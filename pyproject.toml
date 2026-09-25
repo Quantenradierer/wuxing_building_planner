@@ -1,0 +1,40 @@
+[project]
+name = "roomplanner"
+version = "0.1.0"
+description = "Generator for Shadowrun/cyberpunk building battle maps"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic>=2.11",
+    "typer>=0.16",
+]
+
+[project.scripts]
+roomplanner = "roomplanner.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "hypothesis>=6.135",
+    "ruff>=0.12",
+    "pyright>=1.1.403",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,139 @@
+# Architecture
+
+## Package layout
+
+```
+src/roomplanner/
+  geometry.py       Cell, Edge, Side, Axis, CELL_SIZE_M
+  model.py          Room, Opening, Swing, Floor, Building (immutable dataclasses)
+  params.py         GenerationParams (Pydantic) and parameter enums
+  generator.py      generate(params) -> Building
+  validation.py     hard/soft invariant checks, independent of any algorithm
+  serialization.py  JSON contract: to_json / from_json
+  errors.py         RoomplannerError hierarchy
+  render/ascii.py   minimal debug renderer
+  cli.py            Typer CLI
+```
+
+Added in milestone 2:
+
+```
+  data/rooms/*.yaml       shared room catalog
+  data/buildings/*.yaml   one program per building type
+  rules.py                Pydantic models for the YAML + loader
+  pipeline/               stages and the strategy registry
+```
+
+## Coordinates
+
+- The origin is the north-west (top-left) corner. `x` grows east, `y` grows south.
+- A **cell** `(x, y)` is the 0.5 m square whose north-west corner is the grid vertex `(x, y)`.
+- An **edge** is a unit segment between two grid vertices, stored canonically as
+  `Edge(x, y, axis)`:
+  - `Axis.H`: from vertex `(x, y)` to `(x+1, y)`, i.e. the north side of cell `(x, y)`,
+    separating cells `(x, y-1)` and `(x, y)`.
+  - `Axis.V`: from vertex `(x, y)` to `(x, y+1)`, i.e. the west side of cell `(x, y)`,
+    separating cells `(x-1, y)` and `(x, y)`.
+  - `Edge.of(cell, side)` converts "side of a cell" to the canonical edge.
+- A building of `width × height` cells has horizontal edges `x ∈ [0, w)`, `y ∈ [0, h]` and
+  vertical edges `x ∈ [0, w]`, `y ∈ [0, h)`.
+
+## Data model
+
+```
+Building
+  schema_version, width, height (cells), seed, params, warnings
+  floors: Floor[]                      sorted by level
+Floor
+  level                                0 = ground, <0 basement
+  footprint: set[Cell]                 interior cells of this floor
+  rooms: Room[]                        partition the footprint exactly
+  walls: set[Edge]                     every wall edge, openings included
+  openings: Opening[]                  cut into walls
+Room
+  id, type, cells: set[Cell]
+Opening
+  kind: door | window
+  edges: Edge[]                        straight, contiguous run of wall edges
+  swing: Swing | None                  doors only
+Swing
+  towards: Side                        side of the wall the leaf opens into
+  hinge: Side                          end of the run the hinge sits at
+```
+
+Invariants (checked by `validation.py`):
+
+- Rooms are disjoint and their union is the footprint.
+- Every edge between a footprint cell and a non-footprint cell is a wall.
+- Walls only exist on edges touching the footprint.
+- Every opening's edges are walls; openings never share edges.
+- Swings are perpendicular to their wall (`towards`) and parallel to it (`hinge`).
+
+Exterior vs. interior walls, room areas, etc. are derived, not stored.
+
+Layers (furniture, later tactical, security, condition) are added to `Floor` as
+separate collections of placed objects. Each layer is produced by its own pipeline stage.
+
+## Pipeline (milestone 2 onward)
+
+```
+params ─► feasibility check ─► footprint ─► core ─► room layout ─► openings
+       ─► furnishing ─► condition ─► validation ─► Building
+```
+
+- Each stage is a **strategy** behind a small `Protocol`, registered by name.
+  The building's YAML chooses strategies by name (`layout: corridor`), or by import path
+  for custom code (`layout: my_pkg.module:MyLayout`).
+- Stages only communicate through the data model. No stage knows how another works.
+- Every stage receives its own `random.Random` derived from the run seed and the stage
+  name, so changing one stage's randomness does not reshuffle the others.
+- Validation is algorithm-agnostic. A hard violation triggers a retry with a derived seed;
+  after N retries the best attempt is returned with warnings.
+
+Default room layout: **corridor-first**. Place the core, lay a corridor network from the
+entrance past the core, then split the remaining strips into rooms as a squarified treemap
+ordered by adjacency preference. Variants: `corridor`, `units` (flats are sub-footprints laid out
+recursively) and `hall` (reserve a hall, back-of-house along its sides).
+
+## JSON contract
+
+`serialization.py` maps the model to a JSON document explicitly (not via reflection),
+so internal refactors do not change the contract. Breaking changes bump `schema_version`.
+
+```json
+{
+  "schema_version": 1,
+  "cell_size_m": 0.5,
+  "width": 60, "height": 40,
+  "seed": 42,
+  "params": { "building_type": "office", "...": "..." },
+  "warnings": [],
+  "floors": [{
+    "level": 0,
+    "name": "Ground floor",
+    "footprint": [[0, 0], [1, 0], "..."],
+    "rooms": [{"id": "0.1", "type": "office", "cells": [[0, 0], "..."]}],
+    "walls": [[0, 0, "h"], [0, 0, "v"], "..."],
+    "openings": [{
+      "kind": "door",
+      "edges": [[10, 40, "h"], [11, 40, "h"]],
+      "swing": {"towards": "N", "hinge": "W"}
+    }]
+  }]
+}
+```
+
+Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`. Lists are sorted for stable output.
+
+## ASCII debug renderer
+
+Doubled grid: a `w × h` floor becomes `(2w+1) × (2h+1)` characters. Cell `(x, y)` sits at
+column `2x+1`, row `2y+1`. Edges and vertices occupy the even positions in between.
+
+| Glyph     | Meaning                            |
+|-----------|------------------------------------|
+| `-` `\|`  | wall                               |
+| `+`       | vertex touching a wall             |
+| `D`       | door edge                          |
+| `=` `"`   | window edge (horizontal, vertical) |
+| digits    | room number, see the legend        |
