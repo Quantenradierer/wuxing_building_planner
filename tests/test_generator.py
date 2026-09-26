@@ -367,3 +367,33 @@ def test_storeroom_behind_the_stairwell_is_reachable() -> None:
     )
     building = generate(params)
     assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []
+
+
+@pytest.mark.parametrize(
+    "building_type", [BuildingType.STUFFER_SHACK, BuildingType.STREET_DOC, BuildingType.CHOP_SHOP]
+)
+def test_small_shops_get_a_staff_wc_instead_of_a_public_toilet(
+    building_type: BuildingType,
+) -> None:
+    building = generate(make_params(building_type=building_type, width=40, depth=32, seed=3))
+    types = [r.type for f in building.floors for r in f.rooms]
+    assert "wc" in types
+    assert "toilet" not in types and "stall" not in types
+
+
+def test_stall_wc_backs_onto_the_wall_opposite_the_door() -> None:
+    building = generate(make_params(width=48, depth=32, seed=2))
+    faced = 0
+    for floor in building.floors:
+        clearances = floor.door_clearances()
+        for obj in floor.objects:
+            room = next(r for r in floor.rooms if r.id == obj.room)
+            if obj.kind != "wc" or room.type != "stall":
+                continue
+            dx, dy = obj.facing.delta
+            door = clearances[room.id]
+            cx = sum(c.x for c in door) / len(door) - (obj.x + obj.w / 2 - 0.5)
+            cy = sum(c.y for c in door) / len(door) - (obj.y + obj.h / 2 - 0.5)
+            assert dx * cx + dy * cy > 0, obj
+            faced += 1
+    assert faced

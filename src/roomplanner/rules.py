@@ -269,6 +269,11 @@ class UnitSpec(_Strict):
 
     hall: str = "hallway"
     hall_width: int = Field(default=3, gt=0)
+    hall_in_back: bool = Field(
+        default=False,
+        description="No hall room: back[0] reaches the corridor and the front rooms open into "
+        "it (a hotel room's entry nook)",
+    )
     front: list[str] = []
     back: list[str]
     back_fill: str | None = None

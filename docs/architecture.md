@@ -214,6 +214,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      skipped if the rest would lose its door to circulation, narrow gaps join a stall.
      What's left can become another type (`rest`: a cell block's `lockup`); if no stall
      fits the room becomes the `single` type (a one-person WC). Bathrooms have no stalls.
+     Stalls have 1-cell doors so the 2 × 2 wc fits in front of the door clearance.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside; `fill` rooms with
@@ -244,7 +245,10 @@ beside it, `back` rooms along the facade, and — if the strip is deep enough �
 along the unit so every room opens onto it. Rooms carry the unit id. The front zone is
 no deeper than the front rooms' maximum area allows at their minimum width; front rooms
 wider than their maximum leave the spare width to `front_fill` rooms (closets), and spare
-back width goes to the back rooms furthest below their maximum.
+back width goes to the back rooms furthest below their maximum. With `hall_in_back`
+(hotel rooms) the hall is part of the first back room, which then reaches the corridor
+and is the entry; the bathroom opens into it. Units too narrow for an entry leg of the
+back room's `min_side`, or deep enough to push it over its maximum, keep their hall.
 
 ### Openings
 
@@ -284,8 +288,8 @@ stairwell (or a circulation room).
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, `walkable`, ASCII glyph).
-Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, without
-randomness: stairs stand in the same spot on every floor), `fixed` (a corner decided by
+Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, facing
+them on ties, without randomness: stairs stand in the same spot on every floor), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back

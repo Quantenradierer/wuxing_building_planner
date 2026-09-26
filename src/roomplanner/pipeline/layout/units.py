@@ -8,6 +8,9 @@ Deep enough, the hall is T-shaped and every room opens onto it:
 
 Shallower: the hall only reaches in from the corridor, the first back room lies behind it
 and the other back rooms are entered through that one. Too small for two zones: one room.
+With `hall_in_back` the hall (as wide as the first back room's minimum side) is part of
+that back room, which is then the unit's entry; there is no spine. Units too narrow for
+that, or so deep that the back room would exceed its maximum area, keep their hall.
 """
 
 from __future__ import annotations
@@ -48,8 +51,12 @@ def subdivide(
         return rules.spec(kind).min_side
 
     back_min = max(side(k) for k in spec.back)
-    front_min = max([spec.hall_width, *(side(k) for k in spec.front)])
-    spine = spec.hall_width if depth - spec.hall_width >= front_min + back_min else 0
+    # Too narrow for an entry leg as wide as the back room: keep a hall of its own.
+    merge = spec.hall_in_back and width >= max(spec.hall_width, side(spec.back[0])) + back_min
+    hall_width = max(spec.hall_width, side(spec.back[0])) if merge else spec.hall_width
+    front_min = max([hall_width, *(side(k) for k in spec.front)])
+    fits_spine = depth - hall_width >= front_min + back_min
+    spine = hall_width if fits_spine and not merge else 0
     front_depth = round((depth - spine) * FRONT_SHARE)
     # Not so deep that a front room at its minimum width exceeds its maximum area.
     for kind in spec.front:
@@ -58,17 +65,17 @@ def subdivide(
     back_depth = depth - front_depth - spine
     first_front = spec.front[0] if spec.front else None
 
-    if back_depth < back_min or width < spec.hall_width + back_min:
+    if back_depth < back_min or width < hall_width + back_min:
         # Too small for two zones: one room, entered from the corridor.
         return [room(spec.back[0], 0, width, 0, depth, entry=True)]
 
     # Corridor side: [front[0]] hall [front[1:]], each at least its minimum side.
     rooms: list[PlannedRoom] = []
     fronts = list(spec.front)
-    widths = _share(width - spec.hall_width, [side(k) for k in fronts], fronts, rules)
+    widths = _share(width - hall_width, [side(k) for k in fronts], fronts, rules)
     while fronts and widths is None:
         fronts.pop()
-        widths = _share(width - spec.hall_width, [side(k) for k in fronts], fronts, rules)
+        widths = _share(width - hall_width, [side(k) for k in fronts], fronts, rules)
     widths = widths or []
     fronts, widths = _front_fill(fronts, widths, front_depth, spec, rules)
     order: list[tuple[str, int]] = []
@@ -77,7 +84,7 @@ def subdivide(
         rest = list(zip(fronts[1:], widths[1:], strict=True))
     else:
         rest = list(zip(fronts, widths, strict=True))
-    order.append((spec.hall, spec.hall_width))
+    order.append((spec.hall, hall_width))
     order += rest
     position = 0
     hall_end = 0
@@ -87,7 +94,7 @@ def subdivide(
         if kind == spec.hall:
             hall_end = position
     if position < width:  # no front rooms: the hall takes the corridor side
-        rooms[-1] = room(spec.hall, position - spec.hall_width, width, 0, front_depth, True)
+        rooms[-1] = room(spec.hall, position - hall_width, width, 0, front_depth, True)
     if spine:
         hall = next(i for i, r in enumerate(rooms) if r.entry)
         along = room(spec.hall, 0, width, front_depth, front_depth + spine)
@@ -118,6 +125,15 @@ def subdivide(
     for kind, size in zip(backs, sizes, strict=True):
         rooms.append(room(kind, position, position + size, front_depth + spine, depth))
         position += size
+    if merge:
+        hall = next(i for i, r in enumerate(rooms) if r.entry)
+        first = len(rooms) - len(backs)
+        cells = rooms[hall].cells | rooms[first].cells
+        if len(cells) > rules.spec(spec.back[0]).area[1]:  # deep strip: a hall of its own
+            plain = spec.model_copy(update={"hall_in_back": False})
+            return subdivide(frame, band, span, unit, plain, rules, rng)
+        rooms[first] = PlannedRoom(spec.back[0], cells, unit=unit, entry=True)
+        del rooms[hall]
     return rooms
 
 

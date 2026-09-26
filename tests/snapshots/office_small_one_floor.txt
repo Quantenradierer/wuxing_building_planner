@@ -10,44 +10,47 @@ D                                                               |
 |                                                               |
 |                      1                                        |
 |       +---+---+---+                 +--DDD------------+--DDD--+
-|       |  W|  W|  W|                 |k         ddddd F|s     s|
-|       |   |   |   |                 |          ddddd F|s     s|
-|       |4  |5  |6  |q               $|          ddddd F|s     s|
-|       |   |   |   |q                |                 |       |
-"       |   |   |   |q       AAA      |F           c    |s     s"
-"       +DDD+DDD+DDD+q       AAA      |F                |s     s"
-"       D           |q       AAA     q|F               F|s     s"
-|       D           |q               q|                F|       |
-|       D    3      |q               q|ddd             F|       |
-|       |           |                q|ddd              |       |
-"       |i w   i    |}               q|ddd c            |s     s"
-"       +-----+-----+                q|ddd              |s     s"
-"       D     D     |AAA     2       q|ddd     10    ddd|s 12  s"
-|       D     D     |AAA              |              ddd|       |
-|       D  7  D  8  |AAA              |ddddd       c ddd|      s|
-|       |     |     |                 |ddddd         ddd|      s|
-"       |i i w|W    |                 |ddddd         ddd|s     s"
-"       +-----+-----+                 +-------+         |s      "
-"       |EEE     EEE|                q|s sss  |         |s     s"
-|       |           |                q|s      |         |      s|
-|       D          E|<               q|s      D         |KKK   s|
-|       D          E|<               q|       D         |KKK    |
-"       D    9     E|<               q|  11   D      c  |KKK    "
-"       |           |<               q|       |         |       "
-"    ^^^|           |<               q|s      |    ddddd|      s"
-|    ^^^|           |                 |s      |    ddddd|      s|
-|    ^^^|bbbbb EEE '|*               *|s sss  |k   ddddd|  sss s|
-+--===--+-----------+----DDDDDDD------+===----+----===--+===----+
-  objects: A armchair, $ atm, b battery_bank, q bench, k cabinet, c chair, K crate, E electrical_panel, F filing_cabinet, ' fire_extinguisher, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, w urinal, < wall_screen, W wc
+|       |WWW|WWW|WWW|q                |F     FFF       *|s      |
+|       |WWW|WWW|WWW|q                |F                |s      |
+|       |WWW|WWW|WWW|q   }           U|F               F|s     k|
+|       |   |   |   |q                |                F|       |
+"       |4  |5  |6  |q   AAA         q|                F|s      "
+"       +D--+D--+D--+q   AAA         q|                 |s      "
+"       |  w   w    |q   AAA         q|ddd           ddd|s     s"
+|       |           |                q|ddd           ddd|      s|
+|       D           |                q|ddd c       c ddd|s     s|
+|       D           |                q|ddd           ddd|s      |
+"       D        iii|                q|ddd           ddd|s     s"
+"       |        iii|                 |                 |      s"
+"       |    3   iii|        2        |ddd     10       |k 12  s"
+|       |           |                 |ddd              |       |
+|       |w          |  }              |ddd c         ddd|s     s|
+|       |           |                 |ddd           ddd|s     s|
+"       |iii iii    |  AAA            |ddd         c ddd|s     s"
+"       |iii iii    |  AAA            +-------+      ddd|       "
+"       |iii iii    |  AAA           q|KKK sss|U     ddd|s      "
+|       +-----+-----+                q|KKK    |         |s      |
+|       |     D8 WWW|                q|KKK    D      ddd|s     s|
+|       |     |  WWW|                q|       D      ddd|      s|
+"       D  7  |  WWW|                q|  11   D    c ddd|KKK   s"
+"       D     +-----+                q|       |      ddd|KKK    "
+"^^^    D     D9 WWW|                q|s     s|      ddd|KKK    "
+|^^^    |     |  WWW|                 |s     s|         |       |
+|^^^    |U    |  WWW|U $             *|s sss s|         |sss sss|
++--===--+===--+-----+----DDDDDDD------+===----+----===--+===----+
+  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, F filing_cabinet, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, W wc
     1  corridor            184 cells
     2  lobby               126 cells
-    3  toilet               18 cells
+    3  toilet               42 cells
     4  stall                 6 cells
     5  stall                 6 cells
     6  stall                 6 cells
-    7  toilet                9 cells
-    8  stall                 9 cells
-    9  electrical_room      30 cells
+    7  toilet               12 cells
+    8  stall                 6 cells
+    9  stall                 6 cells
    10  office              106 cells
    11  storage              20 cells
    12  storage              56 cells
+
+Warnings:
+  - Ground floor: dropped electrical_room (no space)

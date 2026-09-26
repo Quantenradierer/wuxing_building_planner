@@ -268,7 +268,8 @@ class RoomFurnisher:
                 self.rng.shuffle(candidates)
             case Placement.BACK:
                 candidates = self._against_walls(spec, corners_only=False)
-                candidates.sort(key=lambda r: (-self._door_distance(r), r))
+                # Equally far (a square wc filling a stall): face the door.
+                candidates.sort(key=lambda r: (-self._door_distance(r), -self._faces_door(r), r))
             case Placement.FIXED:
                 # Far corner of the room's box: only the room's shape decides.
                 candidates = self._against_walls(spec, corners_only=True)
@@ -329,6 +330,16 @@ class RoomFurnisher:
         x, y, w, h, _ = rect
         cx, cy = x + w / 2, y + h / 2
         return min(abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in self.clearance)
+
+    def _faces_door(self, rect: Rect) -> float:
+        """How much a rectangle's front points towards the door clearances (deterministic)."""
+        if not self.clearance:
+            return 0.0
+        x, y, w, h, facing = rect
+        dx = sum(c.x + 0.5 for c in self.clearance) / len(self.clearance) - (x + w / 2)
+        dy = sum(c.y + 0.5 for c in self.clearance) / len(self.clearance) - (y + h / 2)
+        fx, fy = facing.delta
+        return fx * dx + fy * dy
 
     def _anywhere(self, spec: ObjectSpec) -> list[Rect]:
         along, deep = spec.size

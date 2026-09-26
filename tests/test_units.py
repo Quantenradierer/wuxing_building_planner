@@ -69,3 +69,10 @@ def test_clinic_surgery_floor() -> None:
     assert building.floor(1).role == "surgery"
     assert any(r.type == "operating_room" for r in building.floor(1).rooms)
     assert building.floor(2).role == "wards"
+
+
+def test_hotel_bathrooms_open_into_the_guest_room_where_the_unit_is_wide_enough() -> None:
+    params = make_params(building_type=BuildingType.HOTEL, width=56, depth=36, floors_above=2)
+    floors = generate(params).floors
+    pairs = {(a.type, b.type) for floor in floors for a, b in door_pairs(floor)}
+    assert ("bathroom", "guest_room") in pairs or ("guest_room", "bathroom") in pairs

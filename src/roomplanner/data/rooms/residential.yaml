@@ -46,7 +46,7 @@ rooms:
   bathroom:
     area: [12, 30]
     min_side: 3
-    access: [hallway, bedroom, living_room]
+    access: [hallway, bedroom, living_room, guest_room]
     transit: false
     furniture:
       - {object: wc, placement: wall}
@@ -57,7 +57,7 @@ rooms:
     area: [6, 40]
     min_side: 3
     windows: forbidden
-    access: [hallway, kitchen, bedroom, living_room]
+    access: [hallway, kitchen, bedroom, living_room, guest_room]
     transit: false
     furniture:
       - {object: shelf, placement: wall, count: [1, 3]}

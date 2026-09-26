@@ -28,7 +28,7 @@ floor_roles:
       - {room: storefront, place: entrance, area: [40, 100], priority: required}
       - {room: back_room_or, count: 1, priority: required}
       - {room: recovery_room, count: [1, 2], priority: required}
-      - {room: toilet, count: 1, priority: required}
+      - {room: wc, count: 1, priority: required}
       - {room: pharmacy, count: [0, 1]}
       - {room: storage, count: [1, 2]}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
@@ -38,7 +38,7 @@ floor_roles:
   upstairs:
     applies: [upper, top]
     rooms:
-      - {room: toilet, count: 1}
+      - {room: wc, count: [0, 1]}
       - {room: treatment_room, count: [0, 1]}
       - {room: cyber_surgery, count: [0, 1], wealth: [middle, high, luxury], priority: optional}
       - {room: recovery_room, fill: true}

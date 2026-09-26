@@ -28,7 +28,7 @@ floor_roles:
     applies: [ground]
     rooms:
       - {room: shop_floor, place: hall}
-      - {room: toilet, count: 1, priority: required}
+      - {room: wc, count: 1, priority: required}       # one staff WC
       - {room: manager_office, count: [0, 1]}
       - {room: cold_storage, count: [0, 1]}
       - {room: cashier_booth, count: 1, near: entrance}

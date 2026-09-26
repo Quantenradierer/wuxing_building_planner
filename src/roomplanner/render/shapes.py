@@ -144,6 +144,14 @@ def wc_shape(pen: Pen, box: Box, facing: Side) -> None:
     pen.base.ellipse(inset(bowl, pen.cell * 0.05), fill=pen.fill, outline=pen.stroke)
 
 
+def urinal_shape(pen: Pen, box: Box, facing: Side) -> None:
+    """A narrow wall bowl: backplate on the wall, a small bowl in front (unlike a wc)."""
+    inner = inset(box, pen.cell * 0.15)
+    pen.base.rectangle(strip(inner, facing.opposite, 0.2), fill=pen.stroke)
+    bowl = inset(strip(inner, facing, 0.7), pen.cell * 0.08)
+    pen.base.rounded_rectangle(bowl, radius=pen.cell * 0.12, fill=pen.fill, outline=pen.stroke)
+
+
 def sink_shape(pen: Pen, box: Box, facing: Side) -> None:
     inner = inset(box, pen.cell * 0.1)
     pen.base.rounded_rectangle(inner, radius=pen.cell * 0.1, fill=pen.fill, outline=pen.stroke)
@@ -268,6 +276,7 @@ SHAPES: dict[str, Callable[[Pen, Box, Side], None]] = {
     "stairs": stairs_shape,
     "elevator": elevator_shape,
     "wc": wc_shape,
+    "urinal": urinal_shape,
     "sink": sink_shape,
     "shelf": shelf_shape,
     "table": table_shape,

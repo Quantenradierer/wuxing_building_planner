@@ -30,7 +30,7 @@ floor_roles:
     applies: [ground]
     rooms:
       - {room: taproom, place: hall}
-      - {room: toilet, count: [1, 2], near: core, priority: required}
+      - {room: toilet, count: 1, near: core, priority: required, area: [20, 30]}
       - {room: prep_kitchen, count: [0, 1]}
       - {room: manager_office, count: 1}
       - {room: cold_storage, count: [0, 1]}
@@ -43,7 +43,7 @@ floor_roles:
     applies: [upper, top]
     rooms:
       - {room: taproom, place: hall}
-      - {room: toilet, count: [0, 1], near: core}
+      - {room: toilet, count: [0, 1], near: core, area: [20, 30]}
       - {room: vip_room, fill: true}           # back rooms: card games, deals
       - {room: staff_room, fill: true}
   basement:

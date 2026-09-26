@@ -28,6 +28,7 @@ units:
   hotel_room:
     hall: hallway
     front: [bathroom]
+    hall_in_back: true     # bathroom and closet open into the guest room
     back: [guest_room]
     front_fill: closet
 
