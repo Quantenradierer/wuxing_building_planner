@@ -22,4 +22,7 @@ format can express more (locked doors, see-through windows, teleporting stairs).
   an arrival region on the neighbouring floor. Cross-scene references need stable ids, so
   the export is a folder (images, `scenes.json`, `import-macro.js`) whose macro creates the
   scenes with `keepId: true`; ids are derived from the seed and the export name.
+- Lighting is left to the VTT by default: exported images carry no light map, Foundry
+  scenes start at darkness 0.6 and the exported lights do the work. `--baked-lighting`
+  bakes the light map into the image instead (VTT stays bright). Decided with the user.
 - No module dependencies; Levels support, adventure compendia and Roll20 stay later work.

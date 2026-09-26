@@ -52,6 +52,9 @@ GridMOption = Annotated[
     float, typer.Option("--grid-m", help="VTT exports: grid square size in metres")
 ]
 LightsOption = Annotated[bool, typer.Option(help="VTT exports: include light sources")]
+BakedOption = Annotated[
+    bool, typer.Option(help="VTT exports: bake the lighting into the image (VTT stays bright)")
+]
 
 
 @app.command()
@@ -87,6 +90,7 @@ def generate(
     grid: GridOption = 0,
     grid_m: GridMOption = 1.0,
     lights: LightsOption = True,
+    baked_lighting: BakedOption = False,
 ) -> None:
     """Generate a building."""
     try:
@@ -129,6 +133,7 @@ def render(
     grid: GridOption = 0,
     grid_m: GridMOption = 1.0,
     lights: LightsOption = True,
+    baked_lighting: BakedOption = False,
 ) -> None:
     """Render a saved JSON building as ASCII or images."""
     try:
@@ -151,6 +156,7 @@ class _ImageSettings:
     grid: int
     grid_m: float = 1.0
     lights: bool = True
+    baked_lighting: bool = False
 
 
 def _emit(
@@ -194,7 +200,9 @@ def _export_vtt(
 ) -> None:
     try:
         theme = load_theme(settings.theme)
-        options = ExportOptions(settings.grid_m, settings.cell_px, settings.lights)
+        options = ExportOptions(
+            settings.grid_m, settings.cell_px, settings.lights, settings.baked_lighting
+        )
         options.cells_per_square  # noqa: B018 - validates the grid size early
         stem = f"{building.params.building_type}_{building.seed}"
         if output_format is OutputFormat.DD2VTT:

@@ -104,7 +104,8 @@ def test_foundry_export_is_deterministic_and_writes_files(tmp_path: Path) -> Non
 def test_cli_exports(tmp_path: Path) -> None:
     runner = CliRunner()
     base = ["generate", "-t", "office", "-w", "28", "-d", "18", "--seed", "5", "--cell-px", "6"]
-    uvtt = runner.invoke(app, [*base, "-f", "dd2vtt", "-o", str(tmp_path / "out" / "m.dd2vtt")])
+    target = str(tmp_path / "out" / "m.dd2vtt")
+    uvtt = runner.invoke(app, [*base, "-f", "dd2vtt", "-o", target, "--baked-lighting"])
     assert uvtt.exit_code == 0, uvtt.output
     assert (tmp_path / "out" / "m_F0.dd2vtt").is_file()
     foundry = runner.invoke(app, [*base, "-f", "foundry", "-o", str(tmp_path / "scene")])
@@ -113,3 +114,17 @@ def test_cli_exports(tmp_path: Path) -> None:
     bad = runner.invoke(app, [*base, "-f", "dd2vtt", "--grid-m", "0.7"])
     assert bad.exit_code == 1
     assert "multiple of 0.5" in bad.output
+
+
+def test_lighting_is_left_to_the_vtt_unless_baked() -> None:
+    b = building()
+    theme = load_theme("neon")
+    flat = to_uvtt(b, b.floor(0), theme, SMALL)
+    baked_options = ExportOptions(grid_m=1.0, cell_px=6, baked_lighting=True)
+    baked = to_uvtt(b, b.floor(0), theme, baked_options)
+    assert flat["environment"]["baked_lighting"] is False
+    assert baked["environment"]["baked_lighting"] is True
+    assert flat["image"] != baked["image"]
+    assert to_foundry(b, theme, SMALL, "t").scenes[0]["environment"]["darknessLevel"] > 0
+    scenes = to_foundry(b, theme, baked_options, "t").scenes
+    assert scenes[0]["environment"]["darknessLevel"] == 0

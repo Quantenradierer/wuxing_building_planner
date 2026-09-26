@@ -32,6 +32,7 @@ class RenderOptions:
     padding: int = 2  # cells around the building; whole VTT grid squares keep alignment
     labels: bool = False
     grid: int = 0  # grid line every n cells, 0 = none
+    lighting: bool = True  # bake the light map (dim unlit areas); off for VTTs that light
 
 
 def render_floor(
@@ -111,7 +112,8 @@ class _Canvas:
         self._walls()
         self._openings()
         self._devices()
-        self._lights()
+        if self.options.lighting:
+            self._lights()
         if self.options.labels:
             self._labels()
         if self.options.grid:

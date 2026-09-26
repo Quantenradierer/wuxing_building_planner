@@ -24,6 +24,7 @@ class ExportOptions:
     grid_m: float = 1.0  # size of one VTT grid square in metres
     cell_px: int = 50
     lights: bool = True
+    baked_lighting: bool = False  # True: the image carries the light map, the VTT stays bright
 
     @property
     def cells_per_square(self) -> int:
@@ -37,7 +38,9 @@ class ExportOptions:
     @property
     def render(self) -> RenderOptions:
         # Pad by one grid square so the VTT grid stays aligned with the cells.
-        return RenderOptions(cell_px=self.cell_px, padding=self.cells_per_square)
+        return RenderOptions(
+            cell_px=self.cell_px, padding=self.cells_per_square, lighting=self.baked_lighting
+        )
 
     @property
     def pixels_per_square(self) -> int:

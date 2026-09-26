@@ -46,6 +46,7 @@ the floor scenes (Foundry v12+ Scene Regions).
 | `--labels`, `--grid N` | room names in images; grid line every N cells          |
 | `--grid-m`             | VTT grid square in metres (default 1.0, multiple of 0.5)|
 | `--no-lights`          | VTT exports without light sources                      |
+| `--baked-lighting`     | VTT exports: light map baked into the image            |
 
 Impossible inputs fail with an explanation (e.g. "too small for an L shape, both arms need
 at least 14 cells"); tight ones return a building plus warnings about dropped rooms.

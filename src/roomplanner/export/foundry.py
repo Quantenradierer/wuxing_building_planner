@@ -44,6 +44,7 @@ DOOR_CLOSED, DOOR_OPEN, DOOR_LOCKED = 0, 1, 2
 
 TRANSPORT = {"stairwell": "stairs", "elevator": "elevator_car"}  # room type -> object kind
 ASSET_ROOT = "roomplanner"
+DARKNESS = 0.6  # scene darkness when the VTT does the lighting
 
 
 @dataclass(frozen=True)
@@ -95,7 +96,7 @@ def to_foundry(
                 },
                 "tokenVision": True,
                 "fog": {"exploration": True},
-                "environment": {"darknessLevel": 0.0},
+                "environment": {"darknessLevel": 0.0 if options.baked_lighting else DARKNESS},
                 "walls": scene.walls(),
                 "lights": scene.lights() if options.lights else [],
                 "regions": scene.regions(),

@@ -29,7 +29,8 @@ from roomplanner.model import Building, Floor, OpeningKind, OpeningState
 from roomplanner.render.theme import Theme
 
 FORMAT = 0.3
-AMBIENT_LIGHT = "ff5a5a64"  # ARGB; the image already shows the room lighting
+AMBIENT_LIGHT = "ff404048"  # ARGB; dark, the exported lights do the lighting
+BAKED_AMBIENT_LIGHT = "ffffffff"  # the image already shows the lighting
 
 
 def to_uvtt(
@@ -90,7 +91,10 @@ def to_uvtt(
         "line_of_sight": walls,
         "objects_line_of_sight": [],
         "portals": portals,
-        "environment": {"baked_lighting": False, "ambient_light": AMBIENT_LIGHT},
+        "environment": {
+            "baked_lighting": options.baked_lighting,
+            "ambient_light": BAKED_AMBIENT_LIGHT if options.baked_lighting else AMBIENT_LIGHT,
+        },
         "lights": lights,
         "image": png_base64(image),
     }

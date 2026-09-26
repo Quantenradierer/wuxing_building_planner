@@ -321,8 +321,10 @@ condition. Themes are YAML (`data/themes/neon.yaml`) or any file passed by path.
 
 ## VTT export
 
-ADR 0011. `ExportOptions(grid_m, cell_px, lights)`: the grid square is `grid_m / 0.5`
+ADR 0011. `ExportOptions(grid_m, cell_px, lights, baked_lighting)`: the grid square is `grid_m / 0.5`
 cells (default 2), the image is padded by one square, `pixels_per_grid = cell_px × cells`.
+Without `baked_lighting` (default) the image has no light map and the VTT lights the scene
+(Foundry darkness 0.6); with it, the image is lit and the VTT stays bright.
 
 | Model                  | Universal VTT          | Foundry wall                                  |
 |------------------------|------------------------|-----------------------------------------------|
