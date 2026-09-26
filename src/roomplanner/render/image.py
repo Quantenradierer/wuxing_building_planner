@@ -547,7 +547,7 @@ class _Canvas:
             font = ImageFont.load_default()
         fill = colour(self.theme.label)
         for room in self.floor.rooms:
-            if len(room.cells) < 6:
+            if len(room.cells) < 12:  # stalls, tiny closets: the name wouldn't fit
                 continue
             cx = sum(c.x for c in room.cells) / len(room.cells)
             cy = sum(c.y for c in room.cells) / len(room.cells)
