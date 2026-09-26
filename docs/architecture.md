@@ -360,7 +360,7 @@ object whose kind has `<kind>.png` there is drawn as that picture instead of its
 (ADR 0012): sprites face S (the object's back at the top), are rotated to the object's
 `facing` and stretched to its box; their shadow follows the sprite's alpha. Wealth
 variants are named `<kind>.<wealth>.png`: the renderer uses the object's tier
-(`obj.wealth`, else the building's), else the nearest lower tier's variant, else
+(`obj.wealth`, else the building's), else the next tier's variant towards middle, else
 `<kind>.png`, else the shape.
 
 ## VTT export

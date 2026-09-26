@@ -133,15 +133,15 @@ def test_missing_sprite_directory_is_rejected(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("tier", "expected"),
     [
-        (Wealth.SQUATTER, "bed"),
+        (Wealth.SQUATTER, "bed.squatter"),
         (Wealth.LOW, "bed"),
-        (Wealth.MIDDLE, "bed.middle"),
-        (Wealth.HIGH, "bed.middle"),
-        (Wealth.LUXURY, "bed.luxury"),
+        (Wealth.MIDDLE, "bed"),
+        (Wealth.HIGH, "bed.high"),
+        (Wealth.LUXURY, "bed.high"),
     ],
 )
-def test_wealth_sprite_falls_back_to_lower_tiers(tier: Wealth, expected: str) -> None:
+def test_wealth_sprite_falls_back_towards_middle(tier: Wealth, expected: str) -> None:
     blank = Image.new("RGBA", (1, 1))
-    sprites = {"bed": blank, "bed.middle": blank, "bed.luxury": blank}
+    sprites = {"bed": blank, "bed.squatter": blank, "bed.high": blank}
     assert sprite_name(sprites, "bed", tier) == expected
     assert sprite_name(sprites, "sofa", tier) is None

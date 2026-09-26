@@ -13,9 +13,14 @@ author has Midjourney access (the Discord accessor used by the SINner project).
 - Sprites are PNGs with alpha, one per object kind, in `data/sprites/<set>/<kind>.png`. A
   theme names its set with `sprites:`; objects without a sprite keep their shape. The
   bundled `neon_sprites` theme `extends: neon` and uses the `midjourney` set.
-- Wealth variants are `<kind>.<wealth>.png` (e.g. `bed.luxury.png`). The object's tier
-  (`PlacedObject.wealth`, else the building's wealth) picks its variant, else the nearest
-  lower tier's, else the plain `<kind>.png`. Flat files keep the set a single folder.
+- Wealth variants are `<kind>.<wealth>.png` (e.g. `bed.high.png`). The object's tier
+  (`PlacedObject.wealth`, else the building's wealth) picks its variant, else the variant of
+  the next tier towards middle, else the plain `<kind>.png`: luxury uses `.high`, squatter
+  uses `.low`, but low and high never borrow the extremes (the default sprites already look
+  worn, a squatter mattress would be wrong in a low-tier flat). Variants have their own
+  prompt style in `variants:` of the prompt file; the base style reference at a lower
+  weight keeps the painted look while the materials change. Flat files keep the set a
+  single folder.
 - Convention: a sprite faces S, i.e. the object's back (the wall side) is at the top and
   the picture spans `[along, deep]` of `objects.yaml`. The renderer rotates it to the
   object's `facing` and stretches it to the object's box.

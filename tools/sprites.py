@@ -5,6 +5,9 @@
     uv run python tools/sprites.py sheet [kind ...]        # contact sheets to review
     uv run python tools/sprites.py cut [kind ...]          # picks -> data/sprites/<set>/
 
+A name `<kind>.<wealth>` (e.g. `bed.high`) is a wealth variant from `variants:` in the
+prompt file, with its own style and style reference; it is cut to `<kind>.<wealth>.png`.
+
 `generate` stores the raw 2x2 grids in `.sprites_raw/` (not versioned). `tools/sprite_picks.yaml`
 names the chosen quadrant per kind (0..3, reading order), optionally with the attempt and
 a rotation in degrees counter-clockwise to bring the back of the object to the top.
@@ -18,6 +21,7 @@ import sys
 import time
 import zlib
 from pathlib import Path
+from typing import Any
 
 import yaml
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -43,21 +47,28 @@ def _sizes() -> dict[str, tuple[int, int]]:
 
 
 def _prompts() -> dict[str, str]:
-    """The full prompt (without seed) per kind."""
+    """The full prompt (without seed) per sprite name: `<kind>` or `<kind>.<wealth>`."""
     data = yaml.safe_load(PROMPTS.read_text())
+    prompts = _prompt_set(data, data["subjects"], "")
+    for tier, variant in data.get("variants", {}).items():
+        prompts |= _prompt_set({**data, **variant}, variant["subjects"], f".{tier}")
+    return prompts
+
+
+def _prompt_set(data: dict[str, Any], subjects: dict[str, str], suffix_name: str) -> dict[str, str]:
     sizes = _sizes()
     style = " ".join(data["style"].split())
+    sref = ""
+    if data.get("sref"):
+        sref = f" --sref {data['sref']} --sw {data.get('sref_weight', 100)}"
     prompts: dict[str, str] = {}
-    for kind, subject in data["subjects"].items():
-        suffix = (
-            data["suffix"].replace("--no ", f"--no {data['exclude'][kind]}, ", 1)
-            if kind in data.get("exclude", {})
-            else data["suffix"]
+    for kind, subject in subjects.items():
+        suffix = data["suffix"]
+        if kind in data.get("exclude", {}):
+            suffix = suffix.replace("--no ", f"--no {data['exclude'][kind]}, ", 1)
+        prompts[kind + suffix_name] = (
+            f"{style.format(subject=subject)} {_aspect(sizes[kind])} {suffix}{sref}"
         )
-        sref = ""
-        if data.get("sref"):
-            sref = f" --sref {data['sref']} --sw {data.get('sref_weight', 100)}"
-        prompts[kind] = f"{style.format(subject=subject)} {_aspect(sizes[kind])} {suffix}{sref}"
     return prompts
 
 
@@ -117,6 +128,28 @@ def _background(image: Image.Image) -> tuple[int, int, int]:
     return tuple(sorted(c)[len(c) // 2] for c in map(list, channels))  # type: ignore[return-value]
 
 
+def _not_background_hue(image: Image.Image, background: tuple[int, int, int]) -> Image.Image:
+    """Mask (255 = keep) without pixels of the background's hue: its shadows and spill.
+
+    Only for a saturated background colour, e.g. magenta for pale objects.
+    """
+    top = max(background)
+    target = [c / top for c in background]
+    mask = Image.new("L", image.size, 255)
+    pixels = image.load()
+    out = mask.load()
+    assert pixels is not None and out is not None
+    for y in range(image.height):
+        for x in range(image.width):
+            r, g, b = pixels[x, y]  # type: ignore[misc]
+            peak = max(r, g, b)
+            if peak < 40:
+                continue
+            if max(abs(c / peak - t) for c, t in zip((r, g, b), target, strict=True)) < 0.4:
+                out[x, y] = 0
+    return mask
+
+
 def cut_out(image: Image.Image, tolerance: int = 70) -> Image.Image:
     """Key out the background connected to the border, trim to the object."""
     small = image.convert("RGB")
@@ -124,7 +157,8 @@ def cut_out(image: Image.Image, tolerance: int = 70) -> Image.Image:
     if scale < 1:
         small = small.resize((round(small.width * scale), round(small.height * scale)))
     # Distance to the background colour (max over channels), smoothed against grain.
-    bg = Image.new("RGB", small.size, _background(small))
+    background = _background(small)
+    bg = Image.new("RGB", small.size, background)
     diff = ImageChops.difference(small, bg).split()
     distance = ImageChops.lighter(ImageChops.lighter(diff[0], diff[1]), diff[2])
     distance = distance.filter(ImageFilter.MedianFilter(3)).point(lambda v: min(v, 254))
@@ -134,6 +168,8 @@ def cut_out(image: Image.Image, tolerance: int = 70) -> Image.Image:
     ImageDraw.floodfill(framed, (0, 0), 255, thresh=tolerance)
     alpha = framed.point(lambda v: 0 if v == 255 else 255)
     alpha = alpha.crop((1, 1, small.width + 1, small.height + 1))
+    if max(background) - min(background) > 100:
+        alpha = ImageChops.multiply(alpha, _not_background_hue(small, background))
     # Shrink by a pixel against white halos, then soften the edge.
     alpha = alpha.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.7))
     sprite = small.convert("RGBA")
@@ -160,7 +196,7 @@ def cut(kinds: list[str]) -> None:
         sprite = cut_out(quadrants(grid)[quadrant])
         if rotate:
             sprite = sprite.rotate(rotate, expand=True)
-        along, deep = sizes[kind]
+        along, deep = sizes[kind.split(".")[0]]
         w, h = along * PX_PER_CELL, deep * PX_PER_CELL
         scale = min(1.0, MAX_SIDE / max(w, h))
         sprite = sprite.resize((round(w * scale), round(h * scale)), Image.Resampling.LANCZOS)
@@ -194,14 +230,14 @@ def main() -> None:
     parser.add_argument("--attempt", type=int, default=0)
     parser.add_argument("--out", type=Path, default=Path("sprite_sheet.png"))
     args = parser.parse_args()
-    kinds = args.kinds or list(_prompts())
+    kinds = args.kinds or [name for name in _prompts() if "." not in name]
     match args.command:
         case "generate":
             generate(kinds, args.attempt)
         case "sheet":
             sheet(kinds, args.attempt, args.out)
         case _:
-            cut(kinds)
+            cut(args.kinds or list(yaml.safe_load(PICKS.read_text()) or {}))
 
 
 if __name__ == "__main__":

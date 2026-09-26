@@ -107,3 +107,58 @@ subjects:
   laundry_cart: "laundry cart full of towels"
   arcade_machine: "arcade game cabinet, glowing screen, joystick facing the bottom edge"
   stage: "rectangular stage platform with black floor, light rigs and monitor speakers"
+
+# Wealth variants, cut to <kind>.<tier>.png. The renderer falls back towards the default
+# sprite: luxury uses the .high variant, low the default one.
+variants:
+  high:
+    style: >-
+      {subject}, orthographic plan view, camera pointing straight down, flat lay, 2D top-down
+      asset for a tabletop RPG battlemap, hand-painted digital illustration with bold ink outlines, upscale corporate
+      cyberpunk luxury, polished dark wood, black leather, brushed chrome, white marble,
+      colour palette of black, white, chrome, deep teal and gold, subtle cyan neon accents, clean
+      and pristine, no olive, no orange, single object isolated on a
+      flat solid bright magenta background
+    sref: "https://cdn.discordapp.com/attachments/1189970972279853087/1553476480712052777/leto_single_bed_pillow_at_the_top_edge_blanket_towards_the_bot_dcb9a504-e0bf-4993-acb7-9fcb1b37127e.webp?ex=6ab96337&is=6ab811b7&hm=d61fbdad78da94572f3239ec517fedef9a565567b5a56f5cae8b75cc366bcae2"
+    sref_weight: 35
+    suffix: "--no drop shadow, cast shadow, perspective, isometric, side view, photo, photorealistic, 3d render, text, people, floor, walls, border, frame --style raw"
+    subjects:
+      bed: "luxury single bed with silk sheets, pillow at the top edge"
+      double_bed: "luxury king size bed with silk sheets and many pillows at the top edge"
+      sofa: "designer leather sofa, backrest along the top edge"
+      armchair: "designer leather lounge armchair, backrest along the top edge"
+      desk: "executive desk of dark wood and glass seen from straight above, only the flat desktop visible, slim monitor along the top edge, no chair"
+      chair: "executive leather office chair seen from straight above, backrest along the top edge"
+      table: "square marble dining table seen from straight above, only the tabletop visible"
+      meeting_table: "long glossy black boardroom table seen from straight above, only the tabletop visible, inlaid light strip"
+      reception_desk: "curved white marble reception desk with a gold logo panel, no chair"
+      bar_counter: "long polished marble bar counter seen from straight above, bottles and chrome taps along the top edge"
+      side_table: "small round marble side table with a lamp seen from straight above"
+      wardrobe: "built-in wardrobe of dark wood seen from straight above, only the flat top visible"
+      wc: "white designer toilet seen from straight above, oval seat, tank at the top edge"
+      sink: "white marble washbasin seen from straight above, gold faucet at the top edge"
+      rug: "luxurious persian rug"
+      stool: "chrome bar stool with a round leather seat seen from straight above"
+      plant: "exotic palm in a large designer pot"
+      pool_table: "luxury pool table with dark wood and blue felt seen from straight above"
+  squatter:
+    style: >-
+      {subject}, orthographic plan view, camera pointing straight down, flat lay, 2D top-down
+      asset for a tabletop RPG battlemap, hand-painted digital art, cyberpunk slum squat,
+      improvised and makeshift, scavenged junk, dirty torn fabric, rust, duct tape, cardboard,
+      single object isolated on a flat solid white background
+    sref: "https://cdn.discordapp.com/attachments/1189970972279853087/1553476480712052777/leto_single_bed_pillow_at_the_top_edge_blanket_towards_the_bot_dcb9a504-e0bf-4993-acb7-9fcb1b37127e.webp?ex=6ab96337&is=6ab811b7&hm=d61fbdad78da94572f3239ec517fedef9a565567b5a56f5cae8b75cc366bcae2"
+    sref_weight: 40
+    subjects:
+      bed: "bare dirty mattress on the floor with a crumpled blanket, pillow at the top edge"
+      double_bed: "two dirty mattresses on the floor with blankets, pillows at the top edge"
+      sofa: "torn old sofa with stuffing coming out, backrest along the top edge"
+      armchair: "ragged torn armchair, backrest along the top edge"
+      table: "improvised table made from a wooden cable spool"
+      chair: "plastic milk crate used as a seat"
+      desk: "improvised desk from an old door on two crates with a cracked old monitor at the top edge"
+      wc: "filthy cracked toilet bowl, tank at the top edge"
+      sink: "cracked dirty washbasin, rusty tap at the top edge"
+      stove: "camping gas stove and a hot plate on a crate"
+      rug: "dirty torn rug"
+      wardrobe: "clothes hanging on a pipe rack next to cardboard boxes"

@@ -5,7 +5,7 @@ and objects, objects, walls with windows and doors, room labels, grid. Neon mark
 strips, window glass, screens, lights) go to a glow layer that is blurred and added on top.
 Objects with a sprite in the theme are drawn as that picture, rotated to their facing; their
 shadow follows the sprite's outline. `<kind>.<wealth>.png` variants are preferred for the
-object's wealth tier (or the nearest lower one) over the plain `<kind>.png`.
+object's wealth tier (or the next tier towards middle) over the plain `<kind>.png`.
 The picture is drawn at a higher resolution and scaled down for anti-aliasing.
 """
 
@@ -613,11 +613,17 @@ def _sprites(directory: str) -> dict[str, Image.Image]:
 
 
 def sprite_name(sprites: dict[str, Image.Image], kind: str, tier: Wealth) -> str | None:
-    """`<kind>.<tier>`, else the nearest lower tier's variant, else plain `<kind>`."""
+    """`<kind>.<tier>`, else the variants of the tiers towards middle, else plain `<kind>`.
+
+    Luxury falls back to high, squatter to low: an extreme tier never borrows the other
+    extreme's look, and low / high never borrow squatter / luxury.
+    """
     tiers = list(Wealth)
-    for lower in reversed(tiers[: tiers.index(tier) + 1]):
-        if f"{kind}.{lower}" in sprites:
-            return f"{kind}.{lower}"
+    here, middle = tiers.index(tier), tiers.index(Wealth.MIDDLE)
+    step = 1 if here < middle else -1
+    for index in range(here, middle + step, step):
+        if f"{kind}.{tiers[index]}" in sprites:
+            return f"{kind}.{tiers[index]}"
     return kind if kind in sprites else None
 
 

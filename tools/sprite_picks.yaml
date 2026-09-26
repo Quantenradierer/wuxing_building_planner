@@ -78,3 +78,31 @@ vital_monitor: {quadrant: 1, attempt: 4}
 medical_cart: {quadrant: 2, attempt: 4}
 # No usable result (keep the procedural shape): nightstand (always drawn with a bed),
 # coat_rack (side views only), shower (Midjourney returned nothing twice).
+
+# Wealth variants. Not picked (perspective or fragments only): side_table.high,
+# plant.high, stool.high, wc.squatter, wardrobe.squatter.
+bed.high: {quadrant: 2, attempt: 4}
+double_bed.high: {quadrant: 2, attempt: 4}
+sofa.high: {quadrant: 3, attempt: 4}
+armchair.high: {quadrant: 2, attempt: 4}
+desk.high: {quadrant: 1, attempt: 4}
+chair.high: {quadrant: 2, attempt: 4}
+table.high: {quadrant: 1, attempt: 4}
+meeting_table.high: {quadrant: 1, attempt: 4}
+reception_desk.high: {quadrant: 2, attempt: 4}
+bar_counter.high: {quadrant: 1, attempt: 4}
+wardrobe.high: {quadrant: 3, attempt: 4}
+wc.high: {quadrant: 3, attempt: 4}
+sink.high: {quadrant: 1, attempt: 4}
+rug.high: {quadrant: 2, attempt: 4}
+pool_table.high: {quadrant: 1, attempt: 4}
+bed.squatter: {quadrant: 1, attempt: 1}
+double_bed.squatter: {quadrant: 3, attempt: 1}
+sofa.squatter: {quadrant: 1, attempt: 1}
+armchair.squatter: {quadrant: 2, attempt: 1}
+table.squatter: {quadrant: 2, attempt: 1}
+chair.squatter: {quadrant: 1, attempt: 1}
+desk.squatter: {quadrant: 0, attempt: 1}
+sink.squatter: {quadrant: 2, attempt: 1}
+stove.squatter: {quadrant: 2, attempt: 1}
+rug.squatter: {quadrant: 3, attempt: 1}
