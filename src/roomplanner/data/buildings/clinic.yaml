@@ -32,6 +32,7 @@ floor_roles:
       - {room: toilet, count: 2, near: entrance, priority: required}
       - {room: trauma_bay, count: [1, 2], wealth: [middle, high, luxury]}
       - {room: pharmacy, count: 1}
+      - {room: security_room, count: 1, near: entrance, security: [corporate, aaa]}
       - {room: xray, count: [0, 1], wealth: [low, middle, high, luxury]}
       - {room: exam_room, count: [2, 4]}
       - {room: exam_room, fill: true}

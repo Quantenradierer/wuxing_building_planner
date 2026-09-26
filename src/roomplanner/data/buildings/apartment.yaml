@@ -35,6 +35,7 @@ floor_roles:
     rooms:
       - {room: lobby, place: entrance, area: [40, 80], priority: required}
       - {room: mailroom, count: 1, near: entrance}
+      - {room: security_room, count: 1, near: entrance, security: [aaa]}   # concierge
       - {room: storage, count: [0, 1], near: core, priority: optional}
       - {room: apartment, fill: true}
       - {room: laundry, fill: true}            # interior rows without facade

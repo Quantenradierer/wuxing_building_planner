@@ -118,3 +118,12 @@ def test_some_storage_rooms_are_closets_entered_through_their_host() -> None:
                 assert neighbours <= set(rules.spec("storage").access)
                 found += 1
     assert found > 0
+
+
+def test_corporate_offices_get_a_security_room() -> None:
+    def has_security_room(security: Security) -> bool:
+        building = generate(make_params(width=60, depth=40, security=security))
+        return any(r.type == "security_room" for r in building.floor(0).rooms)
+
+    assert has_security_room(Security.CORPORATE)
+    assert not has_security_room(Security.NONE)

@@ -52,3 +52,11 @@ rooms:
     furniture:
       - {object: machinery, placement: wall, per: 25, count: [1, 5]}
       - {object: crate, placement: scatter, count: [0, 2]}
+  security_room:
+    area: [16, 40]
+    min_side: 4
+    windows: forbidden
+    furniture:
+      - {object: desk, placement: wall}
+      - {object: terminal, placement: wall, count: [2, 4]}
+      - {object: locker, placement: wall, count: [0, 2]}

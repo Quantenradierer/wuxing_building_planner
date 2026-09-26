@@ -33,7 +33,8 @@ floor_roles:
       - {room: loading_bay, count: 1, priority: required}
       - {room: toilet, count: [1, 2], near: core, priority: required}
       - {room: manager_office, count: 1}
-      - {room: security_room, count: [0, 1], wealth: [middle, high, luxury]}
+      - {room: security_room, count: [0, 1], wealth: [middle, high, luxury], security: [none, low]}
+      - {room: security_room, count: 1, security: [corporate, aaa]}
       - {room: staff_room, count: 1, wealth: [low, middle, high, luxury]}
       - {room: cold_storage, count: [1, 2]}
       - {room: prep_kitchen, count: [0, 1], wealth: [middle, high, luxury]}

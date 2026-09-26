@@ -45,14 +45,6 @@ rooms:
       - {object: table, placement: center}
       - {object: locker, placement: wall, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
-  security_room:
-    area: [16, 40]
-    min_side: 4
-    windows: forbidden
-    furniture:
-      - {object: desk, placement: wall}
-      - {object: terminal, placement: wall, count: [2, 4]}
-      - {object: locker, placement: wall, count: [0, 2]}
   prep_kitchen:         # deli / bakery / soykaf bar
     area: [30, 90]
     min_side: 5
