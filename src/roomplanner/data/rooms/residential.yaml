@@ -5,8 +5,8 @@ rooms:
     min_side: 11
     windows: required
     door_width: 2
-  hallway:
-    area: [9, 40]
+  hallway:              # in a deep unit it runs along the whole unit (T-shaped)
+    area: [9, 90]
     min_side: 3
     furniture:
       - {object: wardrobe, placement: wall, count: [0, 1]}
@@ -45,6 +45,15 @@ rooms:
       - {object: sink, placement: wall}
       - {object: shower, placement: corner, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [0, 1]}
+  closet:               # walk-in closet or pantry beside the entry hall
+    area: [6, 40]
+    min_side: 3
+    windows: forbidden
+    access: [hallway, kitchen, bedroom, living_room]
+    transit: false
+    furniture:
+      - {object: shelf, placement: wall, count: [1, 3]}
+      - {object: wardrobe, placement: wall, count: [0, 1]}
   kitchen:
     area: [16, 40]
     min_side: 4

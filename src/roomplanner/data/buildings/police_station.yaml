@@ -12,7 +12,7 @@ strip_depth: [10, 14]
 facade:
   module: 3
   window: 2
-cluster_filler: storage
+cluster_filler: records_room
 service_rooms: [evidence_room, locker_room, storage, utility]
 
 core:
@@ -39,8 +39,9 @@ floor_roles:
       - {room: security_room, count: 1, priority: required}
       - {room: toilet, count: [1, 2], near: core, priority: required}
       - {room: locker_room, count: 1}
+      - {room: booking_room, count: 1, near: service}
       - {room: squad_room, fill: true}
-      - {room: storage, fill: true}           # interior rows without facade
+      - {room: records_room, fill: true}      # interior rows without facade
   upper:
     applies: [upper, top]
     rooms:

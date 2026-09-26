@@ -88,6 +88,9 @@ class FurnitureRule(_Strict):
     margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
     block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
+    toward: str | None = Field(
+        default=None, description="rows: face the object of this kind placed before (the altar)"
+    )
     at: str | None = Field(default=None, description="at: the object kind to stand beside")
     beside: list[Literal["front", "back", "flanks"]] = Field(
         default=["front", "back", "flanks"], description="at: which sides of the target, in turn"
@@ -97,6 +100,8 @@ class FurnitureRule(_Strict):
     def _at_needs_target(self) -> Self:
         if (self.placement is Placement.AT) != (self.at is not None):
             raise ValueError(f"'{self.object}': `at` goes with placement 'at' and only with it")
+        if self.toward is not None and self.placement is not Placement.ROWS:
+            raise ValueError(f"'{self.object}': `toward` goes with placement 'rows' only")
         return self
 
     @property
@@ -256,6 +261,8 @@ class UnitSpec(_Strict):
 
     The corridor side holds the entry hall with the `front` rooms beside it, the facade side
     the `back` rooms (the first one behind the hall), then `back_fill` rooms for the rest.
+    Front rooms wider than their maximum area allows leave the spare width to `front_fill`
+    rooms (closets), if given.
     """
 
     hall: str = "hallway"
@@ -263,6 +270,7 @@ class UnitSpec(_Strict):
     front: list[str] = []
     back: list[str]
     back_fill: str | None = None
+    front_fill: str | None = None
 
 
 class WealthRule(_Strict):
@@ -484,9 +492,11 @@ def _check_references(rules: Rules) -> None:
     for unit, spec in program.units.items():
         names += [unit, spec.hall, *spec.front, *spec.back]
         names += [spec.back_fill] if spec.back_fill else []
+        names += [spec.front_fill] if spec.front_fill else []
     # `access` may name room types other buildings have; unknown ones are ignored.
     used = {f.object for s in rules.rooms.values() for f in s.furniture}
     used |= {f.at for s in rules.rooms.values() for f in s.furniture if f.at}
+    used |= {f.toward for s in rules.rooms.values() for f in s.furniture if f.toward}
     unknown = used - set(rules.objects) - set(rules.groups)
     for spec in rules.rooms.values():
         if spec.stalls is not None:

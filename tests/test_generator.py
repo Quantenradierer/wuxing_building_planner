@@ -237,6 +237,48 @@ def test_row_leftovers_dont_inflate_rooms() -> None:
 
 
 @pytest.mark.parametrize(
+    ("building_type", "width", "depth", "wealth", "seed"),
+    [
+        (BuildingType.APARTMENT, 72, 66, Wealth.SQUATTER, 198),
+        (BuildingType.APARTMENT, 76, 57, Wealth.SQUATTER, 215),
+        (BuildingType.APARTMENT, 53, 41, Wealth.HIGH, 123),
+        (BuildingType.HOTEL, 58, 41, Wealth.LUXURY, 270),
+        (BuildingType.CLINIC, 44, 55, Wealth.SQUATTER, 323),
+        (BuildingType.CORP_OFFICE, 37, 47, Wealth.SQUATTER, 261),
+    ],
+)
+def test_units_and_storerooms_keep_near_their_maximum(
+    building_type: BuildingType, width: int, depth: int, wealth: Wealth, seed: int
+) -> None:
+    """Spare width goes to closets and more storerooms, not to one room."""
+    params = make_params(
+        building_type=building_type,
+        width=width,
+        depth=depth,
+        wealth=wealth,
+        seed=seed,
+        floors_above=2,
+        floors_below=1,
+    )
+    building = generate(params)
+    rules = rules_for(building_type, wealth)
+    for floor in building.floors:
+        for room in floor.rooms:
+            if room.unit is not None or room.type == "storage":
+                assert len(room.cells) <= rules.spec(room.type).area[1] * 1.5, room
+
+
+def test_police_ground_floor_has_records_not_storerooms() -> None:
+    for seed in range(4):
+        params = make_params(
+            building_type=BuildingType.POLICE_STATION, width=48, depth=40, seed=seed
+        )
+        types = [r.type for r in generate(params).floor(0).rooms]
+        assert "storage" not in types
+        assert "booking_room" in types
+
+
+@pytest.mark.parametrize(
     "building_type", [BuildingType.OFFICE, BuildingType.HOTEL, BuildingType.HOSPITAL]
 )
 def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingType) -> None:
@@ -309,3 +351,19 @@ def test_new_halls_are_furnished(building_type: BuildingType, hall: str, objects
     halls = {r.id for r in ground.rooms if r.type == hall}
     assert halls
     assert objects <= {o.kind for o in ground.objects if o.room in halls}
+
+
+def test_storeroom_behind_the_stairwell_is_reachable() -> None:
+    """Walled in by apartments, it opens into the stairwell as a last resort."""
+    params = make_params(
+        building_type=BuildingType.APARTMENT,
+        width=31,
+        depth=81,
+        floors_above=3,
+        wealth=Wealth.SQUATTER,
+        street_side=Side.N,
+        service_side=Side.N,
+        seed=0,
+    )
+    building = generate(params)
+    assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []

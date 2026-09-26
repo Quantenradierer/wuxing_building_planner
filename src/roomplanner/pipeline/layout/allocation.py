@@ -455,14 +455,13 @@ class Allocator:
                 # the rest of the row becomes a storeroom.
                 filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
                 if self._fill_min_units(filler, segment) <= state.free_units:
-                    state.slots.append(self._fill_slot(filler, state.free_units, segment))
+                    state.slots += self._filler_slots(state.free_units, segment)
                     return
             if (cluster := self._facade_cluster(entry, state)) is not None:
                 # Small window rooms in deep facade strips: at the facade, back rooms behind.
                 state.slots.append(cluster)
                 continue
-            low, high = entry.area or spec.area
-            if state.slots and self._facade_column(spec, low, high, segment) is not None:
+            if state.slots and self._facade_stack(entry, segment) is not None:
                 # No room left for another stack: widen the row rather than a huge room.
                 self._spread(state, state.free_units, fills)
                 return
@@ -513,10 +512,10 @@ class Allocator:
         rest = extra - given
         if rest == 0:
             return
-        # Every room is at its maximum: the rest becomes a storeroom if one fits.
+        # Every room is at its maximum: the rest becomes storerooms if one fits.
         filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
         if rest * segment.unit >= self.rules.spec(filler.room).min_side:
-            state.slots.append(self._fill_slot(filler, rest, segment))
+            state.slots += self._filler_slots(rest, segment)
             return
         # Too little for a room: a cluster's hallway gets wider, else the rooms after all.
         wider = [s for s in state.slots if isinstance(s, Cluster)] or targets
@@ -556,22 +555,31 @@ class Allocator:
 
     def _facade_cluster(self, entry: RoomEntry, state: SegmentState) -> Cluster | None:
         """Fill rooms needing windows in deep facade strips: two columns of facade stacks."""
-        spec = self.rules.spec(entry.room)
-        low, high = entry.area or spec.area
-        column = self._facade_column(spec, low, high, state.segment)
-        if column is None:
+        if (found := self._facade_stack(entry, state.segment)) is None:
             return None
-        front = min(high // column, max(spec.min_side, round((low + high) / 2 / column)))
-        stack = self._backs(state.segment, column, front)
-        if stack is None:
-            return None
-        stack.append((Request(entry.room, spec, front * column, Priority.OPTIONAL, None), front))
+        column, stack = found
         hall = math.ceil(self.hallway / state.segment.unit) * state.segment.unit
         for columns in (2, 1):
             units = (hall + columns * column) // state.segment.unit
             if units <= state.free_units:
                 return Cluster(units, hall, columns, column, [list(stack) for _ in range(columns)])
         return None
+
+    def _facade_stack(
+        self, entry: RoomEntry, segment: Segment
+    ) -> tuple[int, list[tuple[Request, int]]] | None:
+        """Column width and rooms (backs first) of a facade stack, if the strip needs one."""
+        spec = self.rules.spec(entry.room)
+        low, high = entry.area or spec.area
+        column = self._facade_column(spec, low, high, segment)
+        if column is None:
+            return None
+        front = min(high // column, max(spec.min_side, round((low + high) / 2 / column)))
+        stack = self._backs(segment, column, front)
+        if stack is None:
+            return None
+        stack.append((Request(entry.room, spec, front * column, Priority.OPTIONAL, None), front))
+        return column, stack
 
     def _facade_column(self, spec: RoomSpec, low: int, high: int, segment: Segment) -> int | None:
         """Column width of a facade stack if a room needing windows is too small for the strip.
@@ -617,6 +625,14 @@ class Allocator:
         if spec.vestibule is not None:
             width += self.rules.spec(spec.vestibule).min_side
         return math.ceil(width / segment.unit)
+
+    def _filler_slots(self, units: int, segment: Segment) -> list[FullSlot]:
+        """`units` of storerooms side by side, as few as keep each near its maximum area."""
+        filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
+        spec = self.rules.spec(filler.room)
+        least = max(1, math.ceil(spec.min_side / segment.unit))
+        most = int(spec.area[1] * SMALL_ROOM_TOLERANCE / segment.unit / segment.depth)
+        return [self._fill_slot(filler, w, segment) for w in _split(units, least, most)]
 
     def _fill_slot(self, entry: RoomEntry, units: int, segment: Segment) -> FullSlot:
         area = units * segment.unit * segment.depth
@@ -738,10 +754,12 @@ class Allocator:
         filler_min = self.rules.spec(filler).min_side
         extra = span.width - cluster.hall - cluster.columns * column_width
         if extra >= filler_min:
-            rooms.append(
-                PlannedRoom(filler, self._rect(segment, Interval(span.u0, span.u0 + extra)))
-            )
-            span = Interval(span.u0 + extra, span.u1)
+            most = int(self.rules.spec(filler).area[1] * SMALL_ROOM_TOLERANCE / segment.depth)
+            u0 = span.u0
+            for width in _split(extra, filler_min, most):
+                rooms.append(PlannedRoom(filler, self._rect(segment, Interval(u0, u0 + width))))
+                u0 += width
+            span = Interval(u0, span.u1)
         if cluster.columns == 2:
             columns = [
                 Interval(span.u0, span.u0 + column_width),
@@ -773,6 +791,12 @@ class Allocator:
                 rooms.append(PlannedRoom(room_type, cells))
                 offset += depth
         return rooms
+
+
+def _split(total: int, least: int, most: int) -> list[int]:
+    """`total` in as few parts of at most `most` as possible, each at least `least`."""
+    count = max(1, min(math.ceil(total / max(most, least)), total // least))
+    return [total // count + (i < total % count) for i in range(count)]
 
 
 def _first_type(slot: Slot) -> str | None:

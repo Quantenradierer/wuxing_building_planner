@@ -50,7 +50,11 @@ def subdivide(
     back_min = max(side(k) for k in spec.back)
     front_min = max([spec.hall_width, *(side(k) for k in spec.front)])
     spine = spec.hall_width if depth - spec.hall_width >= front_min + back_min else 0
-    front_depth = max(front_min, round((depth - spine) * FRONT_SHARE))
+    front_depth = round((depth - spine) * FRONT_SHARE)
+    # Not so deep that a front room at its minimum width exceeds its maximum area.
+    for kind in spec.front:
+        front_depth = min(front_depth, rules.spec(kind).area[1] // side(kind))
+    front_depth = max(front_min, front_depth)
     back_depth = depth - front_depth - spine
     first_front = spec.front[0] if spec.front else None
 
@@ -66,6 +70,7 @@ def subdivide(
         fronts.pop()
         widths = _share(width - spec.hall_width, [side(k) for k in fronts], fronts, rules)
     widths = widths or []
+    fronts, widths = _front_fill(fronts, widths, front_depth, spec, rules)
     order: list[tuple[str, int]] = []
     if fronts and fronts[0] == first_front:
         order.append((fronts[0], widths[0]))
@@ -100,16 +105,41 @@ def subdivide(
         target = max(side(kind), round(rng.randint(low, high) / back_depth))
         if remaining < side(kind):
             break
-        size = target if remaining - target >= side(kind) else remaining
+        size = min(target, remaining)
         backs.append(kind)
         sizes.append(size)
         remaining -= size
-    sizes[-1 if len(sizes) > 1 else 0] += remaining
+    # What is left goes to the rooms furthest below their maximum, not all to the last one.
+    maxima = [rules.spec(k).area[1] for k in backs]
+    for _ in range(remaining):
+        i = min(range(len(sizes)), key=lambda i: (sizes[i] * back_depth / maxima[i], -i))
+        sizes[i] += 1
     position = 0
     for kind, size in zip(backs, sizes, strict=True):
         rooms.append(room(kind, position, position + size, front_depth + spine, depth))
         position += size
     return rooms
+
+
+def _front_fill(
+    fronts: list[str], widths: list[int], depth: int, spec: UnitSpec, rules: Rules
+) -> tuple[list[str], list[int]]:
+    """Cap the front rooms at their maximum area; `front_fill` rooms take the spare width."""
+    if spec.front_fill is None or not fronts:
+        return fronts, widths
+
+    def cap(kind: str) -> int:
+        room = rules.spec(kind)
+        return max(room.min_side, room.area[1] // depth)
+
+    capped = [min(w, cap(k)) for k, w in zip(fronts, widths, strict=True)]
+    spare = sum(widths) - sum(capped)
+    fill_side = rules.spec(spec.front_fill).min_side
+    if spare < fill_side:
+        return fronts, widths
+    count = max(1, min(-(-spare // cap(spec.front_fill)), spare // fill_side))
+    fills = [spare // count + (i < spare % count) for i in range(count)]
+    return [*fronts, *[spec.front_fill] * count], [*capped, *fills]
 
 
 def _share(total: int, minimums: list[int], kinds: list[str], rules: Rules) -> list[int] | None:

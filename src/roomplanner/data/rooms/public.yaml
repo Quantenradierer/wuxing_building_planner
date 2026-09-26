@@ -65,6 +65,23 @@ rooms:
     furniture:
       - {object: shelf, placement: rows, aisle: 2, margin: 1}
       - {object: counter, placement: wall, count: [0, 1]}
+  records_room:         # case files and paper records, the front desk's back office
+    area: [24, 120]
+    min_side: 4
+    windows: forbidden
+    cluster: true
+    furniture:
+      - {object: filing_cabinet, placement: wall, per: 6, count: [2, 10]}
+      - {object: shelf, placement: wall, per: 12, count: [0, 4]}
+      - {object: workstation, placement: wall, count: [0, 1]}
+  booking_room:         # fingerprints, retina scan, mugshot wall
+    area: [24, 60]
+    min_side: 4
+    windows: forbidden
+    furniture:
+      - {object: counter, placement: wall}
+      - {object: terminal, placement: wall, count: [1, 2]}
+      - {object: bench, placement: wall}
   armory:
     area: [20, 60]
     min_side: 4
@@ -82,7 +99,7 @@ rooms:
     furniture:
       - {object: altar, placement: back}
       - {object: pulpit, placement: back}
-      - {object: pew, placement: rows, aisle: 2, margin: 3, block: 24}   # blocks of three
+      - {object: pew, placement: rows, aisle: 2, margin: 3, block: 24, toward: altar}
       - {object: candle_stand, placement: wall, count: [2, 6]}
       - {object: confessional, placement: wall, count: [0, 2]}
   choir_loft:           # the gallery upstairs

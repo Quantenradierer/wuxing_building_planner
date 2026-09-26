@@ -235,11 +235,8 @@ Decided by the author (2026-09-27):
 - Tactical layer: the unused `cover` field was removed from objects.
 
 Known weaknesses:
-- Police station: interior rows on the ground floor are mostly storerooms; offices or
-  archives would fit better.
-- Church pews stand in blocks but don't necessarily face the altar.
-- About 13 of ~5000 rooms exceed 1.5x their catalog maximum (mostly coffins in shallow
-  rows, where the facade grid forces the width).
+- About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their
+  catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
 - If a stairwell borders different corridors on different floors, its door (and so the
   stairs) can still move between floors.
 

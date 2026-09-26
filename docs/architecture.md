@@ -191,7 +191,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      rooms still to come want to be next to prefers a segment with space left for them
      (the restaurant leaves room for its kitchen).
    - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
-     over the row, extra cluster width becomes a room of its own.
+     over the row, extra cluster width becomes a room of its own. Leftovers that every
+     room is too big for become storerooms, as many as keep each near its maximum area.
+     A row is only widened instead of getting another facade stack if such a stack fits
+     the strip at all.
    - *Stalls*: a room with `stalls:` (public toilets, cell blocks) gets a row of stall
      rooms along the wall where most fit, each an annex entered only from the room, with
      a passage in front (`passage`, at least the `min_side` of what's left); places are
@@ -224,7 +227,10 @@ Connectors that must cross a hall band become a short corridor across its end.
 A room type listed under a program's `units:` (e.g. `apartment`) is allocated like any
 full-depth room and then subdivided: entry hall on the corridor side with `front` rooms
 beside it, `back` rooms along the facade, and — if the strip is deep enough — a hall running
-along the unit so every room opens onto it. Rooms carry the unit id.
+along the unit so every room opens onto it. Rooms carry the unit id. The front zone is
+no deeper than the front rooms' maximum area allows at their minimum width; front rooms
+wider than their maximum leave the spare width to `front_fill` rooms (closets), and spare
+back width goes to the back rooms furthest below their maximum.
 
 ### Openings
 
@@ -269,7 +275,9 @@ randomness: stairs stand in the same spot on every floor), `fixed` (a corner dec
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
-with an aisle after each pair, e.g. capsules), and `at` (beside every object of kind `at`
+with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
+direction of that object, all facing it and centred: pews facing the altar), and `at`
+(beside every object of kind `at`
 placed earlier in the room: chairs at desks and tables, stools at bar counters, monitors
 beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` — gone round in
 turn, and `count` is per target, never scaled). Counts are a range or `per: N` (one

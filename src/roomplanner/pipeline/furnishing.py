@@ -369,36 +369,54 @@ class RoomFurnisher:
         return None
 
     def _rows(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
-        """Parallel rows along the room's long axis, with aisles and cross aisles."""
+        """Parallel rows along the room's long axis, with aisles and cross aisles.
+
+        With `toward`, the rows run across the direction of that object instead and all
+        face it (pews facing the altar).
+        """
         along, deep = spec.size
         x0, y0, x1, y1 = self.box
         horizontal = (x1 - x0) >= (y1 - y0)
+        toward: Side | None = None
+        if rule.toward is not None:
+            target = next((o for o in self.placed if o.kind == rule.toward), None)
+            if target is not None:
+                toward = target.facing.opposite  # the wall the target stands against
+                horizontal = toward in (Side.N, Side.S)
         length, width = (x1 - x0, y1 - y0) if horizontal else (y1 - y0, x1 - x0)
         m = rule.margin
         per_block = max(1, math.floor(rule.block / along))  # cross aisle every `block` cells
         rows: list[tuple[int, Side]] = []  # offset across the room, facing
         across = m
         while across + deep <= width - m:
-            if rule.paired and across + 2 * deep <= width - m:
+            if rule.paired and toward is None and across + 2 * deep <= width - m:
                 rows += [(across, Side.N), (across + deep, Side.S)]
                 across += 2 * deep + rule.aisle
             else:
                 rows.append((across, Side.S))
                 across += deep + rule.aisle
+        positions: list[int] = []
+        position, in_block = m, 0
+        while position + along <= length - m:
+            positions.append(position)
+            position += along
+            in_block += 1
+            if in_block == per_block:
+                position += rule.aisle
+                in_block = 0
+        if toward is not None and positions:  # centred, the side aisles equally wide
+            shift = (length - positions[-1] - along - m) // 2
+            positions = [p + shift for p in positions]
         for across, facing in rows:
-            position, in_block = m, 0
-            while position + along <= length - m:
+            for position in positions:
                 if horizontal:
                     rect = (x0 + position, y0 + across, along, deep, facing)
                 else:
                     side = Side.W if facing is Side.N else Side.E
                     rect = (x0 + across, y0 + position, deep, along, side)
+                if toward is not None:
+                    rect = (*rect[:4], toward)
                 self._try(rule.object, rect, spec.walkable)
-                position += along
-                in_block += 1
-                if in_block == per_block:
-                    position += rule.aisle
-                    in_block = 0
 
     def _at(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
         """`count` objects beside every placed `rule.at`, going round its `beside` sides in turn.

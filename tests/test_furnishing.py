@@ -151,3 +151,14 @@ def test_rooms_can_shift_the_look_of_their_objects() -> None:
     assert looks["office"] == {None}  # the building's own tier
     assert looks["executive_office"] == {Wealth.LUXURY}
     assert from_json(to_json(building)) == building
+
+
+@pytest.mark.parametrize(("width", "depth"), [(40, 48), (56, 32), (48, 60)])
+def test_pews_face_the_altar(width: int, depth: int) -> None:
+    for seed in range(4):
+        params = make_params(building_type=BuildingType.CHURCH, width=width, depth=depth, seed=seed)
+        ground = generate(params).floor(0)
+        altar = next(o for o in ground.objects if o.kind == "altar")
+        pews = [o for o in ground.objects if o.kind == "pew"]
+        assert pews
+        assert {p.facing for p in pews} == {altar.facing.opposite}
