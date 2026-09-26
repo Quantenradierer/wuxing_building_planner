@@ -140,3 +140,21 @@ def test_coffin_units_are_small_and_stacked() -> None:
     assert len(small) >= 0.8 * len(coffins)
     ground = building.floor(0)
     assert all(any(o.room == r.id and o.kind == "bed" for o in ground.objects) for r in coffins)
+
+
+def test_operating_rooms_are_entered_through_their_scrub_room() -> None:
+    building = generate(
+        make_params(building_type=BuildingType.HOSPITAL, width=72, depth=48, floors_above=3)
+    )
+    surgery = building.floor(1)
+    theatres = [r for r in surgery.rooms if r.type == "operating_room"]
+    assert theatres
+    for room in theatres:
+        neighbours = {
+            other.type
+            for door in doors(surgery)
+            if any(c in room.cells for c in door.edges[0].cells())
+            for c in door.edges[0].cells()
+            if c not in room.cells and (other := surgery.room_at(c)) is not None
+        }
+        assert neighbours == {"scrub_room"}

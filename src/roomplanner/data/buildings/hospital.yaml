@@ -47,6 +47,7 @@ floor_roles:
       - {room: operating_room, count: [2, 4], priority: required}
       - {room: sterilization, count: [1, 2], priority: required}
       - {room: icu, count: 1, priority: required}
+      - {room: recovery_room, count: [1, 2]}
       - {room: nurse_station, count: 1, near: core, priority: required}
       - {room: toilet, count: 2, near: core}
       - {room: staff_room, count: 1}

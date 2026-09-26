@@ -99,6 +99,10 @@ class RoomSpec(_Strict):
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
+    vestibule: str | None = Field(
+        default=None, description="Entered only through this room type, placed beside it"
+    )
+    next_to: list[str] = Field(default=[], description="Placed next to these room types")
     annex: float = Field(
         default=0.5,
         ge=0,

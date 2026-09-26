@@ -29,6 +29,7 @@ from roomplanner.rules import (
     variables,
 )
 
+NEXT_TO_BONUS = 20  # score bonus for sharing a strip segment with a `next_to` room
 SMALL_ROOM_TOLERANCE = 1.25  # a full-depth room may exceed its max area by this factor
 MIN_CLUSTER_COLUMN = 4  # cells
 FACADE_PENALTY = 5
@@ -233,7 +234,10 @@ class Allocator:
         return width * segment.depth > max_area * SMALL_ROOM_TOLERANCE
 
     def _full_units(self, request: Request, segment: Segment) -> int:
-        minimum = math.ceil(self._min_width(request.spec, segment.depth) / segment.unit)
+        width = self._min_width(request.spec, segment.depth)
+        if request.spec.vestibule is not None:  # the vestibule is carved out of the slot
+            width += self.rules.spec(request.spec.vestibule).min_side
+        minimum = math.ceil(width / segment.unit)
         return max(minimum, round(request.area / segment.depth / segment.unit))
 
     def _place(self, request: Request) -> bool:
@@ -377,6 +381,13 @@ class Allocator:
                 score += FORBIDDEN_WINDOW_PENALTY
             elif request.spec.windows is WindowRule.OPTIONAL:
                 score += FACADE_PENALTY
+        if request.spec.next_to:
+            gaps = [
+                -NEXT_TO_BONUS if state.segment is segment else state.segment.box.gap(segment.box)
+                for state in self.states
+                if any(t in request.spec.next_to for t in _slot_types(state))
+            ]
+            score += min(gaps, default=0)
         return score
 
     # --- fill -------------------------------------------------------------------------
@@ -472,7 +483,11 @@ class Allocator:
         return Cluster(units, hall, columns, column, stacks)
 
     def _fill_min_units(self, entry: RoomEntry, segment: Segment) -> int:
-        return math.ceil(self._min_width(self.rules.spec(entry.room), segment.depth) / segment.unit)
+        spec = self.rules.spec(entry.room)
+        width = self._min_width(spec, segment.depth)
+        if spec.vestibule is not None:
+            width += self.rules.spec(spec.vestibule).min_side
+        return math.ceil(width / segment.unit)
 
     def _fill_slot(self, entry: RoomEntry, units: int, segment: Segment) -> FullSlot:
         area = units * segment.unit * segment.depth
@@ -486,6 +501,7 @@ class Allocator:
         if not state.slots:
             return []
         slots = sorted(state.slots, key=lambda s: (self._pull(s, segment), self.rng.random()))
+        slots = _neighbours_together(slots)
         widths = [slot.units * segment.unit for slot in slots]
         # Partial modules at the building ends go to the outermost slots.
         widths[0] += segment.aligned.u0 - segment.span.u0
@@ -501,6 +517,8 @@ class Allocator:
                 rooms += subdivide(
                     segment.frame, segment.band, span, unit, spec, self.rules, self.rng
                 )
+            elif isinstance(slot, FullSlot) and slot.request.spec.vestibule is not None:
+                rooms += self._with_vestibule(slot, segment, span, slots, position)
             elif isinstance(slot, FullSlot) and slot.annex is not None:
                 rooms += self._with_annex(slot, slot.annex, segment, span)
             elif isinstance(slot, FullSlot):
@@ -527,6 +545,41 @@ class Allocator:
         annex_cells = segment.frame.rect(u0, u0 + width, v0, v1)
         host = PlannedRoom(slot.request.type, self._rect(segment, span) - annex_cells)
         return [host, PlannedRoom(annex.type, annex_cells, host=host)]
+
+    def _with_vestibule(
+        self,
+        slot: FullSlot,
+        segment: Segment,
+        span: Interval,
+        slots: list[Slot],
+        position: int,
+    ) -> list[PlannedRoom]:
+        """A full-depth vestibule column beside the room; the room is entered only through it."""
+        spec = slot.request.spec
+        assert spec.vestibule is not None
+        width = self.rules.spec(spec.vestibule).min_side
+        if span.width - width < spec.min_side:
+            return [PlannedRoom(slot.request.type, self._rect(segment, span))]
+        # Put the vestibule on the side away from a `next_to` neighbour (recovery beside OR).
+        index = next(i for i, s in enumerate(slots) if s is slot)
+        before = [_first_type(s) for s in slots[:index]]
+        after = [_first_type(s) for s in slots[index + 1 :]]
+        wanted = set(self.rules.spec(spec.vestibule).next_to) | {
+            t for t in (*before, *after) if slot.request.type in self._next_to(t)
+        }
+        at_start = not (before and before[-1] in wanted)
+        vest = (
+            Interval(span.u0, span.u0 + width) if at_start else Interval(span.u1 - width, span.u1)
+        )
+        room = Interval(vest.u1, span.u1) if at_start else Interval(span.u0, vest.u0)
+        vestibule = PlannedRoom(spec.vestibule, self._rect(segment, vest))
+        return [
+            vestibule,
+            PlannedRoom(slot.request.type, self._rect(segment, room), host=vestibule),
+        ]
+
+    def _next_to(self, room_type: str | None) -> list[str]:
+        return self.rules.spec(room_type).next_to if room_type else []
 
     def _pull(self, slot: Slot, segment: Segment) -> int:
         """-1 to sort towards u0, +1 towards u1, 0 anywhere."""
@@ -591,3 +644,30 @@ class Allocator:
                 rooms.append(PlannedRoom(room_type, cells))
                 offset += depth
         return rooms
+
+
+def _first_type(slot: Slot) -> str | None:
+    if isinstance(slot, FullSlot):
+        return slot.request.type
+    return next((r.type for stack in slot.stacks for r, _ in stack), None)
+
+
+def _slot_types(state: SegmentState) -> set[str]:
+    return {t for s in state.slots if (t := _first_type(s)) is not None}
+
+
+def _neighbours_together(slots: list[Slot]) -> list[Slot]:
+    """Move each slot with `next_to` types right after the first slot of such a type."""
+    ordered = list(slots)
+    for slot in slots:
+        if not isinstance(slot, FullSlot) or not slot.request.spec.next_to:
+            continue
+        target = next(
+            (s for s in ordered if s is not slot and _first_type(s) in slot.request.spec.next_to),
+            None,
+        )
+        if target is None:
+            continue
+        ordered.remove(slot)
+        ordered.insert(ordered.index(target) + 1, slot)
+    return ordered

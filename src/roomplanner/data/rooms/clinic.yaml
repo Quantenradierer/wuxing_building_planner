@@ -33,13 +33,22 @@ rooms:
     min_side: 10
     windows: forbidden
     door_width: 4
-    access: [sterilization]
+    vestibule: scrub_room       # entered only through the scrub room beside it
     furniture:
       - {object: operating_table, placement: center}
       - {object: medical_cabinet, placement: wall, count: [2, 4]}
+  scrub_room:           # scrub-in beside an OR; beds are wheeled through
+    area: [24, 80]
+    min_side: 4
+    windows: forbidden
+    door_width: 3
+    furniture:
+      - {object: sink, placement: wall, count: [2, 3]}
+      - {object: locker, placement: wall, count: [1, 3]}
   sterilization:
     area: [24, 60]
     min_side: 4
+    next_to: [operating_room]
     windows: forbidden
     furniture:
       - {object: counter, placement: wall, count: [1, 2]}
