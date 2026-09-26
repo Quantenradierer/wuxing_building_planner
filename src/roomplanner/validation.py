@@ -158,7 +158,13 @@ def _flood(floor: Floor, doors: set[Edge], start: set[Cell]) -> frozenset[Cell]:
 
 def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
     violations: list[Violation] = []
-    window_edges = {e for o in floor.openings if o.kind is OpeningKind.WINDOW for e in o.edges}
+    window_cells = {
+        c
+        for o in floor.openings
+        if o.kind is OpeningKind.WINDOW
+        for e in o.edges
+        for c in e.cells()
+    }
     for room in floor.rooms:
         if room.type not in rules.rooms:
             violations.append(
@@ -171,7 +177,7 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
                 f"{room.type} {room.id} is {thinnest} cells wide in places, minimum {spec.min_side}"
             )
             violations.append(Violation(Severity.HARD, floor.level, message))
-        has_window = any(c in room.cells for e in window_edges for c in e.cells())
+        has_window = not window_cells.isdisjoint(room.cells)
         if spec.windows is WindowRule.REQUIRED and floor.level >= 0 and not has_window:
             message = f"{room.type} {room.id} has no window"
             violations.append(Violation(Severity.SOFT, floor.level, message))
@@ -219,6 +225,7 @@ def _check_objects(floor: Floor) -> list[Violation]:
     """Objects stay inside their room, don't overlap, keep doors clear and rooms walkable."""
     problems: list[str] = []
     rooms = {room.id: room for room in floor.rooms}
+    clearances = floor.door_clearances()
     taken: dict[str, set[Cell]] = {}
     for obj in floor.objects:
         room = rooms.get(obj.room)
@@ -231,7 +238,7 @@ def _check_objects(floor: Floor) -> list[Violation]:
         cells |= obj.cells
     for room_id, cells in taken.items():
         room = rooms[room_id]
-        if cells & floor.door_clearance(room):
+        if cells & clearances.get(room_id, frozenset()):
             problems.append(f"objects block a door of {room.type} {room_id}")
         if not connected(room.cells - cells):
             problems.append(f"objects cut {room.type} {room_id} into unreachable parts")

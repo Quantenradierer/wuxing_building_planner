@@ -4,27 +4,33 @@
 
 ```
 src/roomplanner/
-  geometry.py       Cell, Edge, Side, Axis, CELL_SIZE_M
-  model.py          Room, Opening, Swing, Floor, Building (immutable dataclasses)
-  params.py         GenerationParams (Pydantic) and parameter enums
-  generator.py      generate(params) -> Building
-  validation.py     hard/soft invariant checks, independent of any algorithm
-  serialization.py  JSON contract: to_json / from_json
-  errors.py         RoomplannerError hierarchy
-  render/ascii.py   minimal debug renderer
-  cli.py            Typer CLI
-```
-
-```
-  rules.py                   Pydantic models for the YAML, loader, `when:` expressions
-  data/rooms/*.yaml          room catalogs (common + per building type)
-  data/buildings/*.yaml      one program per building type
-  pipeline/base.py           Context, intermediate plan, stage protocols
-  pipeline/registry.py       strategies by name or `module:Class`
-  pipeline/run.py            feasibility check, attempts, validation, best-effort result
-  pipeline/footprint.py      footprint strategies
-  pipeline/layout/           layout strategies (frame/grid helpers, allocation, corridor)
-  pipeline/openings.py       walls, doors, windows
+  geometry.py                Cell, Edge (NamedTuples), Side, Axis, grid helpers, CELL_SIZE_M
+  model.py                   Room, Opening, Swing, PlacedObject, Floor, Building
+  params.py                  GenerationParams (Pydantic) and parameter enums
+  rules.py                   Pydantic models for the YAML, loaders, wealth, `when:` expressions
+  generator.py               generate(params) -> Building
+  validation.py              hard/soft invariant checks, independent of any algorithm
+  serialization.py           JSON contract: to_json / from_json
+  errors.py                  RoomplannerError hierarchy
+  render/ascii.py            minimal debug renderer
+  cli.py                     Typer CLI
+  pipeline/
+    base.py                  Context, intermediate plan, stage protocols
+    registry.py              strategies by name or `module:Class`
+    run.py                   feasibility check, attempts, validation, best-effort result
+    footprint.py             footprint strategies: rectangle, l
+    layout/frame.py          local (u, v) frames, facade grid, bands, intervals
+    layout/corridor.py       corridor layout (parts, bands, core, lobby, connectors)
+    layout/allocation.py     fills strip segments with a floor role's rooms
+    layout/units.py          subdivides units (apartments)
+    layout/hall.py           hall layout (supermarket), a corridor layout variant
+    openings.py              walls, doors, windows
+    furnishing.py            furniture and fixtures
+  data/
+    wealth.yaml              per-tier multipliers
+    objects.yaml             furniture and fixture catalog
+    rooms/*.yaml             room catalogs (common + per building family)
+    buildings/*.yaml         one program per building type
 ```
 
 ## Units
@@ -35,7 +41,7 @@ only so renderers know the physical scale; no code converts meters.
 ## Coordinates
 
 - The origin is the north-west (top-left) corner. `x` grows east, `y` grows south.
-- A **cell** `(x, y)` is the 0.5 m square whose north-west corner is the grid vertex `(x, y)`.
+- A **cell** `(x, y)` is the square whose north-west corner is the grid vertex `(x, y)`.
 - An **edge** is a unit segment between two grid vertices, stored canonically as
   `Edge(x, y, axis)`:
   - `Axis.H`: from vertex `(x, y)` to `(x+1, y)`, i.e. the north side of cell `(x, y)`,
@@ -50,17 +56,18 @@ only so renderers know the physical scale; no code converts meters.
 
 ```
 Building
-  schema_version, width, height (cells), seed, params, warnings
+  schema_version, width, height, seed, params, warnings
   floors: Floor[]                      sorted by level
 Floor
   level                                0 = ground, <0 basement
+  role                                 floor role from the program (ground, standard, …)
   footprint: set[Cell]                 interior cells of this floor
   rooms: Room[]                        partition the footprint exactly
   walls: set[Edge]                     every wall edge, openings included
   openings: Opening[]                  cut into walls
-  objects: PlacedObject[]              furniture: kind, x, y, w, h, facing, room
+  objects: PlacedObject[]              furniture and fixtures
 Room
-  id, type, cells: set[Cell]
+  id, type, cells: set[Cell], unit     unit: apartment etc. the room belongs to, if any
 Opening
   kind: door | window
   edges: Edge[]                        straight, contiguous run of wall edges
@@ -68,67 +75,103 @@ Opening
 Swing
   towards: Side                        side of the wall the leaf opens into
   hinge: Side                          end of the run the hinge sits at
+PlacedObject
+  kind, x, y, w, h                     covers cells [x, x+w) × [y, y+h)
+  facing: Side                         front of the object, away from its wall
+  room                                 id of the room it stands in
 ```
 
-Invariants (checked by `validation.py`):
+Model classes are immutable. Exterior vs. interior walls, room areas and door clearances
+are derived, not stored.
 
-- Rooms are disjoint and their union is the footprint.
-- Every edge between a footprint cell and a non-footprint cell is a wall.
-- Walls only exist on edges touching the footprint.
-- Every opening's edges are walls; openings never share edges.
-- Swings are perpendicular to their wall (`towards`) and parallel to it (`hinge`).
+Invariants checked by `validation.py` (all hard unless noted):
 
-Exterior vs. interior walls, room areas, etc. are derived, not stored.
+- Rooms are disjoint and their union is the footprint; every cell is reachable (ground
+  floor: from an exterior door; other floors: one connected area).
+- Every edge between a footprint and a non-footprint cell is a wall; walls touch the
+  footprint; openings lie on walls and never share edges; door swings fit their wall.
+- With rules: every room is at least `min_side` wide everywhere; core rooms (stairs,
+  elevators) occupy the same cells on every floor; rooms that need windows have one (soft).
+- Objects lie inside their room, don't overlap, keep door clearances free and leave the
+  room's free floor connected.
 
-Layers (furniture, later tactical, security, condition) are added to `Floor` as
-separate collections of placed objects. Each layer is produced by its own pipeline stage.
+Future layers (tactical markup, security, condition) are added to `Floor` as further
+collections, each produced by its own pipeline stage.
 
 ## Pipeline
 
 ```
 params ─► footprint ─► feasibility check ─► layout (core, corridors, rooms) ─► openings
-       ─► furnishing ─► condition ─► validation ─► Building
+       ─► furnishing ─► [condition, planned] ─► validation ─► Building
 ```
 
-The core is placed by the layout strategy because core and corridors depend on each other.
-
-- Each stage is a **strategy** behind a small `Protocol`, registered by name.
-  The building's YAML chooses strategies by name (`layout: corridor`), or by import path
-  for custom code (`layout: my_pkg.module:MyLayout`).
-- Stages only communicate through the data model. No stage knows how another works.
-- Every stage receives its own `random.Random` derived from the run seed and the stage
-  name, so changing one stage's randomness does not reshuffle the others.
-- Validation is algorithm-agnostic. A hard violation triggers a retry with a derived seed;
-  after N retries the best attempt is returned with warnings.
+- Each stage is a **strategy** behind a small `Protocol` (`pipeline/base.py`), registered by
+  name. The program YAML selects strategies by name (`layout: corridor`, `furnishing:
+  rules`) or by import path for custom code (`layout: my_pkg.module:MyLayout`).
+- Stages only communicate through the intermediate plan and the model.
+- Randomness: every stage gets its own `random.Random` derived from seed, attempt and stage
+  name, so changing one stage does not reshuffle the others. The same parameters and seed
+  always give the same building.
+- Failure policy (ADR 0004): the layout's feasibility check fails fast for impossible
+  input. Otherwise up to 8 attempts run; an attempt whose layout cannot place a required
+  room (`AllocationError`) is discarded, hard violations trigger the next attempt. The best
+  attempt is returned, with dropped rooms and violations as warnings. If no attempt could
+  place the required rooms, generation fails with `InfeasibleError`.
+- The core is placed by the layout strategy because core and corridors depend on each other.
 
 ### Corridor layout
 
-Works in local frames: `u` along a part's long axis, `v` across it.
+Works in local frames: `u` along a part's long axis (or away from the junction for a wing),
+`v` across it.
 
-0. **Parts.** A rectangle is one part. An L is split into a *main* bar that touches the street
-   (lobby, core, entrances) and a *wing* whose frame runs away from the junction; each wing
-   corridor is joined to the main part by a connector stub through the adjacent strip.
-
-1. **Bands.** The depth is split into strips (rows of rooms) and corridors along `u`:
-   single-loaded (one strip) for shallow buildings, one central corridor for medium depth,
-   `k` parallel corridors ("racetrack") for deep buildings: facade strips keep their
+1. **Parts.** A rectangle is one part. An L is split into a *main* bar that touches the street
+   (lobby, core, entrances) and a *wing*; each wing corridor is joined to the main part by a
+   connector stub through the adjacent strip.
+2. **Bands.** The depth is split into strips (rows of rooms) and corridors along `u`:
+   single-loaded (one strip) for shallow parts, one central corridor for medium depth,
+   `k` parallel corridors ("racetrack") for deep ones: facade strips keep their
    `strip_depth`, thin back-to-back interior strips between the corridors take the rest.
-2. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
-   the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator).
-3. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
-   slice across the whole building (street on a short end). A service corridor stub reaches
-   the service side when no corridor touches it; fallback is an exit from the stairwell.
-4. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
+3. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
+   the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator; in
+   deep strips a storage room behind it).
+4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
+   slice across the whole part (street on a short end). A service corridor stub reaches the
+   service side when no corridor touches it; fallback is an exit from the stairwell.
+5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage) which go into *clusters*: a side hallway from the corridor
-   with rooms stacked along it. Partition walls on facade strips snap to the facade `module`
-   grid, so windows (one per module) never collide with walls.
-5. Order: required → normal → optional; fixed counts before `share` rooms, which shrink or
-   split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
-   need windows on facades and windowless ones inside.
-6. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
+   with rooms stacked along it. Rooms that need windows are never clustered. Partition walls
+   on facade strips snap to the facade `module` grid.
+6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
+   or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
+   need windows on facades and windowless ones inside. `near: core | entrance` pulls rooms
+   towards those anchors.
+7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 
-Windows follow one facade grid for all floors; each floor omits the windows its own walls,
-doors or windowless rooms collide with.
+### Hall layout
+
+`layout: hall` subclasses the corridor layout and only changes the main part's bands to
+`[hall | service corridor | back-of-house strip]`, hall on the street side (and away from an
+L's junction). Each floor role names the hall's room type with `place: hall` (sales floor;
+stockroom in the basement). Without a lobby the main entrance opens into the hall.
+Connectors that must cross a hall band become a short corridor across its end.
+
+### Units
+
+A room type listed under a program's `units:` (e.g. `apartment`) is allocated like any
+full-depth room and then subdivided: entry hall on the corridor side with `front` rooms
+beside it, `back` rooms along the facade, and — if the strip is deep enough — a hall running
+along the unit so every room opens onto it. Rooms carry the unit id.
+
+### Openings
+
+- Walls separate different rooms, except between two circulation rooms (corridor, lobby).
+- One door per non-circulation room, committed greedily over all pending rooms: into
+  circulation first, then into a type from the room's `access` list, then into any connected
+  room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect
+  only within their unit, except the unit's entry room, which opens to circulation.
+- Exterior doors open outwards, at the positions the layout requested.
+- Windows follow one facade grid for all floors (so they line up); each floor omits the
+  windows its own walls, doors or windowless rooms collide with.
 
 ### Wealth
 
@@ -137,84 +180,61 @@ doors or windowless rooms collide with.
 overrides (`wealth:` in the catalog), and room entries / floor roles filtered by their
 `wealth:` lists (e.g. the office's executive top floor exists for high and luxury only).
 
-### Units
-
-A room type listed under a program's `units:` (e.g. `apartment`) is allocated like any
-full-depth room and then subdivided (`pipeline/layout/units.py`): entry hall on the corridor
-side with `front` rooms beside it, `back` rooms along the facade, and — if the strip is deep
-enough — a hall running along the unit so every room opens onto it. Rooms carry the unit id
-(`Room.unit`, JSON `"unit"`).
-
-### Doors
-
-One door per non-circulation room, committed greedily over all pending rooms: into
-circulation first, then into a type from the room's `access` list, then into any connected
-room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect only
-within their unit, except the unit's entry room, which opens to circulation.
-
 ### Furnishing
 
-`furnishing: rules` (`pipeline/furnishing.py`, the default) places the objects listed under a
-room's `furniture:` in the catalogs. Objects come from `data/objects.yaml` (size in cells
-along the wall × deep, cover, ASCII glyph). Placements: `wall`, `corner`, `center`,
-`scatter`, `near_exit` (e.g. checkouts) and `rows` (shelves, desks, racks with aisles and
-cross aisles). Counts scale with the wealth tier's `furniture` factor. A placement is
-rejected if it would cover another object or a door's clearance (as deep as the door is
-wide) or split the room's free floor; the ring test around the object avoids most flood
-fills. Result: `Floor.objects`, each an axis-aligned rectangle with `facing` and `room`.
-
-### Hall layout
-
-`layout: hall` (`pipeline/layout/hall.py`) subclasses the corridor layout and only changes
-the main part's bands to `[hall | service corridor | back-of-house strip]`, hall on the
-street side (and away from an L's junction). Each floor role names the hall's room type with
-`place: hall` (sales floor; stockroom in the basement). Without a lobby the main entrance
-opens into the hall. Wings, core, service stub and allocation work as in the corridor layout;
-connectors that must cross a hall band carve a short corridor across its end.
+`furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
+`data/objects.yaml` (size in cells along the wall × deep, cover, ASCII glyph). Placements:
+`wall`, `corner`, `center`, `scatter`, `near_exit` (checkouts) and `rows` (shelves, desks,
+racks with aisles and cross aisles). Counts scale with the tier's `furniture` factor. A
+placement is rejected if it covers another object or a door's clearance (as deep as the door
+is wide) or splits the room's free floor; a ring test around the object avoids most flood
+fills.
 
 ## JSON contract
 
 `serialization.py` maps the model to a JSON document explicitly (not via reflection),
-so internal refactors do not change the contract. Breaking changes bump `schema_version`.
+so internal refactors do not change the contract. Breaking changes bump `schema_version`;
+optional fields may be added without a bump, so readers must ignore unknown fields.
 
 ```json
 {
   "schema_version": 2,
   "cell_size_m": 0.5,
-  "width": 60, "height": 40,          // cells
+  "width": 60, "height": 40,
   "seed": 42,
-  "params": { "building_type": "office", "...": "..." },
+  "params": {"building_type": "office", "width": 60, "depth": 40, "wealth": "middle", "...": "..."},
   "warnings": [],
   "floors": [{
     "level": 0,
     "name": "Ground floor",
     "role": "ground",
-    "footprint": [[0, 0], [1, 0], "..."],
-    "rooms": [{"id": "0.1", "type": "office", "cells": [[0, 0], "..."]}],
+    "footprint": [[0, 0], [0, 1], "..."],
+    "rooms": [{"id": "0.1", "type": "office", "cells": [[0, 0], "..."]},
+              {"id": "0.7", "type": "bedroom", "cells": ["..."], "unit": "0-03"}],
     "walls": [[0, 0, "h"], [0, 0, "v"], "..."],
     "openings": [{
       "kind": "door",
       "edges": [[10, 40, "h"], [11, 40, "h"]],
-      "swing": {"towards": "N", "hinge": "W"}
-    }],
+      "swing": {"towards": "S", "hinge": "W"}
+    }, {"kind": "window", "edges": [[3, 0, "h"], [4, 0, "h"]]}],
     "objects": [{"kind": "desk", "x": 4, "y": 1, "w": 3, "h": 2, "facing": "S", "room": "0.3"}]
   }]
 }
 ```
 
-Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`. Lists are sorted for stable output.
-Optional fields (e.g. a room's `"unit"`) may be added without a version bump; readers must
-ignore unknown fields.
+Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`; cell and wall lists are sorted, the
+output as a whole is deterministic.
 
 ## ASCII debug renderer
 
 Doubled grid: a `w × h` floor becomes `(2w+1) × (2h+1)` characters. Cell `(x, y)` sits at
-column `2x+1`, row `2y+1`. Edges and vertices occupy the even positions in between.
+column `2x+1`, row `2y+1`; edges and vertices occupy the even positions in between.
 
-| Glyph     | Meaning                            |
-|-----------|------------------------------------|
-| `-` `\|`  | wall                               |
-| `+`       | vertex touching a wall             |
-| `D`       | door edge                          |
-| `=` `"`   | window edge (horizontal, vertical) |
-| digits    | room number, see the legend        |
+| Glyph     | Meaning                                                  |
+|-----------|----------------------------------------------------------|
+| `-` `\|`  | wall                                                     |
+| `+`       | walls meeting at an angle                                |
+| `D`       | door edge                                                |
+| `=` `"`   | window edge (horizontal, vertical)                       |
+| letters   | furniture, see the per-floor `objects:` legend           |
+| digits    | room number, see the legend (with the unit in brackets)  |

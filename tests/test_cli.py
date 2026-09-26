@@ -33,3 +33,54 @@ def test_errors_exit_non_zero_with_message() -> None:
     result = runner.invoke(app, ["generate", "-t", "office", "-w", "2", "-d", "12"])
     assert result.exit_code == 1
     assert "error: building must be at least" in result.output
+
+
+def test_all_options(tmp_path: Path) -> None:
+    target = tmp_path / "shop.json"
+    args = [
+        "generate",
+        "-t",
+        "supermarket",
+        "-w",
+        "60",
+        "-d",
+        "48",
+        "--floors-above",
+        "2",
+        "--floors-below",
+        "1",
+        "--wealth",
+        "luxury",
+        "--condition",
+        "derelict",
+        "--security",
+        "corporate",
+        "--shape",
+        "l",
+        "--street-side",
+        "E",
+        "--service-side",
+        "N",
+        "--seed",
+        "3",
+        "-f",
+        "json",
+        "-o",
+        str(target),
+    ]
+    result = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    document = json.loads(target.read_text())
+    assert document["params"]["wealth"] == "luxury"
+    assert document["params"]["condition"] == "derelict"
+    assert any(f["objects"] for f in document["floors"])
+    rendered = runner.invoke(app, ["render", str(target)])
+    assert "objects:" in rendered.output
+
+
+def test_render_rejects_foreign_json(tmp_path: Path) -> None:
+    target = tmp_path / "other.json"
+    target.write_text('{"schema_version": 1}')
+    result = runner.invoke(app, ["render", str(target)])
+    assert result.exit_code == 1
+    assert "schema_version" in result.output

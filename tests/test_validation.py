@@ -2,7 +2,8 @@ from dataclasses import replace
 
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side
-from roomplanner.model import Building, Floor, Room
+from roomplanner.model import Building, Floor, PlacedObject, Room
+from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations
 
 from .conftest import make_params
@@ -59,3 +60,58 @@ def test_detects_missing_entrance() -> None:
     ground = building.floor(0)
     broken = replace(ground, openings=())
     assert "ground floor has no exterior door" in messages(with_ground_floor(building, broken))
+
+
+def test_detects_misaligned_core() -> None:
+    params = make_params(floors_above=2)
+    building = generate(params)
+    upper = building.floor(1)
+    stairs = next(r for r in upper.rooms if r.type == "stairwell")
+    other = next(r for r in upper.rooms if r.type == "office")
+    moved_cell = min(other.cells)
+    rooms = replace_room(
+        upper,
+        stairs,
+        replace(stairs, cells=stairs.cells | {moved_cell}),
+    )
+    rooms = tuple(
+        replace(r, cells=r.cells - {moved_cell}) if r.id == other.id else r for r in rooms
+    )
+    broken = replace(building, floors=(building.floor(0), replace(upper, rooms=rooms)))
+    rules = rules_for(params.building_type, params.wealth)
+    assert any("stairwell not aligned" in v.message for v in hard_violations(broken, rules))
+
+
+def test_detects_rooms_below_minimum_width() -> None:
+    params = make_params()
+    building = generate(params)
+    ground = building.floor(0)
+    office = next(r for r in ground.rooms if r.type == "office")
+    column = min(c.x for c in office.cells)
+    sliver = frozenset(c for c in office.cells if c.x == column)
+    rooms = replace_room(
+        ground, office, replace(office, cells=office.cells - sliver), Room("0.99", "office", sliver)
+    )
+    broken = with_ground_floor(building, replace(ground, rooms=rooms))
+    rules = rules_for(params.building_type, params.wealth)
+    assert any("1 cells wide" in v.message for v in hard_violations(broken, rules))
+
+
+def test_detects_objects_blocking_doors_and_overlapping() -> None:
+    building = generate(make_params())
+    ground = building.floor(0)
+    room = next(r for r in ground.rooms if ground.door_clearance(r) and r.type == "office")
+    cell = min(ground.door_clearance(room))
+    blocker = PlacedObject("pallet", cell.x, cell.y, 1, 1, Side.S, room.id)
+    broken = with_ground_floor(building, replace(ground, objects=(blocker, blocker)))
+    found = messages(broken)
+    assert any("block a door" in m for m in found)
+    assert any("overlaps another object" in m for m in found)
+
+
+def test_detects_objects_outside_their_room() -> None:
+    building = generate(make_params())
+    ground = building.floor(0)
+    stray = PlacedObject("pallet", -5, -5, 1, 1, Side.S, ground.rooms[0].id)
+    broken = with_ground_floor(building, replace(ground, objects=(stray,)))
+    assert any("outside room" in m for m in messages(broken))

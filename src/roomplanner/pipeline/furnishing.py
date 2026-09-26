@@ -27,10 +27,15 @@ class RulesFurnishing:
         for floor in floors:
             rng = ctx.rng(f"furnish:{floor.level}")
             objects: list[PlacedObject] = []
+            clearances = floor.door_clearances()
+            door_edges = {e for o in floor.openings if o.kind is OpeningKind.DOOR for e in o.edges}
+            solid = floor.walls - door_edges
             for room in floor.rooms:
                 rules = ctx.rules.spec(room.type).furniture
                 if rules:
-                    objects += _RoomFurnisher(ctx, floor, room, rng).place(rules)
+                    clearance = clearances.get(room.id, frozenset())
+                    furnisher = _RoomFurnisher(ctx, floor, room, rng, clearance, solid)
+                    objects += furnisher.place(rules)
             furnished.append(replace(floor, objects=tuple(objects)))
         return furnished
 
@@ -53,15 +58,23 @@ def ring_is_one_run(free: frozenset[Cell] | set[Cell], x: int, y: int, w: int, h
 
 
 class _RoomFurnisher:
-    def __init__(self, ctx: Context, floor: Floor, room: Room, rng: random.Random) -> None:
+    def __init__(
+        self,
+        ctx: Context,
+        floor: Floor,
+        room: Room,
+        rng: random.Random,
+        clearance: frozenset[Cell],
+        solid: frozenset[Edge],
+    ) -> None:
         self.ctx = ctx
         self.floor = floor
         self.room = room
         self.rng = rng
         self.cells = room.cells
-        self.clearance = floor.door_clearance(room)
-        door_edges = {e for o in floor.openings if o.kind is OpeningKind.DOOR for e in o.edges}
-        self.solid = floor.walls - door_edges
+        self.clearance = clearance
+        self.solid = solid
+        self._wall_rects: dict[tuple[int, int, bool], list[Rect]] = {}
         self.taken: set[Cell] = set()
         self.placed: list[PlacedObject] = []
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
@@ -111,8 +124,14 @@ class _RoomFurnisher:
         return any(self._try(rule.object, rect) for rect in candidates)
 
     def _against_walls(self, spec: ObjectSpec, corners_only: bool) -> list[Rect]:
-        """Rectangles whose back row lies entirely against a solid wall."""
+        """Rectangles whose back row lies entirely against a solid wall (cached per size)."""
         along, deep = spec.size
+        key = (along, deep, corners_only)
+        if key not in self._wall_rects:
+            self._wall_rects[key] = self._find_against_walls(along, deep, corners_only)
+        return list(self._wall_rects[key])
+
+    def _find_against_walls(self, along: int, deep: int, corners_only: bool) -> list[Rect]:
         rects: list[Rect] = []
         for cell in self.cells:
             for side in Side:

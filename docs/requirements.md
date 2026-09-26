@@ -45,13 +45,12 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 | `condition`     | pristine, maintained, run_down, derelict, ruined    | validated and stored only             |
 | `security`      | none, low, corporate, aaa                           | validated and stored only             |
 | `shape`         | rectangle, l, u, irregular                          | rectangle and L; others are rejected  |
-
-L shapes need both arms at least one corridor plus one row of rooms wide.
 | `street_side`   | N, E, S, W (default S)                              | main entrance faces this side         |
 | `service_side`  | N, E, S, W (default: opposite of `street_side`)     | service entrances face this side      |
 | `seed`          | integer (random if omitted, always recorded)        | full determinism                      |
 
-There are no size presets and no room overrides.
+There are no size presets and no room overrides. L shapes need both arms as deep as the
+layout's main part (e.g. corridor plus one row of rooms).
 
 Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2, …
 (displayed as B1, B2, …).
@@ -69,12 +68,15 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 
 - Rules are data: YAML files validated with Pydantic.
   - A shared **room catalog** (toilet, storage, stairwell, corridor, …) with area ranges,
-    minimum side, window requirement, access level, furniture.
-  - One **program** per building type: layout strategy, vertical core, floor roles
-    (ground, standard, top, basement) and room entries with `count`, `share` or `fill`,
-    a priority (`required`, `normal`, `optional`) and soft adjacency preferences.
+    minimum side, window requirement, door width, which rooms it is entered from
+    (`access`), whether it may be walked through (`transit`), wealth overrides, furniture.
+  - One **program** per building type: layout strategy, corridor and strip sizes, facade
+    grid, vertical core, entrances, units, floor roles (matched by ground / upper / top /
+    basement plus `when:` and `wealth:`) and room entries with `count`, `share`, `fill` or
+    `place`, a priority (`required`, `normal`, `optional`) and `near: core | entrance`.
   - `when:` conditions are a deliberately tiny expression language.
-- Optional Python hooks for layout logic that data cannot express.
+- Logic that data cannot express goes into Python strategies, referenced from the YAML by
+  name or import path (e.g. `layout: my_pkg.layouts:Mine`).
 
 ## Floors
 
@@ -86,9 +88,10 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 
 ## Entrances
 
-- The building type defines which entrance kinds exist (main, service, loading dock,
-  emergency, fire exit).
-- The main entrance faces `street_side`; service-type entrances face `service_side`.
+- The building type defines which entrance kinds exist and their widths. v1: `main` and
+  `service` (loading dock, ambulance bay, back door). Emergency exits and fire escapes are
+  planned.
+- The main entrance faces `street_side`; the service entrance faces `service_side`.
 
 ## Openings
 
@@ -137,4 +140,12 @@ rooms mean fewer rooms.
 6. Furnishing layer for all four types.
 7. Test hardening and docs pass.
 
-The user reviews after each milestone.
+All seven milestones are implemented (2026-09-26).
+
+## Known limitations (v1)
+
+- Shapes `u` and `irregular` are rejected; `condition` and `security` have no effect yet.
+- Only `main` and `service` entrances; no fire escapes or emergency exits.
+- Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
+- Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
+- The ASCII renderer is a debug view; image rendering is the next step.

@@ -118,7 +118,12 @@ class Floor:
 
     def door_clearance(self, room: Room) -> frozenset[Cell]:
         """Cells of the room in front of its doors, as deep as the door is wide."""
-        clear: set[Cell] = set()
+        return self.door_clearances().get(room.id, frozenset())
+
+    def door_clearances(self) -> dict[str, frozenset[Cell]]:
+        """Door clearance of every room with a door, by room id."""
+        owner = {cell: room for room in self.rooms for cell in room.cells}
+        clear: dict[str, set[Cell]] = {}
         for door in self.openings:
             if door.kind is not OpeningKind.DOOR:
                 continue
@@ -126,14 +131,15 @@ class Floor:
             for edge in door.edges:
                 a, b = edge.cells()
                 for cell, other in ((a, b), (b, a)):
-                    if cell not in room.cells:
+                    room = owner.get(cell)
+                    if room is None:
                         continue
                     dx, dy = cell.x - other.x, cell.y - other.y
                     for step in range(depth):
                         ahead = Cell(cell.x + dx * step, cell.y + dy * step)
                         if ahead in room.cells:
-                            clear.add(ahead)
-        return frozenset(clear)
+                            clear.setdefault(room.id, set()).add(ahead)
+        return {room_id: frozenset(cells) for room_id, cells in clear.items()}
 
     def is_exterior_wall(self, edge: Edge) -> bool:
         a, b = edge.cells()

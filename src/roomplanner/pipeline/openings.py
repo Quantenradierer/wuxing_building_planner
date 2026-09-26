@@ -77,9 +77,11 @@ def _walls(
     for cell in footprint:
         for side in (Side.E, Side.S):
             neighbour = cell.neighbour(side)
-            if neighbour not in owner:
+            if neighbour not in footprint:
                 continue
-            a, b = owner[cell], owner[neighbour]
+            # Cells a (faulty) layout left without a room are walled off; the validator
+            # reports them instead of this stage crashing.
+            a, b = owner.get(cell), owner.get(neighbour)
             if a != b and not (a in circulation and b in circulation):
                 walls.add(Edge.of(cell, side))
     return frozenset(walls)
@@ -288,7 +290,7 @@ def _window_fits(
         return False
     for edge in edges:
         inside = next(c for c in edge.cells() if c in footprint)
-        room = next(r for r in draft.rooms if inside in r.cells)
-        if ctx.rules.spec(room.type).windows is WindowRule.FORBIDDEN:
+        room = next((r for r in draft.rooms if inside in r.cells), None)
+        if room is None or ctx.rules.spec(room.type).windows is WindowRule.FORBIDDEN:
             return False
     return True

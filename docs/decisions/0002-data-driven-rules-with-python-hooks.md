@@ -21,3 +21,9 @@ the file format into a programming language.
 - A new building type is mostly a YAML file.
 - YAML over TOML because programs are deeply nested lists of tables.
 - The Pydantic models are the schema for the data files and give clear load errors.
+
+## Addendum (2026-09-26)
+
+The "hooks" are realised as pipeline strategies: a program selects any stage by registered
+name or by import path (`layout: my_pkg.layouts:MyLayout`), and a custom strategy may
+subclass a built-in one (see the hall layout, ADR 0007).
