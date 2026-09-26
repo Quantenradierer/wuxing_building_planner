@@ -138,3 +138,16 @@ def test_groups_keep_their_parts_together() -> None:
                 and any(c.neighbour(s) in o.cells for c in chair.cells for s in Side)
                 for o in floor.objects
             ), chair
+
+
+def test_rooms_can_shift_the_look_of_their_objects() -> None:
+    params = make_params(width=60, depth=40, floors_above=3, wealth=Wealth.HIGH, seed=2)
+    building = generate(params)
+    looks: dict[str, set[Wealth | None]] = {}
+    for floor in building.floors:
+        types = {r.id: r.type for r in floor.rooms}
+        for obj in floor.objects:
+            looks.setdefault(types[obj.room], set()).add(obj.wealth)
+    assert looks["office"] == {None}  # the building's own tier
+    assert looks["executive_office"] == {Wealth.LUXURY}
+    assert from_json(to_json(building)) == building

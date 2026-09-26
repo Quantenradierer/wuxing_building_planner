@@ -14,7 +14,7 @@ from dataclasses import replace
 
 from roomplanner.geometry import Cell, Edge, Side, connected
 from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
-from roomplanner.params import EntranceKind
+from roomplanner.params import EntranceKind, Wealth
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import FurnitureRule, GroupSpec, ObjectSpec, Placement
@@ -41,7 +41,8 @@ class RulesFurnishing:
                 if rules:
                     clearance = clearances.get(room.id, frozenset())
                     furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
-                    objects += furnisher.place(rules)
+                    wealth = object_wealth(ctx, room)
+                    objects += [replace(o, wealth=wealth) for o in furnisher.place(rules)]
             furnished.append(replace(floor, objects=tuple(objects)))
         return furnished
 
@@ -55,6 +56,17 @@ class RulesFurnishing:
         order = [r for r in floor.rooms if r.type == "stairwell"]
         order += [r for r in floor.rooms if ctx.rules.spec(r.type).circulation]
         return order[0] if order else None
+
+
+def object_wealth(ctx: Context, room: Room) -> Wealth | None:
+    """The look of a room's objects if its `wealth_shift` moves it off the building's tier."""
+    shift = ctx.rules.spec(room.type).wealth_shift
+    if shift == 0:
+        return None
+    tiers = list(Wealth)
+    index = tiers.index(ctx.params.wealth) + shift
+    wealth = tiers[min(len(tiers) - 1, max(0, index))]
+    return None if wealth is ctx.params.wealth else wealth
 
 
 def solid_walls(floor: Floor) -> frozenset[Edge]:

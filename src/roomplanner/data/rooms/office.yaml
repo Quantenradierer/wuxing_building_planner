@@ -55,6 +55,7 @@ rooms:
     furniture:
       - {object: shelf, placement: rows, aisle: 2, margin: 1}
   executive_office:
+    wealth_shift: +1          # fancier than the rest of the building
     area: [80, 160]
     min_side: 8
     windows: required
@@ -67,6 +68,7 @@ rooms:
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: shelf, placement: wall, count: [0, 2]}
   board_room:
+    wealth_shift: +1          # fancier than the rest of the building
     area: [100, 240]
     min_side: 8
     windows: required

@@ -32,6 +32,7 @@ rooms:
       - {object: sink, placement: wall, count: [1, 2]}
       - {object: bench, placement: center, count: [0, 1]}
   locker_room:
+    wealth_shift: -1          # plainer than the rest of the building
     area: [16, 48]
     min_side: 4
     cluster: true
@@ -105,6 +106,7 @@ rooms:
       - {object: arcade_machine, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   vip_room:
+    wealth_shift: +1          # fancier than the rest of the building
     area: [30, 90]
     min_side: 5
     furniture:
@@ -115,6 +117,7 @@ rooms:
       - {object: counter, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
   backstage:
+    wealth_shift: -1          # plainer than the rest of the building
     area: [30, 90]
     min_side: 5
     furniture:

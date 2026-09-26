@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from roomplanner.geometry import Axis, Cell, Edge, Side
-from roomplanner.params import GenerationParams
+from roomplanner.params import GenerationParams, Wealth
 
 SCHEMA_VERSION = 3
 READABLE_SCHEMA_VERSIONS = (2, 3)  # version 3 only added fields and the `breach` kind
@@ -111,6 +111,7 @@ class PlacedObject:
     facing: Side  # the side the object's front faces (away from the wall it stands at)
     room: str
     blocking: bool = True  # False: can be walked over (stairs, elevator car, rug)
+    wealth: Wealth | None = None  # look (sprite variant); None: the building's wealth
 
     @property
     def cells(self) -> frozenset[Cell]:

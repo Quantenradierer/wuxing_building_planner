@@ -135,6 +135,7 @@ rooms:
       - {object: cabinet, placement: corner, count: [0, 1]}
       - {object: shelf, placement: wall, count: [0, 1]}
   consultation_room:    # cosmetic clinic: a desk, two armchairs, a screen
+    wealth_shift: +1          # fancier than the rest of the building
     area: [50, 120]
     min_side: 5
     windows: required
@@ -158,6 +159,7 @@ rooms:
       - {object: vital_monitor, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
       - {object: workbench, placement: wall, count: [0, 1]}
   recovery_suite:       # private room for a paying patient
+    wealth_shift: +1          # fancier than the rest of the building
     area: [50, 110]
     min_side: 6
     windows: required

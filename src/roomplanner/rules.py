@@ -135,6 +135,12 @@ class RoomSpec(_Strict):
     connect: list[str] = Field(
         default=[], description="Also a direct door to adjacent rooms of these types"
     )
+    wealth_shift: int = Field(
+        default=0,
+        ge=-4,
+        le=4,
+        description="Look of the room's objects, in wealth tiers from the building's",
+    )
     annex: float = Field(
         default=0.5,
         ge=0,

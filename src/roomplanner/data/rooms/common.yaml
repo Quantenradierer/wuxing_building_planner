@@ -51,6 +51,7 @@ rooms:
       - {object: crate, placement: scatter, per: 30, count: [0, 3]}
       - {object: cabinet, placement: wall, count: [0, 2]}
   utility:
+    wealth_shift: -1          # plainer than the rest of the building
     area: [32, 120]
     min_side: 4
     windows: forbidden
@@ -78,6 +79,7 @@ rooms:
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
   staff_room:
+    wealth_shift: -1          # plainer than the rest of the building
     area: [30, 70]
     min_side: 5
     furniture:

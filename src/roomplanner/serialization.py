@@ -27,7 +27,7 @@ from roomplanner.model import (
     Room,
     Swing,
 )
-from roomplanner.params import GenerationParams
+from roomplanner.params import GenerationParams, Wealth
 
 type JsonObject = dict[str, Any]
 
@@ -158,6 +158,8 @@ def _object_to_dict(obj: PlacedObject) -> JsonObject:
     }
     if not obj.blocking:
         result["blocking"] = False
+    if obj.wealth is not None:
+        result["wealth"] = obj.wealth.value
     return result
 
 
@@ -171,6 +173,7 @@ def _object_from_dict(data: JsonObject) -> PlacedObject:
         Side(data["facing"]),
         data["room"],
         data.get("blocking", True),
+        Wealth(data["wealth"]) if "wealth" in data else None,
     )
 
 
