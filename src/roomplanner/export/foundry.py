@@ -10,9 +10,10 @@ the import because stairs link the floors: each stairwell and elevator gets an "
 "down" region (a Scene Region with a native Teleport Token behaviour) that moves tokens to
 the arrival region of the same stairwell on the floor above or below.
 
-Walls: plain walls block everything; windows block movement and sound only; doors are
-doors (locked if they have a lock, open if broken); barricaded doors are walls; missing
-doors and breaches are gaps.
+Walls: plain walls block everything; windows are see-through doors (closed: movement and
+sound blocked, can be opened to climb out); doors are doors (locked if they have a lock,
+open if broken); barricaded doors are walls; missing doors, broken windows and breaches
+are gaps.
 """
 
 from __future__ import annotations
@@ -154,7 +155,15 @@ class _Scene:
                 case OpeningKind.WINDOW, OpeningState.BROKEN:
                     pass  # a hole: nothing stops anyone
                 case OpeningKind.WINDOW, _:
-                    add(a, b, sight=SENSE_NONE, light=SENSE_NONE, sound=SENSE_LIMITED)
+                    # See-through, and a door: windows can be opened to climb out.
+                    add(
+                        a,
+                        b,
+                        sight=SENSE_NONE,
+                        light=SENSE_NONE,
+                        sound=SENSE_LIMITED,
+                        door=DOOR_DOOR,
+                    )
                 case OpeningKind.DOOR, OpeningState.BLOCKED:
                     add(a, b)
                 case OpeningKind.DOOR, OpeningState.BROKEN:

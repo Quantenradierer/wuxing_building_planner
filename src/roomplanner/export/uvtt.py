@@ -3,10 +3,9 @@
 Coordinates are in grid squares from the image's top-left corner.
 
 - Walls (`line_of_sight`): every wall without an opening, plus barricaded doors.
-- Doors (`portals`): intact and broken doors; broken ones are open. Missing doors and
-  breaches are plain gaps.
-- Windows: left out of the walls, so sight and light pass (the format has no windows;
-  movement through them is not blocked either).
+- Doors and windows (`portals`): intact ones closed, broken ones open (the format has no
+  window type; windows can be opened, so they are portals too). Missing doors and breaches
+  are plain gaps.
 - Lights: every light that is not off; flickering ones at half intensity.
 """
 
@@ -46,7 +45,8 @@ def to_uvtt(
     walls = [[grid(a), grid(b)] for a, b in runs(solid_walls(floor))]
     portals: list[dict[str, Any]] = []
     for door in floor.openings:
-        if door.kind is not OpeningKind.DOOR or door.state is OpeningState.MISSING:
+        # Windows can be opened (or climbed through when broken): portals like doors.
+        if door.kind is OpeningKind.BREACH or door.state is OpeningState.MISSING:
             continue
         a, b = opening_segment(door)
         if door.state is OpeningState.BLOCKED:

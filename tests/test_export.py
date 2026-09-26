@@ -36,12 +36,13 @@ def test_uvtt_document() -> None:
     assert doc["resolution"]["map_size"] == {"x": 22.0, "y": 15.0}
     image = Image.open(io.BytesIO(base64.b64decode(doc["image"])))
     assert image.size == (22 * 12, 15 * 12)
-    passable_doors = [
+    portals = [
         o
         for o in ground.openings
-        if o.kind is OpeningKind.DOOR and o.state in (OpeningState.INTACT, OpeningState.BROKEN)
+        if o.kind in (OpeningKind.DOOR, OpeningKind.WINDOW)
+        and o.state in (OpeningState.INTACT, OpeningState.BROKEN)
     ]
-    assert len(doc["portals"]) == len(passable_doors)
+    assert len(doc["portals"]) == len(portals)
     assert doc["line_of_sight"]
     for wall in doc["line_of_sight"]:
         (a, b_) = wall
@@ -80,10 +81,10 @@ def test_foundry_scenes_link_their_stairs() -> None:
     assert set(destinations) <= regions
     ground = export.scenes[0]
     assert ground["grid"] == {"type": 1, "size": 12, "distance": 1.0, "units": "m"}
-    doors = [w for w in ground["walls"] if w["door"] == 1]
+    doors = [w for w in ground["walls"] if w["door"] == 1 and w["sight"] == 20]
     assert any(w["ds"] == 2 for w in doors)  # locked
     windows = [w for w in ground["walls"] if w["sight"] == 0]
-    assert windows and all(w["move"] == 20 for w in windows)
+    assert windows and all(w["move"] == 20 and w["door"] == 1 for w in windows)
     ids = [w["_id"] for s in export.scenes for w in s["walls"]]
     assert len(ids) == len(set(ids))
 

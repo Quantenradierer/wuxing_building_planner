@@ -200,7 +200,7 @@ All seven milestones are implemented (2026-09-26).
 - Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
-- Universal VTT has no window type: windows are see-through and walkable there.
+- Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
 - Foundry export needs the import macro (scenes keep their ids so the stairs stay linked).
 
 All v2 roadmap steps are implemented (2026-09-26).

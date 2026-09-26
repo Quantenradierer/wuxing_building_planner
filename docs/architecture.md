@@ -329,8 +329,9 @@ Without `baked_lighting` (default) the image has no light map and the VTT lights
 | Model                  | Universal VTT          | Foundry wall                                  |
 |------------------------|------------------------|-----------------------------------------------|
 | wall                   | line of sight          | blocks all                                    |
-| window                 | — (sight passes)       | move blocked, sight / light none, sound limited |
-| broken window, breach, missing door | —         | —                                             |
+| window                 | closed portal          | door (openable), sight / light pass, sound limited |
+| broken window          | open portal            | —                                             |
+| breach, missing door   | —                      | —                                             |
 | door (intact)          | closed portal          | door; locked if it has a lock                 |
 | door (broken)          | open portal            | open door                                     |
 | door (blocked)         | line of sight          | wall                                          |
