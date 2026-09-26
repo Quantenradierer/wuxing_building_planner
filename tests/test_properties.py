@@ -12,7 +12,7 @@ from roomplanner.rules import rules_for
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
-IMPLEMENTED = [BuildingType.OFFICE, BuildingType.CLINIC, BuildingType.APARTMENT]
+IMPLEMENTED = list(BuildingType)
 
 cells = st.integers(min_value=8, max_value=90)
 

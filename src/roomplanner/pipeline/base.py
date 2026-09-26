@@ -73,6 +73,10 @@ class FootprintStrategy(Protocol):
 
 
 class LayoutStrategy(Protocol):
+    def main_min_depth(self, ctx: Context) -> int:
+        """Smallest depth of the main part (footprints size L-shape arms with it)."""
+        ...
+
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         """Problems that make the parameters impossible for this layout, never retried."""
         ...

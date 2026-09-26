@@ -133,6 +133,7 @@ class Grid:
 class BandKind(StrEnum):
     STRIP = "strip"
     CORRIDOR = "corridor"
+    HALL = "hall"  # one big room per floor (sales floor, stockroom)
 
 
 @dataclass(frozen=True)

@@ -63,7 +63,7 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | office      | corridor        | lobby/reception, offices, open plan, meeting rooms  |
 | clinic      | corridor        | many specialised rooms, surgery floor, wards        |
 | apartment   | corridor+units  | flats along a corridor, each subdivided             |
-| supermarket | hall            | sales hall with shelf rows, back-of-house strip     |
+| supermarket | hall            | sales hall per floor, back-of-house strip, loading  |
 
 ## Building rules
 

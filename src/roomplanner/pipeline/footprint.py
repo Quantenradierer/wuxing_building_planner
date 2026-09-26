@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import cast
+
 from roomplanner.errors import InfeasibleError
 from roomplanner.geometry import Cell, rectangle
-from roomplanner.pipeline.base import Context
-from roomplanner.pipeline.registry import register
+from roomplanner.pipeline.base import Context, LayoutStrategy
+from roomplanner.pipeline.registry import register, resolve
 
 
 @register("footprint", "rectangle")
@@ -16,12 +18,12 @@ class RectangleFootprint:
 class LFootprint:
     """The bounding box minus one corner of about 1/3 to 1/2 of each side.
 
-    Both arms stay at least one corridor plus one row of rooms wide.
+    Both arms stay as deep as the building's layout needs for its main part.
     """
 
     def footprint(self, ctx: Context) -> frozenset[Cell]:
-        program = ctx.rules.program
-        arm = program.corridor.width + program.strip_depth[0]
+        layout = cast(LayoutStrategy, resolve("layout", ctx.rules.program.layout))
+        arm = layout.main_min_depth(ctx)
         cuts: list[tuple[int, int]] = []
         for side in (ctx.width, ctx.height):
             low, high = max(side // 3, arm // 2), min(side // 2, side - arm)

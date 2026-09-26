@@ -1,0 +1,51 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# From a corner stuffer shack to a Megamart: one sales hall per floor plus back of house.
+building: supermarket
+catalogs: [common, retail]
+layout: hall
+
+corridor:
+  width: 4
+  hallway_width: 3
+strip_depth: [8, 14]       # back-of-house row behind the service corridor
+hall:
+  min_depth: 12
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [5, 6], when: "floors_total >= 2"}   # freight elevator
+
+entrances:
+  main: {width: 6}         # automatic sliding doors
+  service: {width: 6}      # loading dock
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: sales_floor, place: hall}
+      - {room: loading_bay, count: 1, priority: required}
+      - {room: toilet, count: [1, 2], near: core, priority: required}
+      - {room: manager_office, count: 1}
+      - {room: security_room, count: [0, 1], wealth: [middle, high, luxury]}
+      - {room: staff_room, count: 1, wealth: [low, middle, high, luxury]}
+      - {room: cold_storage, count: [1, 2]}
+      - {room: prep_kitchen, count: [0, 1], wealth: [middle, high, luxury]}
+      - {room: stockroom, fill: true}
+  upper:
+    applies: [upper, top]
+    rooms:
+      - {room: sales_floor, place: hall}
+      - {room: toilet, count: [0, 2], near: core}
+      - {room: stockroom, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: utility, count: 1, priority: required}
+      - {room: cold_storage, count: [0, 2]}
+      - {room: storage, fill: true}

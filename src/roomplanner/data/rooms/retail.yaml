@@ -1,0 +1,33 @@
+# Units are cells: lengths in cells, areas in number of cells.
+rooms:
+  sales_floor:          # the hall; shelves and checkouts come with the furnishing layer
+    area: [100, 100000]
+    min_side: 10
+    door_width: 3
+  stockroom:
+    area: [40, 100000]
+    min_side: 6
+    windows: forbidden
+    door_width: 3
+  cold_storage:
+    area: [16, 80]
+    min_side: 4
+    windows: forbidden
+  loading_bay:
+    area: [48, 160]
+    min_side: 8
+    windows: forbidden
+    door_width: 4
+  manager_office:
+    area: [24, 60]
+    min_side: 5
+  staff_room:
+    area: [30, 70]
+    min_side: 5
+  security_room:
+    area: [16, 40]
+    min_side: 4
+    windows: forbidden
+  prep_kitchen:         # deli / bakery / soykaf bar
+    area: [30, 90]
+    min_side: 5

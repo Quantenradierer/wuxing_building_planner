@@ -55,10 +55,11 @@ def test_generated_building_is_valid() -> None:
     assert validate(generate(make_params(floors_above=2, floors_below=1))) == []
 
 
-@pytest.mark.parametrize("building_type", [BuildingType.SUPERMARKET])
-def test_unimplemented_building_types_are_rejected(building_type: BuildingType) -> None:
-    with pytest.raises(NotSupportedError, match="not implemented yet"):
-        generate(make_params(building_type=building_type))
+def test_all_building_types_generate() -> None:
+    for building_type in BuildingType:
+        building = generate(make_params(building_type=building_type, width=60, depth=40))
+        rules = rules_for(building_type, building.params.wealth)
+        assert validate(building, rules) == []
 
 
 def test_too_small_footprint_fails_fast() -> None:

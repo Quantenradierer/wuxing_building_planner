@@ -18,6 +18,7 @@ import random
 from dataclasses import dataclass, field
 from itertools import pairwise
 
+from roomplanner.errors import RulesError
 from roomplanner.geometry import Axis, Cell, Side
 from roomplanner.model import level_name
 from roomplanner.pipeline.base import (
@@ -91,23 +92,27 @@ class Split:
 
 @register("layout", "corridor")
 class CorridorLayout:
+    def main_min_depth(self, ctx: Context) -> int:
+        """Depth the main part needs; subclasses with other band patterns override it."""
+        return ctx.rules.program.corridor.width + ctx.rules.program.strip_depth[0]
+
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         program = ctx.rules.program
         corridor = program.corridor.width
-        min_depth = corridor + program.strip_depth[0]
+        wing_depth = corridor + program.strip_depth[0]
         problems: list[str] = []
-        split = _split(footprint, ctx.params.street_side, min_depth)
-        frames = [("building", Frame.for_rect(split.main))]
+        split = _split(footprint, ctx.params.street_side, wing_depth)
+        frames = [("building", Frame.for_rect(split.main), self.main_min_depth(ctx))]
         if split.wing is not None and split.junction is not None:
-            frames.append(("wing", _wing_frame(split.wing, split.junction)))
-        for name, frame in frames:
+            frames.append(("wing", _wing_frame(split.wing, split.junction), wing_depth))
+        for name, frame, min_depth in frames:
             if frame.depth < min_depth:
                 problems.append(
                     f"{name} is {frame.depth} cells across, needs at least "
-                    f"{min_depth} for a corridor and a row of rooms"
+                    f"{min_depth} for its corridor and rooms"
                 )
         core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
-        corridors = sum(corridor * frame.length for _, frame in frames)
+        corridors = sum(corridor * frame.length for _, frame, _ in frames)
         for level in ctx.params.levels:
             _, role = ctx.rules.role_for(level, ctx.params)
             needed = core + corridors
@@ -146,7 +151,8 @@ class CorridorLayout:
 
         main_frame = Frame.for_rect(split.main)
         street = main_frame.local(ctx.params.street_side)
-        main = self._part(ctx, main_frame, street, rng)
+        junction = main_frame.local(split.junction) if split.junction else None
+        main = self._part(ctx, main_frame, street, rng, junction, main=True)
         wing = None
         if split.wing is not None and split.junction is not None:
             wing_frame = _wing_frame(split.wing, split.junction)
@@ -191,7 +197,16 @@ class CorridorLayout:
             )
         return skeleton
 
-    def _part(self, ctx: Context, frame: Frame, street: LocalSide, rng: random.Random) -> Part:
+    def _part(
+        self,
+        ctx: Context,
+        frame: Frame,
+        street: LocalSide,
+        rng: random.Random,
+        junction: LocalSide | None = None,
+        main: bool = False,
+    ) -> Part:
+        """Bands of one part; `junction` is the main part's side a wing is attached to."""
         grid = Grid.centred(ctx.rules.program.facade.module, frame.length)
         bands = self._bands(ctx, frame, ctx.rules.program.corridor.width, street, rng)
         return Part(frame, grid, bands)
@@ -463,6 +478,18 @@ class CorridorLayout:
         for part in skeleton.parts:
             part_slice = slice_ if part is main else None
             for band in part.bands:
+                if band.kind is BandKind.HALL:
+                    hall = next((e.room for e in role.rooms if e.place == "hall"), None)
+                    if hall is None:
+                        raise RulesError(f"floor role {role_name} needs a `place: hall` room")
+                    cells = frozenset[Cell]().union(
+                        *(
+                            part.frame.rect(span.u0, span.u1, band.v0, band.v1)
+                            for span in free_intervals(part.frame.length, part.blocked(band))
+                        )
+                    )
+                    rooms.append(PlannedRoom(hall, cells))
+                    continue
                 if band.kind is BandKind.CORRIDOR:
                     blocked = [part_slice] if part_slice else []
                     for span in free_intervals(part.frame.length, blocked):
@@ -552,6 +579,16 @@ class CorridorLayout:
             v = 0 if street is LocalSide.V0 else frame.depth - 1
             hints.append((EntranceKind.MAIN, street_side, frame.cell(int(span.centre), v)))
             anchor = frame.box(span.u0, span.u1, band.v0, band.v1)
+        elif (hall := next((b for b in main.bands if b.kind is BandKind.HALL), None)) is not None:
+            # No lobby: customers walk straight into the hall.
+            if street.is_end:
+                u = 0 if street is LocalSide.U0 else frame.length - 1
+                hint = frame.cell(u, (hall.v0 + hall.v1) // 2)
+            else:
+                v = 0 if street is LocalSide.V0 else frame.depth - 1
+                hint = frame.cell(frame.length // 2, v)
+            hints.append((EntranceKind.MAIN, street_side, hint))
+            anchor = frame.box(0, frame.length, hall.v0, hall.v1)
 
         if EntranceKind.SERVICE not in program.entrances:
             return anchor
@@ -565,7 +602,7 @@ class CorridorLayout:
         else:
             band = self._facade_band(main.bands, service)
             v = 0 if service is LocalSide.V0 else frame.depth - 1
-            if band.kind is BandKind.CORRIDOR:
+            if band.kind in (BandKind.CORRIDOR, BandKind.HALL):
                 hint = frame.cell(frame.length // 2, v)
             else:
                 width = grid.round_up(program.corridor.width)

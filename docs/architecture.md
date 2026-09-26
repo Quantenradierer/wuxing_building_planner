@@ -151,7 +151,14 @@ circulation first, then into a type from the room's `access` list, then into any
 room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect only
 within their unit, except the unit's entry room, which opens to circulation.
 
-Planned: the `hall` layout (supermarket).
+### Hall layout
+
+`layout: hall` (`pipeline/layout/hall.py`) subclasses the corridor layout and only changes
+the main part's bands to `[hall | service corridor | back-of-house strip]`, hall on the
+street side (and away from an L's junction). Each floor role names the hall's room type with
+`place: hall` (sales floor; stockroom in the basement). Without a lobby the main entrance
+opens into the hall. Wings, core, service stub and allocation work as in the corridor layout;
+connectors that must cross a hall band carve a short corridor across its end.
 
 ## JSON contract
 

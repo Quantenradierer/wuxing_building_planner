@@ -40,6 +40,15 @@ CASES: dict[str, dict[str, Any]] = {
         "floors_below": 1,
         "seed": 5,
     },
+    "supermarket_two_floors": {
+        "building_type": BuildingType.SUPERMARKET,
+        "width": 64,
+        "depth": 40,
+        "floors_above": 2,
+        "floors_below": 1,
+        "seed": 6,
+    },
+    "stuffer_shack": {"building_type": BuildingType.SUPERMARKET, "width": 30, "depth": 26},
     "office_luxury_executive": {
         "width": 72,
         "depth": 36,

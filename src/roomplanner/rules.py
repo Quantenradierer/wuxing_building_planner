@@ -65,7 +65,7 @@ class RoomEntry(_Strict):
     count: int | tuple[int, int] | None = None
     share: float | None = Field(default=None, gt=0, le=1)
     fill: bool = False
-    place: Literal["entrance"] | None = None
+    place: Literal["entrance", "hall"] | None = None
     near: Literal["core", "entrance"] | None = None
     priority: Priority = Priority.NORMAL
     area: Range | None = Field(default=None, description="Overrides the catalog")
@@ -138,6 +138,10 @@ class FacadeRule(_Strict):
     window: int = Field(gt=0)
 
 
+class HallRule(_Strict):
+    min_depth: int = Field(gt=0, description="Minimum depth of the hall band")
+
+
 class UnitSpec(_Strict):
     """Subdivision of a unit (e.g. an apartment) spanning a strip from corridor to facade.
 
@@ -176,6 +180,7 @@ class BuildingProgram(_Strict):
     entrances: dict[EntranceKind, EntranceRule]
     floor_roles: dict[str, FloorRole]
     units: dict[str, UnitSpec] = Field(default={}, description="Room types that are units")
+    hall: HallRule | None = Field(default=None, description="Required by the hall layout")
     wealth: dict[Wealth, WealthRule] = Field(default={}, description="Overrides wealth.yaml")
 
 
