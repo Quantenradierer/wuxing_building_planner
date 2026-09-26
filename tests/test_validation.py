@@ -24,12 +24,17 @@ def test_detects_missing_exterior_wall() -> None:
     assert any("exterior wall missing" in m for m in messages(with_ground_floor(building, broken)))
 
 
+def replace_room(floor: Floor, old: Room, *new: Room) -> tuple[Room, ...]:
+    return tuple(r for r in floor.rooms if r != old) + new
+
+
 def test_detects_cells_outside_every_room() -> None:
     building = generate(make_params())
     ground = building.floor(0)
-    room = ground.rooms[0]
-    shrunk = replace(room, cells=room.cells - {Cell(0, 0)})
-    broken = replace(ground, rooms=(shrunk,))
+    room = ground.room_at(Cell(0, 0))
+    assert room is not None
+    rooms = replace_room(ground, room, replace(room, cells=room.cells - {Cell(0, 0)}))
+    broken = replace(ground, rooms=rooms)
     assert any("belong to no room" in m for m in messages(with_ground_floor(building, broken)))
 
 
@@ -37,9 +42,10 @@ def test_detects_unreachable_room() -> None:
     building = generate(make_params())
     ground = building.floor(0)
     closet = frozenset({Cell(0, 0)})
-    rooms = (
-        replace(ground.rooms[0], cells=ground.rooms[0].cells - closet),
-        Room(id="0.2", type="closet", cells=closet),
+    room = ground.room_at(Cell(0, 0))
+    assert room is not None
+    rooms = replace_room(
+        ground, room, replace(room, cells=room.cells - closet), Room("0.99", "closet", closet)
     )
     walls = ground.walls | {Edge.of(Cell(0, 0), Side.E), Edge.of(Cell(0, 0), Side.S)}
     broken = replace(ground, rooms=rooms, walls=walls)

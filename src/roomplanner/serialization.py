@@ -61,6 +61,7 @@ def _floor_to_dict(floor: Floor) -> JsonObject:
     return {
         "level": floor.level,
         "name": floor.name,
+        "role": floor.role,
         "footprint": _cells(floor.footprint),
         "rooms": [{"id": r.id, "type": r.type, "cells": _cells(r.cells)} for r in floor.rooms],
         "walls": [_edge(e) for e in sorted(floor.walls)],
@@ -77,6 +78,7 @@ def _floor_from_dict(data: JsonObject) -> Floor:
         ),
         walls=frozenset(_parse_edge(e) for e in data["walls"]),
         openings=tuple(_opening_from_dict(o) for o in data["openings"]),
+        role=data.get("role", ""),
     )
 
 

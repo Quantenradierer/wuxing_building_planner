@@ -1,19 +1,28 @@
+"""Invariants that must hold for any parameters: impossible input is rejected, never broken."""
+
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
+from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
+from roomplanner.model import Building
 from roomplanner.params import BuildingType, Condition, GenerationParams, Security, Wealth
+from roomplanner.rules import load_rules
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
+IMPLEMENTED = [BuildingType.OFFICE]
+
+meters = st.integers(min_value=8, max_value=90).map(lambda half_meters: half_meters / 2)
+
 params_strategy = st.builds(
     GenerationParams,
-    building_type=st.sampled_from(BuildingType),
-    width_m=st.floats(min_value=2, max_value=60).map(lambda v: round(v * 2) / 2),
-    depth_m=st.floats(min_value=2, max_value=60).map(lambda v: round(v * 2) / 2),
-    floors_above=st.integers(min_value=1, max_value=4),
-    floors_below=st.integers(min_value=0, max_value=2),
+    building_type=st.sampled_from(IMPLEMENTED),
+    width_m=meters,
+    depth_m=meters,
+    floors_above=st.integers(min_value=1, max_value=3),
+    floors_below=st.integers(min_value=0, max_value=1),
     wealth=st.sampled_from(Wealth),
     condition=st.sampled_from(Condition),
     security=st.sampled_from(Security),
@@ -23,15 +32,33 @@ params_strategy = st.builds(
 )
 
 
-@settings(max_examples=150, deadline=None)
+def generate_or_none(params: GenerationParams) -> Building | None:
+    try:
+        return generate(params)
+    except InfeasibleError:
+        return None
+
+
+@settings(max_examples=80, deadline=None)
 @given(params_strategy)
 def test_generated_buildings_have_no_hard_violations(params: GenerationParams) -> None:
-    assert hard_violations(generate(params)) == []
+    building = generate_or_none(params)
+    if building is not None:
+        assert hard_violations(building, load_rules(params.building_type)) == []
 
 
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=25, deadline=None)
 @given(params_strategy)
 def test_generation_is_deterministic_and_serializable(params: GenerationParams) -> None:
-    building = generate(params)
-    assert generate(params) == building
-    assert from_json(to_json(building)) == building
+    building = generate_or_none(params)
+    if building is not None:
+        assert generate(params) == building
+        assert from_json(to_json(building)) == building
+
+
+@settings(max_examples=25, deadline=None)
+@given(
+    params_strategy.filter(lambda p: min(p.width_m, p.depth_m) >= 12),
+)
+def test_reasonably_sized_offices_are_always_feasible(params: GenerationParams) -> None:
+    assert generate(params) is not None

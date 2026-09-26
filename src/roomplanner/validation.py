@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
-from roomplanner.geometry import Cell, Edge, Side, boundary_edges
-from roomplanner.model import Building, Floor, OpeningKind
+from roomplanner.geometry import CELL_SIZE_M, Cell, Edge, Side, boundary_edges
+from roomplanner.model import Building, Floor, OpeningKind, Room
+from roomplanner.rules import Rules, WindowRule
 
 
 class Severity(StrEnum):
@@ -25,15 +27,20 @@ class Violation:
         return f"[{self.severity}] level {self.level}: {self.message}"
 
 
-def validate(building: Building) -> list[Violation]:
+def validate(building: Building, rules: Rules | None = None) -> list[Violation]:
+    """Structural checks always; rule checks (room sizes, core, windows) when rules are given."""
     violations: list[Violation] = []
     for floor in building.floors:
         violations += _check_floor(building, floor)
+        if rules is not None:
+            violations += _check_rules(floor, rules)
+    if rules is not None:
+        violations += _check_core(building, rules)
     return violations
 
 
-def hard_violations(building: Building) -> list[Violation]:
-    return [v for v in validate(building) if v.severity is Severity.HARD]
+def hard_violations(building: Building, rules: Rules | None = None) -> list[Violation]:
+    return [v for v in validate(building, rules) if v.severity is Severity.HARD]
 
 
 def _check_floor(building: Building, floor: Floor) -> list[Violation]:
@@ -146,3 +153,64 @@ def _flood(floor: Floor, doors: set[Edge], start: set[Cell]) -> frozenset[Cell]:
             seen.add(neighbour)
             queue.append(neighbour)
     return frozenset(seen)
+
+
+def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
+    violations: list[Violation] = []
+    window_edges = {e for o in floor.openings if o.kind is OpeningKind.WINDOW for e in o.edges}
+    for room in floor.rooms:
+        if room.type not in rules.rooms:
+            violations.append(
+                Violation(Severity.HARD, floor.level, f"unknown room type {room.type}")
+            )
+            continue
+        spec = rules.spec(room.type)
+        min_side = round(spec.min_side_m / CELL_SIZE_M)
+        if (thinnest := _thinnest(room)) < min_side:
+            message = (
+                f"{room.type} {room.id} is {thinnest * CELL_SIZE_M:g} m wide in places, "
+                f"minimum {spec.min_side_m:g} m"
+            )
+            violations.append(Violation(Severity.HARD, floor.level, message))
+        has_window = any(c in room.cells for e in window_edges for c in e.cells())
+        if spec.windows is WindowRule.REQUIRED and floor.level >= 0 and not has_window:
+            message = f"{room.type} {room.id} has no window"
+            violations.append(Violation(Severity.SOFT, floor.level, message))
+    return violations
+
+
+def _thinnest(room: Room) -> int:
+    """Smallest extent of the room through any of its cells, horizontally or vertically."""
+    horizontal = _run_lengths(room.cells, lambda c: (c.y, c.x))
+    vertical = _run_lengths(room.cells, lambda c: (c.x, c.y))
+    return min(min(horizontal[c], vertical[c]) for c in room.cells)
+
+
+def _run_lengths(cells: frozenset[Cell], key: Callable[[Cell], tuple[int, int]]) -> dict[Cell, int]:
+    """Length of the straight run through each cell; `key` gives (line, position on line)."""
+    lengths: dict[Cell, int] = {}
+    run: list[Cell] = []
+    for cell in sorted(cells, key=key):
+        if run and key(run[-1]) != (key(cell)[0], key(cell)[1] - 1):
+            lengths.update(dict.fromkeys(run, len(run)))
+            run = []
+        run.append(cell)
+    lengths.update(dict.fromkeys(run, len(run)))
+    return lengths
+
+
+def _check_core(building: Building, rules: Rules) -> list[Violation]:
+    """Core rooms (stairs, elevators) must sit at the same cells on every floor."""
+    violations: list[Violation] = []
+    for entry in rules.active_core(building.params):
+        placements = {
+            floor.level: frozenset(r.cells for r in floor.rooms if r.type == entry.room)
+            for floor in building.floors
+        }
+        reference = placements[building.floors[0].level]
+        for level, cells in placements.items():
+            if not cells:
+                violations.append(Violation(Severity.HARD, level, f"{entry.room} missing"))
+            elif cells != reference:
+                violations.append(Violation(Severity.HARD, level, f"{entry.room} not aligned"))
+    return violations

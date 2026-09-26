@@ -6,7 +6,7 @@ from typer.testing import CliRunner
 from roomplanner.cli import app
 
 runner = CliRunner()
-BASE = ["generate", "-t", "office", "-w", "10", "-d", "6", "--seed", "5"]
+BASE = ["generate", "-t", "office", "-w", "14", "-d", "9", "--seed", "5"]
 
 
 def test_generate_ascii() -> None:

@@ -8,8 +8,8 @@ from roomplanner.params import BuildingType, GenerationParams
 def make_params(**overrides: Any) -> GenerationParams:
     values: dict[str, Any] = {
         "building_type": BuildingType.OFFICE,
-        "width_m": 12,
-        "depth_m": 8,
+        "width_m": 20,
+        "depth_m": 12,
         "seed": 7,
     }
     return GenerationParams(**(values | overrides))

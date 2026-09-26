@@ -66,6 +66,14 @@ class Room:
         return len(self.cells) * CELL_AREA_M2
 
 
+def level_name(level: int) -> str:
+    if level == 0:
+        return "Ground floor"
+    if level > 0:
+        return f"Floor {level}"
+    return f"Basement B{-level}"
+
+
 @dataclass(frozen=True, slots=True)
 class Floor:
     level: int
@@ -73,14 +81,11 @@ class Floor:
     rooms: tuple[Room, ...]
     walls: frozenset[Edge]
     openings: tuple[Opening, ...] = ()
+    role: str = ""
 
     @property
     def name(self) -> str:
-        if self.level == 0:
-            return "Ground floor"
-        if self.level > 0:
-            return f"Floor {self.level}"
-        return f"Basement B{-self.level}"
+        return level_name(self.level)
 
     def room_at(self, cell: Cell) -> Room | None:
         for room in self.rooms:

@@ -4,7 +4,7 @@ from roomplanner.errors import InfeasibleError, NotSupportedError
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
 from roomplanner.model import OpeningKind
-from roomplanner.params import Shape
+from roomplanner.params import BuildingType, Shape
 from roomplanner.validation import validate
 
 from .conftest import make_params
@@ -21,8 +21,8 @@ def test_missing_seed_is_resolved_and_recorded() -> None:
 
 
 def test_dimensions_snap_to_grid() -> None:
-    building = generate(make_params(width_m=10.2, depth_m=6.3))
-    assert (building.width, building.height) == (20, 13)
+    building = generate(make_params(width_m=12.2, depth_m=8.3))
+    assert (building.width, building.height) == (24, 17)
 
 
 def test_levels_run_from_lowest_basement_to_top() -> None:
@@ -36,17 +36,28 @@ def test_service_side_defaults_to_opposite_of_street() -> None:
 
 def test_exterior_doors_face_street_and_service_side_and_open_outwards() -> None:
     building = generate(make_params(street_side=Side.N, service_side=Side.E))
-    doors = [o for o in building.floor(0).openings if o.kind is OpeningKind.DOOR]
-    assert sorted(d.swing.towards for d in doors if d.swing) == [Side.E, Side.N]
+    ground = building.floor(0)
+    exits = [
+        o
+        for o in ground.openings
+        if o.kind is OpeningKind.DOOR and ground.is_exterior_wall(o.edges[0])
+    ]
+    assert sorted(d.swing.towards for d in exits if d.swing) == [Side.E, Side.N]
 
 
 def test_basements_have_no_windows() -> None:
     building = generate(make_params(floors_below=1))
-    assert not building.floor(-1).openings
+    assert all(o.kind is OpeningKind.DOOR for o in building.floor(-1).openings)
 
 
 def test_generated_building_is_valid() -> None:
     assert validate(generate(make_params(floors_above=2, floors_below=1))) == []
+
+
+@pytest.mark.parametrize("building_type", [BuildingType.CLINIC, BuildingType.APARTMENT])
+def test_unimplemented_building_types_are_rejected(building_type: BuildingType) -> None:
+    with pytest.raises(NotSupportedError, match="not implemented yet"):
+        generate(make_params(building_type=building_type))
 
 
 def test_too_small_footprint_fails_fast() -> None:

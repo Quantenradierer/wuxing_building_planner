@@ -15,11 +15,11 @@ from .conftest import make_params
 SNAPSHOT_DIR = Path(__file__).parent / "snapshots"
 
 CASES: dict[str, dict[str, Any]] = {
-    "office_small_one_floor": {"width_m": 10, "depth_m": 6, "seed": 1},
-    "office_multi_level": {"width_m": 8, "depth_m": 5, "floors_above": 2, "floors_below": 1},
+    "office_small_one_floor": {"width_m": 16, "depth_m": 9, "seed": 1},
+    "office_multi_level": {"width_m": 24, "depth_m": 14, "floors_above": 2, "floors_below": 1},
     "office_street_west_service_north": {
-        "width_m": 9,
-        "depth_m": 7,
+        "width_m": 30,
+        "depth_m": 22,
         "street_side": Side.W,
         "service_side": Side.N,
     },

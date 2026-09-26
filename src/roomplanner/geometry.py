@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import StrEnum
+from functools import lru_cache
+from typing import NamedTuple
 
 CELL_SIZE_M = 0.5
 CELL_AREA_M2 = CELL_SIZE_M * CELL_SIZE_M
@@ -38,8 +39,7 @@ class Axis(StrEnum):
     V = "v"
 
 
-@dataclass(frozen=True, order=True, slots=True)
-class Cell:
+class Cell(NamedTuple):
     x: int
     y: int
 
@@ -48,8 +48,7 @@ class Cell:
         return Cell(self.x + dx, self.y + dy)
 
 
-@dataclass(frozen=True, order=True, slots=True)
-class Edge:
+class Edge(NamedTuple):
     """Unit segment starting at grid vertex (x, y).
 
     Axis.H runs east to (x+1, y): the north side of cell (x, y).
@@ -101,6 +100,7 @@ def rectangle(x: int, y: int, width: int, height: int) -> frozenset[Cell]:
     return frozenset(Cell(cx, cy) for cx in range(x, x + width) for cy in range(y, y + height))
 
 
+@lru_cache(maxsize=16)
 def boundary_edges(cells: frozenset[Cell]) -> frozenset[Edge]:
     """Edges separating the given cells from everything else."""
     return frozenset(

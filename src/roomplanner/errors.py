@@ -12,3 +12,7 @@ class NotSupportedError(RoomplannerError):
 
 class SchemaError(RoomplannerError):
     """A JSON document does not match the expected schema version or structure."""
+
+
+class RulesError(RoomplannerError):
+    """A rules data file (room catalog or building program) is invalid."""
