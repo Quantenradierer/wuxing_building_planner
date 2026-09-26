@@ -217,3 +217,20 @@ def test_public_toilets_have_stalls_private_bathrooms_not() -> None:
                 assert next(r for r in floor.rooms if outside in r.cells).type == "toilet"
     office = generate(make_params(width=60, depth=40, seed=3))
     assert any(r.type == "stall" for f in office.floors for r in f.rooms)
+
+
+def test_row_leftovers_dont_inflate_rooms() -> None:
+    """Leftover width goes to rooms with room to grow, a storeroom or a hallway."""
+    cases = [
+        (BuildingType.COFFIN_BLOCK, 40, 63, 379),
+        (BuildingType.COSMETIC_CLINIC, 79, 73, 383),
+        (BuildingType.OFFICE, 71, 64, 961),
+    ]
+    for building_type, width, depth, seed in cases:
+        params = make_params(building_type=building_type, width=width, depth=depth, seed=seed)
+        building = generate(params)
+        rules = rules_for(building_type, params.wealth)
+        for floor in building.floors:
+            for room in floor.rooms:
+                if room.type in ("coffin_unit", "consultation_room", "office"):
+                    assert len(room.cells) <= rules.spec(room.type).area[1] * 1.5, room.type

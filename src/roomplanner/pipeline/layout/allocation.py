@@ -450,6 +450,13 @@ class Allocator:
                 # Small fill rooms (coffins, …) in deep strips: stacked along a hallway.
                 state.slots.append(cluster)
                 continue
+            if spec.cluster and state.slots and self._too_deep(entry, segment):
+                # No space for another stack, and a full-depth one would be far too big:
+                # the rest of the row becomes a storeroom.
+                filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
+                if self._fill_min_units(filler, segment) <= state.free_units:
+                    state.slots.append(self._fill_slot(filler, state.free_units, segment))
+                    return
             if (cluster := self._facade_cluster(entry, state)) is not None:
                 # Small window rooms in deep facade strips: at the facade, back rooms behind.
                 state.slots.append(cluster)
@@ -490,8 +497,37 @@ class Allocator:
             s for s in full if not s.request.spec.cluster
         ]
         targets = preferred or full or [state.slots[-1]]
-        for i in range(extra):
-            targets[i % len(targets)].units += 1
+        segment = state.segment
+
+        def has_room(slot: Slot) -> bool:
+            if not isinstance(slot, FullSlot) or slot.request.spec.vestibule is not None:
+                return True
+            area = (slot.units + 1) * segment.unit * segment.depth
+            return area <= slot.request.spec.area[1] * SMALL_ROOM_TOLERANCE
+
+        given = 0
+        while given < extra and (open_ := [t for t in targets if has_room(t)]):
+            for target in open_[: extra - given]:
+                target.units += 1
+                given += 1
+        rest = extra - given
+        if rest == 0:
+            return
+        # Every room is at its maximum: the rest becomes a storeroom if one fits.
+        filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
+        if rest * segment.unit >= self.rules.spec(filler.room).min_side:
+            state.slots.append(self._fill_slot(filler, rest, segment))
+            return
+        # Too little for a room: a cluster's hallway gets wider, else the rooms after all.
+        wider = [s for s in state.slots if isinstance(s, Cluster)] or targets
+        for i in range(rest):
+            wider[i % len(wider)].units += 1
+
+    def _too_deep(self, entry: RoomEntry, segment: Segment) -> bool:
+        """A full-depth slot of this fill room would be far above its maximum area."""
+        spec = self.rules.spec(entry.room)
+        high = (entry.area or spec.area)[1]
+        return self._is_small(Request(entry.room, spec, high, Priority.OPTIONAL, None), segment)
 
     def _fill_cluster(self, entry: RoomEntry, state: SegmentState) -> Cluster | None:
         """A hallway with one or two columns of stacked fill rooms, if full depth is too big."""
