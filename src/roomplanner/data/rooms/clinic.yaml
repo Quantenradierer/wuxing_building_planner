@@ -3,58 +3,106 @@ rooms:
   waiting_room:
     area: [60, 200]
     min_side: 6
+    furniture:
+      - {object: bench, placement: wall, count: [2, 6]}
+      - {object: vending_machine, placement: wall, count: [0, 1]}
+      - {object: plant, placement: corner, count: [0, 2]}
   reception:
     area: [16, 40]
     min_side: 4
+    furniture:
+      - {object: reception_desk, placement: wall}
+      - {object: terminal, placement: corner, count: [0, 1]}
   exam_room:
     area: [40, 70]
     min_side: 5
     windows: required
+    furniture:
+      - {object: exam_table, placement: wall}
+      - {object: medical_cabinet, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall}
   treatment_room:
     area: [50, 100]
     min_side: 6
+    furniture:
+      - {object: hospital_bed, placement: wall, count: [1, 2]}
+      - {object: medical_cabinet, placement: wall, count: [1, 2]}
   trauma_bay:           # DocWagon-style emergency bay
     area: [80, 160]
     min_side: 8
     door_width: 4
+    furniture:
+      - {object: hospital_bed, placement: wall, count: [1, 3]}
+      - {object: medical_cabinet, placement: wall, count: [2, 4]}
   operating_room:
     area: [100, 200]
     min_side: 10
     windows: forbidden
     door_width: 4
     access: [sterilization]
+    furniture:
+      - {object: operating_table, placement: center}
+      - {object: medical_cabinet, placement: wall, count: [2, 4]}
   sterilization:
     area: [24, 60]
     min_side: 4
     windows: forbidden
+    furniture:
+      - {object: counter, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall, count: [1, 2]}
   ward:                 # patient room
     area: [60, 120]
     min_side: 6
     windows: required
     door_width: 3
+    furniture:
+      - {object: hospital_bed, placement: wall, count: [1, 4]}
+      - {object: cabinet, placement: wall, count: [1, 2]}
   nurse_station:
     area: [24, 60]
     min_side: 4
+    furniture:
+      - {object: counter, placement: wall, count: [1, 2]}
+      - {object: terminal, placement: wall, count: [1, 2]}
   pharmacy:
     area: [30, 80]
     min_side: 5
     windows: forbidden
+    furniture:
+      - {object: shelf, placement: rows, aisle: 2, margin: 1}
   lab:
     area: [40, 120]
     min_side: 6
+    furniture:
+      - {object: counter, placement: wall, count: [2, 4]}
+      - {object: fridge, placement: wall, count: [0, 2]}
   xray:
     area: [40, 80]
     min_side: 6
     windows: forbidden
+    furniture:
+      - {object: exam_table, placement: center}
+      - {object: machinery, placement: wall}
   morgue:
     area: [60, 160]
     min_side: 6
     windows: forbidden
     door_width: 3
+    furniture:
+      - {object: morgue_drawers, placement: wall, count: [2, 4]}
+      - {object: operating_table, placement: center, count: [0, 1]}
   doctor_office:
     area: [36, 70]
     min_side: 5
     windows: required
+    furniture:
+      - {object: desk, placement: wall}
+      - {object: exam_table, placement: wall, count: [0, 1]}
+      - {object: cabinet, placement: corner, count: [0, 1]}
   staff_room:
     area: [30, 70]
     min_side: 5
+    furniture:
+      - {object: table, placement: center}
+      - {object: locker, placement: wall, count: [2, 6]}
+      - {object: sofa, placement: wall, count: [0, 1]}

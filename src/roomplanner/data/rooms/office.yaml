@@ -4,31 +4,56 @@ rooms:
     area: [36, 80]
     min_side: 5
     windows: required
+    furniture:
+      - {object: desk, placement: wall, count: [1, 2]}
+      - {object: cabinet, placement: corner, count: [0, 2]}
+      - {object: plant, placement: corner, count: [0, 1]}
   open_office:
     area: [160, 1200]
     min_side: 10
     windows: required
     door_width: 3
+    furniture:
+      - {object: desk, placement: rows, aisle: 3}
   meeting_room:
     area: [48, 120]
     min_side: 6
+    furniture:
+      - {object: meeting_table, placement: center}
+      - {object: plant, placement: corner, count: [0, 1]}
   kitchenette:
     area: [24, 60]
     min_side: 4
+    furniture:
+      - {object: counter, placement: wall, count: 1}
+      - {object: fridge, placement: wall, count: 1}
+      - {object: table, placement: center, count: [0, 1]}
   server_room:
     area: [40, 160]
     min_side: 6
     windows: forbidden
+    furniture:
+      - {object: server_rack, placement: rows, aisle: 2, margin: 1}
   archive:
     area: [60, 240]
     min_side: 6
     windows: forbidden
+    furniture:
+      - {object: shelf, placement: rows, aisle: 2, margin: 1}
   executive_office:
     area: [80, 160]
     min_side: 8
     windows: required
+    furniture:
+      - {object: desk, placement: center}
+      - {object: sofa, placement: wall, count: [1, 2]}
+      - {object: cabinet, placement: corner, count: [1, 2]}
+      - {object: plant, placement: corner, count: [1, 2]}
   board_room:
     area: [100, 240]
     min_side: 8
     windows: required
     door_width: 3
+    furniture:
+      - {object: meeting_table, placement: center, count: [1, 2]}
+      - {object: plant, placement: corner, count: [1, 2]}

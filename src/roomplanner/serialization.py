@@ -13,7 +13,16 @@ from pydantic import ValidationError
 
 from roomplanner.errors import SchemaError
 from roomplanner.geometry import CELL_SIZE_M, Axis, Cell, Edge, Side
-from roomplanner.model import SCHEMA_VERSION, Building, Floor, Opening, OpeningKind, Room, Swing
+from roomplanner.model import (
+    SCHEMA_VERSION,
+    Building,
+    Floor,
+    Opening,
+    OpeningKind,
+    PlacedObject,
+    Room,
+    Swing,
+)
 from roomplanner.params import GenerationParams
 
 type JsonObject = dict[str, Any]
@@ -66,6 +75,7 @@ def _floor_to_dict(floor: Floor) -> JsonObject:
         "rooms": [_room_to_dict(r) for r in floor.rooms],
         "walls": [_edge(e) for e in sorted(floor.walls)],
         "openings": [_opening_to_dict(o) for o in floor.openings],
+        "objects": [_object_to_dict(o) for o in floor.objects],
     }
 
 
@@ -79,6 +89,25 @@ def _floor_from_dict(data: JsonObject) -> Floor:
         walls=frozenset(_parse_edge(e) for e in data["walls"]),
         openings=tuple(_opening_from_dict(o) for o in data["openings"]),
         role=data.get("role", ""),
+        objects=tuple(_object_from_dict(o) for o in data.get("objects", [])),
+    )
+
+
+def _object_to_dict(obj: PlacedObject) -> JsonObject:
+    return {
+        "kind": obj.kind,
+        "x": obj.x,
+        "y": obj.y,
+        "w": obj.w,
+        "h": obj.h,
+        "facing": obj.facing.value,
+        "room": obj.room,
+    }
+
+
+def _object_from_dict(data: JsonObject) -> PlacedObject:
+    return PlacedObject(
+        data["kind"], data["x"], data["y"], data["w"], data["h"], Side(data["facing"]), data["room"]
     )
 
 

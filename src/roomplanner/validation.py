@@ -7,7 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
-from roomplanner.geometry import Cell, Edge, Side, boundary_edges
+from roomplanner.geometry import Cell, Edge, Side, boundary_edges, connected
 from roomplanner.model import Building, Floor, OpeningKind, Room
 from roomplanner.rules import Rules, WindowRule
 
@@ -32,6 +32,7 @@ def validate(building: Building, rules: Rules | None = None) -> list[Violation]:
     violations: list[Violation] = []
     for floor in building.floors:
         violations += _check_floor(building, floor)
+        violations += _check_objects(floor)
         if rules is not None:
             violations += _check_rules(floor, rules)
     if rules is not None:
@@ -212,3 +213,26 @@ def _check_core(building: Building, rules: Rules) -> list[Violation]:
             elif cells != reference:
                 violations.append(Violation(Severity.HARD, level, f"{entry.room} not aligned"))
     return violations
+
+
+def _check_objects(floor: Floor) -> list[Violation]:
+    """Objects stay inside their room, don't overlap, keep doors clear and rooms walkable."""
+    problems: list[str] = []
+    rooms = {room.id: room for room in floor.rooms}
+    taken: dict[str, set[Cell]] = {}
+    for obj in floor.objects:
+        room = rooms.get(obj.room)
+        if room is None or not obj.cells <= room.cells:
+            problems.append(f"{obj.kind} at ({obj.x}, {obj.y}) is outside room {obj.room}")
+            continue
+        cells = taken.setdefault(obj.room, set())
+        if cells & obj.cells:
+            problems.append(f"{obj.kind} at ({obj.x}, {obj.y}) overlaps another object")
+        cells |= obj.cells
+    for room_id, cells in taken.items():
+        room = rooms[room_id]
+        if cells & floor.door_clearance(room):
+            problems.append(f"objects block a door of {room.type} {room_id}")
+        if not connected(room.cells - cells):
+            problems.append(f"objects cut {room.type} {room_id} into unreachable parts")
+    return [Violation(Severity.HARD, floor.level, p) for p in problems]

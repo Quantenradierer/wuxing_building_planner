@@ -67,6 +67,27 @@ class Room:
         return len(self.cells)
 
 
+@dataclass(frozen=True, slots=True)
+class PlacedObject:
+    """Furniture or fixture covering the cells [x, x+w) x [y, y+h) of one room."""
+
+    kind: str
+    x: int
+    y: int
+    w: int
+    h: int
+    facing: Side  # the side the object's front faces (away from the wall it stands at)
+    room: str
+
+    @property
+    def cells(self) -> frozenset[Cell]:
+        return frozenset(
+            Cell(x, y)
+            for x in range(self.x, self.x + self.w)
+            for y in range(self.y, self.y + self.h)
+        )
+
+
 def level_name(level: int) -> str:
     if level == 0:
         return "Ground floor"
@@ -83,6 +104,7 @@ class Floor:
     walls: frozenset[Edge]
     openings: tuple[Opening, ...] = ()
     role: str = ""
+    objects: tuple[PlacedObject, ...] = ()
 
     @property
     def name(self) -> str:
@@ -93,6 +115,25 @@ class Floor:
             if cell in room.cells:
                 return room
         return None
+
+    def door_clearance(self, room: Room) -> frozenset[Cell]:
+        """Cells of the room in front of its doors, as deep as the door is wide."""
+        clear: set[Cell] = set()
+        for door in self.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            depth = len(door.edges)
+            for edge in door.edges:
+                a, b = edge.cells()
+                for cell, other in ((a, b), (b, a)):
+                    if cell not in room.cells:
+                        continue
+                    dx, dy = cell.x - other.x, cell.y - other.y
+                    for step in range(depth):
+                        ahead = Cell(cell.x + dx * step, cell.y + dy * step)
+                        if ahead in room.cells:
+                            clear.add(ahead)
+        return frozenset(clear)
 
     def is_exterior_wall(self, edge: Edge) -> bool:
         a, b = edge.cells()

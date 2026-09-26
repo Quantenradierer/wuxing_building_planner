@@ -84,6 +84,12 @@ class LayoutStrategy(Protocol):
     def layout(self, ctx: Context, footprint: frozenset[Cell]) -> BuildingPlan: ...
 
 
+class FurnishingStrategy(Protocol):
+    def furnish(self, ctx: Context, floors: list[Floor]) -> list[Floor]:
+        """Return the floors with furniture and fixtures (`Floor.objects`) added."""
+        ...
+
+
 class OpeningsStrategy(Protocol):
     def build(self, ctx: Context, footprint: frozenset[Cell], plan: BuildingPlan) -> list[Floor]:
         """Turn planned rooms into floors with walls, doors and windows."""

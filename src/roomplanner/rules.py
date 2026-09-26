@@ -37,6 +37,43 @@ class Priority(StrEnum):
     OPTIONAL = "optional"
 
 
+class Cover(StrEnum):
+    NONE = "none"
+    LIGHT = "light"
+    HEAVY = "heavy"
+
+
+class ObjectSpec(_Strict):
+    size: tuple[int, int] = Field(description="Cells along the wall / row, cells deep")
+    cover: Cover = Cover.NONE
+    glyph: str = Field(min_length=1, max_length=1, description="ASCII debug glyph")
+
+
+class ObjectCatalog(_Strict):
+    objects: dict[str, ObjectSpec]
+
+
+class Placement(StrEnum):
+    WALL = "wall"  # back against a wall, facing into the room
+    CORNER = "corner"  # into a corner
+    CENTER = "center"  # as close to the room's centre as possible
+    SCATTER = "scatter"  # anywhere free
+    NEAR_EXIT = "near_exit"  # close to the room's exterior door (checkouts)
+    ROWS = "rows"  # parallel rows with aisles, filling the room (shelves, desks)
+
+
+class FurnitureRule(_Strict):
+    object: str
+    placement: Placement
+    count: int | tuple[int, int] = 1
+    aisle: int = Field(default=3, gt=0, description="rows: free cells between rows")
+    margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
+
+    @property
+    def count_range(self) -> tuple[int, int]:
+        return (self.count, self.count) if isinstance(self.count, int) else self.count
+
+
 class RoomTier(_Strict):
     """Per-wealth override of a room; applied after the global wealth multipliers."""
 
@@ -53,6 +90,7 @@ class RoomSpec(_Strict):
     door_width: int = Field(default=2, gt=0)
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
     transit: bool = Field(default=True, description="Other rooms may be entered through it")
+    furniture: list[FurnitureRule] = []
     wealth: dict[Wealth, RoomTier] = {}
 
 
@@ -180,6 +218,7 @@ class BuildingProgram(_Strict):
     entrances: dict[EntranceKind, EntranceRule]
     floor_roles: dict[str, FloorRole]
     units: dict[str, UnitSpec] = Field(default={}, description="Room types that are units")
+    furnishing: str = Field(default="rules", description="Furnishing strategy")
     hall: HallRule | None = Field(default=None, description="Required by the hall layout")
     wealth: dict[Wealth, WealthRule] = Field(default={}, description="Overrides wealth.yaml")
 
@@ -189,6 +228,7 @@ class Rules:
     program: BuildingProgram
     rooms: dict[str, RoomSpec]
     tiers: dict[Wealth, WealthRule]
+    objects: dict[str, ObjectSpec]
     wealth: WealthRule = field(default_factory=WealthRule)  # tier these rules are derived for
 
     def spec(self, room: str) -> RoomSpec:
@@ -234,9 +274,15 @@ def load_rules(building_type: BuildingType) -> Rules:
     for name in program.catalogs:
         rooms |= _load(Catalog, _data_file("rooms", name)).rooms
     tiers = _load(WealthTable, resources.files("roomplanner") / "data" / "wealth.yaml").tiers
-    rules = Rules(program, rooms, tiers | program.wealth)
+    rules = Rules(program, rooms, tiers | program.wealth, load_objects())
     _check_references(rules)
     return rules
+
+
+@cache
+def load_objects() -> dict[str, ObjectSpec]:
+    """The furniture and fixture catalog shared by all building types."""
+    return _load(ObjectCatalog, resources.files("roomplanner") / "data" / "objects.yaml").objects
 
 
 @cache
@@ -280,7 +326,7 @@ def apply_wealth(rules: Rules, wealth: Wealth) -> Rules:
     program = rules.program.model_copy(
         update={"floor_roles": roles, "corridor": corridor.model_copy(update={"width": width})}
     )
-    return Rules(program, rooms, rules.tiers, tier)
+    return Rules(program, rooms, rules.tiers, rules.objects, tier)
 
 
 def _data_file(kind: str, name: str) -> Any:
@@ -302,6 +348,9 @@ def _check_references(rules: Rules) -> None:
         names += [unit, spec.hall, *spec.front, *spec.back]
         names += [spec.back_fill] if spec.back_fill else []
     names += [a for spec in rules.rooms.values() for a in spec.access]
+    unknown = {f.object for s in rules.rooms.values() for f in s.furniture} - set(rules.objects)
+    if unknown:
+        raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")
     if missing := sorted({n for n in names if n not in rules.rooms}):
         raise RulesError(f"{program.building}: unknown rooms {', '.join(missing)}")
 

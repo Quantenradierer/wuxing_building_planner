@@ -1,0 +1,39 @@
+# Furniture and fixtures. size: [cells along the wall / row, cells deep].
+# cover is for the tactical layer; glyph is the ASCII debug character.
+objects:
+  desk:            {size: [3, 2], cover: light, glyph: d}
+  chair:           {size: [1, 1], cover: none,  glyph: c}
+  table:           {size: [2, 2], cover: light, glyph: t}
+  meeting_table:   {size: [6, 3], cover: light, glyph: T}
+  shelf:           {size: [2, 1], cover: heavy, glyph: s}
+  cabinet:         {size: [1, 1], cover: heavy, glyph: k}
+  counter:         {size: [4, 1], cover: heavy, glyph: n}
+  reception_desk:  {size: [5, 2], cover: heavy, glyph: R}
+  bed:             {size: [2, 4], cover: light, glyph: b}
+  double_bed:      {size: [4, 4], cover: light, glyph: B}
+  sofa:            {size: [4, 2], cover: light, glyph: o}
+  wardrobe:        {size: [3, 1], cover: heavy, glyph: a}
+  wc:              {size: [1, 1], cover: none,  glyph: w}
+  sink:            {size: [1, 1], cover: none,  glyph: i}
+  shower:          {size: [2, 2], cover: none,  glyph: h}
+  stove:           {size: [2, 1], cover: heavy, glyph: v}
+  fridge:          {size: [1, 1], cover: heavy, glyph: f}
+  server_rack:     {size: [2, 1], cover: heavy, glyph: S}
+  gondola:         {size: [8, 2], cover: heavy, glyph: g}
+  checkout:        {size: [2, 4], cover: heavy, glyph: C}
+  freezer:         {size: [4, 2], cover: heavy, glyph: z}
+  pallet:          {size: [2, 2], cover: heavy, glyph: p}
+  rack:            {size: [6, 2], cover: heavy, glyph: r}
+  hospital_bed:    {size: [2, 4], cover: light, glyph: H}
+  exam_table:      {size: [2, 4], cover: light, glyph: e}
+  operating_table: {size: [2, 4], cover: light, glyph: O}
+  medical_cabinet: {size: [2, 1], cover: heavy, glyph: m}
+  morgue_drawers:  {size: [4, 2], cover: heavy, glyph: M}
+  locker:          {size: [1, 1], cover: heavy, glyph: l}
+  bench:           {size: [4, 1], cover: light, glyph: q}
+  plant:           {size: [1, 1], cover: light, glyph: "*"}
+  machinery:       {size: [3, 2], cover: heavy, glyph: X}
+  washing_machine: {size: [1, 1], cover: heavy, glyph: x}
+  mailboxes:       {size: [3, 1], cover: heavy, glyph: u}
+  terminal:        {size: [1, 1], cover: none,  glyph: j}
+  vending_machine: {size: [2, 1], cover: heavy, glyph: y}

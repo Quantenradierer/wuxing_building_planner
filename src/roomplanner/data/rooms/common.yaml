@@ -11,6 +11,9 @@ rooms:
     circulation: true
     wealth:
       luxury: {area: [160, 400]}   # grand lobby
+    furniture:
+      - {object: plant, placement: corner, count: [0, 2]}
+      - {object: bench, placement: wall, count: [0, 2]}
   stairwell:
     area: [40, 240]
     min_side: 5
@@ -21,10 +24,17 @@ rooms:
   toilet:
     area: [12, 32]
     min_side: 3
+    furniture:
+      - {object: wc, placement: wall, count: [1, 3]}
+      - {object: sink, placement: wall, count: [1, 2]}
   storage:
     area: [12, 80]
     min_side: 3
+    furniture:
+      - {object: shelf, placement: wall, count: [3, 10]}
   utility:
     area: [32, 120]
     min_side: 4
     windows: forbidden
+    furniture:
+      - {object: machinery, placement: wall, count: [1, 3]}

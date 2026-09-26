@@ -58,6 +58,7 @@ Floor
   rooms: Room[]                        partition the footprint exactly
   walls: set[Edge]                     every wall edge, openings included
   openings: Opening[]                  cut into walls
+  objects: PlacedObject[]              furniture: kind, x, y, w, h, facing, room
 Room
   id, type, cells: set[Cell]
 Opening
@@ -151,6 +152,17 @@ circulation first, then into a type from the room's `access` list, then into any
 room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect only
 within their unit, except the unit's entry room, which opens to circulation.
 
+### Furnishing
+
+`furnishing: rules` (`pipeline/furnishing.py`, the default) places the objects listed under a
+room's `furniture:` in the catalogs. Objects come from `data/objects.yaml` (size in cells
+along the wall × deep, cover, ASCII glyph). Placements: `wall`, `corner`, `center`,
+`scatter`, `near_exit` (e.g. checkouts) and `rows` (shelves, desks, racks with aisles and
+cross aisles). Counts scale with the wealth tier's `furniture` factor. A placement is
+rejected if it would cover another object or a door's clearance (as deep as the door is
+wide) or split the room's free floor; the ring test around the object avoids most flood
+fills. Result: `Floor.objects`, each an axis-aligned rectangle with `facing` and `room`.
+
 ### Hall layout
 
 `layout: hall` (`pipeline/layout/hall.py`) subclasses the corridor layout and only changes
@@ -184,7 +196,8 @@ so internal refactors do not change the contract. Breaking changes bump `schema_
       "kind": "door",
       "edges": [[10, 40, "h"], [11, 40, "h"]],
       "swing": {"towards": "N", "hinge": "W"}
-    }]
+    }],
+    "objects": [{"kind": "desk", "x": 4, "y": 1, "w": 3, "h": 2, "facing": "S", "room": "0.3"}]
   }]
 }
 ```

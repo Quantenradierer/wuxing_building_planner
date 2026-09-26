@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from enum import StrEnum
 from functools import lru_cache
 from typing import NamedTuple
@@ -101,3 +102,20 @@ def boundary_edges(cells: frozenset[Cell]) -> frozenset[Edge]:
     return frozenset(
         Edge.of(cell, side) for cell in cells for side in Side if cell.neighbour(side) not in cells
     )
+
+
+def connected(cells: frozenset[Cell] | set[Cell]) -> bool:
+    """True if the cells form one 4-connected area (and there is at least one)."""
+    free = {(c.x, c.y) for c in cells}
+    if not free:
+        return False
+    start = min(free)
+    seen = {start}
+    queue = deque([start])
+    while queue:
+        x, y = queue.popleft()
+        for neighbour in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if neighbour in free and neighbour not in seen:
+                seen.add(neighbour)
+                queue.append(neighbour)
+    return len(seen) == len(free)

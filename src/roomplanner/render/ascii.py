@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from roomplanner.geometry import Axis, Cell, Edge
 from roomplanner.model import Building, Floor, OpeningKind, Room
+from roomplanner.rules import load_objects
 
 
 def render_building(building: Building) -> str:
@@ -13,14 +14,20 @@ def render_building(building: Building) -> str:
         f"wealth={p.wealth}, seed={building.seed}"
     )
     parts = [header]
-    parts += [render_floor(f, building.width, building.height) for f in reversed(building.floors)]
+    glyphs = {name: spec.glyph for name, spec in load_objects().items()}
+    parts += [
+        render_floor(f, building.width, building.height, glyphs) for f in reversed(building.floors)
+    ]
     if building.warnings:
         parts.append("Warnings:\n" + "\n".join(f"  - {w}" for w in building.warnings))
     return "\n\n".join(parts) + "\n"
 
 
-def render_floor(floor: Floor, width: int, height: int) -> str:
+def render_floor(
+    floor: Floor, width: int, height: int, glyphs: dict[str, str] | None = None
+) -> str:
     canvas = [[" "] * (2 * width + 1) for _ in range(2 * height + 1)]
+    glyphs = glyphs or {}
 
     for edge in floor.walls:
         row, col = _edge_pos(edge)
@@ -36,7 +43,17 @@ def render_floor(floor: Floor, width: int, height: int) -> str:
         for col in range(0, 2 * width + 1, 2):
             canvas[row][col] = _vertex_glyph(canvas, row, col)
 
+    # Objects fill their cells and the grid positions between them, so they read as blocks.
+    for obj in floor.objects:
+        glyph = glyphs.get(obj.kind, "?")
+        for row in range(2 * obj.y + 1, 2 * (obj.y + obj.h)):
+            for col in range(2 * obj.x + 1, 2 * (obj.x + obj.w)):
+                canvas[row][col] = glyph
+
     legend: list[str] = []
+    kinds = sorted({o.kind for o in floor.objects})
+    if kinds:
+        legend.append("  objects: " + ", ".join(f"{glyphs.get(k, '?')} {k}" for k in kinds))
     for number, room in enumerate(floor.rooms, start=1):
         _place_label(canvas, room, str(number))
         unit = f"  [{room.unit}]" if room.unit else ""

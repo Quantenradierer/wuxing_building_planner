@@ -11,6 +11,7 @@ from roomplanner.pipeline.base import (
     AllocationError,
     Context,
     FootprintStrategy,
+    FurnishingStrategy,
     LayoutStrategy,
     OpeningsStrategy,
 )
@@ -35,6 +36,7 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
     footprint = cast(FootprintStrategy, resolve("footprint", params.shape.value)).footprint(ctx)
     layout = cast(LayoutStrategy, resolve("layout", rules.program.layout))
     openings = cast(OpeningsStrategy, resolve("openings", "default"))
+    furnishing = cast(FurnishingStrategy, resolve("furnishing", rules.program.furnishing))
 
     if problems := layout.check_feasibility(ctx, footprint):
         raise InfeasibleError("; ".join(problems))
@@ -49,6 +51,7 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
             failure = error
             continue
         floors = openings.build(attempt_ctx, footprint, plan)
+        floors = furnishing.furnish(attempt_ctx, floors)
         building = Building(params, seed, width, height, tuple(floors), tuple(plan.warnings))
         violations = validate(building, rules)
         hard = sum(v.severity is Severity.HARD for v in violations)

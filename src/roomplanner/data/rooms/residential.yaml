@@ -8,30 +8,51 @@ rooms:
   hallway:
     area: [9, 40]
     min_side: 3
+    furniture:
+      - {object: wardrobe, placement: wall, count: [0, 1]}
   living_room:
     area: [60, 160]
     min_side: 6
     windows: required
     access: [hallway]
+    furniture:
+      - {object: sofa, placement: wall, count: 1}
+      - {object: table, placement: center, count: [0, 1]}
+      - {object: plant, placement: corner, count: [0, 1]}
   bedroom:
     area: [40, 70]
     min_side: 5
     windows: required
     access: [living_room, hallway]
     transit: false
+    furniture:
+      - {object: bed, placement: wall, count: 1}
+      - {object: wardrobe, placement: wall, count: [0, 1]}
   bathroom:
     area: [12, 30]
     min_side: 3
     access: [hallway, bedroom, living_room]
     transit: false
+    furniture:
+      - {object: wc, placement: wall}
+      - {object: sink, placement: wall}
+      - {object: shower, placement: corner, count: [0, 1]}
   kitchen:
     area: [16, 40]
     min_side: 4
     access: [hallway, living_room]
+    furniture:
+      - {object: counter, placement: wall}
+      - {object: stove, placement: wall}
+      - {object: fridge, placement: wall}
   laundry:
     area: [24, 60]
     min_side: 4
     windows: forbidden
+    furniture:
+      - {object: washing_machine, placement: wall, count: [2, 6]}
   mailroom:
     area: [12, 30]
     min_side: 3
+    furniture:
+      - {object: mailboxes, placement: wall, count: [1, 3]}
