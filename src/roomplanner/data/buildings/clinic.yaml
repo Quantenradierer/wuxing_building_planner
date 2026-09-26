@@ -1,0 +1,64 @@
+# Units are cells: lengths in cells, areas in number of cells.
+building: clinic
+catalogs: [common, clinic]
+layout: corridor
+
+corridor:
+  width: 5                 # beds and gurneys must pass each other
+  hallway_width: 3
+strip_depth: [10, 16]
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [5, 6], when: "floors_total >= 2"}   # bed elevator
+
+entrances:
+  main: {width: 4}
+  service: {width: 4}      # ambulance bay
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: lobby, place: entrance, area: [60, 140], priority: required}
+      - {room: reception, count: 1, near: entrance, priority: required}
+      - {room: waiting_room, count: 1, near: entrance, priority: required}
+      - {room: toilet, count: 2, near: entrance, priority: required}
+      - {room: trauma_bay, count: [1, 2], wealth: [middle, high, luxury]}
+      - {room: pharmacy, count: 1}
+      - {room: xray, count: [0, 1], wealth: [low, middle, high, luxury]}
+      - {room: exam_room, count: [2, 4]}
+      - {room: exam_room, fill: true}
+      - {room: storage, fill: true}              # interior rows without facade
+  surgery:
+    applies: [upper]
+    when: "level == 1 and floors_above >= 3"
+    rooms:
+      - {room: operating_room, count: [1, 3], priority: required}
+      - {room: sterilization, count: 1, priority: required}
+      - {room: nurse_station, count: 1, near: core, priority: required}
+      - {room: toilet, count: 2, near: core}
+      - {room: staff_room, count: 1}
+      - {room: treatment_room, fill: true}
+      - {room: storage, fill: true}
+  wards:
+    applies: [upper, top]
+    rooms:
+      - {room: nurse_station, count: 1, near: core, priority: required}
+      - {room: toilet, count: 2, near: core}
+      - {room: treatment_room, count: [0, 2]}
+      - {room: doctor_office, count: [1, 2]}
+      - {room: staff_room, count: 1}
+      - {room: ward, fill: true}
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: morgue, count: 1, priority: required}
+      - {room: lab, count: [0, 1]}
+      - {room: utility, count: 1, priority: required}
+      - {room: storage, fill: true}

@@ -1,0 +1,60 @@
+# Units are cells: lengths in cells, areas in number of cells.
+rooms:
+  waiting_room:
+    area: [60, 200]
+    min_side: 6
+  reception:
+    area: [16, 40]
+    min_side: 4
+  exam_room:
+    area: [40, 70]
+    min_side: 5
+    windows: required
+  treatment_room:
+    area: [50, 100]
+    min_side: 6
+  trauma_bay:           # DocWagon-style emergency bay
+    area: [80, 160]
+    min_side: 8
+    door_width: 4
+  operating_room:
+    area: [100, 200]
+    min_side: 10
+    windows: forbidden
+    door_width: 4
+    access: [sterilization]
+  sterilization:
+    area: [24, 60]
+    min_side: 4
+    windows: forbidden
+  ward:                 # patient room
+    area: [60, 120]
+    min_side: 6
+    windows: required
+    door_width: 3
+  nurse_station:
+    area: [24, 60]
+    min_side: 4
+  pharmacy:
+    area: [30, 80]
+    min_side: 5
+    windows: forbidden
+  lab:
+    area: [40, 120]
+    min_side: 6
+  xray:
+    area: [40, 80]
+    min_side: 6
+    windows: forbidden
+  morgue:
+    area: [60, 160]
+    min_side: 6
+    windows: forbidden
+    door_width: 3
+  doctor_office:
+    area: [36, 70]
+    min_side: 5
+    windows: required
+  staff_room:
+    area: [30, 70]
+    min_side: 5

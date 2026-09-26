@@ -60,6 +60,7 @@ class Room:
     id: str
     type: str
     cells: frozenset[Cell]
+    unit: str | None = None  # e.g. the apartment the room belongs to
 
     @property
     def area(self) -> int:

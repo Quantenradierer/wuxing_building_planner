@@ -126,7 +126,8 @@ Works in local frames: `u` along a part's long axis, `v` across it.
    need windows on facades and windowless ones inside.
 6. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 
-Windows are identical on all floors except where a floor's own doors are.
+Windows follow one facade grid for all floors; each floor omits the windows its own walls,
+doors or windowless rooms collide with.
 
 ### Wealth
 
@@ -135,7 +136,22 @@ Windows are identical on all floors except where a floor's own doors are.
 overrides (`wealth:` in the catalog), and room entries / floor roles filtered by their
 `wealth:` lists (e.g. the office's executive top floor exists for high and luxury only).
 
-Planned variants: `units` (flats as recursively laid out sub-footprints) and `hall`.
+### Units
+
+A room type listed under a program's `units:` (e.g. `apartment`) is allocated like any
+full-depth room and then subdivided (`pipeline/layout/units.py`): entry hall on the corridor
+side with `front` rooms beside it, `back` rooms along the facade, and — if the strip is deep
+enough — a hall running along the unit so every room opens onto it. Rooms carry the unit id
+(`Room.unit`, JSON `"unit"`).
+
+### Doors
+
+One door per non-circulation room, committed greedily over all pending rooms: into
+circulation first, then into a type from the room's `access` list, then into any connected
+room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect only
+within their unit, except the unit's entry room, which opens to circulation.
+
+Planned: the `hall` layout (supermarket).
 
 ## JSON contract
 
@@ -167,6 +183,8 @@ so internal refactors do not change the contract. Breaking changes bump `schema_
 ```
 
 Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`. Lists are sorted for stable output.
+Optional fields (e.g. a room's `"unit"`) may be added without a version bump; readers must
+ignore unknown fields.
 
 ## ASCII debug renderer
 

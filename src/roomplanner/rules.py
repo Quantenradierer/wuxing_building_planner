@@ -51,6 +51,8 @@ class RoomSpec(_Strict):
     circulation: bool = Field(default=False, description="Corridor-like; no walls to others")
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
+    access: list[str] = Field(default=[], description="Preferred room types to enter from")
+    transit: bool = Field(default=True, description="Other rooms may be entered through it")
     wealth: dict[Wealth, RoomTier] = {}
 
 
@@ -136,6 +138,20 @@ class FacadeRule(_Strict):
     window: int = Field(gt=0)
 
 
+class UnitSpec(_Strict):
+    """Subdivision of a unit (e.g. an apartment) spanning a strip from corridor to facade.
+
+    The corridor side holds the entry hall with the `front` rooms beside it, the facade side
+    the `back` rooms (the first one behind the hall), then `back_fill` rooms for the rest.
+    """
+
+    hall: str = "hallway"
+    hall_width: int = Field(default=3, gt=0)
+    front: list[str] = []
+    back: list[str]
+    back_fill: str | None = None
+
+
 class WealthRule(_Strict):
     """Multipliers for one wealth tier."""
 
@@ -159,6 +175,7 @@ class BuildingProgram(_Strict):
     core: list[CoreEntry] = []
     entrances: dict[EntranceKind, EntranceRule]
     floor_roles: dict[str, FloorRole]
+    units: dict[str, UnitSpec] = Field(default={}, description="Room types that are units")
     wealth: dict[Wealth, WealthRule] = Field(default={}, description="Overrides wealth.yaml")
 
 
@@ -276,6 +293,10 @@ def _check_references(rules: Rules) -> None:
     program = rules.program
     names = [program.cluster_filler, *(c.room for c in program.core)]
     names += [e.room for role in program.floor_roles.values() for e in role.rooms]
+    for unit, spec in program.units.items():
+        names += [unit, spec.hall, *spec.front, *spec.back]
+        names += [spec.back_fill] if spec.back_fill else []
+    names += [a for spec in rules.rooms.values() for a in spec.access]
     if missing := sorted({n for n in names if n not in rules.rooms}):
         raise RulesError(f"{program.building}: unknown rooms {', '.join(missing)}")
 

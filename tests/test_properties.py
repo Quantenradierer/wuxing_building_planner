@@ -12,7 +12,7 @@ from roomplanner.rules import rules_for
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
-IMPLEMENTED = [BuildingType.OFFICE]
+IMPLEMENTED = [BuildingType.OFFICE, BuildingType.CLINIC, BuildingType.APARTMENT]
 
 cells = st.integers(min_value=8, max_value=90)
 
@@ -59,7 +59,9 @@ def test_generation_is_deterministic_and_serializable(params: GenerationParams) 
 
 @settings(max_examples=25, deadline=None)
 @given(
-    params_strategy.filter(lambda p: min(p.width, p.depth) >= 24 and p.shape is Shape.RECTANGLE),
+    params_strategy.filter(lambda p: min(p.width, p.depth) >= 32 and p.shape is Shape.RECTANGLE),
 )
-def test_reasonably_sized_rectangular_offices_are_always_feasible(params: GenerationParams) -> None:
+def test_reasonably_sized_rectangular_buildings_are_always_feasible(
+    params: GenerationParams,
+) -> None:
     assert generate(params) is not None

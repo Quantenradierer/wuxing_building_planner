@@ -63,7 +63,7 @@ def _floor_to_dict(floor: Floor) -> JsonObject:
         "name": floor.name,
         "role": floor.role,
         "footprint": _cells(floor.footprint),
-        "rooms": [{"id": r.id, "type": r.type, "cells": _cells(r.cells)} for r in floor.rooms],
+        "rooms": [_room_to_dict(r) for r in floor.rooms],
         "walls": [_edge(e) for e in sorted(floor.walls)],
         "openings": [_opening_to_dict(o) for o in floor.openings],
     }
@@ -74,12 +74,19 @@ def _floor_from_dict(data: JsonObject) -> Floor:
         level=data["level"],
         footprint=_parse_cells(data["footprint"]),
         rooms=tuple(
-            Room(id=r["id"], type=r["type"], cells=_parse_cells(r["cells"])) for r in data["rooms"]
+            Room(r["id"], r["type"], _parse_cells(r["cells"]), r.get("unit")) for r in data["rooms"]
         ),
         walls=frozenset(_parse_edge(e) for e in data["walls"]),
         openings=tuple(_opening_from_dict(o) for o in data["openings"]),
         role=data.get("role", ""),
     )
+
+
+def _room_to_dict(room: Room) -> JsonObject:
+    result: JsonObject = {"id": room.id, "type": room.type, "cells": _cells(room.cells)}
+    if room.unit is not None:
+        result["unit"] = room.unit
+    return result
 
 
 def _opening_to_dict(opening: Opening) -> JsonObject:

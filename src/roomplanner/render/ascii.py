@@ -39,7 +39,8 @@ def render_floor(floor: Floor, width: int, height: int) -> str:
     legend: list[str] = []
     for number, room in enumerate(floor.rooms, start=1):
         _place_label(canvas, room, str(number))
-        legend.append(f"  {number:>3}  {room.type:<16} {room.area:6d} cells")
+        unit = f"  [{room.unit}]" if room.unit else ""
+        legend.append(f"  {number:>3}  {room.type:<16} {room.area:6d} cells{unit}")
 
     lines = ["".join(row).rstrip() for row in canvas]
     return "\n".join([f"== {floor.name} ==", *lines, *legend])

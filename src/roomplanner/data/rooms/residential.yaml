@@ -1,0 +1,37 @@
+# Units are cells: lengths in cells, areas in number of cells.
+rooms:
+  apartment:            # a unit, subdivided per the building program's `units:`
+    area: [180, 360]
+    min_side: 11
+    windows: required
+    door_width: 2
+  hallway:
+    area: [9, 40]
+    min_side: 3
+  living_room:
+    area: [60, 160]
+    min_side: 6
+    windows: required
+    access: [hallway]
+  bedroom:
+    area: [40, 70]
+    min_side: 5
+    windows: required
+    access: [living_room, hallway]
+    transit: false
+  bathroom:
+    area: [12, 30]
+    min_side: 3
+    access: [hallway, bedroom, living_room]
+    transit: false
+  kitchen:
+    area: [16, 40]
+    min_side: 4
+    access: [hallway, living_room]
+  laundry:
+    area: [24, 60]
+    min_side: 4
+    windows: forbidden
+  mailroom:
+    area: [12, 30]
+    min_side: 3

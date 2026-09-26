@@ -55,7 +55,7 @@ def test_generated_building_is_valid() -> None:
     assert validate(generate(make_params(floors_above=2, floors_below=1))) == []
 
 
-@pytest.mark.parametrize("building_type", [BuildingType.CLINIC, BuildingType.APARTMENT])
+@pytest.mark.parametrize("building_type", [BuildingType.SUPERMARKET])
 def test_unimplemented_building_types_are_rejected(building_type: BuildingType) -> None:
     with pytest.raises(NotSupportedError, match="not implemented yet"):
         generate(make_params(building_type=building_type))

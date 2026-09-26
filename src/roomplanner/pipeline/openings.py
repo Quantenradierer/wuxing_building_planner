@@ -4,8 +4,8 @@
 - Every other room gets one door, preferably into circulation, otherwise into a room that
   is already connected.
 - Exterior doors are placed where the layout asked for them and open outwards.
-- Windows sit on a facade grid and are identical on every floor above ground: a window
-  that collides with a wall, door or windowless room on any floor is dropped everywhere.
+- Windows sit on a facade grid shared by all floors above ground (so they line up); each
+  floor omits the windows its own walls, doors or windowless rooms collide with.
 """
 
 from __future__ import annotations
@@ -39,13 +39,14 @@ class DefaultOpenings:
         drafts: list[_Draft] = []
         for planned in plan.floors:
             rooms = tuple(
-                Room(f"{planned.level}.{i + 1}", r.type, r.cells)
+                Room(f"{planned.level}.{i + 1}", r.type, r.cells, r.unit)
                 for i, r in enumerate(planned.rooms)
             )
+            entries = {i for i, r in enumerate(planned.rooms) if r.entry}
             owner = {cell: i for i, room in enumerate(rooms) for cell in room.cells}
             circulation = {i for i, r in enumerate(rooms) if ctx.rules.spec(r.type).circulation}
             walls = _walls(footprint, owner, circulation)
-            doors = _interior_doors(ctx, rooms, owner, walls, circulation, rng)
+            doors = _interior_doors(ctx, rooms, owner, walls, circulation, entries, rng)
             used: set[Edge] = set()
             for request in planned.entrances:
                 door = _exterior_door(ctx, footprint, rooms[request.room], request, used, rng)
@@ -56,20 +57,17 @@ class DefaultOpenings:
                 used |= set(door.edges)
             drafts.append(_Draft(planned.level, planned.role, rooms, walls, doors))
 
-        windows = _windows(ctx, footprint, [d for d in drafts if d.level >= 0], plan.facade_grid)
-        return [
-            Floor(
-                level=d.level,
-                footprint=footprint,
-                rooms=d.rooms,
-                walls=d.walls,
-                openings=tuple(
-                    d.doors + (_clear_of_doors(windows, d.doors) if d.level >= 0 else [])
-                ),
-                role=d.role,
+        candidates = _window_grid(ctx, footprint, plan.facade_grid)
+        floors: list[Floor] = []
+        for d in drafts:
+            windows: list[Opening] = []
+            if d.level >= 0:
+                fitting = [w for w, side in candidates if _window_fits(ctx, footprint, d, w, side)]
+                windows = _clear_of_doors(fitting, d.doors)
+            floors.append(
+                Floor(d.level, footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)
             )
-            for d in drafts
-        ]
+        return floors
 
 
 def _walls(
@@ -128,39 +126,71 @@ def _interior_doors(
     owner: dict[Cell, int],
     walls: frozenset[Edge],
     circulation: set[int],
+    entries: set[int],
     rng: random.Random,
 ) -> list[Opening]:
-    shared: dict[tuple[int, int], set[Edge]] = defaultdict(set)
+    """One door per room, committed greedily: the best-ranked door of all pending rooms first.
+
+    Rank: into circulation, then into a type from the room's `access` list (in order), then
+    anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
+    only connect within their unit, except its entry room, which opens to circulation.
+    """
+    shared: dict[tuple[int, int], list[Run]] = {}
+    pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
     for edge in walls:
         a, b = edge.cells()
         if a in owner and b in owner:
             i, j = owner[a], owner[b]
-            shared[(i, j)].add(edge)
-            shared[(j, i)].add(edge)
+            pairs[(i, j)].add(edge)
+            pairs[(j, i)].add(edge)
+    neighbours: dict[int, list[int]] = defaultdict(list)
+    for (i, j), edges in pairs.items():
+        shared[(i, j)] = _runs(edges)
+        neighbours[i].append(j)
+
+    def allowed(i: int, j: int) -> bool:
+        unit_i, unit_j = rooms[i].unit, rooms[j].unit
+        if j in circulation:
+            return unit_i is None or i in entries
+        if unit_i != unit_j:
+            return False
+        return ctx.rules.spec(rooms[j].type).transit
+
+    def best(i: int) -> tuple[tuple[int, int, int, Edge], Run] | None:
+        spec = ctx.rules.spec(rooms[i].type)
+        width = spec.door_width
+        found: tuple[tuple[int, int, int, Edge], Run] | None = None
+        for j in neighbours[i]:
+            if j not in connected or not allowed(i, j):
+                continue
+            if j in circulation:
+                rank = -1
+            elif rooms[j].type in spec.access:
+                rank = spec.access.index(rooms[j].type)
+            else:
+                rank = len(spec.access)
+            for run in shared[(i, j)]:
+                if len(run) >= width:
+                    key = (rank, -len(run), i, run[0])
+                    if found is None or key < found[0]:
+                        found = (key, run)
+        return found
 
     doors: list[Opening] = []
     connected = set(circulation)
-    pending = [i for i in range(len(rooms)) if i not in circulation]
-    progress = True
-    while pending and progress:
-        progress = False
-        for i in list(pending):
-            width = ctx.rules.spec(rooms[i].type).door_width
-            options: list[tuple[bool, int, Run]] = []
-            for j in sorted(connected):
-                for run in _runs(shared.get((i, j), set())):
-                    if len(run) >= width:
-                        options.append((j not in circulation, -len(run), run))
-            if not options:
-                continue
-            _, _, run = min(options, key=lambda o: (o[0], o[1], o[2][0]))
-            margin = 1 if len(run) >= width + 2 else 0
-            start = rng.randint(margin, len(run) - width - margin)
-            inside = next(c for c in run[0].cells() if owner.get(c) == i)
-            doors.append(_door(run, width, inside, None, rng, start))
-            connected.add(i)
-            pending.remove(i)
-            progress = True
+    pending = {i for i in range(len(rooms)) if i not in circulation}
+    while pending:
+        options = [(option, i) for i in sorted(pending) if (option := best(i)) is not None]
+        if not options:
+            break
+        (_, run), i = min(options, key=lambda o: o[0][0])
+        width = ctx.rules.spec(rooms[i].type).door_width
+        margin = 1 if len(run) >= width + 2 else 0
+        start = rng.randint(margin, len(run) - width - margin)
+        inside = next(c for c in run[0].cells() if owner.get(c) == i)
+        doors.append(_door(run, width, inside, None, rng, start))
+        connected.add(i)
+        pending.remove(i)
     return doors
 
 
@@ -209,18 +239,14 @@ def _inward(vertex: tuple[int, int], side: Side) -> Edge:
             return Edge(x - 1, y, Axis.H)
 
 
-def _windows(
-    ctx: Context,
-    footprint: frozenset[Cell],
-    drafts: list[_Draft],
-    grids: dict[Axis, tuple[int, int]],
-) -> list[Opening]:
-    if not drafts:
-        return []
+def _window_grid(
+    ctx: Context, footprint: frozenset[Cell], grids: dict[Axis, tuple[int, int]]
+) -> list[tuple[Opening, Side]]:
+    """Every window position of the facade grid, shared by all floors above ground."""
     program = ctx.rules.program
     module = program.facade.module
     width = min(module, program.facade.window)
-    windows: list[Opening] = []
+    windows: list[tuple[Opening, Side]] = []
     for side in Side:
         facade = {Edge.of(c, side) for c in footprint if c.neighbour(side) not in footprint}
         for run in _runs(facade):
@@ -233,8 +259,7 @@ def _windows(
                 offset = (len(run) % module) // 2
             for start in range(offset, len(run) - module + 1, module):
                 edges = run[start + (module - width) // 2 :][:width]
-                if all(_window_fits(ctx, footprint, draft, edges, side) for draft in drafts):
-                    windows.append(Opening(OpeningKind.WINDOW, tuple(edges)))
+                windows.append((Opening(OpeningKind.WINDOW, tuple(edges)), side))
     return windows
 
 
@@ -253,8 +278,10 @@ def _clear_of_doors(windows: list[Opening], doors: list[Opening]) -> list[Openin
 
 
 def _window_fits(
-    ctx: Context, footprint: frozenset[Cell], draft: _Draft, edges: list[Edge], side: Side
+    ctx: Context, footprint: frozenset[Cell], draft: _Draft, window: Opening, side: Side
 ) -> bool:
+    """False if a wall of this floor runs into the window or the room must stay windowless."""
+    edges = window.edges
     # A partition may meet the window's ends, but not run into its middle.
     vertices = [(e.x, e.y) for e in edges[1:]]
     if any(_inward(v, side) in draft.walls for v in vertices):

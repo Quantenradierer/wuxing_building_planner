@@ -17,6 +17,7 @@ from dataclasses import dataclass, field, replace
 from roomplanner.geometry import Cell
 from roomplanner.pipeline.base import AllocationError, Context, PlannedRoom
 from roomplanner.pipeline.layout.frame import Band, Box, Frame, Grid, Interval, LocalSide
+from roomplanner.pipeline.layout.units import subdivide
 from roomplanner.rules import (
     FloorRole,
     Priority,
@@ -133,10 +134,13 @@ class Allocator:
         self.rng = rng
         self.hallway = rules.program.corridor.hallway_width
         self.warnings: list[str] = []
+        self.units = 0
+        self.level = 0
 
     # --- public -----------------------------------------------------------------------
 
     def allocate(self, role: FloorRole, level: int, floor_name: str) -> list[PlannedRoom]:
+        self.level = level
         requests, fills = self._requests(role, level)
         queue = deque(requests)
         while queue:
@@ -256,7 +260,9 @@ class Allocator:
         if min_side > segment.depth:
             return None
         full = FullSlot(request, self._full_units(request, segment))
-        if not self._is_small(request, segment):
+        # Cluster members mostly don't touch the facade, so rooms needing windows stay full.
+        needs_window = request.spec.windows is WindowRule.REQUIRED
+        if needs_window or not self._is_small(request, segment):
             return full if full.units <= state.free_units else None
         for slot in state.slots:
             if isinstance(slot, Cluster) and slot.column_width >= min_side:
@@ -358,7 +364,14 @@ class Allocator:
         position = segment.span.u0
         for slot, width in zip(slots, widths, strict=True):
             span = Interval(position, position + width)
-            if isinstance(slot, FullSlot):
+            if isinstance(slot, FullSlot) and slot.request.type in self.rules.program.units:
+                self.units += 1
+                unit = f"{self.level}-{self.units:02d}"
+                spec = self.rules.program.units[slot.request.type]
+                rooms += subdivide(
+                    segment.frame, segment.band, span, unit, spec, self.rules, self.rng
+                )
+            elif isinstance(slot, FullSlot):
                 rooms.append(PlannedRoom(slot.request.type, self._rect(segment, span)))
             else:
                 rooms += self._cluster_rooms(slot, segment, span)

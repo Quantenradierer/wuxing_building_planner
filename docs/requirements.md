@@ -61,8 +61,8 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | Type        | Layout strategy | Notes                                               |
 |-------------|-----------------|-----------------------------------------------------|
 | office      | corridor        | lobby/reception, offices, open plan, meeting rooms  |
-| clinic      | corridor        | many specialised rooms                              |
-| apartment   | units           | repeated flats along a corridor, each subdivided    |
+| clinic      | corridor        | many specialised rooms, surgery floor, wards        |
+| apartment   | corridor+units  | flats along a corridor, each subdivided             |
 | supermarket | hall            | sales hall with shelf rows, back-of-house strip     |
 
 ## Building rules
@@ -78,8 +78,9 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 
 ## Floors
 
-- The vertical core (stairwells, elevators, shafts), outer walls and windows are identical on
-  every floor.
+- The vertical core (stairwells, elevators, shafts) and outer walls are identical on every
+  floor. Windows follow one facade grid for all floors (they line up); a floor omits windows
+  where its own walls, doors or windowless rooms are.
 - The building type assigns each floor a role; each floor's rooms are generated from that
   role's program.
 

@@ -1,0 +1,53 @@
+# Units are cells: lengths in cells, areas in number of cells.
+building: apartment
+catalogs: [common, residential]
+layout: corridor
+
+corridor:
+  width: 3
+  hallway_width: 3
+strip_depth: [14, 22]      # apartments reach from the corridor to the facade
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [4, 4], when: "floors_total >= 5"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}
+
+units:
+  apartment:
+    hall: hallway
+    front: [bathroom, kitchen]
+    back: [living_room]
+    back_fill: bedroom
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: lobby, place: entrance, area: [40, 80], priority: required}
+      - {room: mailroom, count: 1, near: entrance}
+      - {room: storage, count: [0, 1], near: core, priority: optional}
+      - {room: apartment, fill: true}
+      - {room: storage, fill: true}            # interior rows without facade
+  residential:
+    applies: [upper, top]
+    rooms:
+      - {room: storage, count: [0, 1], near: core, priority: optional}
+      - {room: apartment, fill: true}
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: utility, count: 1, priority: required}
+      - {room: laundry, count: 1, wealth: [low, middle, high, luxury]}
+      - {room: storage, fill: true}
+
+wealth:
+  squatter: {area: 0.7, corridor: 1.0, furniture: 0.5}

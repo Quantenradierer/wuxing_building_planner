@@ -33,6 +33,8 @@ class Context:
 class PlannedRoom:
     type: str
     cells: frozenset[Cell]
+    unit: str | None = None  # rooms of one apartment etc. only connect among themselves
+    entry: bool = False  # the unit room that opens to the building's circulation
 
 
 @dataclass(frozen=True)
