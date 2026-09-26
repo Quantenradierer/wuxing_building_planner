@@ -90,6 +90,22 @@ objects:
   arcade_machine:  {size: [2, 1], cover: heavy, glyph: "`"}
   stage:           {size: [8, 4], walkable: true, glyph: _}
 
+  # Vehicles, industry, church.
+  car:             {size: [4, 9], cover: heavy, glyph: "="}   # 2 x 4.5 m, nose to the wall
+  car_lift:        {size: [5, 10], cover: heavy, glyph: "="}  # a car up on a lift
+  ramp:            {size: [6, 14], walkable: true, glyph: "/"} # to the next parking level
+  pay_station:     {size: [1, 1], cover: heavy, glyph: $}
+  conveyor:        {size: [8, 2], cover: light, glyph: "-"}
+  robot_arm:       {size: [2, 2], cover: heavy, glyph: X}
+  tool_rack:       {size: [3, 1], cover: heavy, glyph: s}
+  pew:             {size: [8, 2], cover: light, glyph: q}
+  altar:           {size: [4, 2], cover: heavy, glyph: n}
+  pulpit:          {size: [2, 2], cover: heavy, glyph: n}
+  candle_stand:    {size: [1, 1], cover: none,  glyph: "*"}
+  confessional:    {size: [4, 2], cover: heavy, glyph: k}
+  organ:           {size: [4, 2], cover: heavy, glyph: N}
+  tomb:            {size: [3, 5], cover: heavy, glyph: M}
+
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).
 groups:

@@ -80,6 +80,7 @@ class Placement(StrEnum):
     NEAR_EXIT = "near_exit"  # close to the room's exterior door (checkouts)
     ROWS = "rows"  # parallel rows with aisles, filling the room (shelves, desks)
     BACK = "back"  # against the wall farthest from the doors, same spot every time
+    FIXED = "fixed"  # the same wall spot on every floor, whatever the doors (ramps)
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
 
 
@@ -93,6 +94,7 @@ class FurnitureRule(_Strict):
     aisle: int = Field(default=3, gt=0, description="rows: free cells between rows")
     margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
+    block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
     at: str | None = Field(default=None, description="at: the object kind to stand beside")
     beside: list[Literal["front", "back", "flanks"]] = Field(
         default=["front", "back", "flanks"], description="at: which sides of the target, in turn"
@@ -125,7 +127,13 @@ class StallRule(_Strict):
     width: int = Field(default=2, gt=0, description="Cells along the wall")
     depth: int = Field(default=3, gt=0, description="Cells from the wall")
     max: int = Field(default=6, gt=0)
+    passage: int | None = Field(
+        default=None, gt=0, description="Free cells in front of the stalls (default: min_side)"
+    )
     single: str = Field(description="Room type if not even one stall fits")
+    rest: str | None = Field(
+        default=None, description="Room type of what's left in front of the stalls (default: same)"
+    )
 
 
 class RoomSpec(_Strict):
@@ -489,7 +497,7 @@ def _check_references(rules: Rules) -> None:
     unknown = used - set(rules.objects) - set(rules.groups)
     for spec in rules.rooms.values():
         if spec.stalls is not None:
-            names += [spec.stalls.room, spec.stalls.single]
+            names += [spec.stalls.room, spec.stalls.single, spec.stalls.rest or spec.stalls.room]
     if unknown:
         raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")
     if missing := sorted({n for n in names if n not in rules.rooms}):

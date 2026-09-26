@@ -1,0 +1,49 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Chop shop (a warehouse variant): a workshop hall with cars on lifts and parts everywhere,
+# an office, a paint booth and parts storage at the back.
+building: chop_shop
+catalogs: [common, office, retail, industry]
+layout: hall
+
+corridor:
+  width: 3
+  hallway_width: 3
+strip_depth: [8, 12]
+hall:
+  min_depth: 14
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 8}      # the roller door the cars come in through
+  emergency: {width: 2}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: workshop_floor, place: hall}
+      - {room: shipping_office, count: 1, priority: required}
+      - {room: paint_booth, count: [0, 1]}
+      - {room: toilet, count: 1, near: core}
+      - {room: staff_room, count: [0, 1]}
+      - {room: storage, fill: true}
+  upper:
+    applies: [upper, top]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: office, count: [0, 1]}
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: utility, count: 1, priority: required}
+      - {room: storage, fill: true}

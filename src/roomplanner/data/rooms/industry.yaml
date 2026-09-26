@@ -164,3 +164,61 @@ rooms:
       - {object: gondola, placement: rows, aisle: 3, margin: 2}
       - {object: atm, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: wall, count: [0, 1]}
+  # --- factory ---
+  factory_floor:        # the production hall
+    area: [100, 100000]
+    min_side: 10
+    windows: optional
+    door_width: 4
+    furniture:
+      - {object: conveyor, placement: rows, aisle: 4, margin: 3}
+      - {object: machinery, placement: wall, per: 60, count: [2, 10]}
+      - {object: robot_arm, placement: scatter, per: 150, count: [0, 6]}
+      - {object: workbench, placement: wall, per: 150, count: [1, 4]}
+      - {object: pallet, placement: scatter, per: 200, count: [0, 6]}
+      - {object: forklift, placement: scatter, count: [0, 2]}
+  control_room:         # overlooks the floor: screens and consoles
+    area: [24, 70]
+    min_side: 5
+    next_to: [factory_floor]
+    furniture:
+      - {object: workstation, placement: wall, count: [1, 3]}
+      - {object: wall_screen, placement: wall, count: [1, 2]}
+      - {object: server_rack, placement: wall, count: [0, 1]}
+  paint_booth:
+    area: [40, 120]
+    min_side: 6
+    windows: forbidden
+    door_width: 4
+    furniture:
+      - {object: machinery, placement: wall, count: [1, 2]}
+      - {object: barrel, placement: scatter, count: [1, 4]}
+  # --- parking garage ---
+  parking_deck:         # one level of the garage: rows of cars, a ramp to the next level
+    area: [100, 100000]
+    min_side: 12
+    windows: optional
+    door_width: 4
+    furniture:
+      - {object: ramp, placement: fixed}   # lines up with the ramp on the next level
+      - {object: car, placement: rows, aisle: 10, margin: 0, block: 40}   # a 5 m lane between rows
+      - {object: pay_station, placement: wall, count: [0, 2]}
+  attendant_booth:
+    area: [9, 30]
+    min_side: 3
+    furniture:
+      - {object: workstation, placement: wall}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+  # --- chop shop ---
+  workshop_floor:       # cars on lifts, tools, parts everywhere
+    area: [80, 100000]
+    min_side: 10
+    windows: optional
+    door_width: 4
+    furniture:
+      - {object: car_lift, placement: wall, per: 120, count: [1, 4]}
+      - {object: car, placement: scatter, per: 150, count: [0, 3]}
+      - {object: workbench, placement: wall, per: 80, count: [1, 4]}
+      - {object: tool_rack, placement: wall, per: 80, count: [1, 4]}
+      - {object: barrel, placement: scatter, per: 100, count: [1, 6]}
+      - {object: crate, placement: scatter, per: 150, count: [0, 4]}

@@ -1,0 +1,117 @@
+# Police stations and churches. Units are cells (1 cell = 0.5 m).
+rooms:
+  # --- police station (Lone Star / Knight Errant precinct) ---
+  squad_room:           # open plan desks of the officers
+    area: [120, 600]
+    min_side: 10
+    windows: required
+    door_width: 3
+    furniture:
+      - {object: workstation, placement: rows, aisle: 2, paired: true}
+      - {object: whiteboard, placement: wall, count: [1, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: filing_cabinet, placement: wall, per: 60, count: [1, 4]}
+      - {object: coffee_machine, placement: corner, count: [0, 1]}
+  briefing_room:
+    area: [60, 160]
+    min_side: 7
+    furniture:
+      - {object: bench, placement: rows, aisle: 2, margin: 2}
+      - {object: wall_screen, placement: wall}
+      - {object: whiteboard, placement: wall, count: [0, 1]}
+  interview_room:       # a table between suspect and detective, a one-way mirror wall
+    area: [24, 48]
+    min_side: 4
+    windows: forbidden
+    next_to: [observation_room]
+    connect: [observation_room]
+    transit: false
+    furniture:
+      - {object: cafe_table, placement: center}
+  observation_room:     # behind the mirror
+    area: [12, 36]
+    min_side: 3
+    windows: forbidden
+    cluster: true
+    furniture:
+      - {object: terminal, placement: wall, count: [1, 2]}
+      - {object: chair, placement: wall, count: [1, 2]}
+  cell_block:           # holding cells along one wall, a guard post in front
+    area: [80, 240]
+    min_side: 8
+    windows: forbidden
+    door_width: 2
+    stalls: {room: holding_cell, width: 4, depth: 4, max: 6, rest: lockup, single: holding_cell}
+  lockup:               # what's left of a cell block: the walk in front of the cells
+    area: [16, 200]
+    min_side: 4
+    windows: forbidden
+    furniture:
+      - {object: guard_post, placement: wall}
+  holding_cell:         # 2 x 2 m: a bench, a toilet
+    area: [16, 60]
+    min_side: 4
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: bench, placement: wall}
+      - {object: wc, placement: corner}
+      - {object: sink, placement: wall, count: [0, 1]}
+  evidence_room:
+    area: [30, 120]
+    min_side: 5
+    windows: forbidden
+    cluster: true
+    furniture:
+      - {object: shelf, placement: rows, aisle: 2, margin: 1}
+      - {object: counter, placement: wall, count: [0, 1]}
+  armory:
+    area: [20, 60]
+    min_side: 4
+    windows: forbidden
+    cluster: true
+    furniture:
+      - {object: weapon_locker, placement: wall, per: 4, count: [3, 10]}
+      - {object: workbench, placement: wall, count: [0, 1]}
+  # --- church ---
+  nave:                 # the church hall: pews facing the altar
+    area: [100, 100000]
+    min_side: 10
+    windows: required
+    door_width: 4
+    furniture:
+      - {object: altar, placement: back}
+      - {object: pulpit, placement: back}
+      - {object: pew, placement: rows, aisle: 2, margin: 3, block: 24}   # blocks of three
+      - {object: candle_stand, placement: wall, count: [2, 6]}
+      - {object: confessional, placement: wall, count: [0, 2]}
+  choir_loft:           # the gallery upstairs
+    area: [60, 100000]
+    min_side: 8
+    windows: required
+    furniture:
+      - {object: pew, placement: rows, aisle: 2, margin: 2, block: 24}
+      - {object: organ, placement: back, count: [0, 1]}
+  crypt:                # under the church
+    area: [60, 100000]
+    min_side: 8
+    windows: forbidden
+    furniture:
+      - {object: tomb, placement: rows, aisle: 3, margin: 2}
+      - {object: candle_stand, placement: wall, count: [2, 4]}
+  sacristy:
+    area: [24, 70]
+    min_side: 5
+    next_to: [nave]
+    furniture:
+      - {object: wardrobe, placement: wall, count: [1, 3]}
+      - {object: cabinet, placement: wall, count: [1, 2]}
+      - {object: table, placement: center, count: [0, 1]}
+  parish_hall:          # community room, soup kitchen in the Barrens
+    area: [60, 200]
+    min_side: 7
+    windows: required
+    door_width: 3
+    furniture:
+      - {object: dining_set, placement: rows, aisle: 2, margin: 2}
+      - {object: counter, placement: wall, count: [0, 1]}

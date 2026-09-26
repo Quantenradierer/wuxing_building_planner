@@ -18,12 +18,18 @@ class BuildingType(StrEnum):
     CORP_LAB = "corp_lab"
     NIGHTCLUB = "nightclub"
     WAREHOUSE = "warehouse"
+    POLICE_STATION = "police_station"
+    PARKING_GARAGE = "parking_garage"
+    FACTORY = "factory"
+    CHURCH = "church"
     # Variants of the types above.
     CORP_OFFICE = "corp_office"
     STREET_DOC = "street_doc"
     COSMETIC_CLINIC = "cosmetic_clinic"
     COFFIN_BLOCK = "coffin_block"
     STUFFER_SHACK = "stuffer_shack"
+    DIVE_BAR = "dive_bar"
+    CHOP_SHOP = "chop_shop"
 
 
 class Wealth(StrEnum):

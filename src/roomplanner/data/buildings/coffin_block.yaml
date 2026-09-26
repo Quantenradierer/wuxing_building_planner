@@ -12,6 +12,7 @@ facade:
   module: 2                # 1 m grid: coffins are packed tighter than offices
   window: 1                # small slits
 cluster_filler: storage
+service_stub: true         # the back door gets its own corridor, not a coffin
 
 core:
   - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}

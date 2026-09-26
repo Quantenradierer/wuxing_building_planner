@@ -1,0 +1,62 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Police precinct (Lone Star, Knight Errant): front desk, squad room, interview rooms with
+# observation, a cell block, evidence and armory; offices and briefing upstairs.
+building: police_station
+catalogs: [common, office, retail, hospitality, public]
+layout: corridor
+
+corridor:
+  width: 4
+  hallway_width: 3
+strip_depth: [10, 14]
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [evidence_room, locker_room, storage, utility]
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [4, 5], when: "floors_total >= 3"}
+
+entrances:
+  main: {width: 4}
+  service: {width: 4}      # the sally port: prisoners come in the back
+  emergency: {width: 2}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: lobby, place: entrance, area: [60, 140], priority: required}
+      - {room: reception, count: 1, near: entrance, priority: required}
+      - {room: cell_block, count: 1, near: service, priority: required}
+      - {room: interview_room, count: [1, 3], priority: required}
+      - {room: observation_room, count: [1, 2]}
+      - {room: armory, count: 1, near: core, priority: required}
+      - {room: evidence_room, count: 1}
+      - {room: security_room, count: 1, priority: required}
+      - {room: toilet, count: [1, 2], near: core, priority: required}
+      - {room: locker_room, count: 1}
+      - {room: squad_room, fill: true}
+      - {room: storage, fill: true}           # interior rows without facade
+  upper:
+    applies: [upper, top]
+    rooms:
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: briefing_room, count: 1, priority: required}
+      - {room: manager_office, count: [1, 2]}  # the captain's office
+      - {room: kitchenette, count: 1, near: core}
+      - {room: interview_room, count: [0, 2]}
+      - {room: observation_room, count: [0, 1]}
+      - {room: squad_room, fill: true}
+      - {room: office, fill: true}
+      - {room: archive, fill: true}           # interior rows without facade
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: utility, count: 1, priority: required}
+      - {room: cell_block, count: [0, 1]}
+      - {room: evidence_room, count: [1, 2]}
+      - {room: storage, fill: true}

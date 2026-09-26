@@ -192,10 +192,12 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      (the restaurant leaves room for its kitchen).
    - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
      over the row, extra cluster width becomes a room of its own.
-   - *Stalls*: a room with `stalls:` (public toilets) gets a row of stall rooms along its
-     longest wall away from circulation, each an annex entered only from the room, with a
-     passage of the room's `min_side` in front; if none fit it becomes the `single` type
-     (a one-person WC). Private bathrooms have no stalls.
+   - *Stalls*: a room with `stalls:` (public toilets, cell blocks) gets a row of stall
+     rooms along the wall where most fit, each an annex entered only from the room, with
+     a passage in front (`passage`, at least the `min_side` of what's left); places are
+     skipped if the rest would lose its door to circulation, narrow gaps join a stall.
+     What's left can become another type (`rest`: a cell block's `lockup`); if no stall
+     fits the room becomes the `single` type (a one-person WC). Bathrooms have no stalls.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside. `near: core | entrance | service`
@@ -263,9 +265,10 @@ stairwell (or a circulation room).
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, cover, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, without
-randomness: stairs stand in the same spot on every floor), `center`, `scatter`, `near_exit`
+randomness: stairs stand in the same spot on every floor), `fixed` (a corner decided by
+the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts) and `rows`
-(shelves, desks, racks with aisles and cross aisles; `paired: true` puts rows back to back
+(shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules), and `at` (beside every object of kind `at`
 placed earlier in the room: chairs at desks and tables, stools at bar counters, monitors
 beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` — gone round in

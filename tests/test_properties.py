@@ -20,6 +20,8 @@ MIN_REASONABLE = {
     BuildingType.HOSPITAL: 48,
     BuildingType.COSMETIC_CLINIC: 36,
     BuildingType.SUPERMARKET: 36,
+    BuildingType.POLICE_STATION: 36,
+    BuildingType.FACTORY: 40,
 }
 
 cells = st.integers(min_value=8, max_value=90)

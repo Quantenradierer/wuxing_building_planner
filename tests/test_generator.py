@@ -260,3 +260,52 @@ def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingTyp
             and o.entrance is None
         }
     assert len(doors) == 1
+
+
+def test_police_station_has_holding_cells_behind_the_lockup() -> None:
+    building = generate(
+        make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)
+    )
+    ground = building.floor(0)
+    cells = [r for r in ground.rooms if r.type == "holding_cell"]
+    assert len(cells) >= 2
+    types = {r.id: r.type for r in ground.rooms}
+    for cell in cells:
+        doors = [
+            o
+            for o in ground.openings
+            if o.kind is OpeningKind.DOOR
+            and any(c in cell.cells for e in o.edges for c in e.cells())
+        ]
+        assert len(doors) == 1
+        outside = next(c for c in doors[0].edges[0].cells() if c not in cell.cells)
+        assert types[next(r.id for r in ground.rooms if outside in r.cells)] == "lockup"
+
+
+def test_parking_decks_have_cars_and_ramps_that_line_up() -> None:
+    params = make_params(
+        building_type=BuildingType.PARKING_GARAGE, width=60, depth=40, floors_above=3, seed=1
+    )
+    building = generate(params)
+    ramps = {
+        tuple((o.x, o.y, o.w, o.h) for o in f.objects if o.kind == "ramp") for f in building.floors
+    }
+    assert len(ramps) == 1 and next(iter(ramps))
+    for floor in building.floors:
+        assert sum(o.kind == "car" for o in floor.objects) >= 12
+
+
+@pytest.mark.parametrize(
+    ("building_type", "hall", "objects"),
+    [
+        (BuildingType.CHURCH, "nave", {"pew", "altar"}),
+        (BuildingType.FACTORY, "factory_floor", {"conveyor", "machinery"}),
+        (BuildingType.DIVE_BAR, "taproom", {"bar_counter", "stool"}),
+        (BuildingType.CHOP_SHOP, "workshop_floor", {"car_lift", "workbench"}),
+    ],
+)
+def test_new_halls_are_furnished(building_type: BuildingType, hall: str, objects: set[str]) -> None:
+    ground = generate(make_params(building_type=building_type, width=56, depth=40)).floor(0)
+    halls = {r.id for r in ground.rooms if r.type == hall}
+    assert halls
+    assert objects <= {o.kind for o in ground.objects if o.room in halls}

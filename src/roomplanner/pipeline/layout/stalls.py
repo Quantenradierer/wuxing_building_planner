@@ -24,51 +24,111 @@ def carve_stalls(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
         if rule is None:
             result.append(room)
             continue
-        result += _split(room, rule, rules.spec(room.type).min_side, circulation)
+        spec = rules.spec(room.type)
+        # The passage must be as wide as the room left in front of the stalls requires.
+        passage = max(rule.passage or 0, rules.spec(rule.rest or room.type).min_side)
+        result += _split(room, rule, passage, spec.door_width, circulation)
     return result
 
 
 def _split(
-    room: PlannedRoom, rule: StallRule, passage: int, circulation: set[Cell]
+    room: PlannedRoom, rule: StallRule, passage: int, door: int, circulation: set[Cell]
 ) -> list[PlannedRoom]:
     """`passage`: the room's own minimum side, kept free in front of the stalls."""
     xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
     x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
     if len(room.cells) != (x1 - x0) * (y1 - y0):  # only plain rectangles
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
-    options: list[tuple[int, Side]] = []
+    box = (x0, y0, x1, y1)
+    best: list[frozenset[Cell]] = []
     for side in Side:
-        along = x1 - x0 if side in (Side.N, Side.S) else y1 - y0
         across = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
-        wall = [c for c in room.cells if c.neighbour(side) not in room.cells]
-        if any(c.neighbour(side) in circulation for c in wall):
-            continue  # the entrance side
-        if along >= rule.width and across >= rule.depth + passage:
-            options.append((along, side))
-    if not options:
+        if across < rule.depth + passage:
+            continue
+        for strict in (False, True):
+            found = _row(room, rule, passage, circulation if strict else set(), side, box)
+            # The room must still reach circulation through a door.
+            if found and _door_run(room.cells.difference(*found), circulation) >= door:
+                if len(found) > len(best):
+                    best = found
+                break
+    if not best:
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
-    along, side = max(options, key=lambda o: (o[0], o[1].value))
-    count = min(rule.max, along // rule.width)
-    widths = [rule.width] * count
-    leftover = along - sum(widths)
-    if leftover < passage:  # too thin to walk along: the stalls get a bit wider instead
-        for i in range(leftover):
-            widths[i % count] += 1
-    rest = room.cells
-    stalls: list[frozenset[Cell]] = []
-    start = 0
-    for width in widths:
-        cells = frozenset(
+    rest = room.cells.difference(*best)
+    stalls = best
+    host = PlannedRoom(rule.rest or room.type, rest, room.unit, room.entry, room.host)
+    return [host, *(PlannedRoom(rule.room, cells, room.unit, host=host) for cells in stalls)]
+
+
+def _row(
+    room: PlannedRoom,
+    rule: StallRule,
+    passage: int,
+    circulation: set[Cell],
+    side: Side,
+    box: tuple[int, int, int, int],
+) -> list[frozenset[Cell]]:
+    """Stalls along the wall on `side`, skipping places that touch circulation (doors).
+
+    Gaps between stalls too narrow to walk into are added to the stall beside them.
+    """
+    x0, y0, x1, y1 = box
+    along = x1 - x0 if side in (Side.N, Side.S) else y1 - y0
+
+    def cells(start: int, width: int) -> frozenset[Cell]:
+        return frozenset(
             c
             for c in room.cells
             if start <= _along(c, side, x0, y0) < start + width
             and _depth(c, side, x0, y0, x1, y1) < rule.depth
         )
-        start += width
-        stalls.append(cells)
-        rest -= cells
-    host = PlannedRoom(room.type, rest, room.unit, room.entry, room.host)
-    return [host, *(PlannedRoom(rule.room, cells, room.unit, host=host) for cells in stalls)]
+
+    def free(block: frozenset[Cell]) -> bool:
+        return not any(c.neighbour(s) in circulation for c in block for s in Side)
+
+    spans: list[tuple[int, int]] = []  # (start, width)
+    start = 0
+    while start + rule.width <= along and len(spans) < rule.max:
+        if free(cells(start, rule.width)):
+            spans.append((start, rule.width))
+            start += rule.width
+        else:
+            start += 1
+    # Close gaps too narrow to use (to the neighbouring stall), or give the stall up.
+    changed = True
+    while changed and spans:
+        changed = False
+        bounds = [0, *(p for s0, w in spans for p in (s0, s0 + w)), along]
+        for k in range(len(spans) + 1):
+            gap = bounds[2 * k + 1] - bounds[2 * k]
+            if 0 < gap < passage:
+                i = k - 1 if k > 0 else 0  # the stall before the gap, else the one after it
+                s0, w = spans[i]
+                grown = (s0, w + gap) if i == k - 1 else (s0 - gap, w + gap)
+                if free(cells(*grown)):
+                    spans[i] = grown
+                else:
+                    spans.pop(i)
+                changed = True
+                break
+    return [cells(s0, w) for s0, w in spans]
+
+
+def _door_run(cells: frozenset[Cell], circulation: set[Cell]) -> int:
+    """Longest straight run of walls between these cells and circulation."""
+    longest = 0
+    for side in Side:
+        # (line across the wall, position along it) of each wall towards circulation
+        spots = sorted(
+            (c.y, c.x) if side in (Side.N, Side.S) else (c.x, c.y)
+            for c in cells
+            if c.neighbour(side) in circulation
+        )
+        run = 0
+        for k, (line, pos) in enumerate(spots):
+            run = run + 1 if k and spots[k - 1] == (line, pos - 1) else 1
+            longest = max(longest, run)
+    return longest
 
 
 def _along(cell: Cell, side: Side, x0: int, y0: int) -> int:

@@ -1,0 +1,49 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Dive bar (a small nightclub variant): one taproom with bar, booths and a pool table;
+# kitchen, office and storage at the back.
+building: dive_bar
+catalogs: [common, office, hospitality, retail]
+layout: hall
+
+corridor:
+  width: 3
+  hallway_width: 3
+strip_depth: [6, 12]
+hall:
+  min_depth: 10
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}
+  emergency: {width: 2}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: taproom, place: hall}
+      - {room: toilet, count: [1, 2], near: core, priority: required}
+      - {room: prep_kitchen, count: [0, 1]}
+      - {room: manager_office, count: 1}
+      - {room: cold_storage, count: [0, 1]}
+      - {room: storage, fill: true}
+  upper:
+    applies: [upper, top]
+    rooms:
+      - {room: taproom, place: hall}
+      - {room: toilet, count: [0, 1], near: core}
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: utility, count: 1, priority: required}
+      - {room: storage, fill: true}

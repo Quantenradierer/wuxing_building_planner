@@ -310,6 +310,7 @@ def _interior_doors(
 
 
 DOOR_WIDTH = 2  # a plain door, cells
+ROOMY = 40  # cells (10 m²): smaller rooms get an exterior door only if nothing else can
 
 
 def _exterior_door(
@@ -342,14 +343,9 @@ def _exterior_door(
     def needs_window(room: Room) -> bool:
         return ctx.rules.spec(room.type).windows is WindowRule.REQUIRED
 
-    # Rooms that need windows only as a last resort: a door may take their only window.
-    tiers = (
-        service,
-        [r for r in first if not needs_window(r)],
-        [r for r in others if not needs_window(r)],
-        first,
-        others,
-    )
+    # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them.
+    roomy = [r for r in first if r.area >= ROOMY], [r for r in others if r.area >= ROOMY]
+    tiers = (service, *roomy, first, others)
     # A wide door (loading dock) that would blind a room needing windows: a plain door.
     widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
     for candidates_from in tiers:

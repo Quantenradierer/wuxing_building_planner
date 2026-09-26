@@ -84,6 +84,12 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | cosmetic_clinic | corridor    | no ER: consultations, OP, cyberware fitting, suites |
 | coffin_block| corridor        | tiny coffin units, shared toilets and showers       |
 | stuffer_shack | hall          | convenience store: small sales floor, stock room    |
+| police_station | corridor     | squad rooms, interview + observation, cell block    |
+| parking_garage | hall         | parking decks with car rows, ramps lined up         |
+| factory     | hall            | production hall (conveyors, machines), control room |
+| church      | hall            | nave with pews and altar, choir loft, crypt         |
+| dive_bar    | hall            | taproom: bar with stools, booths, pool table        |
+| chop_shop   | hall            | workshop with car lifts, paint booth, parts storage |
 
 ## Building rules
 
@@ -171,6 +177,8 @@ New: hospital, hotel (capsule hotel as its squatter/low tiers), corp lab, nightc
 (hall), warehouse (hall). Variants of the v1 types, each a separate type with its own
 YAML: corp branch office (`corp_office`), street doc (`street_doc`), coffin block
 (`coffin_block`), convenience store (`stuffer_shack`).
+Later: police station, parking garage, factory and church, plus the variants dive bar
+(`dive_bar`, of the nightclub) and chop shop (`chop_shop`, of the warehouse).
 
 ## Roadmap (v2)
 
@@ -200,8 +208,9 @@ All seven milestones are implemented (2026-09-26).
 
 - No fire escapes (they need surroundings).
 - Adjacency preferences are limited to `near`, `next_to`, `vestibule` and door `access` lists.
-- Small footprints can be infeasible for rich tiers or big programs: cosmetic clinics and
-  supermarkets need about 36 × 36 cells (18 m), hospitals 48 × 48, others 32 × 32.
+- Small footprints can be infeasible for rich tiers or big programs: cosmetic clinics,
+  supermarkets and police stations need about 36 × 36 cells (18 m), factories 40 × 40,
+  hospitals 48 × 48, others 32 × 32.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.

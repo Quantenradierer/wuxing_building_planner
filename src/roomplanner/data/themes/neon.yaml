@@ -151,6 +151,29 @@ rooms:
   recovery_suite: carpet
   shop_floor: shop
 
+  # new rooms
+  squad_room: carpet
+  briefing_room: carpet
+  interview_room: concrete
+  observation_room: tech
+  cell_block: concrete
+  lockup: concrete
+  holding_cell: concrete
+  evidence_room: concrete
+  armory: industrial
+  nave: wood
+  choir_loft: wood
+  crypt: concrete
+  sacristy: wood
+  parish_hall: wood
+  factory_floor: industrial
+  control_room: tech
+  paint_booth: industrial
+  parking_deck: concrete
+  attendant_booth: tech
+  workshop_floor: industrial
+  taproom: club
+
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
   stairs:          {shape: stairs, fill: "#2f3440", stroke: "#11131a", detail: "#aab2c5"}
@@ -239,3 +262,17 @@ objects:
   laundry_cart:    {shape: crate, fill: "#6a707c", stroke: "#15171d", detail: "#c9cfdb"}
   arcade_machine:  {shape: screen, fill: "#2a1f33", stroke: "#000000", detail: "#3a1f5a", glow: "#c6ff00"}
   stage:           {shape: rug, fill: "#1f1a2a", stroke: "#0b0e14", detail: "#b14dff"}
+  car:             {shape: rounded, fill: "#3a4252", stroke: "#0b0e14", detail: "#9fe8ff"}
+  car_lift:        {shape: machine, fill: "#4a4f5c", stroke: "#0f1117", detail: "#ffb300", glow: "#ffb300"}
+  ramp:            {shape: stairs, fill: "#2a2e36", stroke: "#11131a", detail: "#ffb347"}
+  pay_station:     {shape: screen, fill: "#2a2f3a", stroke: "#000000", detail: "#003b46", glow: "#6dffb0"}
+  conveyor:        {shape: shelf, fill: "#3b3f47", stroke: "#0f1117", detail: "#8a93a8"}
+  robot_arm:       {shape: machine, fill: "#d9a21b", stroke: "#2a2006", detail: "#3b3f47", glow: "#ffb300"}
+  tool_rack:       {shape: shelf, fill: "#4f4a42", stroke: "#15130e", detail: "#8a8378"}
+  pew:             {shape: seat, fill: "#4a3a2c", stroke: "#15120f"}
+  altar:           {shape: counter, fill: "#d8d0c0", stroke: "#4a4038", detail: "#ffcc66", glow: "#ffcc66"}
+  pulpit:          {shape: box, fill: "#4a3a2c", stroke: "#15120f"}
+  candle_stand:    {shape: circle, fill: "#3b3029", stroke: "#15120f", detail: "#ffcc66", glow: "#ffb347"}
+  confessional:    {shape: box, fill: "#3b2e24", stroke: "#15120f"}
+  organ:           {shape: shelf, fill: "#4a3a2c", stroke: "#15120f", detail: "#c9b27a"}
+  tomb:            {shape: box, fill: "#6a655c", stroke: "#1a1814"}

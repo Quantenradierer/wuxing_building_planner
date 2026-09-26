@@ -180,6 +180,11 @@ class RoomFurnisher:
             case Placement.BACK:
                 candidates = self._against_walls(spec, corners_only=False)
                 candidates.sort(key=lambda r: (-self._door_distance(r), r))
+            case Placement.FIXED:
+                # Far corner of the room's box: only the room's shape decides.
+                candidates = self._against_walls(spec, corners_only=True)
+                x1, y1 = self.box[2], self.box[3]
+                candidates.sort(key=lambda r: (-(r[0] + r[2]) - (r[1] + r[3]) + x1 + y1, r))
             case Placement.CORNER:
                 candidates = self._against_walls(spec, corners_only=True)
                 self.rng.shuffle(candidates)
@@ -281,7 +286,7 @@ class RoomFurnisher:
         horizontal = (x1 - x0) >= (y1 - y0)
         length, width = (x1 - x0, y1 - y0) if horizontal else (y1 - y0, x1 - x0)
         m = rule.margin
-        per_block = max(1, math.floor(12 / along))  # cross aisle roughly every 6 m
+        per_block = max(1, math.floor(rule.block / along))  # cross aisle every `block` cells
         rows: list[tuple[int, Side]] = []  # offset across the room, facing
         across = m
         while across + deep <= width - m:

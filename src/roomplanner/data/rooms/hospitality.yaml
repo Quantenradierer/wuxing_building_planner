@@ -145,3 +145,16 @@ rooms:
       - {object: bed, placement: wall}
       - {object: locker, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
+  taproom:              # a dive bar's hall: bar, booths, pool table
+    area: [60, 100000]
+    min_side: 8
+    windows: optional
+    door_width: 3
+    furniture:
+      - {object: bar_set, placement: wall}
+      - {object: sofa_set, placement: wall, per: 80, count: [0, 3]}
+      - {object: cafe_table, placement: scatter, per: 30, count: [2, 10]}
+      - {object: pool_table, placement: center, count: [0, 1]}
+      - {object: arcade_machine, placement: wall, count: [0, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 2]}
+      - {object: trash_bin, placement: corner, count: [1, 2]}

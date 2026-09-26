@@ -200,7 +200,13 @@ class CorridorLayout:
             band = self._core_band(main, street, rng)
             skeleton.core_band = band
             skeleton.core_slot, skeleton.core_rooms = self._core(
-                ctx, main, band, core_entries, main.blocked(band, skeleton.lobby_slice), rng
+                ctx,
+                main,
+                band,
+                core_entries,
+                main.blocked(band, skeleton.lobby_slice),
+                rng,
+                skeleton.lobby_slice,
             )
         return skeleton
 
@@ -353,6 +359,7 @@ class CorridorLayout:
         entries: list[CoreEntry],
         blocked: list[Interval],
         rng: random.Random,
+        lobby: Interval | None = None,
     ) -> tuple[Interval, list[PlannedRoom]]:
         """The core occupies one full-depth slot; the first entry (stairwell) wraps the rest."""
         frame, grid = main.frame, main.grid
@@ -370,10 +377,10 @@ class CorridorLayout:
             left = main.cross.u0 - width / 2
             right = main.cross.u1 + width / 2
             target = left if rng.random() < 0.5 else right
-            slot = self._choose(grid, width, target, blocked, touching=main.cross)
+            slot = self._choose(grid, width, target, blocked, touching=main.cross, optional=lobby)
         else:
             target = frame.length / 2 + rng.uniform(-1, 1) * frame.length / 6
-            slot = self._choose(grid, width, target, blocked)
+            slot = self._choose(grid, width, target, blocked, optional=lobby)
         if slot is None:
             raise AllocationError("no space for the core")
 
@@ -422,10 +429,13 @@ class CorridorLayout:
         blocked: list[Interval],
         touching: Interval | None = None,
         avoid: tuple[Interval, ...] = (),
+        optional: Interval | None = None,
     ) -> Interval | None:
         """Grid-aligned interval closest to `target` that leaves usable gaps around it.
 
         `avoid` intervals must not be overlapped but are no neighbours (e.g. junctions).
+        `optional` is one of `blocked` that exists on some floors only (the ground-floor
+        lobby): the gaps must be usable with and without it.
         """
         min_gap = _min_gap(grid)
         starts = {*grid.points(), *(b.u1 for b in blocked), *(b.u0 - width for b in blocked)}
@@ -444,10 +454,10 @@ class CorridorLayout:
                 continue
             if touching is not None and interval.gap_to(touching) != 0:
                 continue
-            neighbours = [0, grid.length, *(b.u0 for b in blocked), *(b.u1 for b in blocked)]
-            left = min((start - n for n in neighbours if n <= start), default=0)
-            right = min((n - interval.u1 for n in neighbours if n >= interval.u1), default=0)
-            if 0 < left < min_gap or 0 < right < min_gap:
+            variants = [blocked]
+            if optional is not None:
+                variants.append([b for b in blocked if b != optional])
+            if any(_cramped(interval, spans, grid.length, min_gap) for spans in variants):
                 continue
             candidates.append(interval)
         if not candidates:
@@ -699,6 +709,14 @@ class CorridorLayout:
     @staticmethod
     def _facade_band(bands: list[Band], side: LocalSide) -> Band:
         return bands[0] if side is LocalSide.V0 else bands[-1]
+
+
+def _cramped(interval: Interval, blocked: list[Interval], length: int, min_gap: int) -> bool:
+    """True if the interval leaves a gap too small for a room to a neighbour or part end."""
+    neighbours = [0, length, *(b.u0 for b in blocked), *(b.u1 for b in blocked)]
+    left = min((interval.u0 - n for n in neighbours if n <= interval.u0), default=0)
+    right = min((n - interval.u1 for n in neighbours if n >= interval.u1), default=0)
+    return 0 < left < min_gap or 0 < right < min_gap
 
 
 def _min_gap(grid: Grid) -> int:
