@@ -45,7 +45,7 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 
 | Parameter       | Values                                              | v1 behaviour                          |
 |-----------------|-----------------------------------------------------|---------------------------------------|
-| `building_type` | see "Building types" (13 types)                     | honoured                              |
+| `building_type` | see "Building types" (14 types)                     | honoured                              |
 | `width`         | cells (east–west)                                   | honoured; bounding box for L shapes   |
 | `depth`         | cells (north–south)                                 | honoured; bounding box for L shapes   |
 | `floors_above`  | ≥ 1, includes the ground floor                      | honoured                              |
@@ -81,6 +81,7 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | warehouse   | hall            | racked hall, loading bays, shipping office          |
 | corp_office | corridor        | checkpoint lobby, cubicle floors, executive top     |
 | street_doc  | corridor        | cover storefront, back-room OR, recovery rooms      |
+| cosmetic_clinic | corridor    | no ER: consultations, OP, cyberware fitting, suites |
 | coffin_block| corridor        | tiny coffin units, shared toilets and showers       |
 | stuffer_shack | hall          | convenience store: small sales floor, stock room    |
 

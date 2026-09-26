@@ -21,6 +21,7 @@ class BuildingType(StrEnum):
     # Variants of the types above.
     CORP_OFFICE = "corp_office"
     STREET_DOC = "street_doc"
+    COSMETIC_CLINIC = "cosmetic_clinic"
     COFFIN_BLOCK = "coffin_block"
     STUFFER_SHACK = "stuffer_shack"
 

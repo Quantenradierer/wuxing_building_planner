@@ -28,7 +28,7 @@ the floor scenes (Foundry v12+ Scene Regions).
 
 | Option                 | Values                                                 |
 |------------------------|--------------------------------------------------------|
-| `-t/--type`            | office, clinic, apartment, supermarket, hospital, hotel, corp_lab, nightclub, warehouse, corp_office, street_doc, coffin_block, stuffer_shack |
+| `-t/--type`            | office, clinic, apartment, supermarket, hospital, hotel, corp_lab, nightclub, warehouse, corp_office, street_doc, cosmetic_clinic, coffin_block, stuffer_shack |
 | `-w/--width`, `-d/--depth` | building bounding box in cells                     |
 | `--floors-above`       | floors incl. ground floor (default 1)                  |
 | `--floors-below`       | basements (default 0)                                  |

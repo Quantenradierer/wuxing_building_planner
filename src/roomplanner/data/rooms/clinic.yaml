@@ -93,3 +93,30 @@ rooms:
       - {object: desk, placement: wall}
       - {object: exam_table, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: corner, count: [0, 1]}
+  consultation_room:    # cosmetic clinic: a desk, two armchairs, a screen
+    area: [30, 70]
+    min_side: 5
+    windows: required
+    furniture:
+      - {object: desk, placement: wall}
+      - {object: armchair, placement: scatter, count: [1, 2]}
+      - {object: terminal, placement: corner, count: [0, 1]}
+      - {object: plant, placement: corner, count: [0, 1]}
+  fitting_room:         # implants and cyberware adjustments
+    area: [40, 90]
+    min_side: 6
+    windows: forbidden
+    furniture:
+      - {object: exam_table, placement: center}
+      - {object: machinery, placement: wall, count: [1, 2]}
+      - {object: terminal, placement: wall, count: [1, 2]}
+      - {object: medical_cabinet, placement: wall, count: [1, 2]}
+  recovery_suite:       # private room for a paying patient
+    area: [50, 110]
+    min_side: 6
+    windows: required
+    furniture:
+      - {object: hospital_bed, placement: wall}
+      - {object: sofa, placement: wall, count: [0, 1]}
+      - {object: armchair, placement: scatter, count: [0, 1]}
+      - {object: plant, placement: corner, count: [1, 2]}
