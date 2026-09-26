@@ -9,41 +9,41 @@ D                                                               |
 D                                                               |
 |                                                               |
 |                            1                                  |
-|       +--DDD------+                 +-------+     +------DDD--+
-|       |i     w   w|                U|k     s|     |w   w     U|
-|       |           |                 |      s|     |           |
-|       |           |                 |s     s|     |           |
+|       +------DDD--+                 +-------+     +--DDD------+
+|       |U i        |                U|k   sss|     |w       i  |
+|       |           |                 |       |     |           |
+|       |    3     w|                 |s      |     |i          |
 |       |           |                 |s      |     |           |
-"       |    3      |    }            |s     s|     |    7     w"
-"       |           |                 |      s|     |           "
-"       |w         i|    AAA          |      s|     |w         w"
-|       |           |    AAA          |       |     |           |
-|       |w          |    AAA          |s   KKK|     |i          |
-|       +-----------+                 |s   KKK|     |           |
-"       |sss   sss s|                 |s   KKK|     |      w    |
-"       |          s|                 |       |     +-----------+
-"       D    4     s|q       2        |s 6   s|     |sss   k sss|
-|       D           |q                |s     s|     |           |
-|       D           |q                |s     s|     |s         s|
-|       |           |q                |       |     |s         s|
-"       |k   sss sss|q                |s      |     |s KKK     s"
-"       +-----------+q                |s      |     |  KKK      "
-"       |  sss sss s|q                |s     s|     |s KKK     s"
-|       |          s|                 |      s|     |s         s|
-|       D    5     s|                 D      s|     |s   8     s|
-|       D           |                 D       |     |           |
-"       D    KKK    |AAA              D       |     D    KKK   s"
-"       |    KKK    |AAA              |       |     D    KKK   s"
-"    ^^^|s   KKK   s|AAA              |s     s|     D    KKK   s"
-|    ^^^|s         s|                 |s     s|     |           |
-|    ^^^|s   sss k s|*               *|s sss s|     |sss sss sss|
+"       |w     i    |    }            |s     s|     |    7     w"
+"       +-----------+                 |      s|     |           "
+"       |sss k sss  |    AAA          |s     s|     |w         w"
+|       |           |    AAA          |s      |     |           |
+|       D    4      |    AAA          |s   KKK|     |U       w w|
+|       D           |                 |    KKK|     +-----------+
+"       D          s|                 |s   KKK|     |sss sss sss"
+"       |          s|                 |s      |     |           "
+"       |k sss sss s|q       2        |s 6   s|     |s         s"
+|       +-----------+q                |      s|     |s         s|
+|       |sss   sss s|q                |      s|     |s         s|
+|       |          s|q                |       |     |           |
+"       D          s|q                |s     s|     |k   8     s"
+"       D           |q                |s     s|     |          s"
+"       D    KKK    |q                |s     s|     |s   KKK   s"
+|       |    KKK    |                 |       |     |s   KKK    |
+|       |k   KKK   s|                 D    KKK|     |s   KKK   s|
+|       |          s|                 D    KKK|     |          s|
+"       |s   5     s|AAA              D    KKK|     D    KKK   s"
+"       |s          |AAA              |       |     D    KKK    "
+"    ^^^|s          |AAA              |s     s|     D    KKK   s"
+|    ^^^|           |                 |s     s|     |          s|
+|    ^^^|sss sss sss|*               *|s sss s|     |k sss sss s|
 +--===--+===---===--+----DDDDDDD------+===----+-----+----===----+
   objects: A armchair, q bench, k cabinet, K crate, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, w wc
     1  corridor            226 cells
     2  lobby               126 cells
-    3  toilet               30 cells
+    3  toilet               18 cells
     4  storage              24 cells
-    5  storage              30 cells
+    5  storage              42 cells
     6  storage              56 cells
-    7  toilet               36 cells
-    8  storage              48 cells
+    7  toilet               30 cells
+    8  storage              54 cells

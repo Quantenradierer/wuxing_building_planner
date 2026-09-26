@@ -89,3 +89,106 @@ objects:
   laundry_cart:    {size: [1, 2], cover: light, glyph: "{"}
   arcade_machine:  {size: [2, 1], cover: heavy, glyph: "`"}
   stage:           {size: [8, 4], walkable: true, glyph: _}
+
+# Objects placed together as one. Drawn against a wall to the north (the group faces S);
+# `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).
+groups:
+  workstation:          # desk with its chair
+    size: [3, 3]
+    parts:
+      - {object: desk, at: [0, 0]}
+      - {object: chair, at: [1, 2], facing: N}
+  desk_with_visitors:   # desk, the owner's chair behind it, two visitor chairs
+    size: [3, 4]
+    parts:
+      - {object: chair, at: [1, 0]}
+      - {object: desk, at: [0, 1]}
+      - {object: chair, at: [0, 3], facing: N}
+      - {object: chair, at: [2, 3], facing: N}
+  dining_set:           # table with two chairs on each of two sides, a gap beside it
+    size: [3, 4]
+    parts:
+      - {object: chair, at: [0, 0]}
+      - {object: chair, at: [1, 0]}
+      - {object: table, at: [0, 1]}
+      - {object: chair, at: [0, 3], facing: N}
+      - {object: chair, at: [1, 3], facing: N}
+  cafe_table:           # table with a chair on each of two sides
+    size: [2, 4]
+    parts:
+      - {object: chair, at: [1, 0]}
+      - {object: table, at: [0, 1]}
+      - {object: chair, at: [0, 3], facing: N}
+  meeting_set:          # meeting table, four chairs along each long side
+    size: [6, 5]
+    parts:
+      - {object: meeting_table, at: [0, 1]}
+      - {object: chair, at: [1, 0]}
+      - {object: chair, at: [2, 0]}
+      - {object: chair, at: [3, 0]}
+      - {object: chair, at: [4, 0]}
+      - {object: chair, at: [1, 4], facing: N}
+      - {object: chair, at: [2, 4], facing: N}
+      - {object: chair, at: [3, 4], facing: N}
+      - {object: chair, at: [4, 4], facing: N}
+  board_set:            # boardroom table: six chairs per side and one at each head
+    size: [8, 5]
+    parts:
+      - {object: meeting_table, at: [1, 1]}
+      - {object: chair, at: [1, 0]}
+      - {object: chair, at: [2, 0]}
+      - {object: chair, at: [3, 0]}
+      - {object: chair, at: [4, 0]}
+      - {object: chair, at: [5, 0]}
+      - {object: chair, at: [6, 0]}
+      - {object: chair, at: [1, 4], facing: N}
+      - {object: chair, at: [2, 4], facing: N}
+      - {object: chair, at: [3, 4], facing: N}
+      - {object: chair, at: [4, 4], facing: N}
+      - {object: chair, at: [5, 4], facing: N}
+      - {object: chair, at: [6, 4], facing: N}
+      - {object: chair, at: [0, 2], facing: E}
+      - {object: chair, at: [7, 2], facing: W}
+  bar_set:              # bar counter with a row of stools
+    size: [8, 3]
+    parts:
+      - {object: bar_counter, at: [0, 0]}
+      - {object: stool, at: [1, 2], facing: N}
+      - {object: stool, at: [3, 2], facing: N}
+      - {object: stool, at: [5, 2], facing: N}
+      - {object: stool, at: [7, 2], facing: N}
+  sofa_set:             # sofa, side tables, coffee table in front
+    size: [6, 4]
+    parts:
+      - {object: side_table, at: [0, 0]}
+      - {object: sofa, at: [1, 0]}
+      - {object: side_table, at: [5, 0]}
+      - {object: table, at: [2, 2]}
+  bed_set:              # single bed between two nightstands
+    size: [4, 4]
+    parts:
+      - {object: nightstand, at: [0, 0]}
+      - {object: bed, at: [1, 0]}
+      - {object: nightstand, at: [3, 0]}
+  double_bed_set:
+    size: [6, 4]
+    parts:
+      - {object: nightstand, at: [0, 0]}
+      - {object: double_bed, at: [1, 0]}
+      - {object: nightstand, at: [5, 0]}
+  patient_bed:          # hospital bed with IV stand and vital monitor
+    size: [4, 4]
+    parts:
+      - {object: iv_stand, at: [0, 0]}
+      - {object: hospital_bed, at: [1, 0]}
+      - {object: vital_monitor, at: [3, 0]}
+  reception_post:       # reception desk with the receptionist's chair behind it
+    size: [5, 3]
+    parts:
+      - {object: chair, at: [2, 0]}
+      - {object: reception_desk, at: [0, 1]}
+  guard_post:
+    size: [4, 3]
+    parts:
+      - {object: chair, at: [1, 0]}
+      - {object: guard_desk, at: [0, 1]}

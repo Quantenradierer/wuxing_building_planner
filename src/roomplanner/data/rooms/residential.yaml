@@ -18,14 +18,12 @@ rooms:
     access: [hallway]
     furniture:
       - {object: rug, placement: center, count: [0, 1]}
-      - {object: sofa, placement: wall, count: 1}
+      - {object: sofa_set, placement: wall}
+      - {object: cafe_table, placement: scatter, count: [0, 1]}
       - {object: armchair, placement: scatter, count: [0, 2]}
-      - {object: table, placement: scatter, count: [0, 1]}
       - {object: shelf, placement: wall, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
-      - {object: side_table, placement: at, at: sofa, beside: [flanks], count: [0, 2]}
-      - {object: chair, placement: at, at: table, count: [0, 2]}
   bedroom:
     area: [40, 70]
     min_side: 5
@@ -33,12 +31,10 @@ rooms:
     access: [living_room, hallway]
     transit: false
     furniture:
-      - {object: bed, placement: wall, count: 1}
+      - {object: bed_set, placement: wall}
+      - {object: workstation, placement: wall, count: [0, 1]}
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [0, 2]}
-      - {object: desk, placement: wall, count: [0, 1]}
-      - {object: nightstand, placement: at, at: bed, beside: [flanks], count: [0, 1]}
-      - {object: chair, placement: at, at: desk, count: 1}
   bathroom:
     area: [12, 30]
     min_side: 3
@@ -57,9 +53,8 @@ rooms:
       - {object: counter, placement: wall}
       - {object: stove, placement: wall}
       - {object: fridge, placement: wall}
-      - {object: table, placement: scatter, count: [0, 1]}
+      - {object: cafe_table, placement: scatter, count: [0, 1]}
       - {object: sink, placement: wall, count: [0, 1]}
-      - {object: chair, placement: at, at: table, count: [1, 2]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   laundry:
     area: [24, 60]

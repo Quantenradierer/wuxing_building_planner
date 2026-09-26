@@ -65,28 +65,25 @@ rooms:
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: desk, placement: wall}
+      - {object: workstation, placement: wall}
       - {object: terminal, placement: wall, count: [2, 4]}
       - {object: locker, placement: wall, count: [0, 2]}
-      - {object: chair, placement: at, at: desk, count: 1}
       - {object: wall_screen, placement: wall, count: [1, 2]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
   reception:
     area: [16, 40]
     min_side: 4
     furniture:
-      - {object: reception_desk, placement: wall}
+      - {object: reception_post, placement: wall}
       - {object: terminal, placement: corner, count: [0, 1]}
-      - {object: chair, placement: at, at: reception_desk, count: 1}
       - {object: plant, placement: corner, count: [0, 1]}
   staff_room:
     area: [30, 70]
     min_side: 5
     furniture:
-      - {object: table, placement: center}
+      - {object: dining_set, placement: center}
       - {object: locker, placement: wall, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
-      - {object: chair, placement: at, at: table, count: [2, 4]}
       - {object: coffee_machine, placement: wall, count: [0, 1]}
       - {object: fridge, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}

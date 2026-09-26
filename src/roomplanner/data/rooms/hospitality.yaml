@@ -12,12 +12,10 @@ rooms:
     windows: required
     access: [hallway]
     furniture:
-      - {object: double_bed, placement: wall}
+      - {object: double_bed_set, placement: wall}
+      - {object: workstation, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [1, 2]}
-      - {object: desk, placement: wall, count: [0, 1]}
       - {object: armchair, placement: scatter, count: [0, 1]}
-      - {object: nightstand, placement: at, at: double_bed, beside: [flanks], count: [1, 2]}
-      - {object: chair, placement: at, at: desk, count: 1}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: wardrobe, placement: wall, count: [0, 1]}
   capsule_dorm:         # rows of sleeping pods, back to back
@@ -55,15 +53,16 @@ rooms:
     windows: required
     door_width: 3
     furniture:
-      - {object: table, placement: scatter, per: 14, count: [3, 16]}
+      - {object: dining_set, placement: rows, aisle: 2, margin: 2}
       - {object: counter, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [1, 3]}
-      - {object: chair, placement: at, at: table, count: [2, 4]}
       - {object: coat_rack, placement: corner, count: [0, 1]}
   commercial_kitchen:
     area: [40, 140]
     min_side: 6
     windows: optional
+    next_to: [restaurant]
+    connect: [restaurant]   # the pass: a door straight into the dining room
     furniture:
       - {object: stove, placement: wall, count: [2, 4]}
       - {object: counter, placement: wall, count: [2, 4]}
@@ -77,11 +76,9 @@ rooms:
     min_side: 7
     door_width: 3
     furniture:
-      - {object: bar_counter, placement: wall}
-      - {object: table, placement: scatter, per: 20, count: [2, 8]}
+      - {object: bar_set, placement: wall}
+      - {object: cafe_table, placement: scatter, per: 24, count: [2, 8]}
       - {object: sofa, placement: wall, count: [0, 2]}
-      - {object: stool, placement: at, at: bar_counter, beside: [front], count: [3, 6]}
-      - {object: chair, placement: at, at: table, count: [2, 4]}
       - {object: arcade_machine, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: pool_table, placement: center, count: [0, 1]}
@@ -90,25 +87,21 @@ rooms:
     min_side: 10
     door_width: 4
     furniture:
-      - {object: bar_counter, placement: wall, count: [1, 2]}
+      - {object: bar_set, placement: wall, count: [1, 2]}
+      - {object: cafe_table, placement: scatter, per: 60, count: [1, 6]}
       - {object: dj_booth, placement: wall}
       - {object: speaker, placement: corner, count: [2, 4]}
       - {object: sofa, placement: wall, count: [1, 4]}
-      - {object: table, placement: scatter, per: 60, count: [1, 6]}
       - {object: stage, placement: wall, count: [0, 1]}
-      - {object: stool, placement: at, at: bar_counter, beside: [front], count: [2, 5]}
-      - {object: chair, placement: at, at: table, count: [2, 3]}
   lounge:               # upper club floors
     area: [80, 100000]
     min_side: 10
     door_width: 3
     furniture:
-      - {object: bar_counter, placement: wall}
-      - {object: sofa, placement: wall, per: 40, count: [2, 8]}
-      - {object: table, placement: scatter, per: 40, count: [2, 8]}
+      - {object: bar_set, placement: wall}
+      - {object: sofa_set, placement: wall, per: 60, count: [1, 6]}
+      - {object: cafe_table, placement: scatter, per: 60, count: [0, 4]}
       - {object: pool_table, placement: center, count: [0, 2]}
-      - {object: stool, placement: at, at: bar_counter, beside: [front], count: [2, 4]}
-      - {object: chair, placement: at, at: table, count: [0, 2]}
       - {object: arcade_machine, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   vip_room:
@@ -116,7 +109,7 @@ rooms:
     min_side: 5
     furniture:
       - {object: sofa, placement: wall, count: [1, 3]}
-      - {object: table, placement: center}
+      - {object: sofa_set, placement: wall}
       - {object: rug, placement: center, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: counter, placement: wall, count: [0, 1]}
@@ -128,8 +121,7 @@ rooms:
       - {object: locker, placement: wall, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
       - {object: crate, placement: scatter, count: [1, 3]}
-      - {object: desk, placement: wall, count: [0, 1]}
-      - {object: chair, placement: at, at: desk, count: 1}
+      - {object: workstation, placement: wall, count: [0, 1]}
       - {object: coat_rack, placement: corner, count: [0, 2]}
   cloakroom:
     area: [12, 36]

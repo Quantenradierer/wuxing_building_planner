@@ -1,8 +1,11 @@
+import pytest
+
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Side, connected
 from roomplanner.model import Building, OpeningKind
 from roomplanner.params import BuildingType, Wealth
-from roomplanner.pipeline.furnishing import ring_is_one_run
+from roomplanner.pipeline.furnishing import group_parts, ring_is_one_run
+from roomplanner.rules import load_groups, load_objects
 from roomplanner.serialization import from_json, to_json
 
 from .conftest import make_params
@@ -105,3 +108,33 @@ def test_exact_counts_do_not_scale_with_wealth() -> None:
     building = generate(make_params(width=56, depth=36, floors_above=2, wealth=Wealth.LUXURY))
     for floor in building.floors:
         assert sum(o.kind == "stairs" for o in floor.objects) == 1
+
+
+@pytest.mark.parametrize("facing", list(Side))
+def test_group_parts_turn_with_the_group(facing: Side) -> None:
+    groups, objects = load_groups(), load_objects()
+    for group in groups.values():
+        along, deep = group.size
+        w, h = (along, deep) if facing in (Side.N, Side.S) else (deep, along)
+        parts = group_parts(group, objects, (10, 20, w, h, facing))
+        cells: set[Cell] = set()
+        for x, y, pw, ph, _ in parts:
+            part = {Cell(cx, cy) for cx in range(x, x + pw) for cy in range(y, y + ph)}
+            assert all(10 <= c.x < 10 + w and 20 <= c.y < 20 + h for c in part)
+            assert not part & cells
+            cells |= part
+    _, chair = group_parts(groups["workstation"], objects, (0, 0, 3, 3, facing))
+    # The chair sits on the desk's front side and faces it.
+    assert chair[4] is facing.opposite
+
+
+def test_groups_keep_their_parts_together() -> None:
+    building = generate(make_params(building_type=BuildingType.HOTEL, width=56, depth=36))
+    for floor in building.floors:
+        for chair in (o for o in floor.objects if o.kind == "chair"):
+            assert any(
+                o.room == chair.room
+                and o.kind != "chair"
+                and any(c.neighbour(s) in o.cells for c in chair.cells for s in Side)
+                for o in floor.objects
+            ), chair

@@ -17,7 +17,7 @@ from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
 from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.registry import register
-from roomplanner.rules import FurnitureRule, ObjectSpec, Placement
+from roomplanner.rules import FurnitureRule, GroupSpec, ObjectSpec, Placement
 
 type Rect = tuple[int, int, int, int, Side]  # x, y, w, h, facing
 
@@ -116,7 +116,7 @@ class RoomFurnisher:
         """Place objects by rule; `scale`: multiply counts by the wealth tier's factor."""
         factor = self.ctx.rules.wealth.furniture if scale else 1.0
         for rule in rules:
-            spec = self.ctx.rules.objects[rule.object]
+            spec = self._spec(rule.object)
             if rule.placement is Placement.ROWS:
                 self._rows(rule, spec)
                 continue
@@ -134,9 +134,28 @@ class RoomFurnisher:
             if low > 0:
                 count = max(1, count)
             for _ in range(count):
-                if not self._place_one(rule, spec):
+                if self._place_one(rule, spec):
+                    continue
+                # A group that doesn't fit: at least its main object (the bed, the desk).
+                if (main := self._main_part(rule.object)) is None:
+                    break
+                alone = rule.model_copy(update={"object": main})
+                if not self._place_one(alone, self._spec(main)):
                     break
         return self.placed
+
+    def _spec(self, kind: str) -> ObjectSpec:
+        """An object's spec; a group is placed like one object of its size."""
+        if (group := self.ctx.rules.groups.get(kind)) is not None:
+            return ObjectSpec(size=group.size, glyph="+")
+        return self.ctx.rules.objects[kind]
+
+    def _main_part(self, kind: str) -> str | None:
+        """A group's biggest part, or None for a plain object."""
+        if (group := self.ctx.rules.groups.get(kind)) is None:
+            return None
+        objects = self.ctx.rules.objects
+        return max((p.object for p in group.parts), key=lambda o: math.prod(objects[o].size))
 
     # --- candidates -------------------------------------------------------------------
 
@@ -306,7 +325,36 @@ class RoomFurnisher:
 
     # --- commit -----------------------------------------------------------------------
 
+    def _try_group(self, kind: str, rect: Rect) -> bool:
+        """Place all parts of a group or none; the group's empty cells stay free floor."""
+        x, y, w, h, _ = rect
+        box = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+        if not box <= self.cells or box & self.taken:
+            return False
+        group = self.ctx.rules.groups[kind]
+        objects = self.ctx.rules.objects
+        parts = group_parts(group, objects, rect)
+        solid: set[Cell] = set()
+        for part, (px, py, pw, ph, _) in zip(group.parts, parts, strict=True):
+            if not objects[part.object].walkable:
+                solid |= {Cell(cx, cy) for cx in range(px, px + pw) for cy in range(py, py + ph)}
+        if solid & self.clearance:
+            return False
+        free = self.cells - self.blocking - solid
+        if not free or not connected(free):
+            return False
+        self.taken |= box
+        self.blocking |= solid
+        for part, (px, py, pw, ph, facing) in zip(group.parts, parts, strict=True):
+            blocking = not objects[part.object].walkable
+            self.placed.append(
+                PlacedObject(part.object, px, py, pw, ph, facing, self.room.id, blocking)
+            )
+        return True
+
     def _try(self, kind: str, rect: Rect, walkable: bool = False) -> bool:
+        if kind in self.ctx.rules.groups:
+            return self._try_group(kind, rect)
         x, y, w, h, facing = rect
         cells = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
         if not cells <= self.cells or cells & self.taken:
@@ -349,3 +397,34 @@ def _back_row(rect: Rect) -> list[Cell]:
             return [Cell(x, cy) for cy in range(y, y + h)]
         case Side.W:
             return [Cell(x + w - 1, cy) for cy in range(y, y + h)]
+
+
+_CLOCKWISE = [Side.N, Side.E, Side.S, Side.W]
+
+
+def _turn(side: Side, facing: Side) -> Side:
+    """`side` of a group drawn facing S, once the group faces `facing`."""
+    steps = _CLOCKWISE.index(facing) - _CLOCKWISE.index(Side.S)
+    return _CLOCKWISE[(_CLOCKWISE.index(side) + steps) % 4]
+
+
+def group_parts(group: GroupSpec, objects: dict[str, ObjectSpec], rect: Rect) -> list[Rect]:
+    """The parts of a group placed at `rect` (x, y, w, h, facing), as object rectangles."""
+    x0, y0, _, _, facing = rect
+    along, deep = group.size
+    parts: list[Rect] = []
+    for part in group.parts:
+        size = objects[part.object].size
+        lw, lh = size if part.facing in (Side.N, Side.S) else (size[1], size[0])
+        u, v = part.at
+        match facing:
+            case Side.S:
+                x, y, w, h = x0 + u, y0 + v, lw, lh
+            case Side.N:
+                x, y, w, h = x0 + along - u - lw, y0 + deep - v - lh, lw, lh
+            case Side.E:
+                x, y, w, h = x0 + v, y0 + along - u - lw, lh, lw
+            case Side.W:
+                x, y, w, h = x0 + deep - v - lh, y0 + u, lh, lw
+        parts.append((x, y, w, h, _turn(part.facing, facing)))
+    return parts

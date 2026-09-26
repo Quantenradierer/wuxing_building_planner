@@ -142,6 +142,7 @@ class Allocator:
         self.level = 0
         self.fill_types: set[str] = set()
         self.fills: list[RoomEntry] = []
+        self.pending: deque[Request] = deque()  # requests not placed yet
         self.fill_widths: dict[tuple[str, int, int], int] = {}
 
     # --- public -----------------------------------------------------------------------
@@ -152,6 +153,7 @@ class Allocator:
         self.fill_types = {e.room for e in fills}
         self.fills = fills
         queue = deque(requests)
+        self.pending = queue
         while queue:
             request = queue.popleft()
             placed = self._place(request)
@@ -258,7 +260,8 @@ class Allocator:
             option = self._option(request, state)
             if option is None:
                 continue
-            options.append((self._score(request, segment), self.rng.random(), state, option))
+            score = self._score(request, segment) + self._partner_room(request, state, option)
+            options.append((score, self.rng.random(), state, option))
         if not options:
             return False
         _, _, state, option = min(options, key=lambda o: (o[0], o[1]))
@@ -385,6 +388,15 @@ class Allocator:
 
     def _member_depth(self, request: Request, cluster: Cluster) -> int:
         return max(request.spec.min_side, math.ceil(request.area / cluster.column_width))
+
+    def _partner_room(self, request: Request, state: SegmentState, option: Option) -> float:
+        """Penalty if rooms still to come that want to be `next_to` this one won't fit beside it."""
+        partners = [r for r in self.pending if request.type in r.spec.next_to]
+        if not partners:
+            return 0.0
+        used = option.units if isinstance(option, FullSlot | Cluster) else 0
+        needed = sum(self._full_units(r, state.segment) for r in partners)
+        return 0.0 if used + needed <= state.free_units else NEXT_TO_BONUS
 
     def _score(self, request: Request, segment: Segment) -> float:
         score = 0.0

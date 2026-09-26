@@ -8,7 +8,7 @@ import yaml
 from roomplanner.layer_rules import load_condition, load_lighting, load_security
 from roomplanner.params import BuildingType
 from roomplanner.render.theme import load_theme
-from roomplanner.rules import load_objects, load_rules
+from roomplanner.rules import load_groups, load_objects, load_rules
 
 
 def all_room_types() -> set[str]:
@@ -28,10 +28,11 @@ def test_every_building_type_has_valid_rules(building_type: BuildingType) -> Non
 def test_layer_rules_only_use_known_objects() -> None:
     objects = set(load_objects())
     condition = load_condition()
+    placeable = objects | set(load_groups())
     assert set(condition.debris) | set(condition.collapse) | set(condition.fixtures) <= objects
     for tier in load_security().tiers.values():
         for rules in tier.furniture.values():
-            assert {r.object for r in rules} <= objects
+            assert {r.object for r in rules} <= placeable
 
 
 def test_lights_rules_load() -> None:

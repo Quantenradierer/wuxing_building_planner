@@ -186,7 +186,9 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      beside it (scrub room before an OR, airlock before a clean room) and is entered only
      through it.
    - *Next to*: `next_to: [types]` pulls a room into the strip segment of such a room and
-     orders the slots so they are neighbours (ICU and recovery beside the OR).
+     orders the slots so they are neighbours (ICU and recovery beside the OR). A room that
+     rooms still to come want to be next to prefers a segment with space left for them
+     (the restaurant leaves room for its kitchen).
    - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
      over the row, extra cluster width becomes a room of its own.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
@@ -224,6 +226,11 @@ along the unit so every room opens onto it. Rooms carry the unit id.
   circulation first, then into a type from the room's `access` list, then into any connected
   room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect
   only within their unit, except the unit's entry room, which opens to circulation.
+- A room's door goes as close as possible to the doors of its `next_to` / `connect`
+  partners (either direction; to their rooms if they have no door yet): the loading bay's
+  door faces the warehouse floor's across the service corridor.
+- `connect: [types]` adds a direct door to an adjacent room of such a type (kitchen into
+  the restaurant, loading bay into the stockroom).
 - Exterior doors open outwards, at the positions the layout requested.
 - Windows follow one facade grid for all floors (so they line up); each floor omits the
   windows its own walls, doors or windowless rooms collide with.
@@ -255,6 +262,12 @@ beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` —
 turn, and `count` is per target, never scaled). Counts are a range or `per: N` (one
 object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor;
 an exact count (`count: 1`, the default) is never scaled.
+*Groups* (`groups:` in `objects.yaml`) are objects placed together as one: a table with its
+chairs, a desk with its chair, a bed between nightstands, a bar counter with stools. A
+group is drawn facing S with its parts at [along, deep] positions; a rule places it like
+one object of the group's size, then rotates the parts with it. Its empty cells stay free
+floor. If a group doesn't fit, its biggest part is placed alone (the bed without the
+nightstands).
 Walkable objects (stairs, elevator car, rugs) may cover door clearances and never block. A
 placement is rejected if it covers another object or a door's clearance (as deep as the door
 is wide) or splits the room's free floor; a ring test around the object avoids most flood

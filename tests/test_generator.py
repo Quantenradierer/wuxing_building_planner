@@ -162,3 +162,32 @@ def test_window_rooms_in_deep_strips_keep_their_size() -> None:
         for room in floor.rooms:
             if room.type in ("exam_room", "ward", "doctor_office"):
                 assert len(room.cells) <= rules.spec(room.type).area[1] * 1.5, room
+
+
+def test_kitchen_opens_straight_into_the_restaurant() -> None:
+    linked = 0
+    for seed in range(4):
+        params = make_params(
+            building_type=BuildingType.HOTEL, width=56, depth=36, wealth=Wealth.HIGH, seed=seed
+        )
+        ground = generate(params).floor(0)
+        rooms = {r.type: r for r in ground.rooms}
+        kitchen, restaurant = rooms.get("commercial_kitchen"), rooms.get("restaurant")
+        if kitchen is None or restaurant is None:
+            continue
+        for door in ground.openings:
+            if door.kind is OpeningKind.DOOR:
+                a, b = door.edges[0].cells()
+                if {a in kitchen.cells, b in kitchen.cells} == {True, False} and (
+                    a in restaurant.cells or b in restaurant.cells
+                ):
+                    linked += 1
+    assert linked >= 3
+
+
+def test_bigger_office_floors_get_more_toilets() -> None:
+    def toilets(width: int, depth: int) -> int:
+        building = generate(make_params(width=width, depth=depth, floors_above=2))
+        return sum(r.type == "toilet" for r in building.floor(1).rooms)
+
+    assert toilets(80, 56) > toilets(40, 24) >= 2

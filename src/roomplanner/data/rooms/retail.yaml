@@ -32,6 +32,8 @@ rooms:
     min_side: 8
     windows: forbidden
     door_width: 4
+    next_to: [warehouse_floor, stockroom]
+    connect: [stockroom, warehouse_floor]
     furniture:
       - {object: pallet, placement: scatter, count: [2, 6]}
       - {object: forklift, placement: scatter, count: [0, 1]}
@@ -41,15 +43,15 @@ rooms:
     area: [24, 60]
     min_side: 5
     furniture:
-      - {object: desk, placement: wall}
+      - {object: desk_with_visitors, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}
       - {object: terminal, placement: corner, count: [0, 1]}
-      - {object: chair, placement: at, at: desk, count: [1, 2]}
       - {object: safe, placement: corner, count: [0, 1]}
       - {object: filing_cabinet, placement: wall, count: [0, 1]}
   prep_kitchen:         # deli / bakery / soykaf bar
     area: [30, 90]
     min_side: 5
+    next_to: [sales_floor, shop_floor]
     furniture:
       - {object: counter, placement: wall, count: [2, 3]}
       - {object: stove, placement: wall, count: [1, 2]}

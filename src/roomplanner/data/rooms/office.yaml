@@ -5,33 +5,30 @@ rooms:
     min_side: 5
     windows: required
     furniture:
-      - {object: desk, placement: wall, per: 22, count: [1, 6]}
+      - {object: workstation, placement: wall, per: 22, count: [1, 6]}
       - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
       - {object: cabinet, placement: corner, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: trash_bin, placement: scatter, count: [0, 1]}
-      - {object: chair, placement: at, at: desk, count: 1}
   open_office:
     area: [160, 1200]
     min_side: 10
     windows: required
     door_width: 3
     furniture:
-      - {object: desk, placement: rows, aisle: 3}
+      - {object: workstation, placement: rows, aisle: 2, paired: true}
       - {object: copier, placement: wall, count: [1, 2]}
       - {object: filing_cabinet, placement: wall, per: 80, count: [1, 6]}
       - {object: plant, placement: corner, count: [1, 4]}
-      - {object: chair, placement: at, at: desk, count: 1}
       - {object: water_cooler, placement: wall, count: [0, 1]}
       - {object: whiteboard, placement: wall, count: [0, 2]}
   meeting_room:
     area: [48, 120]
     min_side: 6
     furniture:
-      - {object: meeting_table, placement: center}
+      - {object: meeting_set, placement: center}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: cabinet, placement: wall, count: [0, 2]}
-      - {object: chair, placement: at, at: meeting_table, count: [4, 8]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: whiteboard, placement: wall, count: [0, 1]}
   kitchenette:
@@ -40,10 +37,9 @@ rooms:
     furniture:
       - {object: counter, placement: wall, count: 1}
       - {object: fridge, placement: wall, count: 1}
-      - {object: table, placement: center, count: [0, 1]}
+      - {object: cafe_table, placement: center, count: [0, 1]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
-      - {object: chair, placement: at, at: table, count: [1, 3]}
       - {object: coffee_machine, placement: wall}
       - {object: sink, placement: wall, count: [0, 1]}
   server_room:
@@ -63,22 +59,19 @@ rooms:
     min_side: 8
     windows: required
     furniture:
-      - {object: desk, placement: center}
-      - {object: sofa, placement: wall, count: [1, 2]}
+      - {object: desk_with_visitors, placement: center}
+      - {object: sofa_set, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}
       - {object: plant, placement: corner, count: [1, 2]}
-      - {object: chair, placement: at, at: desk, count: [2, 3]}
       - {object: safe, placement: corner, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: shelf, placement: wall, count: [0, 2]}
-      - {object: side_table, placement: at, at: sofa, beside: [flanks], count: [0, 1]}
   board_room:
     area: [100, 240]
     min_side: 8
     windows: required
     door_width: 3
     furniture:
-      - {object: meeting_table, placement: center, count: [1, 2]}
+      - {object: board_set, placement: center}
       - {object: plant, placement: corner, count: [1, 2]}
-      - {object: chair, placement: at, at: meeting_table, count: [6, 12]}
       - {object: wall_screen, placement: wall}

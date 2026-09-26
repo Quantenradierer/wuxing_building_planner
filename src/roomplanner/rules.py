@@ -16,6 +16,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from roomplanner.errors import NotSupportedError, RulesError
+from roomplanner.geometry import Side
 from roomplanner.params import BuildingType, EntranceKind, GenerationParams, Security, Wealth
 
 type Range = tuple[int, int]
@@ -50,8 +51,25 @@ class ObjectSpec(_Strict):
     glyph: str = Field(min_length=1, max_length=1, description="ASCII debug glyph")
 
 
+class GroupPart(_Strict):
+    object: str
+    at: tuple[int, int] = Field(description="Position in the group (along, deep), facing S")
+    facing: Side = Field(default=Side.S, description="Relative to the group; S = the group's")
+
+
+class GroupSpec(_Strict):
+    """Objects placed together as one (a table with its chairs, a desk with its chair).
+
+    Drawn for a group against a wall to the north (facing S); placing it rotates it.
+    """
+
+    size: tuple[int, int] = Field(description="Cells along the wall / row, cells deep")
+    parts: list[GroupPart] = Field(min_length=1)
+
+
 class ObjectCatalog(_Strict):
     objects: dict[str, ObjectSpec]
+    groups: dict[str, GroupSpec] = {}
 
 
 class Placement(StrEnum):
@@ -114,6 +132,9 @@ class RoomSpec(_Strict):
         default=None, description="Entered only through this room type, placed beside it"
     )
     next_to: list[str] = Field(default=[], description="Placed next to these room types")
+    connect: list[str] = Field(
+        default=[], description="Also a direct door to adjacent rooms of these types"
+    )
     annex: float = Field(
         default=0.5,
         ge=0,
@@ -283,6 +304,7 @@ class Rules:
     tiers: dict[Wealth, WealthRule]
     objects: dict[str, ObjectSpec]
     wealth: WealthRule = field(default_factory=WealthRule)  # tier these rules are derived for
+    groups: dict[str, GroupSpec] = field(default_factory=dict[str, GroupSpec])
 
     def spec(self, room: str) -> RoomSpec:
         return self.rooms[room]
@@ -335,7 +357,7 @@ def load_rules(building_type: BuildingType) -> Rules:
     for name in program.catalogs:
         rooms |= _load(Catalog, _data_file("rooms", name)).rooms
     tiers = _load(WealthTable, resources.files("roomplanner") / "data" / "wealth.yaml").tiers
-    rules = Rules(program, rooms, tiers | program.wealth, load_objects())
+    rules = Rules(program, rooms, tiers | program.wealth, load_objects(), groups=load_groups())
     _check_references(rules)
     return rules
 
@@ -344,6 +366,27 @@ def load_rules(building_type: BuildingType) -> Rules:
 def load_objects() -> dict[str, ObjectSpec]:
     """The furniture and fixture catalog shared by all building types."""
     return _load(ObjectCatalog, resources.files("roomplanner") / "data" / "objects.yaml").objects
+
+
+@cache
+def load_groups() -> dict[str, GroupSpec]:
+    """Object groups (tables with chairs, …); every part lies inside the group, no overlaps."""
+    catalog = _load(ObjectCatalog, resources.files("roomplanner") / "data" / "objects.yaml")
+    for name, group in catalog.groups.items():
+        taken: set[tuple[int, int]] = set()
+        for part in group.parts:
+            if part.object not in catalog.objects:
+                raise RulesError(f"group {name}: unknown object {part.object}")
+            along, deep = catalog.objects[part.object].size
+            w, h = (along, deep) if part.facing in (Side.N, Side.S) else (deep, along)
+            u, v = part.at
+            cells = {(u + i, v + j) for i in range(w) for j in range(h)}
+            if u < 0 or v < 0 or u + w > group.size[0] or v + h > group.size[1]:
+                raise RulesError(f"group {name}: {part.object} sticks out")
+            if cells & taken:
+                raise RulesError(f"group {name}: {part.object} overlaps another part")
+            taken |= cells
+    return catalog.groups
 
 
 @cache
@@ -392,7 +435,7 @@ def apply_wealth(rules: Rules, wealth: Wealth, security: Security = Security.LOW
     program = rules.program.model_copy(
         update={"floor_roles": roles, "corridor": corridor.model_copy(update={"width": width})}
     )
-    return Rules(program, rooms, rules.tiers, rules.objects, tier)
+    return Rules(program, rooms, rules.tiers, rules.objects, tier, rules.groups)
 
 
 def _data_file(kind: str, name: str) -> Any:
@@ -425,7 +468,7 @@ def _check_references(rules: Rules) -> None:
     # `access` may name room types other buildings have; unknown ones are ignored.
     used = {f.object for s in rules.rooms.values() for f in s.furniture}
     used |= {f.at for s in rules.rooms.values() for f in s.furniture if f.at}
-    unknown = used - set(rules.objects)
+    unknown = used - set(rules.objects) - set(rules.groups)
     if unknown:
         raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")
     if missing := sorted({n for n in names if n not in rules.rooms}):

@@ -191,7 +191,34 @@ def _interior_doors(
                         found = (key, run)
         return found
 
+    def partners(i: int) -> list[int]:
+        """Rooms whose doors should be close to room i's (`next_to` / `connect`, both ways)."""
+        spec = ctx.rules.spec(rooms[i].type)
+        own = set(spec.next_to) | set(spec.connect)
+        found: list[int] = []
+        for k, room in enumerate(rooms):
+            other = ctx.rules.spec(room.type)
+            if k != i and (room.type in own or rooms[i].type in {*other.next_to, *other.connect}):
+                found.append(k)
+        return found
+
+    def start_near(i: int, run: Run, width: int, margin: int) -> int:
+        """Door position: close to the partners' doors (else their rooms), else random."""
+        others = partners(i)
+        targets = [(e.x, e.y) for k in others for e in door_edges.get(k, [])]
+        targets = targets or [(c.x, c.y) for k in others for c in rooms[k].cells]
+        if not targets:
+            return rng.randint(margin, len(run) - width - margin)
+
+        def gap(start: int) -> int:
+            mid = run[start + width // 2]
+            return min(abs(mid.x - x) + abs(mid.y - y) for x, y in targets)
+
+        return min(range(margin, len(run) - width - margin + 1), key=gap)
+
     doors: list[Opening] = []
+    door_edges: dict[int, list[Edge]] = defaultdict(list)
+    linked: set[tuple[int, int]] = set()
     connected = set(circulation)
     pending = {i for i in range(len(rooms)) if i not in circulation}
     while pending:
@@ -201,11 +228,32 @@ def _interior_doors(
         (_, run), i = min(options, key=lambda o: o[0][0])
         width = ctx.rules.spec(rooms[i].type).door_width
         margin = 1 if len(run) >= width + 2 else 0
-        start = rng.randint(margin, len(run) - width - margin)
         inside = next(c for c in run[0].cells() if owner.get(c) == i)
-        doors.append(_door(run, width, inside, None, rng, start))
+        outside = next(c for c in run[0].cells() if c != inside)
+        start = start_near(i, run, width, margin)
+        door = _door(run, width, inside, None, rng, start)
+        doors.append(door)
+        door_edges[i] += door.edges
+        j = owner[outside]
+        door_edges[j] += door.edges
+        linked |= {(i, j), (j, i)}
         connected.add(i)
         pending.remove(i)
+    # Direct doors between `connect` partners that share a wall (kitchen - restaurant).
+    for (i, j), runs in sorted(shared.items()):
+        spec = ctx.rules.spec(rooms[i].type)
+        if rooms[j].type not in spec.connect or (i, j) in linked:
+            continue
+        if i in hosts or j in hosts or rooms[i].unit != rooms[j].unit:
+            continue
+        width = min(spec.door_width, ctx.rules.spec(rooms[j].type).door_width)
+        fitting = [r for r in runs if len(r) >= width]
+        if not fitting:
+            continue
+        run = max(fitting, key=len)
+        inside = next(c for c in run[0].cells() if owner.get(c) == i)
+        doors.append(_door(run, width, inside, None, rng, (len(run) - width) // 2))
+        linked |= {(i, j), (j, i)}
     return doors
 
 
