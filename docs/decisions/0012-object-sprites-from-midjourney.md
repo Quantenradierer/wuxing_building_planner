@@ -34,6 +34,10 @@ author has Midjourney access (the Discord accessor used by the SINner project).
 - Stairs, elevator cars, wall screens and whiteboards stay procedural: their exact geometry
   matters more than texture, or they are too thin to read from above.
 
+- Prompts pin the model (`--v 8.2 --raw`; V8 uses `--raw` instead of `--style raw`)
+  because the account's default is older. V8.2 follows "seen from straight above" far
+  better; objects that came out in perspective or as front views were regenerated with it.
+
 ## Consequences
 
 - Sprites are generated artwork under the author's Midjourney terms; regenerate or swap
