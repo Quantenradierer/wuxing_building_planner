@@ -237,8 +237,6 @@ Decided by the author (2026-09-27):
 Known weaknesses:
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their
   catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
-- If a stairwell borders different corridors on different floors, its door (and so the
-  stairs) can still move between floors.
 
 Possible extensions: surroundings (street, yard, parking, fire escapes, roof), more themes
 (corporate white, Barrens, print), a web UI with preview, more building types and variants

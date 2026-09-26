@@ -2,7 +2,7 @@ from dataclasses import replace
 
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side
-from roomplanner.model import Building, Floor, PlacedObject, Room
+from roomplanner.model import Building, Floor, OpeningKind, PlacedObject, Room
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations
 
@@ -81,6 +81,24 @@ def test_detects_misaligned_core() -> None:
     broken = replace(building, floors=(building.floor(0), replace(upper, rooms=rooms)))
     rules = rules_for(params.building_type, params.wealth)
     assert any("stairwell not aligned" in v.message for v in hard_violations(broken, rules))
+
+
+def test_detects_core_door_moved_between_floors() -> None:
+    params = make_params(floors_above=2)
+    building = generate(params)
+    upper = building.floor(1)
+    stairs = next(r for r in upper.rooms if r.type == "stairwell")
+    door = next(
+        o
+        for o in upper.openings
+        if o.kind is OpeningKind.DOOR and any(c in stairs.cells for c in o.edges[0].cells())
+    )
+    shifted = replace(door, edges=(*door.edges[1:], door.edges[-1].next_along()))
+    openings = tuple(shifted if o == door else o for o in upper.openings)
+    broken = replace(building, floors=(building.floor(0), replace(upper, openings=openings)))
+    rules = rules_for(params.building_type, params.wealth)
+    assert not any("door moved" in v.message for v in hard_violations(building, rules))
+    assert any("stairwell door moved" in v.message for v in hard_violations(broken, rules))
 
 
 def test_detects_rooms_below_minimum_width() -> None:

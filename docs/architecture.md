@@ -121,7 +121,8 @@ Invariants checked by `validation.py` (all hard unless noted):
   footprint; openings lie on walls and never share edges; door swings fit their wall.
 - With rules: every room is at least `min_side` wide everywhere (circulation rooms are
   measured across the open space they form together); core rooms (stairs,
-  elevators) occupy the same cells on every floor; rooms that need windows have one (soft).
+  elevators) occupy the same cells on every floor and have their doors into circulation
+  at the same edges; rooms that need windows have one (soft).
 - Objects lie inside their room and don't overlap; blocking objects keep door clearances
   free and leave the room's free floor connected.
 

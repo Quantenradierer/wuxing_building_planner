@@ -213,7 +213,8 @@ def _run_lengths(cells: frozenset[Cell], key: Callable[[Cell], tuple[int, int]])
 
 
 def _check_core(building: Building, rules: Rules) -> list[Violation]:
-    """Core rooms (stairs, elevators) must sit at the same cells on every floor."""
+    """Core rooms (stairs, elevators) sit at the same cells on every floor, and their doors
+    into circulation at the same edges (the stairs don't move between floors)."""
     violations: list[Violation] = []
     for entry in rules.active_core(building.params):
         placements = {
@@ -221,12 +222,36 @@ def _check_core(building: Building, rules: Rules) -> list[Violation]:
             for floor in building.floors
         }
         reference = placements[building.floors[0].level]
+        doors = {
+            floor.level: _circulation_doors(floor, entry.room, rules) for floor in building.floors
+        }
+        first_doors = doors[building.floors[0].level]
         for level, cells in placements.items():
             if not cells:
                 violations.append(Violation(Severity.HARD, level, f"{entry.room} missing"))
             elif cells != reference:
                 violations.append(Violation(Severity.HARD, level, f"{entry.room} not aligned"))
+            elif doors[level] != first_doors:
+                violations.append(Violation(Severity.HARD, level, f"{entry.room} door moved"))
     return violations
+
+
+def _circulation_doors(floor: Floor, room_type: str, rules: Rules) -> frozenset[Edge]:
+    """Door edges between rooms of `room_type` and circulation rooms on one floor."""
+    owner = {cell: room for room in floor.rooms for cell in room.cells}
+    found: set[Edge] = set()
+    for opening in floor.openings:
+        if opening.kind is not OpeningKind.DOOR:
+            continue
+        for edge in opening.edges:
+            rooms = [owner.get(c) for c in edge.cells()]
+            if None in rooms:
+                continue
+            types = {r.type for r in rooms if r is not None}
+            others = types - {room_type}
+            if room_type in types and others and all(rules.spec(t).circulation for t in others):
+                found.add(edge)
+    return frozenset(found)
 
 
 def _check_objects(floor: Floor) -> list[Violation]:
