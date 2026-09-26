@@ -7,7 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
-from roomplanner.geometry import CELL_SIZE_M, Cell, Edge, Side, boundary_edges
+from roomplanner.geometry import Cell, Edge, Side, boundary_edges
 from roomplanner.model import Building, Floor, OpeningKind, Room
 from roomplanner.rules import Rules, WindowRule
 
@@ -165,11 +165,9 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
             )
             continue
         spec = rules.spec(room.type)
-        min_side = round(spec.min_side_m / CELL_SIZE_M)
-        if (thinnest := _thinnest(room)) < min_side:
+        if (thinnest := _thinnest(room)) < spec.min_side:
             message = (
-                f"{room.type} {room.id} is {thinnest * CELL_SIZE_M:g} m wide in places, "
-                f"minimum {spec.min_side_m:g} m"
+                f"{room.type} {room.id} is {thinnest} cells wide in places, minimum {spec.min_side}"
             )
             violations.append(Violation(Severity.HARD, floor.level, message))
         has_window = any(c in room.cells for e in window_edges for c in e.cells())

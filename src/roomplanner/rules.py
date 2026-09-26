@@ -1,4 +1,7 @@
-"""Building rules: YAML room catalogs and building programs. See docs/decisions/0002."""
+"""Building rules: YAML room catalogs and building programs. See docs/decisions/0002.
+
+All lengths are in cells, all areas in cells (number of cells covered).
+"""
 
 from __future__ import annotations
 
@@ -15,7 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_valida
 from roomplanner.errors import NotSupportedError, RulesError
 from roomplanner.params import BuildingType, GenerationParams
 
-type Range = tuple[float, float]
+type Range = tuple[int, int]
 
 
 class _Strict(BaseModel):
@@ -35,12 +38,12 @@ class Priority(StrEnum):
 
 
 class RoomSpec(_Strict):
-    area_m2: Range
-    min_side_m: float = Field(gt=0)
+    area: Range
+    min_side: int = Field(gt=0)
     windows: WindowRule = WindowRule.OPTIONAL
     circulation: bool = Field(default=False, description="Corridor-like; no walls to others")
     max_aspect: float = Field(default=2.5, ge=1)
-    door_width_m: float = Field(default=1.0, gt=0)
+    door_width: int = Field(default=2, gt=0)
 
 
 class Catalog(_Strict):
@@ -55,7 +58,7 @@ class RoomEntry(_Strict):
     place: Literal["entrance"] | None = None
     near: Literal["core", "entrance"] | None = None
     priority: Priority = Priority.NORMAL
-    area_m2: Range | None = Field(default=None, description="Overrides the catalog")
+    area: Range | None = Field(default=None, description="Overrides the catalog")
     when: str | None = None
 
     @model_validator(mode="after")
@@ -95,7 +98,7 @@ class FloorRole(_Strict):
 
 class CoreEntry(_Strict):
     room: str
-    size_m: Range
+    size: Range
     when: str | None = None
 
     @model_validator(mode="after")
@@ -110,17 +113,17 @@ class EntranceKind(StrEnum):
 
 
 class EntranceRule(_Strict):
-    width_m: float = Field(gt=0)
+    width: int = Field(gt=0)
 
 
 class CorridorRule(_Strict):
-    width_m: float = Field(gt=0)
-    hallway_width_m: float = Field(default=1.5, gt=0, description="Side hallways of clusters")
+    width: int = Field(gt=0)
+    hallway_width: int = Field(default=3, gt=0, description="Side hallways of clusters")
 
 
 class FacadeRule(_Strict):
-    module_m: float = Field(gt=0, description="Grid for partitions and windows along facades")
-    window_m: float = Field(gt=0)
+    module: int = Field(gt=0, description="Grid for partitions and windows along facades")
+    window: int = Field(gt=0)
 
 
 class BuildingProgram(_Strict):
@@ -128,7 +131,7 @@ class BuildingProgram(_Strict):
     catalogs: list[str]
     layout: str
     corridor: CorridorRule
-    strip_depth_m: Range
+    strip_depth: Range
     facade: FacadeRule
     cluster_filler: str = Field(description="Room type filling leftover space in clusters")
     core: list[CoreEntry] = []

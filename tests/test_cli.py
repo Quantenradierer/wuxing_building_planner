@@ -6,7 +6,7 @@ from typer.testing import CliRunner
 from roomplanner.cli import app
 
 runner = CliRunner()
-BASE = ["generate", "-t", "office", "-w", "14", "-d", "9", "--seed", "5"]
+BASE = ["generate", "-t", "office", "-w", "28", "-d", "18", "--seed", "5"]
 
 
 def test_generate_ascii() -> None:
@@ -30,6 +30,6 @@ def test_sides_are_case_insensitive() -> None:
 
 
 def test_errors_exit_non_zero_with_message() -> None:
-    result = runner.invoke(app, ["generate", "-t", "office", "-w", "1", "-d", "6"])
+    result = runner.invoke(app, ["generate", "-t", "office", "-w", "2", "-d", "12"])
     assert result.exit_code == 1
     assert "error: building must be at least" in result.output

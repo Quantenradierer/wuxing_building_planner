@@ -6,8 +6,8 @@ from enum import StrEnum
 from functools import lru_cache
 from typing import NamedTuple
 
+# Physical scale, only for renderers. Everything else (parameters, rules, output) is in cells.
 CELL_SIZE_M = 0.5
-CELL_AREA_M2 = CELL_SIZE_M * CELL_SIZE_M
 
 
 class Side(StrEnum):
@@ -89,11 +89,6 @@ class Edge(NamedTuple):
         if self.axis is Axis.H:
             return Edge(self.x + 1, self.y, self.axis)
         return Edge(self.x, self.y + 1, self.axis)
-
-
-def meters_to_cells(meters: float) -> int:
-    """Snap a length to the grid (round half up)."""
-    return int(meters / CELL_SIZE_M + 0.5)
 
 
 def rectangle(x: int, y: int, width: int, height: int) -> frozenset[Cell]:

@@ -51,8 +51,8 @@ class GenerationParams(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     building_type: BuildingType
-    width_m: float = Field(gt=0, description="East-west extent (bounding box) in meters")
-    depth_m: float = Field(gt=0, description="North-south extent (bounding box) in meters")
+    width: int = Field(ge=1, description="East-west extent (bounding box) in cells")
+    depth: int = Field(ge=1, description="North-south extent (bounding box) in cells")
     floors_above: int = Field(default=1, ge=1, description="Floors above ground incl. ground")
     floors_below: int = Field(default=0, ge=0, description="Basement levels")
     wealth: Wealth = Wealth.MIDDLE

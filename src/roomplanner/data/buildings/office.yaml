@@ -1,29 +1,30 @@
+# Units are cells: lengths in cells, areas in number of cells.
 building: office
 catalogs: [common, office]
 layout: corridor
 
 corridor:
-  width_m: 2.0
-  hallway_width_m: 1.5
-strip_depth_m: [5, 9]      # depth of a row of rooms between corridor and facade
+  width: 4
+  hallway_width: 3
+strip_depth: [10, 18]      # depth of a row of rooms between corridor and facade
 facade:
-  module_m: 2.0            # partitions along facades snap to this grid
-  window_m: 1.0            # one window centred in each module
+  module: 4                # partitions along facades snap to this grid
+  window: 2                # one window centred in each module
 cluster_filler: storage    # fills leftover space next to toilet/storage clusters
 
 core:
-  - {room: stairwell, size_m: [2.5, 5], when: "floors_total >= 2"}
-  - {room: elevator, size_m: [2, 2], when: "floors_total >= 3"}
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [4, 4], when: "floors_total >= 3"}
 
 entrances:
-  main: {width_m: 2.0}
-  service: {width_m: 1.0}
+  main: {width: 4}
+  service: {width: 2}
 
 floor_roles:
   ground:
     applies: [ground]
     rooms:
-      - {room: lobby, place: entrance, area_m2: [20, 40], priority: required}
+      - {room: lobby, place: entrance, area: [80, 160], priority: required}
       - {room: toilet, count: [1, 2], near: core, priority: required}
       - {room: meeting_room, count: [0, 1]}
       - {room: storage, count: 1, priority: optional}

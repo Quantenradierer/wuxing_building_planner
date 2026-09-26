@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import cast
 
 from roomplanner.errors import InfeasibleError, NotSupportedError
-from roomplanner.geometry import CELL_SIZE_M, meters_to_cells
 from roomplanner.model import Building
 from roomplanner.params import GenerationParams, Shape
 from roomplanner.pipeline.base import (
@@ -26,11 +25,10 @@ MIN_SIDE_CELLS = 4
 def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
     if params.shape is not Shape.RECTANGLE:
         raise NotSupportedError(f"shape '{params.shape}' is not implemented yet")
-    width, height = meters_to_cells(params.width_m), meters_to_cells(params.depth_m)
+    width, height = params.width, params.depth
     if min(width, height) < MIN_SIDE_CELLS:
         raise InfeasibleError(
-            f"building must be at least {MIN_SIDE_CELLS * CELL_SIZE_M:g} m on each side, "
-            f"got {params.width_m:g} m x {params.depth_m:g} m"
+            f"building must be at least {MIN_SIDE_CELLS} cells on each side, got {width} x {height}"
         )
 
     ctx = Context(params, rules, seed, width, height)

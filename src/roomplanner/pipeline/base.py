@@ -9,7 +9,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from roomplanner.geometry import CELL_AREA_M2, Cell, Side, meters_to_cells
+from roomplanner.geometry import Cell, Side
 from roomplanner.model import Floor
 from roomplanner.params import GenerationParams
 from roomplanner.rules import EntranceKind, Rules
@@ -27,14 +27,6 @@ class Context:
     def rng(self, stage: str) -> random.Random:
         """Independent, reproducible random stream per stage and attempt."""
         return random.Random(f"{self.seed}:{self.attempt}:{stage}")
-
-    @staticmethod
-    def cells(meters: float) -> int:
-        return meters_to_cells(meters)
-
-    @staticmethod
-    def area_cells(square_meters: float) -> int:
-        return round(square_meters / CELL_AREA_M2)
 
 
 @dataclass(frozen=True)

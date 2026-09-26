@@ -14,7 +14,7 @@ import math
 import random
 from dataclasses import dataclass
 
-from roomplanner.geometry import CELL_AREA_M2, CELL_SIZE_M, Cell
+from roomplanner.geometry import Cell
 from roomplanner.model import level_name
 from roomplanner.pipeline.base import (
     AllocationError,
@@ -59,17 +59,15 @@ class CorridorLayout:
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         program = ctx.rules.program
         frame = Frame.for_size(ctx.width, ctx.height)
-        corridor = ctx.cells(program.corridor.width_m)
-        min_depth = ctx.cells(program.strip_depth_m[0])
+        corridor = program.corridor.width
+        min_depth = program.strip_depth[0]
         problems: list[str] = []
         if frame.depth < corridor + min_depth:
             problems.append(
-                f"building is {frame.depth * CELL_SIZE_M:g} m across, needs at least "
-                f"{(corridor + min_depth) * CELL_SIZE_M:g} m for a corridor and a row of rooms"
+                f"building is {frame.depth} cells across, needs at least "
+                f"{corridor + min_depth} for a corridor and a row of rooms"
             )
-        core = sum(
-            ctx.area_cells(c.size_m[0] * c.size_m[1]) for c in ctx.rules.active_core(ctx.params)
-        )
+        core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
         for level in ctx.params.levels:
             _, role = ctx.rules.role_for(level, ctx.params)
             needed = core + corridor * frame.length
@@ -77,13 +75,12 @@ class CorridorLayout:
                 if entry.priority is Priority.REQUIRED and evaluate(
                     entry.when, variables(ctx.params, level)
                 ):
-                    low = (entry.area_m2 or ctx.rules.spec(entry.room).area_m2)[0]
-                    needed += ctx.area_cells(low) * entry.count_range[0]
+                    low = (entry.area or ctx.rules.spec(entry.room).area)[0]
+                    needed += low * entry.count_range[0]
             if needed > len(footprint):
                 problems.append(
                     f"{level_name(level)}: core, corridor and required rooms need "
-                    f"{needed * CELL_AREA_M2:g} m², "
-                    f"the floor has {len(footprint) * CELL_AREA_M2:g} m²"
+                    f"{needed} cells, the floor has {len(footprint)}"
                 )
         return problems
 
@@ -100,8 +97,8 @@ class CorridorLayout:
     def _skeleton(self, ctx: Context, rng: random.Random) -> Skeleton:
         program = ctx.rules.program
         frame = Frame.for_size(ctx.width, ctx.height)
-        grid = Grid.centred(ctx.cells(program.facade.module_m), frame.length)
-        corridor_width = ctx.cells(program.corridor.width_m)
+        grid = Grid.centred(program.facade.module, frame.length)
+        corridor_width = program.corridor.width
         street = frame.local(ctx.params.street_side)
         bands = self._bands(ctx, frame, corridor_width, street, rng)
 
@@ -110,7 +107,7 @@ class CorridorLayout:
         if lobby is not None and street.is_end:
             length = max(
                 math.ceil(self._area(ctx, lobby, rng) / frame.depth),
-                ctx.cells(ctx.rules.spec(lobby.room).min_side_m),
+                ctx.rules.spec(lobby.room).min_side,
             )
             if street is LocalSide.U0:
                 lobby_slice = Interval(0, grid.ceil(length))
@@ -139,7 +136,7 @@ class CorridorLayout:
     def _bands(
         self, ctx: Context, frame: Frame, corridor: int, street: LocalSide, rng: random.Random
     ) -> list[Band]:
-        low, high = (ctx.cells(d) for d in ctx.rules.program.strip_depth_m)
+        low, high = (d for d in ctx.rules.program.strip_depth)
         depth = frame.depth
         if depth < corridor + 2 * low:
             # Single-loaded: one row of rooms, on the street side if the street is a long side.
@@ -212,7 +209,7 @@ class CorridorLayout:
         """The core occupies one full-depth slot; the first entry (stairwell) wraps the rest."""
         sizes: list[tuple[int, int]] = []  # (u, v) per entry
         for entry in entries:
-            short, long = sorted(ctx.cells(s) for s in entry.size_m)
+            short, long = sorted(s for s in entry.size)
             if short > band.depth:
                 raise AllocationError(f"{entry.room} does not fit a {band.depth}-cell strip")
             sizes.append((short, long) if long <= band.depth else (long, short))
@@ -231,7 +228,7 @@ class CorridorLayout:
         if slot is None:
             raise AllocationError("no space for the core")
 
-        main_min_side = ctx.cells(ctx.rules.spec(entries[0].room).min_side_m)
+        main_min_side = ctx.rules.spec(entries[0].room).min_side
         rooms: list[PlannedRoom] = []
         taken: set[Cell] = set()
         right_edge = slot.u1
@@ -388,7 +385,7 @@ class CorridorLayout:
             band = self._facade_band(skeleton.bands, street)
             width = max(
                 math.ceil(self._area(ctx, lobby, rng) / band.depth),
-                ctx.cells(ctx.rules.spec(lobby.room).min_side_m),
+                ctx.rules.spec(lobby.room).min_side,
             )
             target = frame.length / 2 + rng.uniform(-1, 1) * frame.length / 6
             span = self._choose(grid, grid.round_up(width), target, reserved[band.index])
@@ -415,7 +412,7 @@ class CorridorLayout:
             if band.kind is BandKind.CORRIDOR:
                 hint = frame.cell(frame.length // 2, v)
             else:
-                width = grid.round_up(ctx.cells(program.corridor.width_m))
+                width = grid.round_up(program.corridor.width)
                 target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
                 span = self._choose(grid, width, target, reserved[band.index])
                 if span is not None:
@@ -441,9 +438,7 @@ class CorridorLayout:
 
     @staticmethod
     def _area(ctx: Context, entry: RoomEntry, rng: random.Random) -> int:
-        low, high = (
-            ctx.area_cells(a) for a in (entry.area_m2 or ctx.rules.spec(entry.room).area_m2)
-        )
+        low, high = (a for a in (entry.area or ctx.rules.spec(entry.room).area))
         return rng.randint(low, high)
 
     @staticmethod

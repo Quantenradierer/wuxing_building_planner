@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from roomplanner.geometry import CELL_AREA_M2, Axis, Cell, Edge, Side
+from roomplanner.geometry import Axis, Cell, Edge, Side
 from roomplanner.params import GenerationParams
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class OpeningKind(StrEnum):
@@ -62,8 +62,8 @@ class Room:
     cells: frozenset[Cell]
 
     @property
-    def area_m2(self) -> float:
-        return len(self.cells) * CELL_AREA_M2
+    def area(self) -> int:
+        return len(self.cells)
 
 
 def level_name(level: int) -> str:

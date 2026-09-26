@@ -1,24 +1,25 @@
+# Units are cells: lengths in cells, areas in number of cells.
 rooms:
   office:
-    area_m2: [9, 20]
-    min_side_m: 2.5
+    area: [36, 80]
+    min_side: 5
     windows: required
   open_office:
-    area_m2: [40, 300]
-    min_side_m: 5
+    area: [160, 1200]
+    min_side: 10
     windows: required
-    door_width_m: 1.5
+    door_width: 3
   meeting_room:
-    area_m2: [12, 30]
-    min_side_m: 3
+    area: [48, 120]
+    min_side: 6
   kitchenette:
-    area_m2: [6, 15]
-    min_side_m: 2
+    area: [24, 60]
+    min_side: 4
   server_room:
-    area_m2: [10, 40]
-    min_side_m: 3
+    area: [40, 160]
+    min_side: 6
     windows: forbidden
   archive:
-    area_m2: [15, 60]
-    min_side_m: 3
+    area: [60, 240]
+    min_side: 6
     windows: forbidden

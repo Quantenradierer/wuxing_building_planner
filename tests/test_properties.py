@@ -14,13 +14,13 @@ from roomplanner.validation import hard_violations
 
 IMPLEMENTED = [BuildingType.OFFICE]
 
-meters = st.integers(min_value=8, max_value=90).map(lambda half_meters: half_meters / 2)
+cells = st.integers(min_value=8, max_value=90)
 
 params_strategy = st.builds(
     GenerationParams,
     building_type=st.sampled_from(IMPLEMENTED),
-    width_m=meters,
-    depth_m=meters,
+    width=cells,
+    depth=cells,
     floors_above=st.integers(min_value=1, max_value=3),
     floors_below=st.integers(min_value=0, max_value=1),
     wealth=st.sampled_from(Wealth),
@@ -58,7 +58,7 @@ def test_generation_is_deterministic_and_serializable(params: GenerationParams) 
 
 @settings(max_examples=25, deadline=None)
 @given(
-    params_strategy.filter(lambda p: min(p.width_m, p.depth_m) >= 12),
+    params_strategy.filter(lambda p: min(p.width, p.depth) >= 24),
 )
 def test_reasonably_sized_offices_are_always_feasible(params: GenerationParams) -> None:
     assert generate(params) is not None

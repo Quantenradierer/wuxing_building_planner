@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from roomplanner.geometry import CELL_SIZE_M, Axis, Cell, Edge
+from roomplanner.geometry import Axis, Cell, Edge
 from roomplanner.model import Building, Floor, OpeningKind, Room
 
 
 def render_building(building: Building) -> str:
     p = building.params
-    width_m, depth_m = building.width * CELL_SIZE_M, building.height * CELL_SIZE_M
     header = (
-        f"{p.building_type} {width_m:g}m x {depth_m:g}m, wealth={p.wealth}, seed={building.seed}"
+        f"{p.building_type} {building.width}x{building.height} cells, "
+        f"wealth={p.wealth}, seed={building.seed}"
     )
     parts = [header]
     parts += [render_floor(f, building.width, building.height) for f in reversed(building.floors)]
@@ -39,7 +39,7 @@ def render_floor(floor: Floor, width: int, height: int) -> str:
     legend: list[str] = []
     for number, room in enumerate(floor.rooms, start=1):
         _place_label(canvas, room, str(number))
-        legend.append(f"  {number:>3}  {room.type:<16} {room.area_m2:7.2f} m²")
+        legend.append(f"  {number:>3}  {room.type:<16} {room.area:6d} cells")
 
     lines = ["".join(row).rstrip() for row in canvas]
     return "\n".join([f"== {floor.name} ==", *lines, *legend])

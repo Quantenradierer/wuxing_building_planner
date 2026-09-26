@@ -124,7 +124,7 @@ class Allocator:
         self.states = [SegmentState(s) for s in segments if s.span.width > 0]
         self.anchors = anchors
         self.rng = rng
-        self.hallway = ctx.cells(rules.program.corridor.hallway_width_m)
+        self.hallway = rules.program.corridor.hallway_width
         self.warnings: list[str] = []
 
     # --- public -----------------------------------------------------------------------
@@ -168,7 +168,7 @@ class Allocator:
                 fills.append(entry)
                 continue
             spec = self.rules.spec(entry.room)
-            low, high = (self.ctx.area_cells(a) for a in (entry.area_m2 or spec.area_m2))
+            low, high = (a for a in (entry.area or spec.area))
             if entry.share is not None:
                 # A share counts against the area the room may use (facades if it needs windows).
                 target = entry.share * sum(
@@ -207,12 +207,12 @@ class Allocator:
     # --- placement --------------------------------------------------------------------
 
     def _min_width(self, spec: RoomSpec, depth: int) -> int:
-        return max(self.ctx.cells(spec.min_side_m), math.ceil(depth / spec.max_aspect))
+        return max(spec.min_side, math.ceil(depth / spec.max_aspect))
 
     def _is_small(self, request: Request, segment: Segment) -> bool:
         width = self._min_width(request.spec, segment.depth)
         width = math.ceil(width / segment.unit) * segment.unit
-        max_area = self.ctx.area_cells(request.spec.area_m2[1])
+        max_area = request.spec.area[1]
         return width * segment.depth > max_area * SMALL_ROOM_TOLERANCE
 
     def _full_units(self, request: Request, segment: Segment) -> int:
@@ -245,7 +245,7 @@ class Allocator:
     def _option(self, request: Request, state: SegmentState) -> Option | None:
         """How the request could go into this segment, without changing anything yet."""
         segment = state.segment
-        min_side = self.ctx.cells(request.spec.min_side_m)
+        min_side = request.spec.min_side
         if min_side > segment.depth:
             return None
         full = FullSlot(request, self._full_units(request, segment))
@@ -268,19 +268,14 @@ class Allocator:
         """Hallway plus one or two columns, each a whole number of units (facade grid)."""
         unit = segment.unit
         hall = math.ceil(self.hallway / unit) * unit
-        column = (
-            math.ceil(max(MIN_CLUSTER_COLUMN, self.ctx.cells(request.spec.min_side_m)) / unit)
-            * unit
-        )
+        column = math.ceil(max(MIN_CLUSTER_COLUMN, request.spec.min_side) / unit) * unit
         units = (hall + column) // unit
         columns = 1
         column_width = column
         return Cluster(units, hall, columns, column_width, [[] for _ in range(columns)])
 
     def _member_depth(self, request: Request, cluster: Cluster) -> int:
-        return max(
-            self.ctx.cells(request.spec.min_side_m), math.ceil(request.area / cluster.column_width)
-        )
+        return max(request.spec.min_side, math.ceil(request.area / cluster.column_width))
 
     def _score(self, request: Request, segment: Segment) -> float:
         score = 0.0
@@ -324,7 +319,7 @@ class Allocator:
             entry = self.rng.choice(fitting or fills)
             spec = self.rules.spec(entry.room)
             min_units = self._fill_min_units(entry, segment)
-            low, high = (self.ctx.area_cells(a) for a in (entry.area_m2 or spec.area_m2))
+            low, high = (a for a in (entry.area or spec.area))
             units = max(
                 min_units, round(self.rng.randint(low, high) / segment.depth / segment.unit)
             )
@@ -404,7 +399,7 @@ class Allocator:
 
         from_v0 = band.corridor_at is LocalSide.V0
         filler = self.rules.program.cluster_filler
-        filler_min = self.ctx.cells(self.rules.spec(filler).min_side_m)
+        filler_min = self.rules.spec(filler).min_side
         for column, stack in zip(columns, cluster.stacks, strict=True):
             depths = [d for _, d in stack]
             types = [r.type for r, _ in stack]

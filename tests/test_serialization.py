@@ -16,7 +16,7 @@ def test_round_trip() -> None:
 
 def test_document_shape() -> None:
     document = to_dict(generate(make_params()))
-    assert document["schema_version"] == 1
+    assert document["schema_version"] == 2
     assert document["cell_size_m"] == 0.5
     door = next(o for o in document["floors"][0]["openings"] if o["kind"] == "door")
     assert set(door) == {"kind", "edges", "swing"}

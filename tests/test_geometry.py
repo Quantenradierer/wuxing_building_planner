@@ -1,6 +1,6 @@
 import pytest
 
-from roomplanner.geometry import Axis, Cell, Edge, Side, boundary_edges, meters_to_cells, rectangle
+from roomplanner.geometry import Axis, Cell, Edge, Side, boundary_edges, rectangle
 
 
 @pytest.mark.parametrize("side", list(Side))
@@ -24,11 +24,6 @@ def test_between_rejects_non_adjacent_cells() -> None:
 def test_next_along_follows_the_line() -> None:
     assert Edge(2, 3, Axis.H).next_along() == Edge(3, 3, Axis.H)
     assert Edge(2, 3, Axis.V).next_along() == Edge(2, 4, Axis.V)
-
-
-@pytest.mark.parametrize(("meters", "cells"), [(0.5, 1), (1.0, 2), (1.2, 2), (1.25, 3), (30, 60)])
-def test_meters_snap_to_half_meter_grid(meters: float, cells: int) -> None:
-    assert meters_to_cells(meters) == cells
 
 
 def test_rectangle_boundary_is_its_perimeter() -> None:

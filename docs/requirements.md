@@ -29,14 +29,16 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 
 - 1 cell = 0.5 m × 0.5 m. A classic battle square (1.5 m) is 3×3 cells.
 - Walls, doors and windows lie on **edges between cells**, never in cells.
+- **All units are cells**: parameters, rule files and output use cells for lengths and
+  cell counts for areas. Meters appear only as the scale hint `cell_size_m` in the JSON.
 
 ## Parameters
 
 | Parameter       | Values                                              | v1 behaviour                          |
 |-----------------|-----------------------------------------------------|---------------------------------------|
 | `building_type` | office, apartment, supermarket, clinic              | honoured                              |
-| `width_m`       | meters (east–west), snapped to the 0.5 m grid       | honoured; bounding box for L shapes   |
-| `depth_m`       | meters (north–south), snapped to the 0.5 m grid     | honoured; bounding box for L shapes   |
+| `width`         | cells (east–west)                                   | honoured; bounding box for L shapes   |
+| `depth`         | cells (north–south)                                 | honoured; bounding box for L shapes   |
 | `floors_above`  | ≥ 1, includes the ground floor                      | honoured                              |
 | `floors_below`  | ≥ 0 (basements)                                     | honoured                              |
 | `wealth`        | squatter, low, middle, high, luxury                 | honoured                              |

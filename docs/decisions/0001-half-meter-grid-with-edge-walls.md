@@ -20,3 +20,9 @@ resolutions that distorts rooms badly.
 - Maps have many cells (a 1000 m² floor is ~4000 cells). Algorithms must not be
   per-cell expensive.
 - ASCII rendering needs a doubled grid, which is fine because ASCII is a debug view only.
+
+## Addendum (2026-09-26): cells everywhere
+
+Parameters, rule files and output use cells, not meters. Converting meters caused rounding
+surprises and made the rules harder to reason about on the grid. `cell_size_m` remains in the
+JSON as the physical scale for renderers.

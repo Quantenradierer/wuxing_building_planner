@@ -26,8 +26,8 @@ class OutputFormat(StrEnum):
 @app.command()
 def generate(
     building_type: Annotated[BuildingType, typer.Option("--type", "-t")],
-    width: Annotated[float, typer.Option("--width", "-w", help="East-west extent in meters")],
-    depth: Annotated[float, typer.Option("--depth", "-d", help="North-south extent in meters")],
+    width: Annotated[int, typer.Option("--width", "-w", help="East-west extent in cells")],
+    depth: Annotated[int, typer.Option("--depth", "-d", help="North-south extent in cells")],
     floors_above: Annotated[int, typer.Option(help="Floors above ground incl. ground")] = 1,
     floors_below: Annotated[int, typer.Option(help="Basement levels")] = 0,
     wealth: Wealth = Wealth.MIDDLE,
@@ -46,8 +46,8 @@ def generate(
     try:
         params = GenerationParams(
             building_type=building_type,
-            width_m=width,
-            depth_m=depth,
+            width=width,
+            depth=depth,
             floors_above=floors_above,
             floors_below=floors_below,
             wealth=wealth,

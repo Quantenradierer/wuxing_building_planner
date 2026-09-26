@@ -15,14 +15,22 @@ src/roomplanner/
   cli.py            Typer CLI
 ```
 
-Added in milestone 2:
+```
+  rules.py                   Pydantic models for the YAML, loader, `when:` expressions
+  data/rooms/*.yaml          room catalogs (common + per building type)
+  data/buildings/*.yaml      one program per building type
+  pipeline/base.py           Context, intermediate plan, stage protocols
+  pipeline/registry.py       strategies by name or `module:Class`
+  pipeline/run.py            feasibility check, attempts, validation, best-effort result
+  pipeline/footprint.py      footprint strategies
+  pipeline/layout/           layout strategies (frame/grid helpers, allocation, corridor)
+  pipeline/openings.py       walls, doors, windows
+```
 
-```
-  data/rooms/*.yaml       shared room catalog
-  data/buildings/*.yaml   one program per building type
-  rules.py                Pydantic models for the YAML + loader
-  pipeline/               stages and the strategy registry
-```
+## Units
+
+Everything is in cells: lengths in cells, areas in number of cells. `CELL_SIZE_M` (0.5) exists
+only so renderers know the physical scale; no code converts meters.
 
 ## Coordinates
 
@@ -74,12 +82,14 @@ Exterior vs. interior walls, room areas, etc. are derived, not stored.
 Layers (furniture, later tactical, security, condition) are added to `Floor` as
 separate collections of placed objects. Each layer is produced by its own pipeline stage.
 
-## Pipeline (milestone 2 onward)
+## Pipeline
 
 ```
-params ─► feasibility check ─► footprint ─► core ─► room layout ─► openings
+params ─► footprint ─► feasibility check ─► layout (core, corridors, rooms) ─► openings
        ─► furnishing ─► condition ─► validation ─► Building
 ```
+
+The core is placed by the layout strategy because core and corridors depend on each other.
 
 - Each stage is a **strategy** behind a small `Protocol`, registered by name.
   The building's YAML chooses strategies by name (`layout: corridor`), or by import path
@@ -90,10 +100,28 @@ params ─► feasibility check ─► footprint ─► core ─► room layout 
 - Validation is algorithm-agnostic. A hard violation triggers a retry with a derived seed;
   after N retries the best attempt is returned with warnings.
 
-Default room layout: **corridor-first**. Place the core, lay a corridor network from the
-entrance past the core, then split the remaining strips into rooms as a squarified treemap
-ordered by adjacency preference. Variants: `corridor`, `units` (flats are sub-footprints laid out
-recursively) and `hall` (reserve a hall, back-of-house along its sides).
+### Corridor layout
+
+Works in a local frame: `u` along the long axis, `v` across it.
+
+1. **Bands.** The depth is split into strips (rows of rooms) and corridors along `u`:
+   single-loaded (one strip) for shallow buildings, one central corridor for medium depth,
+   `k` parallel corridors with back-to-back interior strips for deep buildings. Strip depth
+   follows `strip_depth` from the program.
+2. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
+   the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator).
+3. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
+   slice across the whole building (street on a short end). A service corridor stub reaches
+   the service side when no corridor touches it; fallback is an exit from the stairwell.
+4. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
+   small rooms (toilets, storage) which go into *clusters*: a side hallway from the corridor
+   with rooms stacked along it. Partition walls on facade strips snap to the facade `module`
+   grid, so windows (one per module) never collide with walls.
+5. Order: required → normal → optional; fixed counts before `share` rooms, which shrink or
+   split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
+   need windows on facades and windowless ones inside.
+
+Planned variants: `units` (flats as recursively laid out sub-footprints) and `hall`.
 
 ## JSON contract
 
@@ -102,15 +130,16 @@ so internal refactors do not change the contract. Breaking changes bump `schema_
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "cell_size_m": 0.5,
-  "width": 60, "height": 40,
+  "width": 60, "height": 40,          // cells
   "seed": 42,
   "params": { "building_type": "office", "...": "..." },
   "warnings": [],
   "floors": [{
     "level": 0,
     "name": "Ground floor",
+    "role": "ground",
     "footprint": [[0, 0], [1, 0], "..."],
     "rooms": [{"id": "0.1", "type": "office", "cells": [[0, 0], "..."]}],
     "walls": [[0, 0, "h"], [0, 0, "v"], "..."],

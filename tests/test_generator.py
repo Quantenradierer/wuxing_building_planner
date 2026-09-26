@@ -20,9 +20,9 @@ def test_missing_seed_is_resolved_and_recorded() -> None:
     assert generate(building.params) == building
 
 
-def test_dimensions_snap_to_grid() -> None:
-    building = generate(make_params(width_m=12.2, depth_m=8.3))
-    assert (building.width, building.height) == (24, 17)
+def test_dimensions_are_cells() -> None:
+    building = generate(make_params(width=45, depth=27))
+    assert (building.width, building.height) == (45, 27)
 
 
 def test_levels_run_from_lowest_basement_to_top() -> None:
@@ -62,7 +62,7 @@ def test_unimplemented_building_types_are_rejected(building_type: BuildingType) 
 
 def test_too_small_footprint_fails_fast() -> None:
     with pytest.raises(InfeasibleError, match="at least"):
-        generate(make_params(width_m=1.5))
+        generate(make_params(width=3))
 
 
 @pytest.mark.parametrize("shape", [Shape.L, Shape.U, Shape.IRREGULAR])

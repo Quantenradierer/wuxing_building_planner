@@ -141,7 +141,7 @@ def _interior_doors(
     while pending and progress:
         progress = False
         for i in list(pending):
-            width = ctx.cells(ctx.rules.spec(rooms[i].type).door_width_m)
+            width = ctx.rules.spec(rooms[i].type).door_width
             options: list[tuple[bool, int, Run]] = []
             for j in sorted(connected):
                 for run in _runs(shared.get((i, j), set())):
@@ -168,7 +168,7 @@ def _exterior_door(
     used: set[Edge],
     rng: random.Random,
 ) -> Opening | None:
-    width = ctx.cells(ctx.rules.program.entrances[request.kind].width_m)
+    width = ctx.rules.program.entrances[request.kind].width
     facade = {
         Edge.of(c, request.side) for c in room.cells if c.neighbour(request.side) not in footprint
     }
@@ -209,8 +209,8 @@ def _windows(ctx: Context, footprint: frozenset[Cell], drafts: list[_Draft]) -> 
     if not drafts:
         return []
     program = ctx.rules.program
-    module = ctx.cells(program.facade.module_m)
-    width = min(module, ctx.cells(program.facade.window_m))
+    module = program.facade.module
+    width = min(module, program.facade.window)
     windows: list[Opening] = []
     for side in Side:
         facade = {Edge.of(c, side) for c in footprint if c.neighbour(side) not in footprint}

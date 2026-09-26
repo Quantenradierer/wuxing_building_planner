@@ -1,27 +1,28 @@
-# Rooms shared by most building types. Areas in m², lengths in m.
+# Rooms shared by most building types.
+# Units are cells (1 cell = 0.5 m): lengths in cells, areas in number of cells.
 rooms:
   corridor:
-    area_m2: [1, 10000]
-    min_side_m: 1.5
+    area: [4, 40000]
+    min_side: 3
     circulation: true
   lobby:
-    area_m2: [15, 200]
-    min_side_m: 3
+    area: [60, 800]
+    min_side: 6
     circulation: true
   stairwell:
-    area_m2: [10, 60]
-    min_side_m: 2.5
+    area: [40, 240]
+    min_side: 5
   elevator:
-    area_m2: [3, 20]
-    min_side_m: 1.5
+    area: [12, 80]
+    min_side: 3
     windows: forbidden
   toilet:
-    area_m2: [3, 8]
-    min_side_m: 1.5
+    area: [12, 32]
+    min_side: 3
   storage:
-    area_m2: [3, 20]
-    min_side_m: 1.5
+    area: [12, 80]
+    min_side: 3
   utility:
-    area_m2: [8, 30]
-    min_side_m: 2
+    area: [32, 120]
+    min_side: 4
     windows: forbidden
