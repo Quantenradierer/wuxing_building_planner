@@ -217,3 +217,35 @@ All seven milestones are implemented (2026-09-26).
 - Foundry export needs the import macro (scenes keep their ids so the stairs stay linked).
 
 All v2 roadmap steps are implemented (2026-09-26).
+
+## Open points (2026-09-27)
+
+To verify:
+- VTT exports in a real Foundry (doors, windows, lights, stair/elevator teleports) and a
+  Universal VTT viewer; so far only checked against the format descriptions.
+- Re-render examples once the sprite set for the newer objects exists (desk/table kinds,
+  church, garage and factory objects; Midjourney run from 2026-09-28).
+
+Decisions for the author:
+- Sprite wealth fallback: the author asked for "the next lower tier, else the default";
+  the sprite set now steps towards middle (luxury → high → middle, squatter → low →
+  middle) because the default sprites already look worn. Confirm or revert.
+- `wealth_shift` of rooms is relative to the building (executive office +1); a fixed tier
+  per room would be the alternative.
+- Stalls in shower rooms and locker rooms (one `stalls:` line in the catalog each).
+- Tactical layer: `cover` exists on objects but is shown nowhere (postponed until it is
+  clear how to show it in images and VTT exports).
+
+Known weaknesses:
+- Police station: interior rows on the ground floor are mostly storerooms; offices or
+  archives would fit better.
+- Church pews stand in blocks but don't necessarily face the altar.
+- About 13 of ~5000 rooms exceed 1.5x their catalog maximum (mostly coffins in shallow
+  rows, where the facade grid forces the width).
+- If a stairwell borders different corridors on different floors, its door (and so the
+  stairs) can still move between floors.
+
+Possible extensions: surroundings (street, yard, parking, fire escapes, roof), more themes
+(corporate white, Barrens, print), a web UI with preview, more building types and variants
+(school, motel, DocWagon station).
+
