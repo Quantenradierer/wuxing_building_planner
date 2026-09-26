@@ -166,21 +166,29 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator; in
    deep strips a storage room behind it).
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
-   slice across the whole part (street on a short end). A service corridor stub reaches the
-   service side when no corridor touches it; fallback is an exit from the stairwell.
+   slice across the whole part (street on a short end). When no corridor touches the service
+   side, the back door opens into a room on that facade, preferring the program's
+   `service_rooms` (storage, loading bay, staff room, …); programs with `service_stub: true`
+   (apartments, hotels) carve a corridor stub to the service side instead.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
-   it. Rooms that need windows are never clustered. Leftover modules widen a fill room.
-   A clustered room whose `access` names a host type becomes an *annex* with the room's
-   `annex` probability (default 0.5; specimen storage 1.0) instead: carved out of the back corner of a host slot (an existing one, or a new
-   host of a fill type), leaving the host at least `min_side` wide; its only door leads into
-   the host and nobody passes through it (storage closets, pantries). Partition walls
-   on facade strips snap to the facade `module` grid.
+   it (small fill rooms such as coffins too). Rooms that need windows are never clustered.
+   Partition walls on facade strips snap to the facade `module` grid.
+   - *Annex*: a clustered room whose `access` names a host type becomes, with the room's
+     `annex` probability (default 0.5), a closet carved out of the back corner of a host slot;
+     its only door leads into the host and nobody passes through it.
+   - *Vestibule*: a room with `vestibule: <type>` gets a full-depth column of that type
+     beside it (scrub room before an OR, airlock before a clean room) and is entered only
+     through it.
+   - *Next to*: `next_to: [types]` pulls a room into the strip segment of such a room and
+     orders the slots so they are neighbours (ICU and recovery beside the OR).
+   - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
+     over the row, extra cluster width becomes a room of its own.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
-   need windows on facades and windowless ones inside. `near: core | entrance` pulls rooms
-   towards those anchors.
+   need windows on facades and windowless ones inside. `near: core | entrance | service`
+   pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
@@ -236,7 +244,8 @@ stairwell (or a circulation room).
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, cover, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `center`, `scatter`, `near_exit` (checkouts) and `rows`
-(shelves, desks, racks with aisles and cross aisles). Counts are a range or `per: N` (one
+(shelves, desks, racks with aisles and cross aisles; `paired: true` puts rows back to back
+with an aisle after each pair, e.g. capsules). Counts are a range or `per: N` (one
 object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor;
 an exact count (`count: 1`, the default) is never scaled.
 Walkable objects (stairs, elevator car, rugs) may cover door clearances and never block. A
