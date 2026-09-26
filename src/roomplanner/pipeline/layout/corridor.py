@@ -43,6 +43,7 @@ from roomplanner.pipeline.layout.frame import (
     free_intervals,
 )
 from roomplanner.pipeline.layout.parts import decompose, wing_frame
+from roomplanner.pipeline.layout.stalls import carve_stalls
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import CoreEntry, Priority, RoomEntry, evaluate, variables
 
@@ -529,7 +530,7 @@ class CorridorLayout:
         rooms += allocator.allocate(role, level, level_name(level))
         warnings += allocator.warnings
 
-        rooms = _merge_corridors(rooms)
+        rooms = carve_stalls(_merge_corridors(rooms), ctx.rules)
         entrances = [
             EntranceRequest(kind, side, _room_index(rooms, hint), hint)
             for kind, side, hint in hints

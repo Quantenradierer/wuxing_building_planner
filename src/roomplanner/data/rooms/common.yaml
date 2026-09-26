@@ -30,15 +30,30 @@ rooms:
     windows: forbidden
     furniture:
       - {object: elevator_car, placement: center}
-  toilet:
-    area: [12, 32]
+  toilet:               # public toilet: stalls along one wall, sinks and urinals outside
+    area: [18, 48]
     min_side: 3
     cluster: true
+    stalls: {room: stall, width: 2, depth: 3, max: 6, single: wc}
     furniture:
-      - {object: wc, placement: wall, per: 8, count: [1, 4]}
-      - {object: sink, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall, count: [1, 3]}
+      - {object: urinal, placement: wall, count: [0, 3]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
-      - {object: urinal, placement: wall, count: [0, 2]}
+  stall:                # a toilet cubicle, 1 x 1.5 m, carved out of a public toilet
+    area: [4, 12]
+    min_side: 2
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: wc, placement: wall}
+  wc:                   # single toilet room (a public toilet too small for stalls)
+    area: [6, 32]
+    min_side: 2
+    transit: false
+    furniture:
+      - {object: wc, placement: wall}
+      - {object: sink, placement: wall}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   storage:
     area: [12, 80]
     min_side: 3

@@ -192,6 +192,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      (the restaurant leaves room for its kitchen).
    - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
      over the row, extra cluster width becomes a room of its own.
+   - *Stalls*: a room with `stalls:` (public toilets) gets a row of stall rooms along its
+     longest wall away from circulation, each an annex entered only from the room, with a
+     passage of the room's `min_side` in front; if none fit it becomes the `single` type
+     (a one-person WC). Private bathrooms have no stalls.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside. `near: core | entrance | service`

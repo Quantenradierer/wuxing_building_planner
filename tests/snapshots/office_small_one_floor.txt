@@ -10,40 +10,43 @@ D                                                               |
 |                                                               |
 |                            1                                  |
 |       +------DDD--+                 +-------+     +--DDD------+
-|       |U i        |                U|k   sss|     |w       i  |
+|       |          U|                U|k   sss|     |i     w w i|
 |       |           |                 |       |     |           |
-|       |    3     w|                 |s      |     |i          |
-|       |           |                 |s      |     |           |
-"       |w     i    |    }            |s     s|     |    7     w"
-"       +-----------+                 |      s|     |           "
-"       |sss k sss  |    AAA          |s     s|     |w         w"
-|       |           |    AAA          |s      |     |           |
-|       D    4      |    AAA          |s   KKK|     |U       w w|
-|       D           |                 |    KKK|     +-----------+
-"       D          s|                 |s   KKK|     |sss sss sss"
-"       |          s|                 |s      |     |           "
-"       |k sss sss s|q       2        |s 6   s|     |s         s"
-|       +-----------+q                |      s|     |s         s|
-|       |sss   sss s|q                |      s|     |s         s|
+|       |    3     i|                 |s     s|     |    7      |
+|       |           |                 |s     s|     |           |
+"       |w          |    }            |s     s|     |           |
+"       +-----------+                 |       |     +DDD+DDD+DDD+
+"       |sss sss    |    AAA          |       |     |   |   |   |
+|       |           |    AAA          |       |     |   |   |   |
+|       D    4     s|    AAA          |s     s|     |8  |9  |10 |
+|       D          s|                 |s     s|     |   |   |   |
+"       D          s|                 |s     s|     |  w|  w|  w|
+"       |           |                 |       |     +---+---+---+
+"       |  sss   sss|q       2        |s 6   s|     |sss sss   s|
+|       +-----------+q                |s     s|     |          s|
+|       |sss sss   s|q                |s     s|     |k         s|
 |       |          s|q                |       |     |           |
-"       D          s|q                |s     s|     |k   8     s"
-"       D           |q                |s     s|     |          s"
-"       D    KKK    |q                |s     s|     |s   KKK   s"
-|       |    KKK    |                 |       |     |s   KKK    |
-|       |k   KKK   s|                 D    KKK|     |s   KKK   s|
-|       |          s|                 D    KKK|     |          s|
-"       |s   5     s|AAA              D    KKK|     D    KKK   s"
-"       |s          |AAA              |       |     D    KKK    "
-"    ^^^|s          |AAA              |s     s|     D    KKK   s"
-|    ^^^|           |                 |s     s|     |          s|
-|    ^^^|sss sss sss|*               *|s sss s|     |k sss sss s|
+"       D          s|q                |s     s|     |s   KKK   s"
+"       D           |q                |s     s|     |s   KKK   s"
+"       D      KKK s|q                |s     s|     |s   KKK   s"
+|       |      KKK s|                 |       |     |           |
+|       |s   5 KKK s|                 D      s|     |    11    s|
+|       |s          |                 D      s|     |          s|
+"       |s          |AAA              D      s|     D      KKK s"
+"       |           |AAA              |       |     D      KKK  "
+"    ^^^|          s|AAA              |       |     D      KKK s"
+|    ^^^|          s|                 |       |     |          s|
+|    ^^^|k sss sss s|*               *|  sss  |     |sss k sss s|
 +--===--+===---===--+----DDDDDDD------+===----+-----+----===----+
   objects: A armchair, q bench, k cabinet, K crate, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, w wc
     1  corridor            226 cells
     2  lobby               126 cells
-    3  toilet               18 cells
+    3  wc                   18 cells
     4  storage              24 cells
     5  storage              42 cells
     6  storage              56 cells
-    7  toilet               30 cells
-    8  storage              54 cells
+    7  toilet               18 cells
+    8  stall                 6 cells
+    9  stall                 6 cells
+   10  stall                 6 cells
+   11  storage              48 cells

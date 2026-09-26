@@ -2,22 +2,22 @@ supermarket 30x26 cells, wealth=middle, seed=7
 
 == Ground floor ==
 +===--+===---===--+----DDDDDDDDDDD--+-----------------------+
-|^^^  |sss sss    |s                |  KKK           ZZZ    |
-|^^^  |           |s                |  KKK           ZZZ    |
-"^^^  D    4     s|s                |  KKK   ppp     ZZZ    |
-"     D          s|                 |        ppp     ZZZ    |
-"     D    KKK   s|                 |        ppp     ZZZ    |
-|     |    KKK    |                 |                ZZZ    |
-|     |    KKK   s|        5        |    KKK   6     ZZZ    |
-|     |          s|                 |    KKK                |
-"     |sss sss   s|                 |    KKK                |
-"     +-----------+                 |                       |
-"     |U     i   w|                 |ppp KKK                |
-|     |           |                 |ppp KKK                |
-|     |    3      |s                |ppp KKK 8              |
-|     |           |s                |                       |
-|     |          w|s             sss|                  8    |
-|     +------DDD--+------DDD--------+----------DDDDDDD------+
+|^^^  |s sss k    |s                |                    ppp|
+|^^^  |s          |s                |                    ppp|
+"^^^  |s   KKK   s|s                |      ppp           ppp|
+"     |    KKK   s|                 |      ppp              |
+"     D    KKK   s|                 |    8 ppp           ZZZ|
+|     D           |                 |                    ZZZ|
+|     D    5     s|s       6        |          7         ZZZ|
+|     |          s|s                |                    ZZZ|
+"     |sss k sss s|s               s|                    ZZZ|
+"     +-----+-----+                s|                    ZZZ|
+"     |i   i|     |s               s|      ppp           ZZZ|
+|     |     |     |s                |      ppp              |
+|     D  3  D  4  |s               s|      ppp              |
+|     D     D     |                s|                       |
+|     D     D    w|            sss s|                       |
+|     +-----+-----+------DDD--------+----------DDDDDDD------+
 D                        1                                  |
 D                                                           |
 D                                                           |
@@ -54,13 +54,14 @@ D                                                           "
 |                    CCC                                    |
 |                    CCC                                    |
 +===---===---===---===---DDDDDDDDDDD-------===---===---===--+
-  objects: 8 barrel, C checkout, K crate, Z forklift, g gondola, p pallet, ^ roof_hatch, s shelf, i sink, U trash_bin, w wc
+  objects: 8 barrel, k cabinet, C checkout, K crate, Z forklift, g gondola, p pallet, ^ roof_hatch, s shelf, i sink, w wc
     1  corridor            144 cells
     2  sales_floor         420 cells
-    3  toilet               18 cells
-    4  storage              30 cells
-    5  cold_storage         72 cells
-    6  loading_bay          96 cells
+    3  toilet                9 cells
+    4  stall                 9 cells
+    5  storage              30 cells
+    6  cold_storage         72 cells
+    7  loading_bay          96 cells
 
 Warnings:
   - Ground floor: dropped prep_kitchen (no space)

@@ -117,6 +117,16 @@ class RoomTier(_Strict):
     min_side: int | None = None
 
 
+class StallRule(_Strict):
+    """Cubicles along one wall of a public toilet, each a small room entered from it."""
+
+    room: str = Field(description="Room type of a stall")
+    width: int = Field(default=2, gt=0, description="Cells along the wall")
+    depth: int = Field(default=3, gt=0, description="Cells from the wall")
+    max: int = Field(default=6, gt=0)
+    single: str = Field(description="Room type if not even one stall fits")
+
+
 class RoomSpec(_Strict):
     area: Range
     min_side: int = Field(gt=0)
@@ -135,6 +145,7 @@ class RoomSpec(_Strict):
     connect: list[str] = Field(
         default=[], description="Also a direct door to adjacent rooms of these types"
     )
+    stalls: StallRule | None = None
     wealth_shift: int = Field(
         default=0,
         ge=-4,
@@ -475,6 +486,9 @@ def _check_references(rules: Rules) -> None:
     used = {f.object for s in rules.rooms.values() for f in s.furniture}
     used |= {f.at for s in rules.rooms.values() for f in s.furniture if f.at}
     unknown = used - set(rules.objects) - set(rules.groups)
+    for spec in rules.rooms.values():
+        if spec.stalls is not None:
+            names += [spec.stalls.room, spec.stalls.single]
     if unknown:
         raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")
     if missing := sorted({n for n in names if n not in rules.rooms}):

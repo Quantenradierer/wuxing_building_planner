@@ -191,3 +191,29 @@ def test_bigger_office_floors_get_more_toilets() -> None:
         return sum(r.type == "toilet" for r in building.floor(1).rooms)
 
     assert toilets(80, 56) > toilets(40, 24) >= 2
+
+
+def test_public_toilets_have_stalls_private_bathrooms_not() -> None:
+    for building_type in (BuildingType.OFFICE, BuildingType.APARTMENT):
+        building = generate(make_params(building_type=building_type, width=60, depth=40, seed=3))
+        for floor in building.floors:
+            rooms = {r.id: r for r in floor.rooms}
+            for obj in floor.objects:
+                if obj.kind == "wc":
+                    assert rooms[obj.room].type in ("stall", "wc", "bathroom")
+            stalls = [r for r in floor.rooms if r.type == "stall"]
+            if building_type is BuildingType.APARTMENT:
+                assert not stalls
+            for stall in stalls:
+                # Entered only from its toilet, through one door.
+                doors = [
+                    o
+                    for o in floor.openings
+                    if o.kind is OpeningKind.DOOR
+                    and any(c in stall.cells for e in o.edges for c in e.cells())
+                ]
+                assert len(doors) == 1
+                outside = next(c for c in doors[0].edges[0].cells() if c not in stall.cells)
+                assert next(r for r in floor.rooms if outside in r.cells).type == "toilet"
+    office = generate(make_params(width=60, depth=40, seed=3))
+    assert any(r.type == "stall" for f in office.floors for r in f.rooms)
