@@ -28,6 +28,10 @@ SCATTER_TRIES = 80  # random positions tried per scattered object
 class RulesFurnishing:
     def furnish(self, ctx: Context, floors: list[Floor]) -> list[Floor]:
         furnished: list[Floor] = []
+        # Rooms of one type with the same shape, doors and walls get the same furniture,
+        # mirrored if they are mirror images: the building looks designed, not rolled.
+        layouts: dict[_Signature, list[Rect]] = {}
+        kinds: dict[_Signature, list[tuple[str, bool]]] = {}
         for floor in floors:
             rng = ctx.rng(f"furnish:{floor.level}")
             objects: list[PlacedObject] = []
@@ -41,9 +45,16 @@ class RulesFurnishing:
                     rules = [*rules, FurnitureRule(object="roof_hatch", placement=Placement.CORNER)]
                 if rules:
                     clearance = clearances.get(room.id, frozenset())
-                    furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
                     wealth = object_wealth(ctx, room)
-                    objects += [replace(o, wealth=wealth) for o in furnisher.place(rules)]
+                    frame = _RoomFrame(room, clearance, solid, room is hatch)
+                    reused = frame.reuse(layouts, kinds)
+                    if reused is None:
+                        furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
+                        placed = furnisher.place(rules)
+                        frame.remember(placed, layouts, kinds)
+                    else:
+                        placed = reused
+                    objects += [replace(o, wealth=wealth) for o in placed]
             furnished.append(replace(floor, objects=tuple(objects)))
         return furnished
 
@@ -57,6 +68,84 @@ class RulesFurnishing:
         order = [r for r in floor.rooms if r.type == "stairwell"]
         order += [r for r in floor.rooms if ctx.rules.spec(r.type).circulation]
         return order[0] if order else None
+
+
+type _Signature = tuple[str, bool, frozenset[Cell], frozenset[Cell], frozenset[tuple[Cell, Side]]]
+_MIRROR_X = {Side.E: Side.W, Side.W: Side.E, Side.N: Side.N, Side.S: Side.S}
+_MIRROR_Y = {Side.N: Side.S, Side.S: Side.N, Side.E: Side.E, Side.W: Side.W}
+
+
+class _RoomFrame:
+    """A room relative to its bounding box, for reusing the layout of an identical room."""
+
+    def __init__(
+        self, room: Room, clearance: frozenset[Cell], solid: frozenset[Edge], hatch: bool
+    ) -> None:
+        self.room = room
+        xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
+        self.x0, self.y0 = min(xs), min(ys)
+        self.w, self.h = max(xs) - self.x0 + 1, max(ys) - self.y0 + 1
+        self.cells = frozenset(Cell(c.x - self.x0, c.y - self.y0) for c in room.cells)
+        self.clearance = frozenset(Cell(c.x - self.x0, c.y - self.y0) for c in clearance)
+        self.walls = frozenset(
+            (Cell(c.x - self.x0, c.y - self.y0), side)
+            for c in room.cells
+            for side in Side
+            if Edge.of(c, side) in solid
+        )
+        self.hatch = hatch
+
+    def _signature(self, mx: bool, my: bool) -> _Signature:
+        def cell(c: Cell) -> Cell:
+            return Cell(self.w - 1 - c.x if mx else c.x, self.h - 1 - c.y if my else c.y)
+
+        def side(s: Side) -> Side:
+            return _MIRROR_Y[_MIRROR_X[s] if mx else s] if my else (_MIRROR_X[s] if mx else s)
+
+        return (
+            self.room.type,
+            self.hatch,
+            frozenset(cell(c) for c in self.cells),
+            frozenset(cell(c) for c in self.clearance),
+            frozenset((cell(c), side(s)) for c, s in self.walls),
+        )
+
+    def _mirror(self, rect: Rect, mx: bool, my: bool) -> Rect:
+        x, y, w, h, facing = rect
+        if mx:
+            x, facing = self.w - x - w, _MIRROR_X[facing]
+        if my:
+            y, facing = self.h - y - h, _MIRROR_Y[facing]
+        return (x, y, w, h, facing)
+
+    def reuse(
+        self, layouts: dict[_Signature, list[Rect]], kinds: dict[_Signature, list[tuple[str, bool]]]
+    ) -> list[PlacedObject] | None:
+        """The layout of an identical room seen before (maybe mirrored), placed here."""
+        for mx in (False, True):
+            for my in (False, True):
+                key = self._signature(mx, my)
+                if key in layouts:
+                    placed: list[PlacedObject] = []
+                    for rect, (kind, blocking) in zip(layouts[key], kinds[key], strict=True):
+                        x, y, w, h, facing = self._mirror(rect, mx, my)
+                        placed.append(
+                            PlacedObject(
+                                kind, x + self.x0, y + self.y0, w, h, facing, self.room.id, blocking
+                            )
+                        )
+                    return placed
+        return None
+
+    def remember(
+        self,
+        placed: list[PlacedObject],
+        layouts: dict[_Signature, list[Rect]],
+        kinds: dict[_Signature, list[tuple[str, bool]]],
+    ) -> None:
+        key = self._signature(False, False)
+        layouts[key] = [(o.x - self.x0, o.y - self.y0, o.w, o.h, o.facing) for o in placed]
+        kinds[key] = [(o.kind, o.blocking) for o in placed]
 
 
 def object_wealth(ctx: Context, room: Room) -> Wealth | None:

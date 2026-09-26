@@ -275,6 +275,11 @@ beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` —
 turn, and `count` is per target, never scaled). Counts are a range or `per: N` (one
 object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor;
 an exact count (`count: 1`, the default) is never scaled.
+Rooms of one type with the same shape, door clearances and walls get the same layout,
+mirrored if they are mirror images, across all floors; doors without a partner to be near
+sit at the same spot of their wall, so same-sized rooms really are the same.
+Tables and desks come in kinds by use (office, executive, home and console desks;
+dining, bar, canteen, kitchen, interview and coffee tables) so each gets its own sprite.
 *Groups* (`groups:` in `objects.yaml`) are objects placed together as one: a table with its
 chairs, a desk with its chair, a bed between nightstands, a bar counter with stools. A
 group is drawn facing S with its parts at [along, deep] positions; a rule places it like

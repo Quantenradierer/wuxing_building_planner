@@ -37,7 +37,7 @@ rooms:
     furniture:
       - {object: counter, placement: wall, count: 1}
       - {object: fridge, placement: wall, count: 1}
-      - {object: cafe_table, placement: center, count: [0, 1]}
+      - {object: kitchen_table_set, placement: center, count: [0, 1]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
       - {object: coffee_machine, placement: wall}
@@ -60,7 +60,7 @@ rooms:
     min_side: 8
     windows: required
     furniture:
-      - {object: desk_with_visitors, placement: center}
+      - {object: executive_desk_set, placement: center}
       - {object: sofa_set, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}
       - {object: plant, placement: corner, count: [1, 2]}

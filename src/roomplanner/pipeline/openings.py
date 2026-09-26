@@ -248,7 +248,7 @@ def _interior_doors(
         return found
 
     def start_near(i: int, run: Run, width: int, margin: int) -> int:
-        """Door position: close to the partners' doors (else their rooms), else random.
+        """Door position: close to the partners' doors (else their rooms), else by the wall's start.
 
         Core rooms (stairwell, elevator) share their cells on every floor: their door goes
         in the middle of the wall, so it is in the same place on all floors.
@@ -259,7 +259,8 @@ def _interior_doors(
         targets = [(e.x, e.y) for k in others for e in door_edges.get(k, [])]
         targets = targets or [(c.x, c.y) for k in others for c in rooms[k].cells]
         if not targets:
-            return rng.randint(margin, len(run) - width - margin)
+            # Always the same spot of the wall: rooms of one size get the same layout.
+            return margin
 
         def gap(start: int) -> int:
             mid = run[start + width // 2]

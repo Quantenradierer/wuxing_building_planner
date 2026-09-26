@@ -82,7 +82,7 @@ rooms:
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: workstation, placement: wall}
+      - {object: console, placement: wall}
       - {object: terminal, placement: wall, count: [2, 4]}
       - {object: locker, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [1, 2]}
@@ -99,7 +99,7 @@ rooms:
     area: [30, 70]
     min_side: 5
     furniture:
-      - {object: dining_set, placement: center}
+      - {object: canteen_set, placement: center}
       - {object: locker, placement: wall, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
       - {object: coffee_machine, placement: wall, count: [0, 1]}

@@ -82,11 +82,11 @@ def test_chairs_stand_at_desks_and_meeting_tables() -> None:
                 o
                 for o in floor.objects
                 if o.room == chair.room
-                and o.kind in ("desk", "meeting_table", "table", "reception_desk", "guard_desk")
+                and (o.kind.endswith(("desk", "table")) or o.kind == "bar_counter")
                 and any(c.neighbour(s) in o.cells for c in chair.cells for s in Side)
             ]
             assert beside, chair
-    assert objects_of(building, "chair") >= objects_of(building, "desk") > 0
+    assert objects_of(building, "chair") >= objects_of(building, "office_desk") > 0
 
 
 def test_objects_survive_json_round_trip() -> None:

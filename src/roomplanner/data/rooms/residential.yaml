@@ -19,7 +19,7 @@ rooms:
     furniture:
       - {object: rug, placement: center, count: [0, 1]}
       - {object: sofa_set, placement: wall}
-      - {object: cafe_table, placement: scatter, count: [0, 1]}
+      - {object: kitchen_table_set, placement: scatter, count: [0, 1]}
       - {object: armchair, placement: scatter, count: [0, 2]}
       - {object: shelf, placement: wall, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
@@ -32,7 +32,7 @@ rooms:
     transit: false
     furniture:
       - {object: bed_set, placement: wall}
-      - {object: workstation, placement: wall, count: [0, 1]}
+      - {object: home_workstation, placement: wall, count: [0, 1]}
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [0, 2]}
   bathroom:
@@ -53,7 +53,7 @@ rooms:
       - {object: counter, placement: wall}
       - {object: stove, placement: wall}
       - {object: fridge, placement: wall}
-      - {object: cafe_table, placement: scatter, count: [0, 1]}
+      - {object: kitchen_table_set, placement: scatter, count: [0, 1]}
       - {object: sink, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   laundry:
