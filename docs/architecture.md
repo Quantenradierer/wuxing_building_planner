@@ -18,8 +18,9 @@ src/roomplanner/
     base.py                  Context, intermediate plan, stage protocols
     registry.py              strategies by name or `module:Class`
     run.py                   feasibility check, attempts, validation, best-effort result
-    footprint.py             footprint strategies: rectangle, l
+    footprint.py             footprint strategies: rectangle, l, u
     layout/frame.py          local (u, v) frames, facade grid, bands, intervals
+    layout/parts.py          splits a footprint into a main part and wings
     layout/corridor.py       corridor layout (parts, bands, core, lobby, connectors)
     layout/allocation.py     fills strip segments with a floor role's rooms
     layout/units.py          subdivides units (apartments)
@@ -124,9 +125,11 @@ params ─► footprint ─► feasibility check ─► layout (core, corridors,
 Works in local frames: `u` along a part's long axis (or away from the junction for a wing),
 `v` across it.
 
-1. **Parts.** A rectangle is one part. An L is split into a *main* bar that touches the street
-   (lobby, core, entrances) and a *wing*; each wing corridor is joined to the main part by a
-   connector stub through the adjacent strip.
+1. **Parts** (`layout/parts.py`). A rectangle is one part. Other footprints are cut along
+   every line where their outline changes; the *main* part is a maximal rectangle of those
+   blocks (preferring one on the street, deep enough, largest), the rest becomes *wings*,
+   each attached with one whole end to an earlier part (its parent). Each wing corridor is
+   joined to its parent by a connector stub through the parent's adjacent strip.
 2. **Bands.** The depth is split into strips (rows of rooms) and corridors along `u`:
    single-loaded (one strip) for shallow parts, one central corridor for medium depth,
    `k` parallel corridors ("racetrack") for deep ones: facade strips keep their

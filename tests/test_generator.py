@@ -6,7 +6,7 @@ from roomplanner.geometry import Side
 from roomplanner.model import OpeningKind
 from roomplanner.params import BuildingType, Shape, Wealth
 from roomplanner.rules import rules_for
-from roomplanner.validation import validate
+from roomplanner.validation import hard_violations, validate
 
 from .conftest import make_params
 
@@ -67,7 +67,7 @@ def test_too_small_footprint_fails_fast() -> None:
         generate(make_params(width=3))
 
 
-@pytest.mark.parametrize("shape", [Shape.U, Shape.IRREGULAR])
+@pytest.mark.parametrize("shape", [Shape.IRREGULAR])
 def test_unimplemented_shapes_are_rejected(shape: Shape) -> None:
     with pytest.raises(NotSupportedError):
         generate(make_params(shape=shape))
@@ -81,6 +81,23 @@ def test_l_shape_misses_one_corner() -> None:
     assert (
         validate(building, rules_for(building.params.building_type, building.params.wealth)) == []
     )
+
+
+@pytest.mark.parametrize("building_type", list(BuildingType))
+def test_u_shape_has_a_courtyard_notch(building_type: BuildingType) -> None:
+    building = generate(
+        make_params(building_type=building_type, shape=Shape.U, width=90, depth=64, seed=3)
+    )
+    footprint = building.floor(0).footprint
+    corners = [(0, 0), (89, 0), (0, 63), (89, 63)]
+    assert all(corner in footprint for corner in corners)
+    assert len(footprint) < 90 * 64
+    assert hard_violations(building, rules_for(building_type, building.params.wealth)) == []
+
+
+def test_small_u_shape_explains_minimum() -> None:
+    with pytest.raises(InfeasibleError, match="too small for a U shape"):
+        generate(make_params(shape=Shape.U, width=30, depth=30))
 
 
 def test_small_l_shape_explains_minimum() -> None:

@@ -26,7 +26,7 @@ params_strategy = st.builds(
     wealth=st.sampled_from(Wealth),
     condition=st.sampled_from(Condition),
     security=st.sampled_from(Security),
-    shape=st.sampled_from([Shape.RECTANGLE, Shape.L]),
+    shape=st.sampled_from([Shape.RECTANGLE, Shape.L, Shape.U]),
     street_side=st.sampled_from(Side),
     service_side=st.sampled_from(Side),
     seed=st.integers(min_value=0, max_value=2**32 - 1),

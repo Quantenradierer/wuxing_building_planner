@@ -24,7 +24,7 @@ MIN_SIDE_CELLS = 4
 
 
 def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
-    if params.shape not in (Shape.RECTANGLE, Shape.L):
+    if params.shape not in (Shape.RECTANGLE, Shape.L, Shape.U):
         raise NotSupportedError(f"shape '{params.shape}' is not implemented yet")
     width, height = params.width, params.depth
     if min(width, height) < MIN_SIDE_CELLS:

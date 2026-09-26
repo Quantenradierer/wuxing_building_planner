@@ -14,14 +14,23 @@ In scope (v1):
 - Furniture and fixtures.
 - Multiple floors above ground and basements.
 
+In scope (v2, see "Roadmap"):
+
+- Security layer: devices (cameras, maglocks, card readers, alarm panels), security rooms
+  per tier, door properties (lock, rating, material).
+- Condition layer: debris, removed furniture, broken / missing / blocked doors, wall
+  breaches, collapsed areas, broken windows; decals in the image renderer.
+- Lights: per room type, altered by condition and security.
+- Image rendering (procedural, themeable) and VTT export (Universal VTT, Foundry VTT).
+
 Later (the model must allow them without redesign):
 
-- Tactical markup layer (cover, difficult terrain).
-- Security layer (cameras, maglocks, guard posts, …).
-- Condition layer (debris, blocked doors, holes in walls).
-- Surroundings (lot, parking, loading area, street). The canvas may then be larger
-  than the footprint; cells outside the footprint are the exterior zone.
-- Image rendering.
+- Tactical markup layer (cover, difficult terrain): postponed until it is clear how images
+  and VTT exports would use it. `objects.yaml` keeps its `cover` field, unused.
+- Surroundings (lot, parking, loading area, street, fire escapes). The canvas may then be
+  larger than the footprint; cells outside the footprint are the exterior zone.
+- Parking garage type with its own "deck" layout; basement garages.
+- Roll20 export, Foundry *Levels* support.
 
 Out of scope: objective markers (paydata, safes, …), scenario design.
 
@@ -42,15 +51,17 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 | `floors_above`  | ≥ 1, includes the ground floor                      | honoured                              |
 | `floors_below`  | ≥ 0 (basements)                                     | honoured                              |
 | `wealth`        | squatter, low, middle, high, luxury                 | honoured                              |
-| `condition`     | pristine, maintained, run_down, derelict, ruined    | validated and stored only             |
-| `security`      | none, low, corporate, aaa                           | validated and stored only             |
-| `shape`         | rectangle, l, u, irregular                          | rectangle and L; others are rejected  |
+| `condition`     | pristine, maintained, run_down, derelict, ruined    | condition layer (v2)                  |
+| `security`      | none, low, corporate, aaa                           | security layer (v2)                   |
+| `shape`         | rectangle, l, u, t, z, stepped, irregular           | all; `irregular` picks one by seed    |
+| `entrances`     | list of entrance kinds                              | overrides the building type's list    |
 | `street_side`   | N, E, S, W (default S)                              | main entrance faces this side         |
 | `service_side`  | N, E, S, W (default: opposite of `street_side`)     | service entrances face this side      |
 | `seed`          | integer (random if omitted, always recorded)        | full determinism                      |
 
-There are no size presets and no room overrides. L shapes need both arms as deep as the
-layout's main part (e.g. corridor plus one row of rooms).
+There are no size presets and no room overrides. Shapes other than the rectangle are unions
+of rectangles (no diagonals or curves); every arm is as deep as the layout's main part
+(e.g. corridor plus one row of rooms).
 
 Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2, …
 (displayed as B1, B2, …).
@@ -88,9 +99,11 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 
 ## Entrances
 
-- The building type defines which entrance kinds exist and their widths. v1: `main` and
-  `service` (loading dock, ambulance bay, back door). Emergency exits and fire escapes are
-  planned.
+- The building type defines which entrance kinds exist and their widths: `main`, `service`
+  (loading dock, ambulance bay, back door), `emergency` (exit from a corridor end or the
+  stairwell) and `roof` (hatch or door from the top floor's stairwell; the roof itself is
+  not modelled). The `entrances` parameter overrides the type's list. Fire escapes wait for
+  surroundings.
 - The main entrance faces `street_side`; the service entrance faces `service_side`.
 
 ## Openings
@@ -129,7 +142,37 @@ rooms mean fewer rooms.
   that assert the validator's hard invariants for arbitrary valid parameters.
 - Tooling: uv, pytest, Hypothesis, ruff, pyright, Python 3.14.
 
-## Milestones
+## Rendering and VTT export (v2)
+
+- The image renderer reads only the JSON. Procedural cyberpunk style (dark concrete, neon
+  accents per room type), swappable themes (a textured asset pack is just another theme).
+  PNG (or WebP), one image per floor, default 50 px per cell. Lights appear as a subtle
+  glow; the VTT does the real lighting.
+- VTT export: Universal VTT (`.dd2vtt`, one file per floor) first, then Foundry VTT (v12+,
+  one scene per floor in an adventure/compendium JSON). Grid size is a per-VTT parameter,
+  default 1 m (2 × 2 cells). Walls, doors (locked if they have a lock), windows (block
+  movement, not sight or light) and lights are exported; lights can be switched off.
+  Foundry stairs and elevators teleport tokens between floors via native Scene Regions.
+
+## Building types (v2)
+
+New: hospital, hotel (capsule hotel as its squatter/low tiers), corp lab, nightclub
+(hall), warehouse (hall). Variants of the v1 types, each a separate type with its own
+YAML: corp branch office (`corp_office`), street doc (`street_doc`), coffin block
+(`coffin_block`), convenience store (`stuffer_shack`).
+
+## Roadmap (v2)
+
+1. U shapes (main bar plus wings attached to their parent part).
+2. Layout fixes: leftover space to useful rooms instead of storage, fuller furnishing,
+   visible stairs and elevators.
+3. Image renderer.
+4. Security, condition, lights, emergency and roof entrances.
+5. Irregular shapes: `t`, `z`, `stepped`, `irregular`.
+6. New building types and variants.
+7. VTT export: Universal VTT, then Foundry.
+
+## Milestones (v1)
 
 1. Skeleton, data model, ASCII and JSON output; a hardcoded single-room generator.
 2. Engine and office: YAML catalog/programs, pipeline and strategy registry, rectangular
@@ -144,7 +187,7 @@ All seven milestones are implemented (2026-09-26).
 
 ## Known limitations (v1)
 
-- Shapes `u` and `irregular` are rejected; `condition` and `security` have no effect yet.
+- Shape `irregular` is rejected; `condition` and `security` have no effect yet.
 - Only `main` and `service` entrances; no fire escapes or emergency exits.
 - Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.

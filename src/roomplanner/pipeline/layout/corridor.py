@@ -1,7 +1,8 @@
-"""Corridor-first layout for rectangular and L-shaped footprints. See docs/architecture.md.
+"""Corridor-first layout for footprints made of rectangles. See docs/architecture.md.
 
-1. Split the footprint into parts: a rectangle is one part; an L is a main bar (touching
-   the street, holding lobby and core) plus a wing whose corridors start at the junction.
+1. Split the footprint into parts: a rectangle is one part; other shapes are a main bar
+   (touching the street, holding lobby and core) plus wings whose corridors start at the
+   junction with their parent part (see `parts.py`).
 2. Split each part's depth into bands: rows of rooms ("strips") and corridors along its
    u-axis. Shallow parts get one single-loaded corridor, deeper ones a central corridor,
    very deep ones several parallel corridors joined by a cross corridor.
@@ -40,6 +41,7 @@ from roomplanner.pipeline.layout.frame import (
     LocalSide,
     free_intervals,
 )
+from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import CoreEntry, EntranceKind, Priority, RoomEntry, evaluate, variables
 
@@ -72,7 +74,7 @@ class Skeleton:
     """Everything shared by all floors."""
 
     main: Part
-    wing: Part | None
+    wings: list[Part]
     core_band: Band | None = None
     core_slot: Interval | None = None
     core_rooms: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
@@ -80,14 +82,7 @@ class Skeleton:
 
     @property
     def parts(self) -> list[Part]:
-        return [self.main] + ([self.wing] if self.wing else [])
-
-
-@dataclass(frozen=True)
-class Split:
-    main: Box
-    wing: Box | None
-    junction: Side | None  # side of the main part the wing is attached to
+        return [self.main, *self.wings]
 
 
 @register("layout", "corridor")
@@ -101,10 +96,11 @@ class CorridorLayout:
         corridor = program.corridor.width
         wing_depth = corridor + program.strip_depth[0]
         problems: list[str] = []
-        split = _split(footprint, ctx.params.street_side, wing_depth)
-        frames = [("building", Frame.for_rect(split.main), self.main_min_depth(ctx))]
-        if split.wing is not None and split.junction is not None:
-            frames.append(("wing", _wing_frame(split.wing, split.junction), wing_depth))
+        pieces = decompose(footprint, ctx.params.street_side, self.main_min_depth(ctx), wing_depth)
+        frames = [("building", Frame.for_rect(pieces[0].box), self.main_min_depth(ctx))]
+        for piece in pieces[1:]:
+            assert piece.junction is not None
+            frames.append(("wing", wing_frame(piece.box, piece.junction), wing_depth))
         for name, frame, min_depth in frames:
             if frame.depth < min_depth:
                 problems.append(
@@ -147,19 +143,28 @@ class CorridorLayout:
     def _skeleton(self, ctx: Context, footprint: frozenset[Cell], rng: random.Random) -> Skeleton:
         program = ctx.rules.program
         corridor_width = program.corridor.width
-        split = _split(footprint, ctx.params.street_side, corridor_width + program.strip_depth[0])
+        pieces = decompose(
+            footprint,
+            ctx.params.street_side,
+            self.main_min_depth(ctx),
+            corridor_width + program.strip_depth[0],
+        )
 
-        main_frame = Frame.for_rect(split.main)
+        main_frame = Frame.for_rect(pieces[0].box)
         street = main_frame.local(ctx.params.street_side)
-        junction = main_frame.local(split.junction) if split.junction else None
-        main = self._part(ctx, main_frame, street, rng, junction, main=True)
-        wing = None
-        if split.wing is not None and split.junction is not None:
-            wing_frame = _wing_frame(split.wing, split.junction)
-            wing = self._part(ctx, wing_frame, wing_frame.local(ctx.params.street_side), rng)
-            self._connect(ctx, main, wing, main_frame.local(split.junction))
+        junctions = [p.junction for p in pieces[1:] if p.parent == 0 and p.junction]
+        junction = main_frame.local(junctions[0]) if junctions else None
+        parts = [self._part(ctx, main_frame, street, rng, junction, main=True)]
+        for piece in pieces[1:]:
+            assert piece.parent is not None and piece.junction is not None
+            frame = wing_frame(piece.box, piece.junction)
+            wing = self._part(ctx, frame, frame.local(ctx.params.street_side), rng)
+            parent = parts[piece.parent]
+            self._connect(ctx, parent, wing, parent.frame.local(piece.junction))
+            parts.append(wing)
 
-        skeleton = Skeleton(main, wing)
+        main = parts[0]
+        skeleton = Skeleton(main, parts[1:])
         lobby = self._lobby_entry(ctx)
         grid, frame = main.grid, main.frame
         if lobby is not None and street.is_end:
@@ -211,15 +216,15 @@ class CorridorLayout:
         bands = self._bands(ctx, frame, ctx.rules.program.corridor.width, street, rng)
         return Part(frame, grid, bands)
 
-    def _connect(self, ctx: Context, main: Part, wing: Part, junction: LocalSide) -> None:
-        """Corridor stubs through the main part's strips so the wing's corridors connect."""
+    def _connect(self, ctx: Context, parent: Part, wing: Part, junction: LocalSide) -> None:
+        """Corridor stubs through the parent part's strips so the wing's corridors connect."""
         corridor_width = ctx.rules.program.corridor.width
         wing_corridors = [b for b in wing.bands if b.kind is BandKind.CORRIDOR]
-        frame = main.frame
+        frame = parent.frame
         if not junction.is_end:
-            band = main.bands[0] if junction is LocalSide.V0 else main.bands[-1]
+            band = parent.bands[0] if junction is LocalSide.V0 else parent.bands[-1]
             whole = _u_range(frame, [wing.frame.cell(0, v) for v in range(wing.frame.depth)])
-            main.no_facade.setdefault(band.index, []).append(whole)
+            parent.no_facade.setdefault(band.index, []).append(whole)
             if band.kind is BandKind.CORRIDOR:
                 return
             spans: list[Interval] = []
@@ -228,14 +233,14 @@ class CorridorLayout:
                 spans.append(_u_range(frame, cells))
             for span in spans:
                 span = _absorb_gaps(
-                    span, [s for s in spans if s != span], frame.length, main.grid.module
+                    span, [s for s in spans if s != span], frame.length, parent.grid.module
                 )
-                main.reserved.setdefault(band.index, []).append(span)
-                main.connectors.append(
+                parent.reserved.setdefault(band.index, []).append(span)
+                parent.connectors.append(
                     PlannedRoom("corridor", frame.rect(span.u0, span.u1, band.v0, band.v1))
                 )
             return
-        width = main.grid.round_up(corridor_width)
+        width = parent.grid.round_up(corridor_width)
         end = (
             Interval(0, width)
             if junction is LocalSide.U0
@@ -245,14 +250,14 @@ class CorridorLayout:
             cells = [wing.frame.cell(0, v) for v in range(corridor.v0, corridor.v1)]
             v_values = {frame.to_local(c.x + 0.5, c.y + 0.5)[1] for c in cells}
             v_lo, v_hi = math.floor(min(v_values)), math.floor(max(v_values)) + 1
-            overlapping = [b for b in main.bands if b.v0 < v_hi and v_lo < b.v1]
+            overlapping = [b for b in parent.bands if b.v0 < v_hi and v_lo < b.v1]
             if any(b.kind is BandKind.CORRIDOR for b in overlapping):
                 continue
             for band in overlapping:
-                if end in main.reserved.get(band.index, []):
+                if end in parent.reserved.get(band.index, []):
                     continue
-                main.reserved.setdefault(band.index, []).append(end)
-                main.connectors.append(
+                parent.reserved.setdefault(band.index, []).append(end)
+                parent.connectors.append(
                     PlannedRoom("corridor", frame.rect(end.u0, end.u1, band.v0, band.v1))
                 )
 
@@ -639,89 +644,6 @@ class CorridorLayout:
     @staticmethod
     def _facade_band(bands: list[Band], side: LocalSide) -> Band:
         return bands[0] if side is LocalSide.V0 else bands[-1]
-
-
-def _split(footprint: frozenset[Cell], street: Side, min_depth: int) -> Split:
-    """Rectangle, or an L split into a main bar touching the street plus a wing."""
-    xs, ys = [c.x for c in footprint], [c.y for c in footprint]
-    bbox = Box(min(xs), min(ys), max(xs) + 1, max(ys) + 1)
-    missing = [
-        Cell(x, y)
-        for x in range(bbox.x0, bbox.x1)
-        for y in range(bbox.y0, bbox.y1)
-        if Cell(x, y) not in footprint
-    ]
-    if not missing:
-        return Split(bbox, None, None)
-    cut = Box(
-        min(c.x for c in missing),
-        min(c.y for c in missing),
-        max(c.x for c in missing) + 1,
-        max(c.y for c in missing) + 1,
-    )
-    options: list[Split] = []
-    # Main bar spanning the full width, wing above or below it.
-    if cut.y0 == bbox.y0:
-        wing_x = (bbox.x0, cut.x0) if cut.x1 == bbox.x1 else (cut.x1, bbox.x1)
-        options.append(
-            Split(
-                Box(bbox.x0, cut.y1, bbox.x1, bbox.y1),
-                Box(wing_x[0], bbox.y0, wing_x[1], cut.y1),
-                Side.N,
-            )
-        )
-    else:
-        wing_x = (bbox.x0, cut.x0) if cut.x1 == bbox.x1 else (cut.x1, bbox.x1)
-        options.append(
-            Split(
-                Box(bbox.x0, bbox.y0, bbox.x1, cut.y0),
-                Box(wing_x[0], cut.y0, wing_x[1], bbox.y1),
-                Side.S,
-            )
-        )
-    # Main bar spanning the full height, wing left or right of it.
-    if cut.x0 == bbox.x0:
-        wing_y = (bbox.y0, cut.y0) if cut.y1 == bbox.y1 else (cut.y1, bbox.y1)
-        options.append(
-            Split(
-                Box(cut.x1, bbox.y0, bbox.x1, bbox.y1),
-                Box(bbox.x0, wing_y[0], cut.x1, wing_y[1]),
-                Side.W,
-            )
-        )
-    else:
-        wing_y = (bbox.y0, cut.y0) if cut.y1 == bbox.y1 else (cut.y1, bbox.y1)
-        options.append(
-            Split(
-                Box(bbox.x0, bbox.y0, cut.x0, bbox.y1),
-                Box(cut.x0, wing_y[0], bbox.x1, wing_y[1]),
-                Side.E,
-            )
-        )
-
-    def score(split: Split) -> tuple[bool, bool, int]:
-        assert split.wing is not None and split.junction is not None
-        main, wing = split.main, split.wing
-        wing_depth = _wing_frame(wing, split.junction).depth
-        fits = min(Frame.for_rect(main).depth, wing_depth) >= min_depth
-        area = (main.x1 - main.x0) * (main.y1 - main.y0)
-        return split.junction is not street, fits, area
-
-    return max(options, key=score)
-
-
-def _wing_frame(wing: Box, junction: Side) -> Frame:
-    """Frame whose u runs away from the main part, u = 0 at the junction."""
-    width, height = wing.x1 - wing.x0, wing.y1 - wing.y0
-    match junction:
-        case Side.N:
-            return Frame(False, height, width, wing.x0, wing.y0, flip_u=True)
-        case Side.S:
-            return Frame(False, height, width, wing.x0, wing.y0)
-        case Side.W:
-            return Frame(True, width, height, wing.x0, wing.y0, flip_u=True)
-        case Side.E:
-            return Frame(True, width, height, wing.x0, wing.y0)
 
 
 def _absorb_gaps(span: Interval, others: list[Interval], length: int, min_gap: int) -> Interval:
