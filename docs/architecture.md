@@ -102,12 +102,16 @@ The core is placed by the layout strategy because core and corridors depend on e
 
 ### Corridor layout
 
-Works in a local frame: `u` along the long axis, `v` across it.
+Works in local frames: `u` along a part's long axis, `v` across it.
+
+0. **Parts.** A rectangle is one part. An L is split into a *main* bar that touches the street
+   (lobby, core, entrances) and a *wing* whose frame runs away from the junction; each wing
+   corridor is joined to the main part by a connector stub through the adjacent strip.
 
 1. **Bands.** The depth is split into strips (rows of rooms) and corridors along `u`:
    single-loaded (one strip) for shallow buildings, one central corridor for medium depth,
-   `k` parallel corridors with back-to-back interior strips for deep buildings. Strip depth
-   follows `strip_depth` from the program.
+   `k` parallel corridors ("racetrack") for deep buildings: facade strips keep their
+   `strip_depth`, thin back-to-back interior strips between the corridors take the rest.
 2. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
    the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator).
 3. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
@@ -120,6 +124,16 @@ Works in a local frame: `u` along the long axis, `v` across it.
 5. Order: required → normal → optional; fixed counts before `share` rooms, which shrink or
    split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside.
+6. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
+
+Windows are identical on all floors except where a floor's own doors are.
+
+### Wealth
+
+`data/wealth.yaml` holds per-tier multipliers (area, corridor width, furniture density).
+`rules_for(type, wealth)` derives the effective rules: scaled room areas, per-room tier
+overrides (`wealth:` in the catalog), and room entries / floor roles filtered by their
+`wealth:` lists (e.g. the office's executive top floor exists for high and luxury only).
 
 Planned variants: `units` (flats as recursively laid out sub-footprints) and `hall`.
 

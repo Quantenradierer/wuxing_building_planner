@@ -6,7 +6,7 @@ All lengths are in cells, all areas in cells (number of cells covered).
 from __future__ import annotations
 
 import ast
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cache
 from importlib import resources
@@ -16,7 +16,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from roomplanner.errors import NotSupportedError, RulesError
-from roomplanner.params import BuildingType, GenerationParams
+from roomplanner.params import BuildingType, GenerationParams, Wealth
 
 type Range = tuple[int, int]
 
@@ -37,6 +37,13 @@ class Priority(StrEnum):
     OPTIONAL = "optional"
 
 
+class RoomTier(_Strict):
+    """Per-wealth override of a room; applied after the global wealth multipliers."""
+
+    area: Range | None = None
+    min_side: int | None = None
+
+
 class RoomSpec(_Strict):
     area: Range
     min_side: int = Field(gt=0)
@@ -44,6 +51,7 @@ class RoomSpec(_Strict):
     circulation: bool = Field(default=False, description="Corridor-like; no walls to others")
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
+    wealth: dict[Wealth, RoomTier] = {}
 
 
 class Catalog(_Strict):
@@ -60,6 +68,7 @@ class RoomEntry(_Strict):
     priority: Priority = Priority.NORMAL
     area: Range | None = Field(default=None, description="Overrides the catalog")
     when: str | None = None
+    wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
 
     @model_validator(mode="after")
     def _one_quantity(self) -> Self:
@@ -86,6 +95,7 @@ class Applies(StrEnum):
 class FloorRole(_Strict):
     applies: list[Applies]
     when: str | None = None
+    wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     rooms: list[RoomEntry]
 
     @model_validator(mode="after")
@@ -126,6 +136,18 @@ class FacadeRule(_Strict):
     window: int = Field(gt=0)
 
 
+class WealthRule(_Strict):
+    """Multipliers for one wealth tier."""
+
+    area: float = Field(default=1.0, gt=0)
+    corridor: float = Field(default=1.0, gt=0)
+    furniture: float = Field(default=1.0, ge=0)
+
+
+class WealthTable(_Strict):
+    tiers: dict[Wealth, WealthRule]
+
+
 class BuildingProgram(_Strict):
     building: BuildingType
     catalogs: list[str]
@@ -137,12 +159,15 @@ class BuildingProgram(_Strict):
     core: list[CoreEntry] = []
     entrances: dict[EntranceKind, EntranceRule]
     floor_roles: dict[str, FloorRole]
+    wealth: dict[Wealth, WealthRule] = Field(default={}, description="Overrides wealth.yaml")
 
 
 @dataclass(frozen=True)
 class Rules:
     program: BuildingProgram
     rooms: dict[str, RoomSpec]
+    tiers: dict[Wealth, WealthRule]
+    wealth: WealthRule = field(default_factory=WealthRule)  # tier these rules are derived for
 
     def spec(self, room: str) -> RoomSpec:
         return self.rooms[room]
@@ -186,9 +211,54 @@ def load_rules(building_type: BuildingType) -> Rules:
     rooms: dict[str, RoomSpec] = {}
     for name in program.catalogs:
         rooms |= _load(Catalog, _data_file("rooms", name)).rooms
-    rules = Rules(program, rooms)
+    tiers = _load(WealthTable, resources.files("roomplanner") / "data" / "wealth.yaml").tiers
+    rules = Rules(program, rooms, tiers | program.wealth)
     _check_references(rules)
     return rules
+
+
+@cache
+def rules_for(building_type: BuildingType, wealth: Wealth) -> Rules:
+    """The rules of a building type with one wealth tier applied (see requirements, Wealth)."""
+    return apply_wealth(load_rules(building_type), wealth)
+
+
+def apply_wealth(rules: Rules, wealth: Wealth) -> Rules:
+    tier = rules.tiers.get(wealth, WealthRule())
+
+    def scale(area: Range) -> Range:
+        return max(1, round(area[0] * tier.area)), max(1, round(area[1] * tier.area))
+
+    rooms: dict[str, RoomSpec] = {}
+    for name, spec in rules.rooms.items():
+        override = spec.wealth.get(wealth, RoomTier())
+        rooms[name] = spec.model_copy(
+            update={
+                "area": override.area or scale(spec.area),
+                "min_side": override.min_side or spec.min_side,
+            }
+        )
+
+    roles: dict[str, FloorRole] = {}
+    for name, role in rules.program.floor_roles.items():
+        if role.wealth is not None and wealth not in role.wealth:
+            continue
+        entries = [
+            e.model_copy(update={"area": scale(e.area) if e.area else None})
+            for e in role.rooms
+            if e.wealth is None or wealth in e.wealth
+        ]
+        if not any(e.fill for e in entries):
+            raise RulesError(f"{rules.program.building}: role {name} has no fill room for {wealth}")
+        roles[name] = role.model_copy(update={"rooms": entries})
+
+    corridor = rules.program.corridor
+    minimum = rules.rooms["corridor"].min_side if "corridor" in rules.rooms else 1
+    width = max(minimum, round(corridor.width * tier.corridor))
+    program = rules.program.model_copy(
+        update={"floor_roles": roles, "corridor": corridor.model_copy(update={"width": width})}
+    )
+    return Rules(program, rooms, rules.tiers, tier)
 
 
 def _data_file(kind: str, name: str) -> Any:

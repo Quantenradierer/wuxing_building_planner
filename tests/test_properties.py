@@ -7,8 +7,8 @@ from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
 from roomplanner.model import Building
-from roomplanner.params import BuildingType, Condition, GenerationParams, Security, Wealth
-from roomplanner.rules import load_rules
+from roomplanner.params import BuildingType, Condition, GenerationParams, Security, Shape, Wealth
+from roomplanner.rules import rules_for
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
@@ -26,6 +26,7 @@ params_strategy = st.builds(
     wealth=st.sampled_from(Wealth),
     condition=st.sampled_from(Condition),
     security=st.sampled_from(Security),
+    shape=st.sampled_from([Shape.RECTANGLE, Shape.L]),
     street_side=st.sampled_from(Side),
     service_side=st.sampled_from(Side),
     seed=st.integers(min_value=0, max_value=2**32 - 1),
@@ -39,12 +40,12 @@ def generate_or_none(params: GenerationParams) -> Building | None:
         return None
 
 
-@settings(max_examples=80, deadline=None)
+@settings(max_examples=100, deadline=None)
 @given(params_strategy)
 def test_generated_buildings_have_no_hard_violations(params: GenerationParams) -> None:
     building = generate_or_none(params)
     if building is not None:
-        assert hard_violations(building, load_rules(params.building_type)) == []
+        assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []
 
 
 @settings(max_examples=25, deadline=None)
@@ -58,7 +59,7 @@ def test_generation_is_deterministic_and_serializable(params: GenerationParams) 
 
 @settings(max_examples=25, deadline=None)
 @given(
-    params_strategy.filter(lambda p: min(p.width, p.depth) >= 24),
+    params_strategy.filter(lambda p: min(p.width, p.depth) >= 24 and p.shape is Shape.RECTANGLE),
 )
-def test_reasonably_sized_offices_are_always_feasible(params: GenerationParams) -> None:
+def test_reasonably_sized_rectangular_offices_are_always_feasible(params: GenerationParams) -> None:
     assert generate(params) is not None

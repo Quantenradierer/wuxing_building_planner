@@ -16,7 +16,7 @@ from dataclasses import dataclass, field, replace
 
 from roomplanner.geometry import Cell
 from roomplanner.pipeline.base import AllocationError, Context, PlannedRoom
-from roomplanner.pipeline.layout.frame import Band, Frame, Grid, Interval, LocalSide
+from roomplanner.pipeline.layout.frame import Band, Box, Frame, Grid, Interval, LocalSide
 from roomplanner.rules import (
     FloorRole,
     Priority,
@@ -36,10 +36,16 @@ FORBIDDEN_WINDOW_PENALTY = 50
 
 @dataclass
 class Segment:
+    frame: Frame
     band: Band
     span: Interval
+    facade: bool  # its back is an exterior wall (windows possible)
     unit: int  # slot widths are multiples of this (facade module or 1 cell)
     grid: Grid
+
+    @property
+    def box(self) -> Box:
+        return self.frame.box(self.span.u0, self.span.u1, self.band.v0, self.band.v1)
 
     @property
     def depth(self) -> int:
@@ -102,10 +108,13 @@ class SegmentState:
 
 @dataclass(frozen=True)
 class Anchors:
-    """Where `near:` targets are: (band index or None for all bands, u-interval)."""
+    """Where `near:` targets are, in absolute coordinates."""
 
-    core: tuple[int | None, Interval] | None
-    entrance: tuple[int | None, Interval] | None
+    core: Box | None
+    entrance: Box | None
+
+    def get(self, near: str | None) -> Box | None:
+        return {"core": self.core, "entrance": self.entrance}.get(near or "")
 
 
 class Allocator:
@@ -113,14 +122,12 @@ class Allocator:
         self,
         ctx: Context,
         rules: Rules,
-        frame: Frame,
         segments: list[Segment],
         anchors: Anchors,
         rng: random.Random,
     ) -> None:
         self.ctx = ctx
         self.rules = rules
-        self.frame = frame
         self.states = [SegmentState(s) for s in segments if s.span.width > 0]
         self.anchors = anchors
         self.rng = rng
@@ -168,13 +175,13 @@ class Allocator:
                 fills.append(entry)
                 continue
             spec = self.rules.spec(entry.room)
-            low, high = (a for a in (entry.area or spec.area))
+            low, high = entry.area or spec.area
             if entry.share is not None:
                 # A share counts against the area the room may use (facades if it needs windows).
                 target = entry.share * sum(
                     s.segment.span.width * s.segment.depth
                     for s in self.states
-                    if spec.windows is not WindowRule.REQUIRED or s.segment.band.facade
+                    if spec.windows is not WindowRule.REQUIRED or s.segment.facade
                 )
                 count = max(1, math.ceil(target / high))
                 area = max(low, round(target / count))
@@ -223,7 +230,7 @@ class Allocator:
         options: list[tuple[float, float, SegmentState, Option]] = []
         for state in self.states:
             segment = state.segment
-            if request.spec.windows is WindowRule.REQUIRED and not segment.band.facade:
+            if request.spec.windows is WindowRule.REQUIRED and not segment.facade:
                 continue
             option = self._option(request, state)
             if option is None:
@@ -279,15 +286,9 @@ class Allocator:
 
     def _score(self, request: Request, segment: Segment) -> float:
         score = 0.0
-        anchor = {"core": self.anchors.core, "entrance": self.anchors.entrance}.get(
-            request.near or ""
-        )
-        if anchor is not None:
-            band, interval = anchor
-            score += segment.span.gap_to(interval)
-            if band is not None and band != segment.band.index:
-                score += 4 * abs(band - segment.band.index)
-        if segment.band.facade:
+        if (anchor := self.anchors.get(request.near)) is not None:
+            score += segment.box.gap(anchor)
+        if segment.facade:
             if request.spec.windows is WindowRule.FORBIDDEN:
                 score += FORBIDDEN_WINDOW_PENALTY
             elif request.spec.windows is WindowRule.OPTIONAL:
@@ -300,7 +301,7 @@ class Allocator:
         """Facades get rooms that need windows if possible; interiors only rooms that don't."""
         needs_window = [e for e in fills if self.rules.spec(e.room).windows is WindowRule.REQUIRED]
         others = [e for e in fills if e not in needs_window]
-        if segment.band.facade:
+        if segment.facade:
             return needs_window or others
         return others or [RoomEntry(room=self.rules.program.cluster_filler, fill=True)]
 
@@ -319,7 +320,7 @@ class Allocator:
             entry = self.rng.choice(fitting or fills)
             spec = self.rules.spec(entry.room)
             min_units = self._fill_min_units(entry, segment)
-            low, high = (a for a in (entry.area or spec.area))
+            low, high = entry.area or spec.area
             units = max(
                 min_units, round(self.rng.randint(low, high) / segment.depth / segment.unit)
             )
@@ -358,9 +359,9 @@ class Allocator:
         for slot, width in zip(slots, widths, strict=True):
             span = Interval(position, position + width)
             if isinstance(slot, FullSlot):
-                rooms.append(PlannedRoom(slot.request.type, self._rect(segment.band, span)))
+                rooms.append(PlannedRoom(slot.request.type, self._rect(segment, span)))
             else:
-                rooms += self._cluster_rooms(slot, segment.band, span)
+                rooms += self._cluster_rooms(slot, segment, span)
             position = span.u1
         return rooms
 
@@ -371,17 +372,19 @@ class Allocator:
             if isinstance(slot, FullSlot)
             else next((r for stack in slot.stacks for r, _ in stack), None)
         )
-        if request is None or request.near is None:
+        if request is None or (anchor := self.anchors.get(request.near)) is None:
             return 0
-        anchor = self.anchors.core if request.near == "core" else self.anchors.entrance
-        if anchor is None:
-            return 0
-        return -1 if anchor[1].centre < segment.span.centre else 1
+        anchor_u, _ = segment.frame.to_local(*anchor.centre)
+        return -1 if anchor_u < segment.span.centre else 1
 
-    def _rect(self, band: Band, span: Interval) -> frozenset[Cell]:
-        return self.frame.rect(span.u0, span.u1, band.v0, band.v1)
+    @staticmethod
+    def _rect(segment: Segment, span: Interval) -> frozenset[Cell]:
+        return segment.frame.rect(span.u0, span.u1, segment.band.v0, segment.band.v1)
 
-    def _cluster_rooms(self, cluster: Cluster, band: Band, span: Interval) -> list[PlannedRoom]:
+    def _cluster_rooms(
+        self, cluster: Cluster, segment: Segment, span: Interval
+    ) -> list[PlannedRoom]:
+        band = segment.band
         rooms: list[PlannedRoom] = []
         hall = cluster.hall
         width = span.width
@@ -395,7 +398,7 @@ class Allocator:
         else:
             hallway = Interval(span.u0, span.u0 + hall)
             columns = [Interval(hallway.u1, span.u1)]
-        rooms.append(PlannedRoom("corridor", self._rect(band, hallway)))
+        rooms.append(PlannedRoom("corridor", self._rect(segment, hallway)))
 
         from_v0 = band.corridor_at is LocalSide.V0
         filler = self.rules.program.cluster_filler
@@ -415,7 +418,7 @@ class Allocator:
                     v0, v1 = band.v0 + offset, band.v0 + offset + depth
                 else:
                     v0, v1 = band.v1 - offset - depth, band.v1 - offset
-                cells = self.frame.rect(column.u0, column.u1, v0, v1)
+                cells = segment.frame.rect(column.u0, column.u1, v0, v1)
                 rooms.append(PlannedRoom(room_type, cells))
                 offset += depth
         return rooms

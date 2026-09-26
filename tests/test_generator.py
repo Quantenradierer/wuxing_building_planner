@@ -4,7 +4,8 @@ from roomplanner.errors import InfeasibleError, NotSupportedError
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
 from roomplanner.model import OpeningKind
-from roomplanner.params import BuildingType, Shape
+from roomplanner.params import BuildingType, Shape, Wealth
+from roomplanner.rules import rules_for
 from roomplanner.validation import validate
 
 from .conftest import make_params
@@ -65,7 +66,31 @@ def test_too_small_footprint_fails_fast() -> None:
         generate(make_params(width=3))
 
 
-@pytest.mark.parametrize("shape", [Shape.L, Shape.U, Shape.IRREGULAR])
+@pytest.mark.parametrize("shape", [Shape.U, Shape.IRREGULAR])
 def test_unimplemented_shapes_are_rejected(shape: Shape) -> None:
     with pytest.raises(NotSupportedError):
         generate(make_params(shape=shape))
+
+
+def test_l_shape_misses_one_corner() -> None:
+    building = generate(make_params(shape=Shape.L, width=60, depth=48))
+    footprint = building.floor(0).footprint
+    corners = [(0, 0), (59, 0), (0, 47), (59, 47)]
+    assert sum((x, y) in footprint for x, y in corners) == 3
+    assert (
+        validate(building, rules_for(building.params.building_type, building.params.wealth)) == []
+    )
+
+
+def test_small_l_shape_explains_minimum() -> None:
+    with pytest.raises(InfeasibleError, match="too small for an L shape"):
+        generate(make_params(shape=Shape.L, width=30, depth=20))
+
+
+def test_luxury_offices_have_bigger_rooms_than_squatter_ones() -> None:
+    def mean_office(wealth: Wealth) -> float:
+        building = generate(make_params(width=80, depth=40, floors_above=2, wealth=wealth))
+        offices = [r.area for f in building.floors for r in f.rooms if r.type == "office"]
+        return sum(offices) / len(offices)
+
+    assert mean_office(Wealth.SQUATTER) < mean_office(Wealth.LUXURY)

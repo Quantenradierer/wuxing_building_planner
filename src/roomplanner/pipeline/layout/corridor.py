@@ -1,10 +1,13 @@
-"""Corridor-first layout for rectangular footprints. See docs/architecture.md, "Pipeline".
+"""Corridor-first layout for rectangular and L-shaped footprints. See docs/architecture.md.
 
-1. Split the depth into bands: rows of rooms ("strips") and corridors running along the
-   long axis. Shallow buildings get one single-loaded corridor, deeper ones one central
-   corridor, very deep ones several parallel corridors joined by a cross corridor.
-2. Reserve building-wide slots: cross corridor and vertical core (identical on every floor).
-3. Per floor: reserve the ground floor's lobby and service corridor stub, then let the
+1. Split the footprint into parts: a rectangle is one part; an L is a main bar (touching
+   the street, holding lobby and core) plus a wing whose corridors start at the junction.
+2. Split each part's depth into bands: rows of rooms ("strips") and corridors along its
+   u-axis. Shallow parts get one single-loaded corridor, deeper ones a central corridor,
+   very deep ones several parallel corridors joined by a cross corridor.
+3. Reserve building-wide slots: cross corridors, the vertical core and the stubs joining a
+   wing's corridors to the main part (identical on every floor).
+4. Per floor: reserve the ground floor's lobby and service corridor stub, then let the
    allocator fill the remaining strip segments with the floor role's rooms.
 """
 
@@ -12,9 +15,10 @@ from __future__ import annotations
 
 import math
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from itertools import pairwise
 
-from roomplanner.geometry import Cell
+from roomplanner.geometry import Axis, Cell, Side
 from roomplanner.model import level_name
 from roomplanner.pipeline.base import (
     AllocationError,
@@ -28,6 +32,7 @@ from roomplanner.pipeline.layout.allocation import Allocator, Anchors, Segment
 from roomplanner.pipeline.layout.frame import (
     Band,
     BandKind,
+    Box,
     Frame,
     Grid,
     Interval,
@@ -38,39 +43,74 @@ from roomplanner.pipeline.registry import register
 from roomplanner.rules import CoreEntry, EntranceKind, Priority, RoomEntry, evaluate, variables
 
 MIN_GAP_MODULES = 1  # free space left next to reserved slots, if any
+INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
 
 
-@dataclass(frozen=True)
-class Skeleton:
-    """Everything shared by all floors."""
+@dataclass
+class Part:
+    """One rectangle of the footprint with its bands and building-wide reservations."""
 
     frame: Frame
     grid: Grid
     bands: list[Band]
-    cross: Interval | None
-    core_band: Band | None
-    core_slot: Interval | None
-    core_rooms: list[PlannedRoom]
-    lobby_slice: Interval | None  # ground-floor lobby spanning all bands at a short end
+    cross: Interval | None = None
+    reserved: dict[int, list[Interval]] = field(default_factory=dict[int, list[Interval]])
+    # u-ranges of strips whose back is a junction with another part instead of a facade
+    no_facade: dict[int, list[Interval]] = field(default_factory=dict[int, list[Interval]])
+    connectors: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
+
+    def blocked(self, band: Band, *extra: Interval | None) -> list[Interval]:
+        spans = [*self.reserved.get(band.index, []), *(e for e in extra if e is not None)]
+        if self.cross is not None:
+            spans.append(self.cross)
+        return spans
+
+
+@dataclass
+class Skeleton:
+    """Everything shared by all floors."""
+
+    main: Part
+    wing: Part | None
+    core_band: Band | None = None
+    core_slot: Interval | None = None
+    core_rooms: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
+    lobby_slice: Interval | None = None  # ground-floor lobby across the main part's short end
+
+    @property
+    def parts(self) -> list[Part]:
+        return [self.main] + ([self.wing] if self.wing else [])
+
+
+@dataclass(frozen=True)
+class Split:
+    main: Box
+    wing: Box | None
+    junction: Side | None  # side of the main part the wing is attached to
 
 
 @register("layout", "corridor")
 class CorridorLayout:
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         program = ctx.rules.program
-        frame = Frame.for_size(ctx.width, ctx.height)
         corridor = program.corridor.width
-        min_depth = program.strip_depth[0]
+        min_depth = corridor + program.strip_depth[0]
         problems: list[str] = []
-        if frame.depth < corridor + min_depth:
-            problems.append(
-                f"building is {frame.depth} cells across, needs at least "
-                f"{corridor + min_depth} for a corridor and a row of rooms"
-            )
+        split = _split(footprint, ctx.params.street_side, min_depth)
+        frames = [("building", Frame.for_rect(split.main))]
+        if split.wing is not None and split.junction is not None:
+            frames.append(("wing", _wing_frame(split.wing, split.junction)))
+        for name, frame in frames:
+            if frame.depth < min_depth:
+                problems.append(
+                    f"{name} is {frame.depth} cells across, needs at least "
+                    f"{min_depth} for a corridor and a row of rooms"
+                )
         core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
+        corridors = sum(corridor * frame.length for _, frame in frames)
         for level in ctx.params.levels:
             _, role = ctx.rules.role_for(level, ctx.params)
-            needed = core + corridor * frame.length
+            needed = core + corridors
             for entry in role.rooms:
                 if entry.priority is Priority.REQUIRED and evaluate(
                     entry.when, variables(ctx.params, level)
@@ -86,57 +126,125 @@ class CorridorLayout:
 
     def layout(self, ctx: Context, footprint: frozenset[Cell]) -> BuildingPlan:
         rng = ctx.rng("layout")
-        skeleton = self._skeleton(ctx, rng)
+        skeleton = self._skeleton(ctx, footprint, rng)
         plan = BuildingPlan(floors=[])
+        for part in skeleton.parts:
+            axis = Axis.H if part.frame.u_is_x else Axis.V
+            if axis not in plan.facade_grid:
+                offset = part.frame.absolute_grid_offset(part.grid)
+                plan.facade_grid[axis] = (offset, part.grid.module)
         for level in ctx.params.levels:
             plan.floors.append(self._floor(ctx, skeleton, level, rng, plan.warnings))
         return plan
 
     # --- skeleton ---------------------------------------------------------------------
 
-    def _skeleton(self, ctx: Context, rng: random.Random) -> Skeleton:
+    def _skeleton(self, ctx: Context, footprint: frozenset[Cell], rng: random.Random) -> Skeleton:
         program = ctx.rules.program
-        frame = Frame.for_size(ctx.width, ctx.height)
-        grid = Grid.centred(program.facade.module, frame.length)
         corridor_width = program.corridor.width
-        street = frame.local(ctx.params.street_side)
-        bands = self._bands(ctx, frame, corridor_width, street, rng)
+        split = _split(footprint, ctx.params.street_side, corridor_width + program.strip_depth[0])
 
-        lobby_slice = None
+        main_frame = Frame.for_rect(split.main)
+        street = main_frame.local(ctx.params.street_side)
+        main = self._part(ctx, main_frame, street, rng)
+        wing = None
+        if split.wing is not None and split.junction is not None:
+            wing_frame = _wing_frame(split.wing, split.junction)
+            wing = self._part(ctx, wing_frame, wing_frame.local(ctx.params.street_side), rng)
+            self._connect(ctx, main, wing, main_frame.local(split.junction))
+
+        skeleton = Skeleton(main, wing)
         lobby = self._lobby_entry(ctx)
+        grid, frame = main.grid, main.frame
         if lobby is not None and street.is_end:
             length = max(
-                math.ceil(self._area(ctx, lobby, rng) / frame.depth),
+                math.ceil(self._area(lobby, ctx, rng) / frame.depth),
                 ctx.rules.spec(lobby.room).min_side,
             )
             if street is LocalSide.U0:
                 lobby_slice = Interval(0, grid.ceil(length))
             else:
                 lobby_slice = Interval(grid.floor(frame.length - length), frame.length)
+            reserved = [i for spans in main.reserved.values() for i in spans]
+            skeleton.lobby_slice = _absorb_gaps(lobby_slice, reserved, frame.length, grid.module)
 
-        blocked = [lobby_slice] if lobby_slice else []
-        cross = None
-        if sum(b.kind is BandKind.CORRIDOR for b in bands) > 1:
-            target = frame.length / 2 + rng.uniform(-1, 1) * frame.length / 8
-            cross = self._choose(grid, grid.round_up(corridor_width), target, blocked)
-            if cross is None:
-                raise AllocationError("no space for the cross corridor")
-            blocked.append(cross)
+        # Parallel corridors of the main part need a cross corridor; a wing's corridors are
+        # already joined through their connectors into the main part.
+        for part in [main]:
+            if sum(b.kind is BandKind.CORRIDOR for b in part.bands) > 1:
+                length = part.frame.length
+                target = length / 2 + rng.uniform(-1, 1) * length / 8
+                blocked = [skeleton.lobby_slice] if part is main and skeleton.lobby_slice else []
+                blocked += [i for spans in part.reserved.values() for i in spans]
+                part.cross = self._choose(
+                    part.grid, part.grid.round_up(corridor_width), target, blocked
+                )
+                if part.cross is None:
+                    raise AllocationError("no space for the cross corridor")
 
-        core_band, core_slot, core_rooms = None, None, []
         core_entries = ctx.rules.active_core(ctx.params)
         if core_entries:
-            core_band = self._core_band(bands, street, cross, rng)
-            core_slot, core_rooms = self._core(
-                ctx, frame, grid, core_band, core_entries, cross, blocked, rng
+            band = self._core_band(main, street, rng)
+            skeleton.core_band = band
+            skeleton.core_slot, skeleton.core_rooms = self._core(
+                ctx, main, band, core_entries, main.blocked(band, skeleton.lobby_slice), rng
             )
+        return skeleton
 
-        return Skeleton(frame, grid, bands, cross, core_band, core_slot, core_rooms, lobby_slice)
+    def _part(self, ctx: Context, frame: Frame, street: LocalSide, rng: random.Random) -> Part:
+        grid = Grid.centred(ctx.rules.program.facade.module, frame.length)
+        bands = self._bands(ctx, frame, ctx.rules.program.corridor.width, street, rng)
+        return Part(frame, grid, bands)
+
+    def _connect(self, ctx: Context, main: Part, wing: Part, junction: LocalSide) -> None:
+        """Corridor stubs through the main part's strips so the wing's corridors connect."""
+        corridor_width = ctx.rules.program.corridor.width
+        wing_corridors = [b for b in wing.bands if b.kind is BandKind.CORRIDOR]
+        frame = main.frame
+        if not junction.is_end:
+            band = main.bands[0] if junction is LocalSide.V0 else main.bands[-1]
+            whole = _u_range(frame, [wing.frame.cell(0, v) for v in range(wing.frame.depth)])
+            main.no_facade.setdefault(band.index, []).append(whole)
+            if band.kind is BandKind.CORRIDOR:
+                return
+            spans: list[Interval] = []
+            for corridor in wing_corridors:
+                cells = [wing.frame.cell(0, v) for v in range(corridor.v0, corridor.v1)]
+                spans.append(_u_range(frame, cells))
+            for span in spans:
+                span = _absorb_gaps(
+                    span, [s for s in spans if s != span], frame.length, main.grid.module
+                )
+                main.reserved.setdefault(band.index, []).append(span)
+                main.connectors.append(
+                    PlannedRoom("corridor", frame.rect(span.u0, span.u1, band.v0, band.v1))
+                )
+            return
+        width = main.grid.round_up(corridor_width)
+        end = (
+            Interval(0, width)
+            if junction is LocalSide.U0
+            else Interval(frame.length - width, frame.length)
+        )
+        for corridor in wing_corridors:
+            cells = [wing.frame.cell(0, v) for v in range(corridor.v0, corridor.v1)]
+            v_values = {frame.to_local(c.x + 0.5, c.y + 0.5)[1] for c in cells}
+            v_lo, v_hi = math.floor(min(v_values)), math.floor(max(v_values)) + 1
+            overlapping = [b for b in main.bands if b.v0 < v_hi and v_lo < b.v1]
+            if any(b.kind is BandKind.CORRIDOR for b in overlapping):
+                continue
+            for band in overlapping:
+                if end in main.reserved.get(band.index, []):
+                    continue
+                main.reserved.setdefault(band.index, []).append(end)
+                main.connectors.append(
+                    PlannedRoom("corridor", frame.rect(end.u0, end.u1, band.v0, band.v1))
+                )
 
     def _bands(
         self, ctx: Context, frame: Frame, corridor: int, street: LocalSide, rng: random.Random
     ) -> list[Band]:
-        low, high = (d for d in ctx.rules.program.strip_depth)
+        low, high = ctx.rules.program.strip_depth
         depth = frame.depth
         if depth < corridor + 2 * low:
             # Single-loaded: one row of rooms, on the street side if the street is a long side.
@@ -151,25 +259,8 @@ class CorridorLayout:
                 Band(1, BandKind.CORRIDOR, depth - corridor, depth),
             ]
 
-        count = 1
-        for k in range(1, depth):
-            strip = (depth - k * corridor) / (2 * k)
-            if strip < low:
-                break
-            count = k
-            if strip <= high:
-                break
-
-        strip_total = depth - count * corridor
-        depths = [strip_total // (2 * count)] * (2 * count)
-        for i in range(strip_total - sum(depths)):
-            depths[i] += 1
-        if count == 1:
-            lo, hi = max(low, strip_total - high), min(high, strip_total - low)
-            if lo <= hi:
-                spread = (hi - lo) // 4
-                first = min(hi, max(lo, (lo + hi) // 2 + rng.randint(-spread, spread)))
-                depths = [first, strip_total - first]
+        depths = self._strip_depths(depth, corridor, low, high, rng)
+        count = len(depths) // 2
 
         bands: list[Band] = []
         v = 0
@@ -184,11 +275,41 @@ class CorridorLayout:
             v += b
         return bands
 
-    def _core_band(
-        self, bands: list[Band], street: LocalSide, cross: Interval | None, rng: random.Random
-    ) -> Band:
-        strips = [b for b in bands if b.kind is BandKind.STRIP]
-        if cross is not None:
+    @staticmethod
+    def _strip_depths(
+        depth: int, corridor: int, low: int, high: int, rng: random.Random
+    ) -> list[int]:
+        """Depths of the 2k strips around k corridors (k >= 1).
+
+        Facade strips stay within [low, high]; with k > 1 the back-to-back interior strips
+        between the corridors take the rest (thin ones hold toilets, storage and the core).
+        """
+        total = depth - corridor
+        if total <= 2 * high:
+            lo, hi = max(low, total - high), min(high, total - low)
+            if lo > hi:
+                return [total // 2, total - total // 2]
+            spread = (hi - lo) // 4
+            first = min(hi, max(lo, (lo + hi) // 2 + rng.randint(-spread, spread)))
+            return [first, total - first]
+        interior_min = INTERIOR_STRIP_MIN
+        for k in range(2, depth):
+            interiors = 2 * k - 2
+            facade = min(high, (depth - k * corridor - interiors * interior_min) // 2)
+            if facade < low:
+                break
+            rest = depth - k * corridor - 2 * facade
+            if rest / interiors <= high:
+                inner = [rest // interiors] * interiors
+                for i in range(rest - sum(inner)):
+                    inner[i] += 1
+                return [facade, *inner, facade]
+        # Between one and two corridors: deeper facade strips.
+        return [total // 2, total - total // 2]
+
+    def _core_band(self, main: Part, street: LocalSide, rng: random.Random) -> Band:
+        strips = [b for b in main.bands if b.kind is BandKind.STRIP]
+        if main.cross is not None:
             return rng.choice([b for b in strips if not b.facade])
         if len(strips) == 2 and not street.is_end:
             street_strip = strips[0] if street is LocalSide.V0 else strips[1]
@@ -198,18 +319,17 @@ class CorridorLayout:
     def _core(
         self,
         ctx: Context,
-        frame: Frame,
-        grid: Grid,
+        main: Part,
         band: Band,
         entries: list[CoreEntry],
-        cross: Interval | None,
         blocked: list[Interval],
         rng: random.Random,
     ) -> tuple[Interval, list[PlannedRoom]]:
         """The core occupies one full-depth slot; the first entry (stairwell) wraps the rest."""
+        frame, grid = main.frame, main.grid
         sizes: list[tuple[int, int]] = []  # (u, v) per entry
         for entry in entries:
-            short, long = sorted(s for s in entry.size)
+            short, long = sorted(entry.size)
             if short > band.depth:
                 raise AllocationError(f"{entry.room} does not fit a {band.depth}-cell strip")
             sizes.append((short, long) if long <= band.depth else (long, short))
@@ -217,11 +337,11 @@ class CorridorLayout:
         if band.facade:
             width = grid.round_up(width)
 
-        if cross is not None:
-            left = cross.u0 - width / 2
-            right = cross.u1 + width / 2
+        if main.cross is not None:
+            left = main.cross.u0 - width / 2
+            right = main.cross.u1 + width / 2
             target = left if rng.random() < 0.5 else right
-            slot = self._choose(grid, width, target, blocked, touching=cross)
+            slot = self._choose(grid, width, target, blocked, touching=main.cross)
         else:
             target = frame.length / 2 + rng.uniform(-1, 1) * frame.length / 6
             slot = self._choose(grid, width, target, blocked)
@@ -231,10 +351,24 @@ class CorridorLayout:
         main_min_side = ctx.rules.spec(entries[0].room).min_side
         rooms: list[PlannedRoom] = []
         taken: set[Cell] = set()
+
+        # Deep strips: the core only takes what it needs, a storage room fills the back.
+        filler = ctx.rules.program.cluster_filler
+        core_depth = max(v for _, v in sizes)
+        if band.depth - core_depth >= ctx.rules.spec(filler).min_side + 2:
+            front = self._from_corridor(band, core_depth)
+            back = (front[1], band.v1) if front[0] == band.v0 else (band.v0, front[0])
+            cells = frame.rect(slot.u0, slot.u1, *back)
+            rooms.append(PlannedRoom(filler, cells))
+            taken |= cells
+            depth = core_depth
+        else:
+            depth = band.depth
+
         right_edge = slot.u1
         for entry, (u_size, v_size) in zip(entries[1:], sizes[1:], strict=True):
-            if band.depth - v_size < main_min_side:
-                v_size = band.depth
+            if depth - v_size < main_min_side:
+                v_size = depth
             v0, v1 = self._from_corridor(band, v_size)
             cells = frame.rect(right_edge - u_size, right_edge, v0, v1)
             rooms.append(PlannedRoom(entry.room, cells))
@@ -263,7 +397,7 @@ class CorridorLayout:
         min_gap = MIN_GAP_MODULES * grid.module
         starts = {*grid.points(), *(b.u1 for b in blocked), *(b.u0 - width for b in blocked)}
         options = {Interval(start, start + width) for start in starts}
-        # Flush with a building end, widened to the next grid point (partial end modules).
+        # Flush with an end of the part, widened to the next grid point (partial modules).
         options |= {
             Interval(0, grid.ceil(width)),
             Interval(grid.floor(grid.length - width), grid.length),
@@ -297,109 +431,131 @@ class CorridorLayout:
         rng: random.Random,
         warnings: list[str],
     ) -> FloorPlan:
-        frame, grid = skeleton.frame, skeleton.grid
+        main = skeleton.main
         role_name, role = ctx.rules.role_for(level, ctx.params)
         rooms: list[PlannedRoom] = list(skeleton.core_rooms)
-        reserved: dict[int, list[Interval]] = {b.index: [] for b in skeleton.bands}
-        entrance_hints: list[tuple[EntranceKind, LocalSide, Cell]] = []
+        extra: dict[int, list[Interval]] = {}  # this floor's reservations in the main part
+        hints: list[tuple[EntranceKind, Side, Cell]] = []
+        slice_ = skeleton.lobby_slice if level == 0 else None
 
         if skeleton.core_band is not None and skeleton.core_slot is not None:
-            reserved[skeleton.core_band.index].append(skeleton.core_slot)
-        if skeleton.cross is not None:
-            for band in skeleton.bands:
-                if band.kind is BandKind.STRIP:
-                    reserved[band.index].append(skeleton.cross)
-                    cells = frame.rect(skeleton.cross.u0, skeleton.cross.u1, band.v0, band.v1)
-                    rooms.append(PlannedRoom("corridor", cells))
+            extra.setdefault(skeleton.core_band.index, []).append(skeleton.core_slot)
+        slice_cells = (
+            main.frame.rect(slice_.u0, slice_.u1, 0, main.frame.depth)
+            if slice_
+            else frozenset[Cell]()
+        )
+        for part in skeleton.parts:
+            for connector in part.connectors:
+                if cells := connector.cells - slice_cells:
+                    rooms.append(PlannedRoom(connector.type, cells))
+            if part.cross is not None:
+                for band in part.bands:
+                    if band.kind is BandKind.STRIP:
+                        cells = part.frame.rect(part.cross.u0, part.cross.u1, band.v0, band.v1)
+                        rooms.append(PlannedRoom("corridor", cells))
 
-        lobby_anchor: tuple[int | None, Interval] | None = None
+        entrance: Box | None = None
         if level == 0:
-            lobby_anchor = self._ground_floor(
-                ctx, skeleton, rooms, reserved, entrance_hints, rng, warnings
-            )
-
-        slice_ = skeleton.lobby_slice if level == 0 else None
-        for band in skeleton.bands:
-            if band.kind is BandKind.CORRIDOR:
-                blocked = [slice_] if slice_ else []
-                for span in free_intervals(frame.length, blocked):
-                    rooms.append(
-                        PlannedRoom("corridor", frame.rect(span.u0, span.u1, band.v0, band.v1))
-                    )
+            entrance = self._ground_floor(ctx, skeleton, rooms, extra, hints, rng, warnings)
 
         segments: list[Segment] = []
-        for band in skeleton.bands:
-            if band.kind is not BandKind.STRIP:
-                continue
-            blocked = reserved[band.index] + ([slice_] if slice_ else [])
-            unit = grid.module if band.facade else 1
-            for span in free_intervals(frame.length, blocked):
-                segments.append(Segment(band, span, unit, grid))
+        for part in skeleton.parts:
+            part_slice = slice_ if part is main else None
+            for band in part.bands:
+                if band.kind is BandKind.CORRIDOR:
+                    blocked = [part_slice] if part_slice else []
+                    for span in free_intervals(part.frame.length, blocked):
+                        cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
+                        rooms.append(PlannedRoom("corridor", cells))
+                    continue
+                own = extra.get(band.index, []) if part is main else []
+                blocked = part.blocked(band, part_slice, *own)
+                segments += self._segments(part, band, blocked)
 
-        core_anchor = None
+        core_box = None
         if skeleton.core_band is not None and skeleton.core_slot is not None:
-            core_anchor = (skeleton.core_band.index, skeleton.core_slot)
+            band, slot = skeleton.core_band, skeleton.core_slot
+            core_box = main.frame.box(slot.u0, slot.u1, band.v0, band.v1)
         allocator = Allocator(
-            ctx,
-            ctx.rules,
-            frame,
-            segments,
-            Anchors(core_anchor, lobby_anchor),
-            ctx.rng(f"allocate:{level}"),
+            ctx, ctx.rules, segments, Anchors(core_box, entrance), ctx.rng(f"allocate:{level}")
         )
         rooms += allocator.allocate(role, level, level_name(level))
         warnings += allocator.warnings
 
         rooms = _merge_corridors(rooms)
         entrances = [
-            EntranceRequest(kind, frame.side(side), _room_index(rooms, hint), hint)
-            for kind, side, hint in entrance_hints
+            EntranceRequest(kind, side, _room_index(rooms, hint), hint)
+            for kind, side, hint in hints
         ]
         return FloorPlan(level, role_name, rooms, entrances)
+
+    @staticmethod
+    def _segments(part: Part, band: Band, blocked: list[Interval]) -> list[Segment]:
+        """Free spans of a strip, split where its back changes between facade and junction."""
+        segments: list[Segment] = []
+        junctions = part.no_facade.get(band.index, [])
+        min_piece = 2 * part.grid.module
+        for span in free_intervals(part.frame.length, blocked):
+            inner = {p for j in junctions for p in (j.u0, j.u1) if span.u0 < p < span.u1}
+            # Don't cut off slivers: only cut where both sides stay usable.
+            cuts = [span.u0]
+            for point in sorted(inner):
+                if point - cuts[-1] >= min_piece and span.u1 - point >= min_piece:
+                    cuts.append(point)
+            cuts.append(span.u1)
+            for u0, u1 in pairwise(cuts):
+                piece = Interval(u0, u1)
+                facade = band.facade and not any(piece.overlaps(j) for j in junctions)
+                unit = part.grid.module if facade else 1
+                segments.append(Segment(part.frame, band, piece, facade, unit, part.grid))
+        return segments
 
     def _ground_floor(
         self,
         ctx: Context,
         skeleton: Skeleton,
         rooms: list[PlannedRoom],
-        reserved: dict[int, list[Interval]],
-        hints: list[tuple[EntranceKind, LocalSide, Cell]],
+        extra: dict[int, list[Interval]],
+        hints: list[tuple[EntranceKind, Side, Cell]],
         rng: random.Random,
         warnings: list[str],
-    ) -> tuple[int | None, Interval] | None:
+    ) -> Box | None:
         """Reserve lobby and service stub; returns the lobby as anchor for `near: entrance`."""
-        frame, grid = skeleton.frame, skeleton.grid
+        main = skeleton.main
+        frame, grid = main.frame, main.grid
         program = ctx.rules.program
-        street = frame.local(ctx.params.street_side)
-        service = frame.local(ctx.params.service_side)
+        street_side, service_side = ctx.params.street_side, ctx.params.service_side
+        street, service = frame.local(street_side), frame.local(service_side)
         lobby = self._lobby_entry(ctx)
-        anchor: tuple[int | None, Interval] | None = None
+        anchor: Box | None = None
 
         if lobby is not None and skeleton.lobby_slice is not None:
             span = skeleton.lobby_slice
             rooms.append(PlannedRoom(lobby.room, frame.rect(span.u0, span.u1, 0, frame.depth)))
             end_u = 0 if street is LocalSide.U0 else frame.length - 1
-            hints.append((EntranceKind.MAIN, street, frame.cell(end_u, frame.depth // 2)))
-            anchor = (None, span)
+            hints.append((EntranceKind.MAIN, street_side, frame.cell(end_u, frame.depth // 2)))
+            anchor = frame.box(span.u0, span.u1, 0, frame.depth)
         elif lobby is not None:
-            band = self._facade_band(skeleton.bands, street)
+            band = self._facade_band(main.bands, street)
             width = max(
-                math.ceil(self._area(ctx, lobby, rng) / band.depth),
+                math.ceil(self._area(lobby, ctx, rng) / band.depth),
                 ctx.rules.spec(lobby.room).min_side,
             )
             target = frame.length / 2 + rng.uniform(-1, 1) * frame.length / 6
-            span = self._choose(grid, grid.round_up(width), target, reserved[band.index])
+            blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
+            span = self._choose(grid, grid.round_up(width), target, blocked)
             if span is None:
                 raise AllocationError("no space for the lobby")
-            reserved[band.index].append(span)
+            extra.setdefault(band.index, []).append(span)
             rooms.append(PlannedRoom(lobby.room, frame.rect(span.u0, span.u1, band.v0, band.v1)))
             v = 0 if street is LocalSide.V0 else frame.depth - 1
-            hints.append((EntranceKind.MAIN, street, frame.cell(int(span.centre), v)))
-            anchor = (band.index, span)
+            hints.append((EntranceKind.MAIN, street_side, frame.cell(int(span.centre), v)))
+            anchor = frame.box(span.u0, span.u1, band.v0, band.v1)
 
         if EntranceKind.SERVICE not in program.entrances:
             return anchor
-        corridors = [b for b in skeleton.bands if b.kind is BandKind.CORRIDOR]
+        corridors = [b for b in main.bands if b.kind is BandKind.CORRIDOR]
         if service is street and anchor is not None:
             hint = hints[0][2]
         elif service.is_end:
@@ -407,16 +563,18 @@ class CorridorLayout:
             u = 0 if service is LocalSide.U0 else frame.length - 1
             hint = frame.cell(u, (band.v0 + band.v1) // 2)
         else:
-            band = self._facade_band(skeleton.bands, service)
+            band = self._facade_band(main.bands, service)
             v = 0 if service is LocalSide.V0 else frame.depth - 1
             if band.kind is BandKind.CORRIDOR:
                 hint = frame.cell(frame.length // 2, v)
             else:
                 width = grid.round_up(program.corridor.width)
                 target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
-                span = self._choose(grid, width, target, reserved[band.index])
+                blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
+                blocked += main.no_facade.get(band.index, [])
+                span = self._choose(grid, width, target, blocked)
                 if span is not None:
-                    reserved[band.index].append(span)
+                    extra.setdefault(band.index, []).append(span)
                     cells = frame.rect(span.u0, span.u1, band.v0, band.v1)
                     rooms.append(PlannedRoom("corridor", cells))
                     hint = frame.cell(int(span.centre), v)
@@ -426,7 +584,7 @@ class CorridorLayout:
                 else:
                     warnings.append("no space for the service entrance")
                     return anchor
-        hints.append((EntranceKind.SERVICE, service, hint))
+        hints.append((EntranceKind.SERVICE, service_side, hint))
         return anchor
 
     # --- helpers ----------------------------------------------------------------------
@@ -437,13 +595,110 @@ class CorridorLayout:
         return next((e for e in role.rooms if e.place == "entrance"), None)
 
     @staticmethod
-    def _area(ctx: Context, entry: RoomEntry, rng: random.Random) -> int:
-        low, high = (a for a in (entry.area or ctx.rules.spec(entry.room).area))
+    def _area(entry: RoomEntry, ctx: Context, rng: random.Random) -> int:
+        low, high = entry.area or ctx.rules.spec(entry.room).area
         return rng.randint(low, high)
 
     @staticmethod
     def _facade_band(bands: list[Band], side: LocalSide) -> Band:
         return bands[0] if side is LocalSide.V0 else bands[-1]
+
+
+def _split(footprint: frozenset[Cell], street: Side, min_depth: int) -> Split:
+    """Rectangle, or an L split into a main bar touching the street plus a wing."""
+    xs, ys = [c.x for c in footprint], [c.y for c in footprint]
+    bbox = Box(min(xs), min(ys), max(xs) + 1, max(ys) + 1)
+    missing = [
+        Cell(x, y)
+        for x in range(bbox.x0, bbox.x1)
+        for y in range(bbox.y0, bbox.y1)
+        if Cell(x, y) not in footprint
+    ]
+    if not missing:
+        return Split(bbox, None, None)
+    cut = Box(
+        min(c.x for c in missing),
+        min(c.y for c in missing),
+        max(c.x for c in missing) + 1,
+        max(c.y for c in missing) + 1,
+    )
+    options: list[Split] = []
+    # Main bar spanning the full width, wing above or below it.
+    if cut.y0 == bbox.y0:
+        wing_x = (bbox.x0, cut.x0) if cut.x1 == bbox.x1 else (cut.x1, bbox.x1)
+        options.append(
+            Split(
+                Box(bbox.x0, cut.y1, bbox.x1, bbox.y1),
+                Box(wing_x[0], bbox.y0, wing_x[1], cut.y1),
+                Side.N,
+            )
+        )
+    else:
+        wing_x = (bbox.x0, cut.x0) if cut.x1 == bbox.x1 else (cut.x1, bbox.x1)
+        options.append(
+            Split(
+                Box(bbox.x0, bbox.y0, bbox.x1, cut.y0),
+                Box(wing_x[0], cut.y0, wing_x[1], bbox.y1),
+                Side.S,
+            )
+        )
+    # Main bar spanning the full height, wing left or right of it.
+    if cut.x0 == bbox.x0:
+        wing_y = (bbox.y0, cut.y0) if cut.y1 == bbox.y1 else (cut.y1, bbox.y1)
+        options.append(
+            Split(
+                Box(cut.x1, bbox.y0, bbox.x1, bbox.y1),
+                Box(bbox.x0, wing_y[0], cut.x1, wing_y[1]),
+                Side.W,
+            )
+        )
+    else:
+        wing_y = (bbox.y0, cut.y0) if cut.y1 == bbox.y1 else (cut.y1, bbox.y1)
+        options.append(
+            Split(
+                Box(bbox.x0, bbox.y0, cut.x0, bbox.y1),
+                Box(cut.x0, wing_y[0], bbox.x1, wing_y[1]),
+                Side.E,
+            )
+        )
+
+    def score(split: Split) -> tuple[bool, bool, int]:
+        assert split.wing is not None and split.junction is not None
+        main, wing = split.main, split.wing
+        wing_depth = _wing_frame(wing, split.junction).depth
+        fits = min(Frame.for_rect(main).depth, wing_depth) >= min_depth
+        area = (main.x1 - main.x0) * (main.y1 - main.y0)
+        return split.junction is not street, fits, area
+
+    return max(options, key=score)
+
+
+def _wing_frame(wing: Box, junction: Side) -> Frame:
+    """Frame whose u runs away from the main part, u = 0 at the junction."""
+    width, height = wing.x1 - wing.x0, wing.y1 - wing.y0
+    match junction:
+        case Side.N:
+            return Frame(False, height, width, wing.x0, wing.y0, flip_u=True)
+        case Side.S:
+            return Frame(False, height, width, wing.x0, wing.y0)
+        case Side.W:
+            return Frame(True, width, height, wing.x0, wing.y0, flip_u=True)
+        case Side.E:
+            return Frame(True, width, height, wing.x0, wing.y0)
+
+
+def _absorb_gaps(span: Interval, others: list[Interval], length: int, min_gap: int) -> Interval:
+    """Extend a forced interval over gaps too small for a room (to neighbours or part ends)."""
+    left = max([0, *(o.u1 for o in others if o.u1 <= span.u0)])
+    right = min([length, *(o.u0 for o in others if o.u0 >= span.u1)])
+    u0 = left if span.u0 - left < min_gap else span.u0
+    u1 = right if right - span.u1 < min_gap else span.u1
+    return Interval(u0, u1)
+
+
+def _u_range(frame: Frame, cells: list[Cell]) -> Interval:
+    us = [frame.to_local(c.x + 0.5, c.y + 0.5)[0] for c in cells]
+    return Interval(math.floor(min(us)), math.floor(max(us)) + 1)
 
 
 def _merge_corridors(rooms: list[PlannedRoom]) -> list[PlannedRoom]:

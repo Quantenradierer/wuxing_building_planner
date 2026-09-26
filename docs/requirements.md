@@ -45,6 +45,8 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 | `condition`     | pristine, maintained, run_down, derelict, ruined    | validated and stored only             |
 | `security`      | none, low, corporate, aaa                           | validated and stored only             |
 | `shape`         | rectangle, l, u, irregular                          | rectangle and L; others are rejected  |
+
+L shapes need both arms at least one corridor plus one row of rooms wide.
 | `street_side`   | N, E, S, W (default S)                              | main entrance faces this side         |
 | `service_side`  | N, E, S, W (default: opposite of `street_side`)     | service entrances face this side      |
 | `seed`          | integer (random if omitted, always recorded)        | full determinism                      |

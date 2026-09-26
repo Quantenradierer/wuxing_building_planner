@@ -23,3 +23,12 @@ rooms:
     area: [60, 240]
     min_side: 6
     windows: forbidden
+  executive_office:
+    area: [80, 160]
+    min_side: 8
+    windows: required
+  board_room:
+    area: [100, 240]
+    min_side: 8
+    windows: required
+    door_width: 3

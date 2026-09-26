@@ -49,19 +49,23 @@ class DefaultOpenings:
             used: set[Edge] = set()
             for request in planned.entrances:
                 door = _exterior_door(ctx, footprint, rooms[request.room], request, used, rng)
-                if door is not None:
-                    doors.append(door)
-                    used |= set(door.edges)
+                if door is None:
+                    plan.warnings.append(f"no facade for the {request.kind} entrance")
+                    continue
+                doors.append(door)
+                used |= set(door.edges)
             drafts.append(_Draft(planned.level, planned.role, rooms, walls, doors))
 
-        windows = _windows(ctx, footprint, [d for d in drafts if d.level >= 0])
+        windows = _windows(ctx, footprint, [d for d in drafts if d.level >= 0], plan.facade_grid)
         return [
             Floor(
                 level=d.level,
                 footprint=footprint,
                 rooms=d.rooms,
                 walls=d.walls,
-                openings=tuple(d.doors + (windows if d.level >= 0 else [])),
+                openings=tuple(
+                    d.doors + (_clear_of_doors(windows, d.doors) if d.level >= 0 else [])
+                ),
                 role=d.role,
             )
             for d in drafts
@@ -205,7 +209,12 @@ def _inward(vertex: tuple[int, int], side: Side) -> Edge:
             return Edge(x - 1, y, Axis.H)
 
 
-def _windows(ctx: Context, footprint: frozenset[Cell], drafts: list[_Draft]) -> list[Opening]:
+def _windows(
+    ctx: Context,
+    footprint: frozenset[Cell],
+    drafts: list[_Draft],
+    grids: dict[Axis, tuple[int, int]],
+) -> list[Opening]:
     if not drafts:
         return []
     program = ctx.rules.program
@@ -215,24 +224,39 @@ def _windows(ctx: Context, footprint: frozenset[Cell], drafts: list[_Draft]) -> 
     for side in Side:
         facade = {Edge.of(c, side) for c in footprint if c.neighbour(side) not in footprint}
         for run in _runs(facade):
-            offset = (len(run) % module) // 2
+            axis = run[0].axis
+            if axis in grids and grids[axis][1] == module:
+                # Align with the layout's partition grid (absolute coordinates).
+                start_coord = run[0].x if axis is Axis.H else run[0].y
+                offset = (grids[axis][0] - start_coord) % module
+            else:
+                offset = (len(run) % module) // 2
             for start in range(offset, len(run) - module + 1, module):
                 edges = run[start + (module - width) // 2 :][:width]
-                if all(_window_fits(ctx, footprint, draft, run, edges, side) for draft in drafts):
+                if all(_window_fits(ctx, footprint, draft, edges, side) for draft in drafts):
                     windows.append(Opening(OpeningKind.WINDOW, tuple(edges)))
     return windows
 
 
+def _clear_of_doors(windows: list[Opening], doors: list[Opening]) -> list[Opening]:
+    """Windows not touching this floor's doors (with one edge of wall in between)."""
+    blocked: set[Edge] = set()
+    for door in doors:
+        first, last = door.edges[0], door.edges[-1]
+        before = (
+            Edge(first.x - 1, first.y, first.axis)
+            if first.axis is Axis.H
+            else Edge(first.x, first.y - 1, first.axis)
+        )
+        blocked |= {*door.edges, before, last.next_along()}
+    return [w for w in windows if blocked.isdisjoint(w.edges)]
+
+
 def _window_fits(
-    ctx: Context, footprint: frozenset[Cell], draft: _Draft, run: Run, edges: list[Edge], side: Side
+    ctx: Context, footprint: frozenset[Cell], draft: _Draft, edges: list[Edge], side: Side
 ) -> bool:
-    first = run.index(edges[0])
-    nearby = set(run[max(0, first - 1) : first + len(edges) + 1])
-    if any(nearby.intersection(d.edges) for d in draft.doors):
-        return False
-    vertices = [(e.x, e.y) for e in edges]
-    last = edges[-1].next_along()
-    vertices.append((last.x, last.y))
+    # A partition may meet the window's ends, but not run into its middle.
+    vertices = [(e.x, e.y) for e in edges[1:]]
     if any(_inward(v, side) in draft.walls for v in vertices):
         return False
     for edge in edges:
