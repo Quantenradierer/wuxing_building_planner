@@ -6,8 +6,8 @@ from PIL import Image
 
 from roomplanner.errors import RulesError
 from roomplanner.generator import generate
-from roomplanner.params import BuildingType
-from roomplanner.render.image import RenderOptions, render_building, render_floor
+from roomplanner.params import BuildingType, Wealth
+from roomplanner.render.image import RenderOptions, render_building, render_floor, sprite_name
 from roomplanner.render.theme import colour, load_theme
 
 from .conftest import make_params
@@ -89,3 +89,59 @@ def test_saved_png_opens(tmp_path: Path) -> None:
     render_floor(building, building.floor(0), load_theme("neon"), SMALL).save(target)
     with Image.open(target) as image:
         assert image.size == (24 * 8, 18 * 8)
+
+
+def test_theme_extends_a_bundled_theme(tmp_path: Path) -> None:
+    path = tmp_path / "child.yaml"
+    path.write_text("extends: neon\nname: child\nobjects: {desk: {shape: box}}\n")
+    theme = load_theme(str(path))
+    neon = load_theme("neon")
+    assert theme.walls == neon.walls
+    assert theme.object_style("desk").shape == "box"
+    assert theme.object_style("bed") == neon.object_style("bed")
+
+
+def test_objects_with_a_sprite_are_drawn_as_the_sprite(tmp_path: Path) -> None:
+    building = generate(make_params(width=30, depth=20))
+    floor = building.floor(0)
+    marked = {(d.x, d.y) for d in floor.devices}
+    obj = next(
+        o for o in floor.objects if o.blocking and not {(c.x, c.y) for c in o.cells} & marked
+    )
+    sprites = tmp_path / "sprites"
+    sprites.mkdir()
+    Image.new("RGBA", (40, 20), (255, 0, 0, 255)).save(sprites / f"{obj.kind}.png")
+    path = tmp_path / "sprited.yaml"
+    path.write_text(
+        "extends: neon\nname: sprited\nsprites: sprites\nambient: 1.0\nglow_radius: 0\nnoise: 0\n"
+    )
+    options = RenderOptions(cell_px=20, padding=2, lighting=False)
+    image = render_floor(building, floor, load_theme(str(path)), options)
+    centre = (round((obj.x + 2 + obj.w / 2) * 20), round((obj.y + 2 + obj.h / 2) * 20))
+    pixel = image.getpixel(centre)
+    assert isinstance(pixel, tuple)
+    assert pixel[0] > 150 and pixel[0] > 3 * max(pixel[1], pixel[2])
+
+
+def test_missing_sprite_directory_is_rejected(tmp_path: Path) -> None:
+    path = tmp_path / "broken.yaml"
+    path.write_text("extends: neon\nname: broken\nsprites: nowhere\n")
+    with pytest.raises(RulesError, match="sprite directory"):
+        load_theme(str(path))
+
+
+@pytest.mark.parametrize(
+    ("tier", "expected"),
+    [
+        (Wealth.SQUATTER, "bed"),
+        (Wealth.LOW, "bed"),
+        (Wealth.MIDDLE, "bed.middle"),
+        (Wealth.HIGH, "bed.middle"),
+        (Wealth.LUXURY, "bed.luxury"),
+    ],
+)
+def test_wealth_sprite_falls_back_to_lower_tiers(tier: Wealth, expected: str) -> None:
+    blank = Image.new("RGBA", (1, 1))
+    sprites = {"bed": blank, "bed.middle": blank, "bed.luxury": blank}
+    assert sprite_name(sprites, "bed", tier) == expected
+    assert sprite_name(sprites, "sofa", tier) is None

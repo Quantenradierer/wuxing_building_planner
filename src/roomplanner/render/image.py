@@ -3,6 +3,9 @@
 Layers, bottom to top: background, floors with patterns and grain, soft shadows of walls
 and objects, objects, walls with windows and doors, room labels, grid. Neon marks (accent
 strips, window glass, screens, lights) go to a glow layer that is blurred and added on top.
+Objects with a sprite in the theme are drawn as that picture, rotated to their facing; their
+shadow follows the sprite's outline. `<kind>.<wealth>.png` variants are preferred for the
+object's wealth tier (or the nearest lower one) over the plain `<kind>.png`.
 The picture is drawn at a higher resolution and scaled down for anti-aliasing.
 """
 
@@ -14,11 +17,22 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass
+from functools import cache
+from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from roomplanner.geometry import Axis, Cell, Edge, Side
-from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
+from roomplanner.model import (
+    Building,
+    Floor,
+    Opening,
+    OpeningKind,
+    OpeningState,
+    PlacedObject,
+    Room,
+)
+from roomplanner.params import Wealth
 from roomplanner.render.shapes import SHAPES, Pen
 from roomplanner.render.theme import Colour, Pattern, Theme, colour
 
@@ -231,6 +245,10 @@ class _Canvas:
             if not obj.blocking:
                 continue
             x0, y0 = self.px(obj.x, obj.y)
+            if (sprite := self._sprite(obj)) is not None:
+                shade = sprite.getchannel("A").point([v * 200 // 255 for v in range(256)])
+                self.shadow.paste(shade, (round(x0 + shift), round(y0 + shift)), shade)
+                continue
             x1, y1 = self.px(obj.x + obj.w, obj.y + obj.h)
             self.draw_shadow.rectangle((x0 + shift, y0 + shift, x1 + shift, y1 + shift), fill=200)
 
@@ -254,13 +272,27 @@ class _Canvas:
 
     def _objects(self) -> None:
         for obj in sorted(self.floor.objects, key=lambda o: o.blocking):  # walkable first
+            x0, y0 = self.px(obj.x, obj.y)
+            if (sprite := self._sprite(obj)) is not None:
+                self.image.paste(sprite, (round(x0), round(y0)), sprite)
+                continue
             style = self.theme.object_style(obj.kind)
             shape = SHAPES.get(style.shape, SHAPES["box"])
-            x0, y0 = self.px(obj.x, obj.y)
             x1, y1 = self.px(obj.x + obj.w, obj.y + obj.h)
             shape(
                 Pen(self.draw_base, self.draw_glow, self.cell, style), (x0, y0, x1, y1), obj.facing
             )
+
+    def _sprite(self, obj: PlacedObject) -> Image.Image | None:
+        """The object's sprite turned to its facing and scaled to its box, if it has one."""
+        directory = self.theme.sprites
+        if directory is None:
+            return None
+        tier = obj.wealth or self.building.params.wealth
+        name = sprite_name(_sprites(directory), obj.kind, tier)
+        if name is None:
+            return None
+        return _placed_sprite(directory, name, obj.facing, obj.w * self.cell, obj.h * self.cell)
 
     def _is_exterior(self, edge: Edge) -> bool:
         return self.floor.is_exterior_wall(edge)
@@ -569,3 +601,27 @@ class _Canvas:
         shaded = ImageChops.multiply(image, Image.merge("RGB", (grey, grey, grey)))
         tint = self.light.point([round(v * self.theme.light_strength) for v in range(256)] * 3)
         return ImageChops.screen(shaded, tint)
+
+
+# Sprites face S (back at the top); degrees counter-clockwise to turn them to a facing.
+_SPRITE_TURN = {Side.S: 0, Side.E: 90, Side.N: 180, Side.W: 270}
+
+
+@cache
+def _sprites(directory: str) -> dict[str, Image.Image]:
+    return {path.stem: Image.open(path).convert("RGBA") for path in Path(directory).glob("*.png")}
+
+
+def sprite_name(sprites: dict[str, Image.Image], kind: str, tier: Wealth) -> str | None:
+    """`<kind>.<tier>`, else the nearest lower tier's variant, else plain `<kind>`."""
+    tiers = list(Wealth)
+    for lower in reversed(tiers[: tiers.index(tier) + 1]):
+        if f"{kind}.{lower}" in sprites:
+            return f"{kind}.{lower}"
+    return kind if kind in sprites else None
+
+
+@cache
+def _placed_sprite(directory: str, kind: str, facing: Side, w: int, h: int) -> Image.Image:
+    turned = _sprites(directory)[kind].rotate(_SPRITE_TURN[facing], expand=True)
+    return turned.resize((w, h), Image.Resampling.LANCZOS)

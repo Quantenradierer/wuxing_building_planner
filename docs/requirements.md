@@ -155,7 +155,8 @@ rooms mean fewer rooms.
 ## Rendering and VTT export (v2)
 
 - The image renderer reads only the JSON. Procedural cyberpunk style (dark concrete, neon
-  accents per room type), swappable themes (a textured asset pack is just another theme).
+  accents per room type), swappable themes (a textured asset pack is just another theme;
+  `neon_sprites` draws objects with painted Midjourney sprites).
   PNG (or WebP), one image per floor, default 50 px per cell. Lights appear as a subtle
   glow; the VTT does the real lighting.
 - VTT export: Universal VTT (`.dd2vtt`, one file per floor) first, then Foundry VTT (v12+,

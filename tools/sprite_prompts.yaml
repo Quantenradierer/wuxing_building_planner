@@ -1,0 +1,109 @@
+# Midjourney prompts for object sprites (tools/sprites.py). One entry per object kind.
+# Sprites face south: the back of the object (the side against the wall) is at the TOP of
+# the image, its front at the bottom. The aspect ratio comes from the object's size
+# [along, deep] in objects.yaml. Kinds not listed keep their procedural shape.
+style: >-
+  {subject}, orthographic plan view, camera pointing straight down, flat lay, 2D top-down
+  asset for a tabletop RPG battlemap, hand-painted digital art, cyberpunk, gritty, muted colours
+  with small neon accents, single object isolated on a flat solid white background
+suffix: "--no drop shadow, cast shadow, perspective, isometric, side view, text, people, floor, walls, border, frame --style raw"
+# Style reference for every job (one of our own grids) so all sprites share one look.
+# Discord CDN links expire after about a day; replace it with a fresh link to that grid.
+sref_weight: 60
+sref: "https://cdn.discordapp.com/attachments/1189970972279853087/1553476480712052777/leto_single_bed_pillow_at_the_top_edge_blanket_towards_the_bot_dcb9a504-e0bf-4993-acb7-9fcb1b37127e.webp?ex=6ab96337&is=6ab811b7&hm=d61fbdad78da94572f3239ec517fedef9a565567b5a56f5cae8b75cc366bcae2"
+# Extra exclusions per kind (appended to --no).
+exclude:
+  desk: chair
+  reception_desk: chair
+  guard_desk: chair
+  cubicle: chair
+  meeting_table: chair
+  table: chair
+  bar_counter: stool
+  bed: nightstand
+  double_bed: nightstand
+  hospital_bed: monitor
+
+subjects:
+  rug: "rectangular worn patterned rug"
+  roof_hatch: "square steel roof access hatch with hinges and hazard stripes"
+  guard_desk: "security guard desk with a row of small surveillance monitors along the top edge"
+  security_gate: "narrow metal detector security gate, seen from above as a slim frame"
+  weapon_locker: "steel weapon locker, closed, with a keypad, back against the top edge"
+  debris: "small scattered pile of debris, broken plaster and trash"
+  trash_pile: "pile of garbage bags and trash"
+  rubble: "pile of concrete rubble and broken bricks"
+  rubble_heap: "large heap of concrete rubble with twisted rebar"
+  collapsed_ceiling: "pile of broken concrete ceiling slabs, fallen ceiling tiles, dangling cables and rubble"
+  filing_cabinet: "grey metal filing cabinet, closed, drawers facing the bottom edge"
+  armchair: "leather armchair, backrest along the top edge, seat facing the bottom edge"
+  crate: "wooden shipping crate lid seen from straight above, square, only the top surface visible"
+  trash_bin: "round trash bin seen from straight above, a circle with garbage inside"
+  copier: "office photocopier machine"
+  desk: "office desk with a computer monitor along the top edge and a keyboard, no chair"
+  chair: "office swivel chair, backrest along the top edge, seat facing the bottom edge"
+  table: "square table"
+  meeting_table: "long rectangular conference table seen from straight above, only the flat tabletop visible"
+  shelf: "metal shelf with boxes and binders, back against the top edge"
+  cabinet: "small storage cabinet"
+  counter: "kitchen counter with worktop, back against the top edge"
+  reception_desk: "curved corporate reception desk with a glowing logo panel, no chair"
+  bed: "single bed, pillow at the top edge, blanket towards the bottom edge"
+  double_bed: "double bed, two pillows at the top edge, blanket towards the bottom edge"
+  sofa: "three seat sofa, backrest along the top edge, cushions facing the bottom edge"
+  wardrobe: "wooden wardrobe, closed, doors facing the bottom edge"
+  wc: "toilet bowl, tank at the top edge"
+  sink: "small washbasin, faucet at the top edge"
+  shower: "square shower tray with a drain in the middle seen from straight above"
+  stove: "kitchen stove with four burners"
+  fridge: "refrigerator, closed"
+  server_rack: "server rack with blinking status lights, cables at the top edge"
+  gondola: "supermarket shelf gondola full of colourful products, double-sided"
+  checkout: "supermarket checkout counter with conveyor belt and register"
+  freezer: "supermarket chest freezer with glass lids and frozen food"
+  pallet: "square wooden pallet with stacked cardboard boxes seen from straight above, only the tops of the boxes visible"
+  rack: "heavy duty warehouse pallet rack with boxes and crates"
+  hospital_bed: "hospital bed with rails, pillow at the top edge"
+  exam_table: "medical examination table with paper roll, headrest at the top edge"
+  operating_table: "surgical operating table, headrest at the top edge, surgical lamp"
+  medical_cabinet: "white medical supply cabinet with glass doors, back against the top edge"
+  morgue_drawers: "stainless steel morgue cold chamber wall with four square drawers"
+  locker: "single metal locker, closed"
+  bench: "long bench, wooden slats"
+  plant: "potted plant in a round pot"
+  machinery: "industrial machine with pipes, valves and a control panel"
+  washing_machine: "washing machine, round door"
+  mailboxes: "one long narrow block of metal mailboxes seen from straight above"
+  terminal: "computer terminal console with a glowing screen"
+  vending_machine: "vending machine with glowing panel, back against the top edge"
+  capsule: "capsule hotel sleeping pod, closed plastic shell, entrance hatch at the bottom edge"
+  bar_counter: "long bar counter with bottles and taps, back against the top edge"
+  dj_booth: "DJ booth with turntables and mixer, neon lights"
+  speaker: "large loudspeaker cabinet"
+  pool_table: "pool table with green felt and balls"
+  forklift: "warehouse forklift, forks pointing towards the bottom edge"
+  lab_bench: "laboratory bench with glassware, microscopes and sample racks"
+  fume_hood: "laboratory fume hood cabinet, sash facing the bottom edge"
+  specimen_fridge: "laboratory specimen refrigerator with glass door"
+  cubicle: "office cubicle seen from straight above like a floor plan, low partition walls around a desk with a monitor, no chair"
+  scanner: "medical MRI scanner, ring gantry with patient table towards the bottom edge"
+  stool: "round bar stool"
+  nightstand: "small bedside table with a lamp seen from straight above, no bed"
+  side_table: "small round side table"
+  coffee_machine: "espresso coffee machine"
+  water_cooler: "water cooler dispenser with a blue bottle"
+  iv_stand: "IV drip stand seen from straight above, round five-leg base with a hanging saline bag"
+  vital_monitor: "small medical vital signs monitor cart seen from straight above"
+  medical_cart: "medical supply trolley seen from straight above, only the flat top tray with supplies visible"
+  gurney: "wheeled hospital gurney stretcher, pillow at the top edge"
+  barrel: "rusty oil drum barrel, open top"
+  workbench: "workshop workbench with tools, vice and parts"
+  display_case: "glass display case with goods inside"
+  atm: "cash machine ATM kiosk, screen facing the bottom edge"
+  coat_rack: "standing coat rack seen from straight above, round base with coats hanging around it"
+  safe: "heavy steel safe with dial"
+  urinal: "wall urinal, back against the top edge"
+  dryer: "tumble dryer, round door"
+  laundry_cart: "laundry cart full of towels"
+  arcade_machine: "arcade game cabinet, glowing screen, joystick facing the bottom edge"
+  stage: "rectangular stage platform with black floor, light rigs and monitor speakers"

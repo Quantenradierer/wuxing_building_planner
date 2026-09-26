@@ -41,7 +41,7 @@ the floor scenes (Foundry v12+ Scene Regions).
 | `--entrances`          | override entrance kinds: main, service, emergency, roof|
 | `--seed`               | same seed, same building                               |
 | `-f/--format`          | ascii, json (full model), png, webp, dd2vtt, foundry   |
-| `--theme`              | image theme: bundled name (neon) or a YAML file        |
+| `--theme`              | image theme: bundled name (neon, neon_sprites) or YAML |
 | `--cell-px`            | image pixels per cell (default 50, i.e. 100 px per m)  |
 | `--labels`, `--grid N` | room names in images; grid line every N cells          |
 | `--grid-m`             | VTT grid square in metres (default 1.0, multiple of 0.5)|
