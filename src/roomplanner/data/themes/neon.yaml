@@ -63,6 +63,9 @@ materials:
   tech:       {floor: "#161a24", pattern: tiles, tile: 2, lines: "#2de2ff22", accent: "#7c4dff"}
   shop:       {floor: "#2e3136", pattern: tiles, tile: 2, lines: "#00000038", accent: "#ff2e88"}
   stairs:     {floor: "#23262d", pattern: plain}
+  club:       {floor: "#16121e", pattern: tiles, tile: 2, lines: "#ff3fa426", accent: "#ff3fa4"}
+  pods:       {floor: "#1c2230", pattern: tiles, tile: 2, lines: "#00e5ff18", accent: "#00e5ff"}
+  lab:        {floor: "#dfe6ee", pattern: tiles, tile: 2, lines: "#00000018", accent: "#6dffb0"}
 
 rooms:
   corridor: corridor
@@ -109,6 +112,37 @@ rooms:
   security_room: tech
   sales_floor: shop
   prep_kitchen: wet
+  guest_room: wood
+  apartment: wood          # units are subdivided; mapped for completeness
+  hotel_room: wood
+  capsule_dorm: pods
+  shower_room: wet
+  locker_room: concrete
+  linen_room: concrete
+  restaurant: wood
+  commercial_kitchen: wet
+  bar_room: club
+  dance_floor: club
+  lounge: club
+  vip_room: executive
+  backstage: concrete
+  cloakroom: lobby
+  coffin_unit: concrete
+  warehouse_floor: industrial
+  shipping_office: carpet
+  clean_room: lab
+  wet_lab: lab
+  specimen_storage: lab
+  test_chamber: tech
+  corp_lobby: lobby
+  cubicle_farm: carpet
+  icu: sterile
+  imaging: sterile
+  cafeteria: wet
+  storefront: shop
+  recovery_room: concrete
+  back_room_or: wet
+  shop_floor: shop
 
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
@@ -156,6 +190,17 @@ objects:
   copier:          {shape: machine, fill: "#bfc6cf", stroke: "#4d5563", detail: "#6d7788"}
   trash_bin:       {shape: circle, fill: "#3b4048", stroke: "#11131a", detail: "#5b616c"}
   rug:             {shape: rug, fill: "#3d2a44", stroke: "#1a1020", detail: "#a05ab4"}
+  capsule:         {shape: bed, fill: "#2a3346", stroke: "#0b0e14", detail: "#00e5ff", glow: "#00e5ff"}
+  bar_counter:     {shape: counter, fill: "#2a1f33", stroke: "#0b0e14", detail: "#ff3fa4", glow: "#ff3fa4"}
+  dj_booth:        {shape: screen, fill: "#1a1d26", stroke: "#000000", detail: "#3a1f5a", glow: "#b14dff"}
+  speaker:         {shape: box, fill: "#0f1117", stroke: "#3a3f4d"}
+  pool_table:      {shape: table, fill: "#1f6b3f", stroke: "#3b2a1c", detail: "#2a8a52"}
+  forklift:        {shape: machine, fill: "#d9a21b", stroke: "#2a2006", detail: "#3b3f47", glow: "#ffb300"}
+  lab_bench:       {shape: counter, fill: "#eef2f6", stroke: "#8a95a5", detail: "#b8c2cf"}
+  fume_hood:       {shape: machine, fill: "#c5ced9", stroke: "#5b6474", detail: "#7b8595", glow: "#6dffb0"}
+  specimen_fridge: {shape: screen, fill: "#dfe6ee", stroke: "#5b6474", detail: "#9fe8ff", glow: "#4fc3f7"}
+  cubicle:         {shape: desk, fill: "#4a4f5c", stroke: "#15171d", detail: "#1b1f2a", glow: "#29b6f6"}
+  scanner:         {shape: machine, fill: "#e6ebf1", stroke: "#5b6474", detail: "#9aa6b5", glow: "#4fc3f7"}
   roof_hatch:      {shape: hatch, fill: "#2a2f3a", stroke: "#ffb347", detail: "#6b7385"}
   guard_desk:      {shape: counter, fill: "#23283a", stroke: "#0f1117", detail: "#00e5ff", glow: "#00e5ff"}
   security_gate:   {shape: counter, fill: "#3b4254", stroke: "#0f1117", detail: "#ff3b30", glow: "#ff3b30"}

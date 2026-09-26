@@ -1,0 +1,54 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Nightclub: dance floor hall, bars, VIP rooms, backstage; lounge floors upstairs.
+building: nightclub
+catalogs: [common, office, hospitality, retail]
+layout: hall
+
+corridor:
+  width: 3
+  hallway_width: 3
+strip_depth: [8, 14]       # back-of-house row
+hall:
+  min_depth: 12
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 4}
+  service: {width: 2}
+  emergency: {width: 3}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: dance_floor, place: hall}
+      - {room: toilet, count: 2, near: core, priority: required}
+      - {room: cloakroom, count: 1, priority: required}
+      - {room: backstage, count: 1}
+      - {room: vip_room, count: [1, 3]}
+      - {room: manager_office, count: 1}
+      - {room: security_room, count: 1, security: [low, corporate, aaa]}
+      - {room: storage, fill: true}
+  upper:
+    applies: [upper, top]
+    rooms:
+      - {room: lounge, place: hall}
+      - {room: toilet, count: [1, 2], near: core}
+      - {room: vip_room, count: [1, 3]}
+      - {room: vip_room, fill: true}
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: dance_floor, place: hall}
+      - {room: toilet, count: 2, near: core}
+      - {room: utility, count: 1, priority: required}
+      - {room: cold_storage, count: [0, 1]}
+      - {room: storage, fill: true}

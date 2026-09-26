@@ -38,13 +38,6 @@ rooms:
       - {object: desk, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}
       - {object: terminal, placement: corner, count: [0, 1]}
-  staff_room:
-    area: [30, 70]
-    min_side: 5
-    furniture:
-      - {object: table, placement: center}
-      - {object: locker, placement: wall, count: [2, 6]}
-      - {object: sofa, placement: wall, count: [0, 1]}
   prep_kitchen:         # deli / bakery / soykaf bar
     area: [30, 90]
     min_side: 5

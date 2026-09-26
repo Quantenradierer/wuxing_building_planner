@@ -381,18 +381,23 @@ class Allocator:
 
     def _fill_entries(self, segment: Segment, fills: list[RoomEntry]) -> list[RoomEntry]:
         """Facades get rooms that need windows if possible; interiors only rooms that don't."""
+        fills = [e for e in fills if self.rules.spec(e.room).min_side <= segment.depth]
         needs_window = [e for e in fills if self.rules.spec(e.room).windows is WindowRule.REQUIRED]
         others = [e for e in fills if e not in needs_window]
+        filler = [RoomEntry(room=self.rules.program.cluster_filler, fill=True)]
         if segment.facade:
-            return needs_window or others
-        return others or [RoomEntry(room=self.rules.program.cluster_filler, fill=True)]
+            return needs_window or others or filler
+        return others or filler
 
     def _fill(self, state: SegmentState, all_fills: list[RoomEntry]) -> None:
         segment = state.segment
         fills = self._fill_entries(segment, all_fills)
         if not state.slots and state.free_units == 0:
             # Segment narrower than one module: a single room takes the partial modules.
-            state.slots.append(self._fill_slot(fills[0], 0, segment))
+            width = segment.span.width
+            fitting = [e for e in fills if self._min_width(self.rules.spec(e.room), 0) <= width]
+            filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
+            state.slots.append(self._fill_slot((fitting or [filler])[0], 0, segment))
             return
         while state.free_units > 0:
             fitting = [e for e in fills if self._fill_min_units(e, segment) <= state.free_units]

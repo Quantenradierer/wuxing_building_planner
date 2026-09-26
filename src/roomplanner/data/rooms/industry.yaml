@@ -1,0 +1,126 @@
+# Warehouses, corp labs, corporate floors, hospitals, street docs.
+rooms:
+  warehouse_floor:      # the warehouse's hall
+    area: [100, 100000]
+    min_side: 10
+    windows: optional
+    door_width: 4
+    furniture:
+      - {object: rack, placement: rows, aisle: 4, margin: 3}
+      - {object: pallet, placement: scatter, per: 120, count: [1, 10]}
+      - {object: forklift, placement: scatter, count: [0, 2]}
+  shipping_office:
+    area: [24, 60]
+    min_side: 5
+    furniture:
+      - {object: desk, placement: wall, count: [1, 2]}
+      - {object: filing_cabinet, placement: wall, count: [1, 3]}
+      - {object: terminal, placement: corner}
+  clean_room:
+    area: [60, 200]
+    min_side: 7
+    windows: forbidden
+    door_width: 2
+    furniture:
+      - {object: lab_bench, placement: rows, aisle: 3, margin: 2}
+      - {object: fume_hood, placement: wall, count: [1, 2]}
+  wet_lab:
+    area: [60, 160]
+    min_side: 6
+    furniture:
+      - {object: lab_bench, placement: rows, aisle: 3, margin: 2}
+      - {object: fume_hood, placement: wall, count: [1, 3]}
+      - {object: specimen_fridge, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall}
+  specimen_storage:
+    area: [16, 48]
+    min_side: 4
+    windows: forbidden
+    cluster: true
+    access: [wet_lab, clean_room, lab]
+    furniture:
+      - {object: specimen_fridge, placement: wall, per: 5, count: [2, 8]}
+  test_chamber:
+    area: [60, 160]
+    min_side: 7
+    windows: forbidden
+    door_width: 3
+    furniture:
+      - {object: machinery, placement: center}
+      - {object: terminal, placement: wall, count: [1, 3]}
+  corp_lobby:           # reception with a security checkpoint
+    area: [80, 400]
+    min_side: 8
+    circulation: true
+    furniture:
+      - {object: reception_desk, placement: center}
+      - {object: security_gate, placement: scatter, count: [2, 3]}
+      - {object: plant, placement: corner, count: [2, 4]}
+      - {object: bench, placement: wall, count: [1, 2]}
+  cubicle_farm:
+    area: [160, 1200]
+    min_side: 10
+    windows: required
+    door_width: 3
+    furniture:
+      - {object: cubicle, placement: rows, aisle: 2, margin: 2}
+      - {object: copier, placement: wall, count: [1, 2]}
+      - {object: plant, placement: corner, count: [0, 2]}
+  icu:
+    area: [80, 200]
+    min_side: 8
+    windows: required
+    door_width: 3
+    furniture:
+      - {object: hospital_bed, placement: wall, per: 20, count: [2, 8]}
+      - {object: machinery, placement: wall, per: 30, count: [1, 6]}
+      - {object: medical_cabinet, placement: wall, count: [1, 2]}
+  imaging:
+    area: [60, 140]
+    min_side: 7
+    windows: forbidden
+    door_width: 3
+    furniture:
+      - {object: scanner, placement: center}
+      - {object: terminal, placement: wall, count: [1, 2]}
+  cafeteria:
+    area: [80, 300]
+    min_side: 8
+    windows: required
+    door_width: 3
+    furniture:
+      - {object: table, placement: scatter, per: 14, count: [3, 16]}
+      - {object: counter, placement: wall, count: [1, 2]}
+      - {object: vending_machine, placement: wall, count: [1, 2]}
+  storefront:           # street doc's cover business (pawn shop, noodle bar)
+    area: [40, 120]
+    min_side: 6
+    circulation: true
+    furniture:
+      - {object: counter, placement: wall}
+      - {object: shelf, placement: wall, per: 8, count: [2, 8]}
+      - {object: vending_machine, placement: wall, count: [0, 1]}
+  recovery_room:
+    area: [30, 90]
+    min_side: 5
+    furniture:
+      - {object: bed, placement: wall, per: 15, count: [1, 4]}
+      - {object: medical_cabinet, placement: wall, count: [0, 1]}
+  back_room_or:         # the street doc's operating table
+    area: [40, 100]
+    min_side: 6
+    windows: forbidden
+    furniture:
+      - {object: operating_table, placement: center}
+      - {object: medical_cabinet, placement: wall, count: [1, 3]}
+      - {object: machinery, placement: wall, count: [0, 1]}
+      - {object: sink, placement: wall}
+  shop_floor:           # convenience store hall
+    area: [40, 100000]
+    min_side: 6
+    door_width: 2
+    furniture:
+      - {object: checkout, placement: near_exit}
+      - {object: freezer, placement: wall, count: [1, 2]}
+      - {object: vending_machine, placement: wall, count: [0, 2]}
+      - {object: gondola, placement: rows, aisle: 3, margin: 2}

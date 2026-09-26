@@ -45,7 +45,7 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 
 | Parameter       | Values                                              | v1 behaviour                          |
 |-----------------|-----------------------------------------------------|---------------------------------------|
-| `building_type` | office, apartment, supermarket, clinic              | honoured                              |
+| `building_type` | see "Building types" (13 types)                     | honoured                              |
 | `width`         | cells (east–west)                                   | honoured; bounding box for L shapes   |
 | `depth`         | cells (north–south)                                 | honoured; bounding box for L shapes   |
 | `floors_above`  | ≥ 1, includes the ground floor                      | honoured                              |
@@ -66,7 +66,7 @@ of rectangles (no diagonals or curves); every arm is as deep as the layout's mai
 Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2, …
 (displayed as B1, B2, …).
 
-## Building types (v1)
+## Building types
 
 | Type        | Layout strategy | Notes                                               |
 |-------------|-----------------|-----------------------------------------------------|
@@ -74,6 +74,15 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | clinic      | corridor        | many specialised rooms, surgery floor, wards        |
 | apartment   | corridor+units  | flats along a corridor, each subdivided             |
 | supermarket | hall            | sales hall per floor, back-of-house strip, loading  |
+| hospital    | corridor        | ER, imaging, ICU, surgery floor, wards, morgue      |
+| hotel       | corridor+units  | rooms with bath; capsule hotel at squatter / low    |
+| corp_lab    | corridor        | wet labs, clean rooms, test chambers, server room   |
+| nightclub   | hall            | dance floor / lounge hall, VIP rooms, backstage     |
+| warehouse   | hall            | racked hall, loading bays, shipping office          |
+| corp_office | corridor        | checkpoint lobby, cubicle floors, executive top     |
+| street_doc  | corridor        | cover storefront, back-room OR, recovery rooms      |
+| coffin_block| corridor        | tiny coffin units, shared toilets and showers       |
+| stuffer_shack | hall          | convenience store: small sales floor, stock room    |
 
 ## Building rules
 

@@ -18,6 +18,20 @@ rooms:
   bedroom:       {colour: "#ffc98a", intensity: 0.5}
   sales_floor:   {spacing: 10, radius: 10, colour: "#f5fbff", intensity: 0.85}
   stockroom:     {spacing: 12, radius: 9, colour: "#ffe7c2", intensity: 0.6}
+  dance_floor:   {spacing: 8, radius: 7, colour: "#b14dff", intensity: 0.6}
+  lounge:        {spacing: 8, radius: 7, colour: "#ff6fb5", intensity: 0.5}
+  bar_room:      {colour: "#ff9f5a", intensity: 0.5}
+  vip_room:      {colour: "#ff6fb5", intensity: 0.5}
+  capsule_dorm:  {spacing: 10, radius: 6, colour: "#7fdcff", intensity: 0.4}
+  coffin_unit:   {radius: 3, colour: "#ffd9a0", intensity: 0.4}
+  warehouse_floor: {spacing: 12, radius: 10, colour: "#fff5e0", intensity: 0.7}
+  clean_room:    {radius: 9, colour: "#f4fbff", intensity: 0.95}
+  wet_lab:       {colour: "#f4fbff", intensity: 0.85}
+  test_chamber:  {colour: "#b0c4ff", intensity: 0.6}
+  corp_lobby:    {spacing: 8, radius: 9, colour: "#f0f6ff", intensity: 0.8}
+  icu:           {colour: "#e8f6ff", intensity: 0.8}
+  back_room_or:  {radius: 7, colour: "#f4fbff", intensity: 0.9}
+  shop_floor:    {spacing: 6, radius: 8, colour: "#f5fbff", intensity: 0.9}
 
 accents:
   stairwell:
@@ -33,6 +47,16 @@ accents:
     - {kind: neon, radius: 4, colour: "#00ff9c", intensity: 0.5}
   kitchenette:
     - {kind: neon, radius: 4, colour: "#ffb347", intensity: 0.4}          # vending glow
+  dance_floor:
+    - {kind: neon, radius: 8, colour: "#00e5ff", intensity: 0.7}
+    - {kind: neon, radius: 8, colour: "#ff3fa4", intensity: 0.7}
+    - {kind: neon, radius: 8, colour: "#c6ff00", intensity: 0.5}
+  bar_room:
+    - {kind: neon, radius: 5, colour: "#ff3fa4", intensity: 0.6}
+  storefront:
+    - {kind: neon, radius: 5, colour: "#ff2e88", intensity: 0.6}
+  shop_floor:
+    - {kind: neon, radius: 5, colour: "#ff2e88", intensity: 0.6}
 
 entrances:
   main: {kind: sign, radius: 8, colour: "#ff3fa4", intensity: 0.9}

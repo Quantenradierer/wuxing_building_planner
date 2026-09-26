@@ -1,0 +1,52 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Coffin block / squat: tiny sleeping units along narrow corridors, shared facilities.
+building: coffin_block
+catalogs: [common, residential, hospitality]
+layout: corridor
+
+corridor:
+  width: 3
+  hallway_width: 3
+strip_depth: [6, 9]
+facade:
+  module: 3
+  window: 1                # small slits
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}
+  emergency: {width: 2}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: lobby, place: entrance, area: [24, 60], priority: required}
+      - {room: toilet, count: [1, 2], near: core, priority: required}
+      - {room: shower_room, count: 1, near: core, priority: required}
+      - {room: mailroom, count: [0, 1], near: entrance}
+      - {room: coffin_unit, fill: true}
+      - {room: storage, fill: true}
+  residential:
+    applies: [upper, top]
+    rooms:
+      - {room: toilet, count: [1, 2], near: core, priority: required}
+      - {room: shower_room, count: 1, near: core}
+      - {room: coffin_unit, fill: true}
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: utility, count: 1, priority: required}
+      - {room: laundry, count: [0, 1]}
+      - {room: coffin_unit, fill: true}
+      - {room: storage, fill: true}
+
+wealth:
+  high: {area: 1.0, corridor: 1.0, furniture: 1.1}     # a coffin stays a coffin
+  luxury: {area: 1.05, corridor: 1.0, furniture: 1.2}

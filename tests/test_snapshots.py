@@ -8,7 +8,7 @@ import pytest
 
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
-from roomplanner.params import BuildingType, Shape, Wealth
+from roomplanner.params import BuildingType, Condition, Security, Shape, Wealth
 from roomplanner.render.ascii import render_building
 
 from .conftest import make_params
@@ -26,6 +26,15 @@ CASES: dict[str, dict[str, Any]] = {
     },
     "office_l_shape": {"width": 64, "depth": 52, "shape": Shape.L, "floors_above": 2, "seed": 2},
     "office_u_shape": {"width": 64, "depth": 48, "shape": Shape.U, "seed": 3},
+    "hotel": {"building_type": BuildingType.HOTEL, "width": 56, "depth": 36, "seed": 2},
+    "nightclub_ruined_aaa": {
+        "building_type": BuildingType.NIGHTCLUB,
+        "width": 56,
+        "depth": 36,
+        "seed": 2,
+        "condition": Condition.RUINED,
+        "security": Security.AAA,
+    },
     "clinic_t_shape": {
         "building_type": BuildingType.CLINIC,
         "width": 72,

@@ -13,6 +13,16 @@ class BuildingType(StrEnum):
     APARTMENT = "apartment"
     SUPERMARKET = "supermarket"
     CLINIC = "clinic"
+    HOSPITAL = "hospital"
+    HOTEL = "hotel"
+    CORP_LAB = "corp_lab"
+    NIGHTCLUB = "nightclub"
+    WAREHOUSE = "warehouse"
+    # Variants of the types above.
+    CORP_OFFICE = "corp_office"
+    STREET_DOC = "street_doc"
+    COFFIN_BLOCK = "coffin_block"
+    STUFFER_SHACK = "stuffer_shack"
 
 
 class Wealth(StrEnum):

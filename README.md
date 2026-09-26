@@ -1,7 +1,8 @@
 # Roomplanner
 
 Parameterized generator for Shadowrun/cyberpunk building battle maps: offices, clinics,
-apartment blocks and supermarkets, from a corner stuffer shack to a corp tower floor.
+hospitals, apartment and coffin blocks, hotels, corp labs, nightclubs, warehouses and shops,
+from a corner Stuffer Shack to a corp tower floor.
 
 All sizes are in cells (1 cell = 0.5 m, so a 1.5 m battle square is 3×3 cells). Walls, doors
 and windows sit on the edges between cells.
@@ -21,7 +22,7 @@ uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
 
 | Option                 | Values                                                 |
 |------------------------|--------------------------------------------------------|
-| `-t/--type`            | office, clinic, apartment, supermarket                 |
+| `-t/--type`            | office, clinic, apartment, supermarket, hospital, hotel, corp_lab, nightclub, warehouse, corp_office, street_doc, coffin_block, stuffer_shack |
 | `-w/--width`, `-d/--depth` | building bounding box in cells                     |
 | `--floors-above`       | floors incl. ground floor (default 1)                  |
 | `--floors-below`       | basements (default 0)                                  |

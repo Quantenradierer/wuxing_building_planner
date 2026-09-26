@@ -7,12 +7,6 @@ rooms:
       - {object: bench, placement: wall, count: [2, 6]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 2]}
-  reception:
-    area: [16, 40]
-    min_side: 4
-    furniture:
-      - {object: reception_desk, placement: wall}
-      - {object: terminal, placement: corner, count: [0, 1]}
   exam_room:
     area: [40, 70]
     min_side: 5
@@ -99,10 +93,3 @@ rooms:
       - {object: desk, placement: wall}
       - {object: exam_table, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: corner, count: [0, 1]}
-  staff_room:
-    area: [30, 70]
-    min_side: 5
-    furniture:
-      - {object: table, placement: center}
-      - {object: locker, placement: wall, count: [2, 6]}
-      - {object: sofa, placement: wall, count: [0, 1]}

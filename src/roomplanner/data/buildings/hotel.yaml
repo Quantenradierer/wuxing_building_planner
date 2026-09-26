@@ -1,0 +1,73 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Hotel rooms with their own bath; the squatter and low tiers are a capsule hotel.
+building: hotel
+catalogs: [common, residential, hospitality]
+layout: corridor
+
+corridor:
+  width: 4
+  hallway_width: 3
+strip_depth: [12, 18]
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [4, 4], when: "floors_total >= 3"}
+
+entrances:
+  main: {width: 4}
+  service: {width: 2}      # kitchen and laundry deliveries
+  emergency: {width: 2}
+  roof: {width: 2}
+
+units:
+  hotel_room:
+    hall: hallway
+    front: [bathroom]
+    back: [guest_room]
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: lobby, place: entrance, area: [80, 200], priority: required}
+      - {room: reception, count: 1, near: entrance, priority: required}
+      - {room: toilet, count: 2, near: core, priority: required}
+      - {room: restaurant, count: 1, wealth: [middle, high, luxury]}
+      - {room: commercial_kitchen, count: 1, wealth: [middle, high, luxury]}
+      - {room: bar_room, count: [0, 1], wealth: [high, luxury]}
+      - {room: security_room, count: 1, near: entrance, security: [corporate, aaa]}
+      - {room: staff_room, count: 1}
+      - {room: locker_room, count: 1, wealth: [squatter, low]}
+      - {room: shower_room, count: [1, 2], wealth: [squatter, low]}
+      - {room: capsule_dorm, fill: true, wealth: [squatter, low]}
+      - {room: hotel_room, fill: true, wealth: [middle, high, luxury]}
+      - {room: linen_room, fill: true}         # interior rows without facade
+      - {room: storage, fill: true}
+  capsules:
+    applies: [upper, top]
+    wealth: [squatter, low]
+    rooms:
+      - {room: shower_room, count: 2, near: core, priority: required}
+      - {room: toilet, count: 2, near: core, priority: required}
+      - {room: locker_room, count: 1, near: core}
+      - {room: capsule_dorm, fill: true}
+      - {room: storage, fill: true}
+  rooms:
+    applies: [upper, top]
+    wealth: [middle, high, luxury]
+    rooms:
+      - {room: linen_room, count: 1, near: core}
+      - {room: storage, count: [0, 1], near: core, priority: optional}
+      - {room: hotel_room, fill: true}
+      - {room: linen_room, fill: true}         # interior rows without facade
+      - {room: storage, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: utility, count: 1, priority: required}
+      - {room: laundry, count: 1}
+      - {room: storage, fill: true}

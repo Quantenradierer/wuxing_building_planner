@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from roomplanner.geometry import Cell, Edge, Side, boundary_edges, connected
-from roomplanner.model import Building, Floor, OpeningKind, Room
+from roomplanner.model import Building, Floor, OpeningKind
 from roomplanner.rules import Rules, WindowRule
 
 
@@ -165,6 +165,13 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
         for e in o.edges
         for c in e.cells()
     }
+    # Circulation rooms have no walls between them: their width counts as one open space.
+    open_space = frozenset(
+        c
+        for r in floor.rooms
+        if r.type in rules.rooms and rules.spec(r.type).circulation
+        for c in r.cells
+    )
     for room in floor.rooms:
         if room.type not in rules.rooms:
             violations.append(
@@ -172,7 +179,8 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
             )
             continue
         spec = rules.spec(room.type)
-        if (thinnest := _thinnest(room)) < spec.min_side:
+        space = open_space if spec.circulation else room.cells
+        if (thinnest := _thinnest(room.cells, space)) < spec.min_side:
             message = (
                 f"{room.type} {room.id} is {thinnest} cells wide in places, minimum {spec.min_side}"
             )
@@ -184,11 +192,11 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
     return violations
 
 
-def _thinnest(room: Room) -> int:
-    """Smallest extent of the room through any of its cells, horizontally or vertically."""
-    horizontal = _run_lengths(room.cells, lambda c: (c.y, c.x))
-    vertical = _run_lengths(room.cells, lambda c: (c.x, c.y))
-    return min(min(horizontal[c], vertical[c]) for c in room.cells)
+def _thinnest(cells: frozenset[Cell], space: frozenset[Cell]) -> int:
+    """Smallest extent of `space` through any of `cells`, horizontally or vertically."""
+    horizontal = _run_lengths(space, lambda c: (c.y, c.x))
+    vertical = _run_lengths(space, lambda c: (c.x, c.y))
+    return min(min(horizontal[c], vertical[c]) for c in cells)
 
 
 def _run_lengths(cells: frozenset[Cell], key: Callable[[Cell], tuple[int, int]]) -> dict[Cell, int]:

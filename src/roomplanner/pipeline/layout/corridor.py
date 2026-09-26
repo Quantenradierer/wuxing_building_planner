@@ -233,9 +233,12 @@ class CorridorLayout:
                 cells = [wing.frame.cell(0, v) for v in range(corridor.v0, corridor.v1)]
                 spans.append(_u_range(frame, cells))
             for span in spans:
-                span = _absorb_gaps(
-                    span, [s for s in spans if s != span], frame.length, parent.grid.module
-                )
+                others = [s for s in spans if s != span]
+                others += parent.reserved.get(band.index, [])
+                span = _absorb_gaps(span, others, frame.length, parent.grid.module)
+                # Stubs of several wings may now overlap: join them.
+                for taken in [r for r in parent.reserved.get(band.index, []) if r.overlaps(span)]:
+                    span = Interval(min(span.u0, taken.u0), max(span.u1, taken.u1))
                 parent.reserved.setdefault(band.index, []).append(span)
                 parent.connectors.append(
                     PlannedRoom("corridor", frame.rect(span.u0, span.u1, band.v0, band.v1))
@@ -413,8 +416,12 @@ class CorridorLayout:
         target: float,
         blocked: list[Interval],
         touching: Interval | None = None,
+        avoid: tuple[Interval, ...] = (),
     ) -> Interval | None:
-        """Grid-aligned interval closest to `target` that leaves usable gaps around it."""
+        """Grid-aligned interval closest to `target` that leaves usable gaps around it.
+
+        `avoid` intervals must not be overlapped but are no neighbours (e.g. junctions).
+        """
         min_gap = MIN_GAP_MODULES * grid.module
         starts = {*grid.points(), *(b.u1 for b in blocked), *(b.u0 - width for b in blocked)}
         options = {Interval(start, start + width) for start in starts}
@@ -428,7 +435,7 @@ class CorridorLayout:
             start = interval.u0
             if start < 0 or interval.u1 > grid.length:
                 continue
-            if any(interval.overlaps(b) for b in blocked):
+            if any(interval.overlaps(b) for b in (*blocked, *avoid)):
                 continue
             if touching is not None and interval.gap_to(touching) != 0:
                 continue
@@ -615,8 +622,8 @@ class CorridorLayout:
                 width = grid.round_up(program.corridor.width)
                 target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
                 blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
-                blocked += main.no_facade.get(band.index, [])
-                span = self._choose(grid, width, target, blocked)
+                junctions = tuple(main.no_facade.get(band.index, []))
+                span = self._choose(grid, width, target, blocked, avoid=junctions)
                 if span is not None:
                     extra.setdefault(band.index, []).append(span)
                     cells = frame.rect(span.u0, span.u1, band.v0, band.v1)
