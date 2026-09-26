@@ -61,6 +61,7 @@ class Placement(StrEnum):
     SCATTER = "scatter"  # anywhere free
     NEAR_EXIT = "near_exit"  # close to the room's exterior door (checkouts)
     ROWS = "rows"  # parallel rows with aisles, filling the room (shelves, desks)
+    AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
 
 
 class FurnitureRule(_Strict):
@@ -73,6 +74,16 @@ class FurnitureRule(_Strict):
     aisle: int = Field(default=3, gt=0, description="rows: free cells between rows")
     margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
+    at: str | None = Field(default=None, description="at: the object kind to stand beside")
+    beside: list[Literal["front", "back", "flanks"]] = Field(
+        default=["front", "back", "flanks"], description="at: which sides of the target, in turn"
+    )
+
+    @model_validator(mode="after")
+    def _at_needs_target(self) -> Self:
+        if (self.placement is Placement.AT) != (self.at is not None):
+            raise ValueError(f"'{self.object}': `at` goes with placement 'at' and only with it")
+        return self
 
     @property
     def count_range(self) -> tuple[int, int]:
@@ -412,7 +423,9 @@ def _check_references(rules: Rules) -> None:
         names += [unit, spec.hall, *spec.front, *spec.back]
         names += [spec.back_fill] if spec.back_fill else []
     # `access` may name room types other buildings have; unknown ones are ignored.
-    unknown = {f.object for s in rules.rooms.values() for f in s.furniture} - set(rules.objects)
+    used = {f.object for s in rules.rooms.values() for f in s.furniture}
+    used |= {f.at for s in rules.rooms.values() for f in s.furniture if f.at}
+    unknown = used - set(rules.objects)
     if unknown:
         raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")
     if missing := sorted({n for n in names if n not in rules.rooms}):

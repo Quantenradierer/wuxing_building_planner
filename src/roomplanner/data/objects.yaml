@@ -66,3 +66,26 @@ objects:
   specimen_fridge: {size: [2, 1], cover: heavy, glyph: I}
   cubicle:         {size: [3, 3], cover: light, glyph: "["}
   scanner:         {size: [4, 6], cover: heavy, glyph: "]"}
+  # Small things that go beside other objects (placement: at) or fill walls.
+  stool:           {size: [1, 1], cover: none,  glyph: c}
+  nightstand:      {size: [1, 1], cover: light, glyph: "1"}
+  side_table:      {size: [1, 1], cover: light, glyph: "}"}
+  wall_screen:     {size: [3, 1], cover: none,  glyph: "2"}   # trideo / camera feeds / holo display
+  whiteboard:      {size: [3, 1], cover: none,  glyph: ">"}
+  coffee_machine:  {size: [1, 1], cover: heavy, glyph: "3"}
+  water_cooler:    {size: [1, 1], cover: light, glyph: "4"}
+  iv_stand:        {size: [1, 1], cover: none,  glyph: "5"}
+  vital_monitor:   {size: [1, 1], cover: light, glyph: "?"}
+  medical_cart:    {size: [2, 1], cover: light, glyph: "6"}
+  gurney:          {size: [2, 4], cover: light, glyph: "7"}
+  barrel:          {size: [1, 1], cover: heavy, glyph: "8"}
+  workbench:       {size: [4, 2], cover: heavy, glyph: "9"}
+  display_case:    {size: [3, 1], cover: light, glyph: D}
+  atm:             {size: [1, 1], cover: heavy, glyph: $}
+  coat_rack:       {size: [1, 1], cover: none,  glyph: (}
+  safe:            {size: [1, 1], cover: heavy, glyph: )}
+  urinal:          {size: [1, 1], cover: none,  glyph: w}
+  dryer:           {size: [1, 1], cover: heavy, glyph: x}
+  laundry_cart:    {size: [1, 2], cover: light, glyph: "{"}
+  arcade_machine:  {size: [2, 1], cover: heavy, glyph: "`"}
+  stage:           {size: [8, 4], walkable: true, glyph: _}

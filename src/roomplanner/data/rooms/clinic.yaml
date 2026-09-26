@@ -7,6 +7,9 @@ rooms:
       - {object: bench, placement: wall, count: [2, 6]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 2]}
+      - {object: water_cooler, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   exam_room:
     area: [40, 70]
     min_side: 5
@@ -15,12 +18,17 @@ rooms:
       - {object: exam_table, placement: wall}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
       - {object: sink, placement: wall}
+      - {object: stool, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   treatment_room:
     area: [50, 100]
     min_side: 6
     furniture:
       - {object: hospital_bed, placement: wall, count: [1, 2]}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
+      - {object: iv_stand, placement: at, at: hospital_bed, beside: [flanks], count: [0, 1]}
+      - {object: vital_monitor, placement: at, at: hospital_bed, beside: [flanks], count: [0, 1]}
+      - {object: sink, placement: wall, count: [0, 1]}
   trauma_bay:           # DocWagon-style emergency bay
     area: [80, 160]
     min_side: 8
@@ -28,6 +36,10 @@ rooms:
     furniture:
       - {object: hospital_bed, placement: wall, count: [1, 3]}
       - {object: medical_cabinet, placement: wall, count: [2, 4]}
+      - {object: vital_monitor, placement: at, at: hospital_bed, beside: [flanks]}
+      - {object: medical_cart, placement: scatter, count: [1, 2]}
+      - {object: gurney, placement: wall, count: [0, 1]}
+      - {object: sink, placement: wall}
   operating_room:
     area: [100, 200]
     min_side: 10
@@ -37,6 +49,10 @@ rooms:
     furniture:
       - {object: operating_table, placement: center}
       - {object: medical_cabinet, placement: wall, count: [2, 4]}
+      - {object: vital_monitor, placement: at, at: operating_table, beside: [flanks]}
+      - {object: medical_cart, placement: at, at: operating_table, beside: [flanks]}
+      - {object: iv_stand, placement: at, at: operating_table, beside: [flanks], count: [0, 1]}
+      - {object: machinery, placement: wall, count: [0, 1]}
   scrub_room:           # scrub-in beside an OR; beds are wheeled through
     area: [24, 80]
     min_side: 4
@@ -45,6 +61,7 @@ rooms:
     furniture:
       - {object: sink, placement: wall, count: [2, 3]}
       - {object: locker, placement: wall, count: [1, 3]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   sterilization:
     area: [24, 60]
     min_side: 4
@@ -53,6 +70,8 @@ rooms:
     furniture:
       - {object: counter, placement: wall, count: [1, 2]}
       - {object: sink, placement: wall, count: [1, 2]}
+      - {object: machinery, placement: wall}
+      - {object: shelf, placement: wall, count: [0, 2]}
   ward:                 # patient room
     area: [60, 120]
     min_side: 6
@@ -61,24 +80,36 @@ rooms:
     furniture:
       - {object: hospital_bed, placement: wall, count: [1, 4]}
       - {object: cabinet, placement: wall, count: [1, 2]}
+      - {object: iv_stand, placement: at, at: hospital_bed, beside: [flanks], count: [0, 1]}
+      - {object: vital_monitor, placement: at, at: hospital_bed, beside: [flanks], count: [0, 1]}
+      - {object: chair, placement: scatter, count: [0, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
   nurse_station:
     area: [24, 60]
     min_side: 4
     furniture:
       - {object: counter, placement: wall, count: [1, 2]}
       - {object: terminal, placement: wall, count: [1, 2]}
+      - {object: chair, placement: at, at: counter, count: [1, 2]}
+      - {object: medical_cabinet, placement: wall, count: [0, 1]}
+      - {object: medical_cart, placement: scatter, count: [0, 1]}
   pharmacy:
     area: [30, 80]
     min_side: 5
     windows: forbidden
     furniture:
+      - {object: counter, placement: wall}
       - {object: shelf, placement: rows, aisle: 2, margin: 1}
+      - {object: stool, placement: at, at: counter, count: [0, 1]}
   lab:
     area: [40, 120]
     min_side: 6
     furniture:
       - {object: counter, placement: wall, count: [2, 4]}
       - {object: fridge, placement: wall, count: [0, 2]}
+      - {object: stool, placement: at, at: counter, count: [0, 1]}
+      - {object: sink, placement: wall, count: [0, 1]}
+      - {object: terminal, placement: wall, count: [0, 1]}
   xray:
     area: [40, 80]
     min_side: 6
@@ -86,6 +117,8 @@ rooms:
     furniture:
       - {object: exam_table, placement: center}
       - {object: machinery, placement: wall}
+      - {object: terminal, placement: wall}
+      - {object: chair, placement: at, at: terminal, beside: [front]}
   morgue:
     area: [60, 160]
     min_side: 6
@@ -94,6 +127,9 @@ rooms:
     furniture:
       - {object: morgue_drawers, placement: wall, count: [2, 4]}
       - {object: operating_table, placement: center, count: [0, 1]}
+      - {object: gurney, placement: wall, count: [0, 2]}
+      - {object: sink, placement: wall, count: [0, 1]}
+      - {object: medical_cart, placement: scatter, count: [0, 1]}
   doctor_office:
     area: [36, 70]
     min_side: 5
@@ -102,6 +138,8 @@ rooms:
       - {object: desk, placement: wall}
       - {object: exam_table, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: corner, count: [0, 1]}
+      - {object: chair, placement: at, at: desk, count: [1, 2]}
+      - {object: shelf, placement: wall, count: [0, 1]}
   consultation_room:    # cosmetic clinic: a desk, two armchairs, a screen
     area: [50, 120]
     min_side: 5
@@ -111,6 +149,9 @@ rooms:
       - {object: armchair, placement: scatter, count: [1, 2]}
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
+      - {object: chair, placement: at, at: desk, count: 1}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
   fitting_room:         # implants and cyberware adjustments
     area: [40, 90]
     min_side: 6
@@ -120,6 +161,9 @@ rooms:
       - {object: machinery, placement: wall, count: [1, 2]}
       - {object: terminal, placement: wall, count: [1, 2]}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
+      - {object: stool, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
+      - {object: vital_monitor, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
+      - {object: workbench, placement: wall, count: [0, 1]}
   recovery_suite:       # private room for a paying patient
     area: [50, 110]
     min_side: 6
@@ -129,3 +173,7 @@ rooms:
       - {object: sofa, placement: wall, count: [0, 1]}
       - {object: armchair, placement: scatter, count: [0, 1]}
       - {object: plant, placement: corner, count: [1, 2]}
+      - {object: vital_monitor, placement: at, at: hospital_bed, beside: [flanks]}
+      - {object: iv_stand, placement: at, at: hospital_bed, beside: [flanks], count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}

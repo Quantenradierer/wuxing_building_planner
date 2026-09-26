@@ -1,5 +1,5 @@
 from roomplanner.generator import generate
-from roomplanner.geometry import Cell, connected
+from roomplanner.geometry import Cell, Side, connected
 from roomplanner.model import Building, OpeningKind
 from roomplanner.params import BuildingType, Wealth
 from roomplanner.pipeline.furnishing import ring_is_one_run
@@ -69,6 +69,21 @@ def test_wealth_scales_furniture_per_room() -> None:
         return objects / offices
 
     assert per_office(Wealth.SQUATTER) < per_office(Wealth.LUXURY)
+
+
+def test_chairs_stand_at_desks_and_meeting_tables() -> None:
+    building = generate(make_params(width=60, depth=40, floors_above=2))
+    for floor in building.floors:
+        for chair in (o for o in floor.objects if o.kind == "chair"):
+            beside = [
+                o
+                for o in floor.objects
+                if o.room == chair.room
+                and o.kind in ("desk", "meeting_table", "table", "reception_desk", "guard_desk")
+                and any(c.neighbour(s) in o.cells for c in chair.cells for s in Side)
+            ]
+            assert beside, chair
+    assert objects_of(building, "chair") >= objects_of(building, "desk") > 0
 
 
 def test_objects_survive_json_round_trip() -> None:

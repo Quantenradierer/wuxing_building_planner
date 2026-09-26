@@ -8,6 +8,8 @@ rooms:
       - {object: checkout, placement: near_exit, count: [1, 4]}
       - {object: freezer, placement: wall, count: [0, 3]}
       - {object: gondola, placement: rows, aisle: 3, margin: 3}
+      - {object: display_case, placement: wall, count: [0, 2]}
+      - {object: atm, placement: wall, count: [0, 1]}
   stockroom:
     area: [40, 100000]
     min_side: 6
@@ -16,6 +18,7 @@ rooms:
     furniture:
       - {object: rack, placement: rows, aisle: 3, margin: 2}
       - {object: pallet, placement: scatter, count: [0, 4]}
+      - {object: crate, placement: scatter, count: [0, 3]}
   cold_storage:
     area: [16, 80]
     min_side: 4
@@ -31,6 +34,9 @@ rooms:
     door_width: 4
     furniture:
       - {object: pallet, placement: scatter, count: [2, 6]}
+      - {object: forklift, placement: scatter, count: [0, 1]}
+      - {object: crate, placement: scatter, count: [0, 3]}
+      - {object: barrel, placement: scatter, count: [0, 2]}
   manager_office:
     area: [24, 60]
     min_side: 5
@@ -38,6 +44,9 @@ rooms:
       - {object: desk, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}
       - {object: terminal, placement: corner, count: [0, 1]}
+      - {object: chair, placement: at, at: desk, count: [1, 2]}
+      - {object: safe, placement: corner, count: [0, 1]}
+      - {object: filing_cabinet, placement: wall, count: [0, 1]}
   prep_kitchen:         # deli / bakery / soykaf bar
     area: [30, 90]
     min_side: 5
@@ -45,3 +54,5 @@ rooms:
       - {object: counter, placement: wall, count: [2, 3]}
       - {object: stove, placement: wall, count: [1, 2]}
       - {object: fridge, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall}
+      - {object: coffee_machine, placement: wall, count: [0, 1]}

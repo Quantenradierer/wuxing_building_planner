@@ -120,6 +120,9 @@ class RoomFurnisher:
             if rule.placement is Placement.ROWS:
                 self._rows(rule, spec)
                 continue
+            if rule.placement is Placement.AT:
+                self._at(rule, spec)
+                continue
             low, high = rule.count_range
             if rule.per is not None:
                 count = round(len(self.cells) / rule.per * factor)
@@ -158,7 +161,7 @@ class RoomFurnisher:
                 ex, ey = exit_
                 candidates = self._anywhere(spec)
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - ex) + abs(r[1] + r[3] / 2 - ey))
-            case Placement.ROWS:
+            case Placement.ROWS | Placement.AT:
                 return False
         return any(self._try(rule.object, rect, spec.walkable) for rect in candidates)
 
@@ -259,6 +262,47 @@ class RoomFurnisher:
                 if in_block == per_block:
                     position += rule.aisle
                     in_block = 0
+
+    def _at(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
+        """`count` objects beside every placed `rule.at`, going round its `beside` sides in turn.
+
+        Counts are per target and never scale (a desk has one chair at any wealth).
+        """
+        low, high = rule.count_range
+        along, deep = spec.size
+        for target in [o for o in self.placed if o.kind == rule.at]:
+            count = self.rng.randint(low, high)
+            front, back = target.facing, target.facing.opposite
+            flanks = [s for s in Side if s not in (front, back)]
+            named = {"front": [front], "back": [back], "flanks": flanks}
+            sides = [side for name in rule.beside for side in named[name]]
+            spots = {side: self._beside(target, side, along, deep) for side in sides}
+            placed = 0
+            while placed < count and any(spots.values()):
+                for side in sides:
+                    while spots[side]:
+                        rect = spots[side].pop(0)
+                        if self._try(rule.object, rect, spec.walkable):
+                            placed += 1
+                            break
+                    if placed == count:
+                        break
+
+    @staticmethod
+    def _beside(target: PlacedObject, side: Side, along: int, deep: int) -> list[Rect]:
+        """Spots along one side of `target`, facing it, middle ones first."""
+        x, y, w, h = target.x, target.y, target.w, target.h
+        match side:
+            case Side.N:
+                spots = [(cx, y - deep, along, deep, Side.S) for cx in range(x, x + w - along + 1)]
+            case Side.S:
+                spots = [(cx, y + h, along, deep, Side.N) for cx in range(x, x + w - along + 1)]
+            case Side.W:
+                spots = [(x - deep, cy, deep, along, Side.E) for cy in range(y, y + h - along + 1)]
+            case Side.E:
+                spots = [(x + w, cy, deep, along, Side.W) for cy in range(y, y + h - along + 1)]
+        middle = (len(spots) - 1) / 2
+        return [r for _, r in sorted(enumerate(spots), key=lambda ir: abs(ir[0] - middle))]
 
     # --- commit -----------------------------------------------------------------------
 

@@ -16,6 +16,10 @@ rooms:
       - {object: cabinet, placement: wall, count: [1, 2]}
       - {object: desk, placement: wall, count: [0, 1]}
       - {object: armchair, placement: scatter, count: [0, 1]}
+      - {object: nightstand, placement: at, at: double_bed, beside: [flanks], count: [1, 2]}
+      - {object: chair, placement: at, at: desk, count: 1}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: wardrobe, placement: wall, count: [0, 1]}
   capsule_dorm:         # rows of sleeping pods, back to back
     area: [240, 900]
     min_side: 10
@@ -28,6 +32,7 @@ rooms:
     furniture:
       - {object: shower, placement: wall, per: 8, count: [1, 4]}
       - {object: sink, placement: wall, count: [1, 2]}
+      - {object: bench, placement: center, count: [0, 1]}
   locker_room:
     area: [16, 48]
     min_side: 4
@@ -35,6 +40,7 @@ rooms:
     furniture:
       - {object: locker, placement: wall, per: 3, count: [2, 16]}
       - {object: bench, placement: center, count: [0, 1]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   linen_room:
     area: [12, 30]
     min_side: 3
@@ -42,6 +48,7 @@ rooms:
     access: [staff_room]
     furniture:
       - {object: shelf, placement: wall, per: 5, count: [2, 8]}
+      - {object: laundry_cart, placement: scatter, count: [0, 2]}
   restaurant:
     area: [80, 300]
     min_side: 8
@@ -51,6 +58,8 @@ rooms:
       - {object: table, placement: scatter, per: 14, count: [3, 16]}
       - {object: counter, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [1, 3]}
+      - {object: chair, placement: at, at: table, count: [2, 4]}
+      - {object: coat_rack, placement: corner, count: [0, 1]}
   commercial_kitchen:
     area: [40, 140]
     min_side: 6
@@ -60,6 +69,9 @@ rooms:
       - {object: counter, placement: wall, count: [2, 4]}
       - {object: fridge, placement: wall, count: [1, 3]}
       - {object: counter, placement: center, count: [0, 1]}
+      - {object: sink, placement: wall, count: [1, 2]}
+      - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   bar_room:
     area: [60, 200]
     min_side: 7
@@ -68,6 +80,11 @@ rooms:
       - {object: bar_counter, placement: wall}
       - {object: table, placement: scatter, per: 20, count: [2, 8]}
       - {object: sofa, placement: wall, count: [0, 2]}
+      - {object: stool, placement: at, at: bar_counter, beside: [front], count: [3, 6]}
+      - {object: chair, placement: at, at: table, count: [2, 4]}
+      - {object: arcade_machine, placement: wall, count: [0, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: pool_table, placement: center, count: [0, 1]}
   dance_floor:          # the club's hall
     area: [100, 100000]
     min_side: 10
@@ -78,6 +95,9 @@ rooms:
       - {object: speaker, placement: corner, count: [2, 4]}
       - {object: sofa, placement: wall, count: [1, 4]}
       - {object: table, placement: scatter, per: 60, count: [1, 6]}
+      - {object: stage, placement: wall, count: [0, 1]}
+      - {object: stool, placement: at, at: bar_counter, beside: [front], count: [2, 5]}
+      - {object: chair, placement: at, at: table, count: [2, 3]}
   lounge:               # upper club floors
     area: [80, 100000]
     min_side: 10
@@ -87,6 +107,10 @@ rooms:
       - {object: sofa, placement: wall, per: 40, count: [2, 8]}
       - {object: table, placement: scatter, per: 40, count: [2, 8]}
       - {object: pool_table, placement: center, count: [0, 2]}
+      - {object: stool, placement: at, at: bar_counter, beside: [front], count: [2, 4]}
+      - {object: chair, placement: at, at: table, count: [0, 2]}
+      - {object: arcade_machine, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
   vip_room:
     area: [30, 90]
     min_side: 5
@@ -94,6 +118,9 @@ rooms:
       - {object: sofa, placement: wall, count: [1, 3]}
       - {object: table, placement: center}
       - {object: rug, placement: center, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: counter, placement: wall, count: [0, 1]}
+      - {object: plant, placement: corner, count: [0, 1]}
   backstage:
     area: [30, 90]
     min_side: 5
@@ -101,12 +128,16 @@ rooms:
       - {object: locker, placement: wall, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
       - {object: crate, placement: scatter, count: [1, 3]}
+      - {object: desk, placement: wall, count: [0, 1]}
+      - {object: chair, placement: at, at: desk, count: 1}
+      - {object: coat_rack, placement: corner, count: [0, 2]}
   cloakroom:
     area: [12, 36]
     min_side: 4
     furniture:
       - {object: counter, placement: wall}
       - {object: shelf, placement: wall, count: [1, 3]}
+      - {object: coat_rack, placement: scatter, count: [1, 3]}
   coffin_unit:          # coffin motel / squat block: a bunk and a locker, ~2 x 2 m
     area: [12, 20]
     min_side: 4                 # the 2 m bunk must fit beside the door

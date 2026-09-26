@@ -6,7 +6,7 @@ Status: accepted (2026-09-26)
 
 - Furniture is data: an object catalog (size, cover, glyph) and per-room `furniture:` rules
   with a small set of placements (`wall`, `corner`, `center`, `scatter`, `near_exit`,
-  `rows`).
+  `rows`, and later `at` for objects beside other objects).
 - Placement is greedy per rule. Hard constraints: inside the room, no overlap, door
   clearance free, the room's free floor stays connected. The connectivity check uses a
   ring test around the new object and only falls back to a flood fill when needed.

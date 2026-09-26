@@ -42,6 +42,7 @@ tiers:
     furniture:
       lobby:
         - {object: guard_desk, placement: center}
+        - {object: chair, placement: at, at: guard_desk, count: [1, 2]}
       security_room:
         - {object: terminal, placement: wall, count: [2, 4]}
         - {object: weapon_locker, placement: wall}
@@ -71,6 +72,7 @@ tiers:
     furniture:
       lobby:
         - {object: guard_desk, placement: center}
+        - {object: chair, placement: at, at: guard_desk, count: [1, 2]}
         - {object: security_gate, placement: near_exit, count: 2}
       security_room:
         - {object: terminal, placement: wall, count: [3, 6]}
