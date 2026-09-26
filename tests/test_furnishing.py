@@ -162,3 +162,36 @@ def test_pews_face_the_altar(width: int, depth: int) -> None:
         pews = [o for o in ground.objects if o.kind == "pew"]
         assert pews
         assert {p.facing for p in pews} == {altar.facing.opposite}
+
+
+@pytest.mark.parametrize(("width", "depth"), [(40, 48), (56, 32), (48, 60)])
+def test_altar_on_a_short_wall_and_a_central_aisle_between_the_pews(width: int, depth: int) -> None:
+    for seed in range(4):
+        params = make_params(building_type=BuildingType.CHURCH, width=width, depth=depth, seed=seed)
+        ground = generate(params).floor(0)
+        nave = next(r for r in ground.rooms if r.type == "nave")
+        xs, ys = [c.x for c in nave.cells], [c.y for c in nave.cells]
+        wide = max(xs) - min(xs) >= max(ys) - min(ys)
+        altar = next(o for o in ground.objects if o.kind == "altar")
+        assert (altar.facing in (Side.E, Side.W)) == wide
+        pews = [o for o in ground.objects if o.kind == "pew"]
+        # Wide enough for two 8-cell pews: the aisle runs through the middle to the altar.
+        across = (max(ys) - min(ys) + 1) if wide else (max(xs) - min(xs) + 1)
+        if across < 2 * 8 + 2 + 2 * 3:
+            continue
+        if wide:
+            middle = (min(ys) + max(ys) + 1) // 2
+            assert all(not (p.y <= middle < p.y + p.h) for p in pews)
+        else:
+            middle = (min(xs) + max(xs) + 1) // 2
+            assert all(not (p.x <= middle < p.x + p.w) for p in pews)
+
+
+def test_a_small_stuffer_shack_has_more_than_one_row_of_gondolas() -> None:
+    for seed in range(1, 4):
+        params = make_params(
+            building_type=BuildingType.STUFFER_SHACK, width=24, depth=16, seed=seed
+        )
+        ground = generate(params).floor(0)
+        gondolas = [o for o in ground.objects if o.kind == "gondola"]
+        assert len({o.y if o.w > o.h else o.x for o in gondolas}) >= 2

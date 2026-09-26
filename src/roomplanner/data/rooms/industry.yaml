@@ -164,11 +164,12 @@ rooms:
     min_side: 6
     door_width: 2
     furniture:
+      # Shelves first: a checkout in the middle of a small shop leaves room for two.
+      - {object: gondola, placement: rows, aisle: 2, margin: 1}   # cramped, 1 m aisles
       - {object: checkout, placement: near_exit}
       - {object: pay_station, placement: wall, count: [0, 1]}   # credstick reader
       - {object: freezer, placement: wall, count: [1, 2]}
       - {object: vending_machine, placement: wall, count: [0, 2]}
-      - {object: gondola, placement: rows, aisle: 3, margin: 2}
       - {object: atm, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: wall, count: [0, 1]}
   # --- factory ---

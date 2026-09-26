@@ -98,8 +98,8 @@ rooms:
     windows: required
     door_width: 4
     furniture:
-      - {object: altar, placement: back}
-      - {object: pulpit, placement: back}
+      - {object: altar, placement: end}
+      - {object: pulpit, placement: at, at: altar, beside: [flanks]}
       - {object: pew, placement: rows, aisle: 2, margin: 3, block: 24, toward: altar}
       - {object: candle_stand, placement: wall, count: [2, 6]}
       - {object: confessional, placement: wall, count: [0, 2]}

@@ -289,12 +289,14 @@ stairwell (or a circulation room).
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, facing
-them on ties, without randomness: stairs stand in the same spot on every floor), `fixed` (a corner decided by
+them on ties, without randomness: stairs stand in the same spot on every floor), `end` (the
+middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
-direction of that object, all facing it and centred: pews facing the altar), and `at`
+direction of that object, all facing it and centred, split by a central aisle where two
+halves fit: pews facing the altar), and `at`
 (beside every object of kind `at`
 placed earlier in the room: chairs at desks and tables, stools at bar counters, monitors
 beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` — gone round in

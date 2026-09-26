@@ -270,6 +270,19 @@ class RoomFurnisher:
                 candidates = self._against_walls(spec, corners_only=False)
                 # Equally far (a square wc filling a stall): face the door.
                 candidates.sort(key=lambda r: (-self._door_distance(r), -self._faces_door(r), r))
+            case Placement.END:
+                candidates = self._against_walls(spec, corners_only=False)
+                x0, y0, x1, y1 = self.box
+                long_axis = (Side.E, Side.W) if x1 - x0 >= y1 - y0 else (Side.N, Side.S)
+
+                def off_centre(r: Rect) -> float:
+                    x, y, w, h, _ = r
+                    return abs(x + w / 2 - (x0 + x1) / 2) + abs(y + h / 2 - (y0 + y1) / 2)
+
+                # Facing along the long axis = backed against a short wall.
+                candidates.sort(
+                    key=lambda r: (r[4] not in long_axis, -self._door_distance(r), off_centre(r), r)
+                )
             case Placement.FIXED:
                 # Far corner of the room's box: only the room's shape decides.
                 candidates = self._against_walls(spec, corners_only=True)
@@ -406,18 +419,17 @@ class RoomFurnisher:
             else:
                 rows.append((across, Side.S))
                 across += deep + rule.aisle
-        positions: list[int] = []
-        position, in_block = m, 0
-        while position + along <= length - m:
-            positions.append(position)
-            position += along
-            in_block += 1
-            if in_block == per_block:
-                position += rule.aisle
-                in_block = 0
+        positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle)]
         if toward is not None and positions:  # centred, the side aisles equally wide
-            shift = (length - positions[-1] - along - m) // 2
-            positions = [p + shift for p in positions]
+            half = _line((length - 2 * m - rule.aisle) // 2, along, per_block, rule.aisle)
+            if half:  # two mirrored halves with a central aisle
+                span = half[-1] + along
+                start = (length - 2 * span - rule.aisle) // 2
+                right = [length - start - p - along for p in reversed(half)]
+                positions = [start + p for p in half] + right
+            else:
+                shift = (length - positions[-1] - along - m) // 2
+                positions = [p + shift for p in positions]
         for across, facing in rows:
             for position in positions:
                 if horizontal:
@@ -518,6 +530,20 @@ class RoomFurnisher:
         self.taken |= cells
         self.placed.append(PlacedObject(kind, x, y, w, h, facing, self.room.id, not walkable))
         return True
+
+
+def _line(length: int, along: int, per_block: int, aisle: int) -> list[int]:
+    """Offsets of objects packed into `length` cells, an aisle after every `per_block`."""
+    offsets: list[int] = []
+    position, in_block = 0, 0
+    while position + along <= length:
+        offsets.append(position)
+        position += along
+        in_block += 1
+        if in_block == per_block:
+            position += aisle
+            in_block = 0
+    return offsets
 
 
 def _backed(cell: Cell, side: Side, along: int, deep: int) -> Rect:

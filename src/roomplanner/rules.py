@@ -73,6 +73,7 @@ class Placement(StrEnum):
     NEAR_EXIT = "near_exit"  # close to the room's exterior door (checkouts)
     ROWS = "rows"  # parallel rows with aisles, filling the room (shelves, desks)
     BACK = "back"  # against the wall farthest from the doors, same spot every time
+    END = "end"  # middle of the short wall farthest from the doors (altar), else like back
     FIXED = "fixed"  # the same wall spot on every floor, whatever the doors (ramps)
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
 
