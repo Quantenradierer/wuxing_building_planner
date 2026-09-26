@@ -72,4 +72,6 @@ floor_roles:
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: generator_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: body_bank, count: [0, 1], priority: optional}
-      - {room: storage, fill: true}
+      - {room: storage, count: 1, near: core}
+      - {room: lab, fill: true}
+      - {room: mechanical_room, fill: true}

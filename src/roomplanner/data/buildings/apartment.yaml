@@ -30,6 +30,11 @@ units:
     back: [living_room]
     back_fill: bedroom
     front_fill: closet
+  studio:
+    hall: hallway
+    front: [bathroom, kitchen]
+    back: [living_room]
+    front_fill: closet
 
 floor_roles:
   ground:
@@ -38,17 +43,21 @@ floor_roles:
       - {room: lobby, place: entrance, area: [40, 80], priority: required}
       - {room: mailroom, count: 1, near: entrance}
       - {room: security_room, count: 1, near: entrance, security: [aaa]}   # concierge
-      - {room: storage, count: [0, 1], near: core, priority: optional}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: vending_room, count: [0, 1], near: entrance, wealth: [squatter, low, middle], priority: optional}
+      - {room: storage, count: [0, 1], near: core, priority: optional, when: "floors_below == 0"}
       - {room: apartment, fill: true}
+      - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
       - {room: laundry, fill: true}            # interior rows without facade
+      - {room: drone_bay, fill: true, priority: optional}  # leftovers: parcel drones
+      - {room: mechanical_room, fill: true, priority: optional}
   residential:
     applies: [upper, top]
     rooms:
-      - {room: storage, count: [0, 1], near: core, priority: optional}
       - {room: apartment, fill: true}
+      - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
       - {room: laundry, fill: true}            # interior rows without facade
+      - {room: mechanical_room, fill: true, priority: optional}  # leftovers
   basement:
     applies: [basement]
     rooms:
@@ -56,7 +65,8 @@ floor_roles:
       - {room: laundry, count: 1, wealth: [low, middle, high, luxury]}
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", wealth: [middle, high, luxury], priority: optional}
-      - {room: storage, fill: true}
+      - {room: storage, count: 1, near: core}
+      - {room: mechanical_room, fill: true}
 
 wealth:
   squatter: {area: 0.7, corridor: 1.0, furniture: 0.5}

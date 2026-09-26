@@ -5,6 +5,11 @@ rooms:
     min_side: 11
     windows: required
     door_width: 2
+  studio:               # a small flat for widths too narrow for an apartment
+    area: [80, 200]
+    min_side: 7
+    windows: required
+    door_width: 2
   hallway:              # in a deep unit it runs along the whole unit (T-shaped)
     area: [9, 90]
     min_side: 3

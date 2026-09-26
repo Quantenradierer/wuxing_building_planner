@@ -31,9 +31,13 @@ from roomplanner.rules import (
 
 NEXT_TO_BONUS = 20  # score bonus for sharing a strip segment with a `next_to` room
 SMALL_ROOM_TOLERANCE = 1.25  # a full-depth room may exceed its max area by this factor
+ABSORB_TOLERANCE = 1.4  # leftovers may grow a room this far before a storeroom takes them
+MAX_SLIVER = 4  # cells: narrower leftovers widen the rooms beside them if they can
+SLIVER_LIMIT = 1.45  # ... as far as this factor of their maximum area
 MIN_CLUSTER_COLUMN = 4  # cells
 FACADE_PENALTY = 5
 FORBIDDEN_WINDOW_PENALTY = 50
+FRAGMENT_PENALTY = 30  # a placement leaving a rest no fill room fits
 
 
 @dataclass
@@ -74,6 +78,7 @@ class Request:
     priority: Priority
     near: str | None
     min_area: int = 0  # > 0 for `share` rooms, which shrink towards it if space is short
+    leftover: bool = False  # the cluster filler taking space no other room fits
 
 
 @dataclass
@@ -141,7 +146,8 @@ class Allocator:
         self.units = 0
         self.level = 0
         self.fill_types: set[str] = set()
-        self.fills: list[RoomEntry] = []
+        self.fills: list[RoomEntry] = []  # all fill rooms, leftover ones included
+        self.main_fills: list[RoomEntry] = []
         self.pending: deque[Request] = deque()  # requests not placed yet
         self.fill_widths: dict[tuple[str, int, int], int] = {}
 
@@ -152,6 +158,8 @@ class Allocator:
         requests, fills = self._requests(role, level)
         self.fill_types = {e.room for e in fills}
         self.fills = fills
+        # Optional fill rooms only take leftovers the others don't fit (studios beside flats).
+        self.main_fills = [e for e in fills if e.priority is not Priority.OPTIONAL] or fills
         queue = deque(requests)
         self.pending = queue
         while queue:
@@ -171,7 +179,7 @@ class Allocator:
                 if warning not in self.warnings:
                     self.warnings.append(warning)
         for state in self.states:
-            self._fill(state, fills)
+            self._fill(state, self.main_fills)
         rooms: list[PlannedRoom] = []
         for state in self.states:
             rooms += self._materialise(state)
@@ -260,7 +268,11 @@ class Allocator:
             option = self._option(request, state)
             if option is None:
                 continue
-            score = self._score(request, segment) + self._partner_room(request, state, option)
+            score = (
+                self._score(request, segment)
+                + self._partner_room(request, state, option)
+                + self._fragments(request, state, option)
+            )
             options.append((score, self.rng.random(), state, option))
         if not options:
             return False
@@ -398,6 +410,26 @@ class Allocator:
         needed = sum(self._full_units(r, state.segment) for r in partners)
         return 0.0 if used + needed <= state.free_units else NEXT_TO_BONUS
 
+    def _fragments(self, request: Request, state: SegmentState, option: Option) -> float:
+        """Penalty if the option leaves a rest too narrow for the floor's fill rooms.
+
+        Neighbours (`next_to`) matter more: rooms with such relations don't pay it.
+        """
+        if not isinstance(option, FullSlot | Cluster):
+            return 0.0  # joins a cluster: no width used
+        if request.spec.next_to or any(request.type in r.spec.next_to for r in self.pending):
+            return 0.0
+        segment = state.segment
+        widths = [
+            self._fill_min_units(e, segment)
+            for e in self._fill_entries(segment, self.main_fills)
+            if e.room != self.rules.program.cluster_filler
+        ]
+        if not widths or state.free_units < min(widths):
+            return 0.0  # no fill room fits anyway
+        rest = state.free_units - option.units
+        return FRAGMENT_PENALTY if 0 < rest < min(widths) else 0.0
+
     def _score(self, request: Request, segment: Segment) -> float:
         score = 0.0
         if (anchor := self.anchors.get(request.near)) is not None:
@@ -428,21 +460,42 @@ class Allocator:
             return needs_window or others or filler
         return others or filler
 
+    def _fallback_entries(self, segment: Segment) -> list[RoomEntry]:
+        """Every fill room allowed in the segment, for leftovers the preferred ones don't fit."""
+        return [
+            e
+            for e in self.fills
+            if self.rules.spec(e.room).min_side <= segment.depth
+            and (segment.facade or self.rules.spec(e.room).windows is not WindowRule.REQUIRED)
+        ]
+
     def _fill(self, state: SegmentState, all_fills: list[RoomEntry]) -> None:
         segment = state.segment
         fills = self._fill_entries(segment, all_fills)
         if not state.slots and state.free_units == 0:
             # Segment narrower than one module: a single room takes the partial modules.
             width = segment.span.width
-            fitting = [e for e in fills if self._min_width(self.rules.spec(e.room), 0) <= width]
+            fitting = [
+                e
+                for e in [*fills, *self._fallback_entries(segment)]
+                if self._min_width(self.rules.spec(e.room), 0) <= width
+            ]
             filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
             state.slots.append(self._fill_slot((fitting or [filler])[0], 0, segment))
             return
         while state.free_units > 0:
             fitting = [e for e in fills if self._fill_min_units(e, segment) <= state.free_units]
             if not fitting and not state.slots:
-                # Narrow leftover: the cluster filler (storage) is the smallest room there is.
-                fitting = [RoomEntry(room=self.rules.program.cluster_filler, fill=True)]
+                # Narrow leftover: another fill room, else the cluster filler (storage).
+                fitting = [
+                    e
+                    for e in self._fallback_entries(segment)
+                    if self._fill_min_units(e, segment) <= state.free_units
+                ]
+                if not fitting:
+                    # Plain storerooms, no hallway: neighbours may absorb them later.
+                    state.slots += self._filler_slots(state.free_units, segment)
+                    return
             entry = self.rng.choice(fitting or fills)
             spec = self.rules.spec(entry.room)
             stackable = spec.cluster or spec.windows is not WindowRule.REQUIRED
@@ -452,11 +505,9 @@ class Allocator:
                 continue
             if spec.cluster and state.slots and self._too_deep(entry, segment):
                 # No space for another stack, and a full-depth one would be far too big:
-                # the rest of the row becomes a storeroom.
-                filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
-                if self._fill_min_units(filler, segment) <= state.free_units:
-                    state.slots += self._filler_slots(state.free_units, segment)
-                    return
+                # the row's rooms take the rest (wider stacks, else a storeroom).
+                self._spread(state, state.free_units, fills)
+                return
             if (cluster := self._facade_cluster(entry, state)) is not None:
                 # Small window rooms in deep facade strips: at the facade, back rooms behind.
                 state.slots.append(cluster)
@@ -495,32 +546,84 @@ class Allocator:
         preferred = [s for s in full if s.request.type in wanted] or [
             s for s in full if not s.request.spec.cluster
         ]
-        targets = preferred or full or [state.slots[-1]]
         segment = state.segment
+        if not full and (entry := self._leftover_entry(extra, segment)) is not None:
+            # Only clusters in the row: a room of its own rather than a wider cluster.
+            state.slots.append(self._fill_slot(entry, extra, segment))
+            return
+        targets = preferred or full or [state.slots[-1]]
 
-        def has_room(slot: Slot) -> bool:
+        def has_room(slot: Slot, tolerance: float) -> bool:
             if not isinstance(slot, FullSlot) or slot.request.spec.vestibule is not None:
                 return True
             area = (slot.units + 1) * segment.unit * segment.depth
-            return area <= slot.request.spec.area[1] * SMALL_ROOM_TOLERANCE
+            return area <= slot.request.spec.area[1] * tolerance
 
         given = 0
-        while given < extra and (open_ := [t for t in targets if has_room(t)]):
-            for target in open_[: extra - given]:
-                target.units += 1
-                given += 1
+        # Rooms grow up to their maximum first, then a little past it rather than leaving
+        # the rest to a storeroom.
+        for tolerance in (SMALL_ROOM_TOLERANCE, ABSORB_TOLERANCE):
+            while given < extra and (open_ := [t for t in targets if has_room(t, tolerance)]):
+                for target in open_[: extra - given]:
+                    target.units += 1
+                    given += 1
         rest = extra - given
         if rest == 0:
             return
-        # Every room is at its maximum: the rest becomes storerooms if one fits.
+        if rest * segment.unit <= MAX_SLIVER:
+            # A sliver too thin to be a useful room widens rooms that stay within bounds.
+            while given < extra and (open_ := [t for t in targets if has_room(t, SLIVER_LIMIT)]):
+                for target in open_[: extra - given]:
+                    target.units += 1
+                    given += 1
+            rest = extra - given
+            if rest == 0:
+                return
+        elif (entry := self._leftover_entry(rest, segment)) is not None:
+            # Every room is full: the rest becomes another fill room if one fits.
+            state.slots.append(self._fill_slot(entry, rest, segment))
+            return
         filler = RoomEntry(room=self.rules.program.cluster_filler, fill=True)
         if rest * segment.unit >= self.rules.spec(filler.room).min_side:
             state.slots += self._filler_slots(rest, segment)
             return
         # Too little for a room: a cluster's hallway gets wider, else the rooms after all.
-        wider = [s for s in state.slots if isinstance(s, Cluster)] or targets
+        wider = (
+            [s for s in state.slots if isinstance(s, Cluster)]
+            or [t for t in targets if has_room(t, SLIVER_LIMIT)]
+            or targets
+        )
         for i in range(rest):
             wider[i % len(wider)].units += 1
+
+    def _leftover_entry(self, units: int, segment: Segment) -> RoomEntry | None:
+        """A fill room that takes `units` of full-depth leftover at its size, if there is one."""
+        width = units * segment.unit
+        room = self._leftover_room(segment, width, segment.depth, units=True)
+        return None if room is None else RoomEntry(room=room, fill=True)
+
+    def _leftover_room(
+        self, segment: Segment, width: int, depth: int, units: bool = False
+    ) -> str | None:
+        """A fill room type for a `width` x `depth` leftover: windows first on facades.
+
+        Units (flats) only if `units`: they must go through a slot to be subdivided.
+        """
+        fitting: list[list[str]] = [[], []]
+        for entry in self._fallback_entries(segment):
+            spec = self.rules.spec(entry.room)
+            high = (entry.area or spec.area)[1]
+            if (
+                (entry.room in self.rules.program.units and not units)
+                or spec.vestibule is not None
+                or spec.stalls is not None
+                or min(width, depth) < max(spec.min_side, self._min_width(spec, max(width, depth)))
+                or width * depth > high * SMALL_ROOM_TOLERANCE
+            ):
+                continue
+            fitting[spec.windows is not WindowRule.REQUIRED].append(entry.room)
+        choices = fitting[0] or fitting[1]
+        return self.rng.choice(choices) if choices else None
 
     def _too_deep(self, entry: RoomEntry, segment: Segment) -> bool:
         """A full-depth slot of this fill room would be far above its maximum area."""
@@ -548,8 +651,7 @@ class Allocator:
         depth = max(spec.min_side, round((low + high) / 2 / column))
         count = max(1, segment.depth // depth)
         stacks = [
-            [(Request(entry.room, spec, depth * column, Priority.OPTIONAL, None), depth)] * count
-            for _ in range(columns)
+            [(self._fill_request(entry, depth * column), depth)] * count for _ in range(columns)
         ]
         return Cluster(units, hall, columns, column, stacks)
 
@@ -600,7 +702,7 @@ class Allocator:
 
     def _back_entry(self) -> RoomEntry:
         """The room behind facade stacks: the floor's first windowless fill room, or storage."""
-        for entry in self.fills:
+        for entry in sorted(self.fills, key=lambda e: e.priority is Priority.OPTIONAL):
             spec = self.rules.spec(entry.room)
             if spec.windows is not WindowRule.REQUIRED and not spec.circulation:
                 return entry
@@ -617,7 +719,7 @@ class Allocator:
         count = max(1, min(rest // spec.min_side, math.ceil(rest * column / high)))
         depths = [rest // count] * count
         depths[-1] += rest - sum(depths)
-        return [(Request(back.room, spec, d * column, Priority.OPTIONAL, None), d) for d in depths]
+        return [(self._fill_request(back, d * column), d) for d in depths]
 
     def _fill_min_units(self, entry: RoomEntry, segment: Segment) -> int:
         spec = self.rules.spec(entry.room)
@@ -636,8 +738,12 @@ class Allocator:
 
     def _fill_slot(self, entry: RoomEntry, units: int, segment: Segment) -> FullSlot:
         area = units * segment.unit * segment.depth
-        request = Request(entry.room, self.rules.spec(entry.room), area, Priority.OPTIONAL, None)
-        return FullSlot(request, units)
+        return FullSlot(self._fill_request(entry, area), units)
+
+    def _fill_request(self, entry: RoomEntry, area: int) -> Request:
+        spec = self.rules.spec(entry.room)
+        leftover = entry.room == self.rules.program.cluster_filler
+        return Request(entry.room, spec, area, Priority.OPTIONAL, None, leftover=leftover)
 
     # --- materialisation --------------------------------------------------------------
 
@@ -667,7 +773,8 @@ class Allocator:
             elif isinstance(slot, FullSlot) and slot.annex is not None:
                 rooms += self._with_annex(slot, slot.annex, segment, span)
             elif isinstance(slot, FullSlot):
-                rooms.append(PlannedRoom(slot.request.type, self._rect(segment, span)))
+                cells = self._rect(segment, span)
+                rooms.append(PlannedRoom(slot.request.type, cells, leftover=slot.request.leftover))
             else:
                 rooms += self._cluster_rooms(slot, segment, span)
             position = span.u1
@@ -753,11 +860,36 @@ class Allocator:
         filler = self.rules.program.cluster_filler
         filler_min = self.rules.spec(filler).min_side
         extra = span.width - cluster.hall - cluster.columns * column_width
+        if extra >= filler_min and self._leftover_room(segment, extra, band.depth) is None:
+            # No room fits the extra width: wider columns, as far as their rooms may grow
+            # (the last one also takes a rest of the depth too small for a storeroom).
+            def deepest(stack: list[tuple[Request, int]]) -> list[tuple[Request, int]]:
+                rest = band.depth - sum(d for _, d in stack)
+                if not stack or rest >= filler_min:
+                    return stack
+                return [*stack[:-1], (stack[-1][0], stack[-1][1] + rest)]
+
+            most = min(
+                (
+                    int(r.spec.area[1] * ABSORB_TOLERANCE) // d
+                    for stack in cluster.stacks
+                    for r, d in deepest(stack)
+                ),
+                default=column_width,
+            )
+            grow = min(extra // cluster.columns, max(0, most - column_width))
+            column_width += grow
+            extra -= grow * cluster.columns
         if extra >= filler_min:
-            most = int(self.rules.spec(filler).area[1] * SMALL_ROOM_TOLERANCE / segment.depth)
             u0 = span.u0
-            for width in _split(extra, filler_min, most):
-                rooms.append(PlannedRoom(filler, self._rect(segment, Interval(u0, u0 + width))))
+            if (room := self._leftover_room(segment, extra, band.depth)) is not None:
+                widths, kind = [extra], room
+            else:
+                most = int(self.rules.spec(filler).area[1] * SMALL_ROOM_TOLERANCE / band.depth)
+                widths, kind = _split(extra, filler_min, most), filler
+            for width in widths:
+                cells = self._rect(segment, Interval(u0, u0 + width))
+                rooms.append(PlannedRoom(kind, cells, leftover=kind == filler))
                 u0 += width
             span = Interval(u0, span.u1)
         if cluster.columns == 2:
@@ -769,28 +901,47 @@ class Allocator:
         else:
             hallway = Interval(span.u0, span.u1 - column_width)
             columns = [Interval(hallway.u1, span.u1)]
-        rooms.append(PlannedRoom("corridor", self._rect(segment, hallway)))
 
-        from_v0 = band.corridor_at is LocalSide.V0
+        # Depth the stacks leave free at the far end: a fill room across the whole cluster,
+        # entered from the end of the hallway (like a facade stack's window room).
+        used = max(sum(d for _, d in stack) for stack in cluster.stacks)
+        back = self._leftover_room(segment, span.width, band.depth - used) if used else None
+        depth = used if back is not None else band.depth
+        rooms.append(PlannedRoom("corridor", self._depth_rect(segment, hallway, 0, depth)))
+        if back is not None:
+            rooms.append(PlannedRoom(back, self._depth_rect(segment, span, depth, band.depth)))
+
         for column, stack in zip(columns, cluster.stacks, strict=True):
             depths = [d for _, d in stack]
-            types = [r.type for r, _ in stack]
-            rest = band.depth - sum(depths)
+            types = [(r.type, r.leftover) for r, _ in stack]
+            rest = depth - sum(depths)
+            # The stacked rooms grow into the rest (last first), a storeroom takes what's left.
+            for i in reversed(range(len(stack))):
+                most = int(stack[i][0].spec.area[1] * ABSORB_TOLERANCE) // column_width
+                grow = max(0, min(rest, most - depths[i]))
+                depths[i] += grow
+                rest -= grow
             if rest >= filler_min or not stack:
-                types.append(filler)
-                depths.append(rest)
+                most = int(self.rules.spec(filler).area[1] * SMALL_ROOM_TOLERANCE) // column_width
+                for part in _split(rest, filler_min, most):
+                    types.append((filler, True))
+                    depths.append(part)
             else:
                 depths[-1] += rest
             offset = 0
-            for room_type, depth in zip(types, depths, strict=True):
-                if from_v0:
-                    v0, v1 = band.v0 + offset, band.v0 + offset + depth
-                else:
-                    v0, v1 = band.v1 - offset - depth, band.v1 - offset
-                cells = segment.frame.rect(column.u0, column.u1, v0, v1)
-                rooms.append(PlannedRoom(room_type, cells))
-                offset += depth
+            for (room_type, leftover), room_depth in zip(types, depths, strict=True):
+                cells = self._depth_rect(segment, column, offset, offset + room_depth)
+                rooms.append(PlannedRoom(room_type, cells, leftover=leftover))
+                offset += room_depth
         return rooms
+
+    @staticmethod
+    def _depth_rect(segment: Segment, span: Interval, d0: int, d1: int) -> frozenset[Cell]:
+        """Cells of `span` from `d0` to `d1` cells away from the strip's corridor side."""
+        band = segment.band
+        if band.corridor_at is LocalSide.V0:
+            return segment.frame.rect(span.u0, span.u1, band.v0 + d0, band.v0 + d1)
+        return segment.frame.rect(span.u0, span.u1, band.v1 - d1, band.v1 - d0)
 
 
 def _split(total: int, least: int, most: int) -> list[int]:

@@ -166,7 +166,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    `strip_depth`, thin back-to-back interior strips between the corridors take the rest.
 3. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
    the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator; in
-   deep strips a storage room behind it).
+   strips so deep the stairwell would exceed its maximum area, a storage room behind it).
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
    slice across the whole part (street on a short end). When no corridor touches the service
    side, the back door opens into a room on that facade, preferring the program's
@@ -192,10 +192,22 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      rooms still to come want to be next to prefers a segment with space left for them
      (the restaurant leaves room for its kitchen).
    - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
-     over the row, extra cluster width becomes a room of its own. Leftovers that every
-     room is too big for become storerooms, as many as keep each near its maximum area.
+     over the row (rooms may grow to 1.4x their maximum, slivers of up to 4 cells to 1.45x).
      A row is only widened instead of getting another facade stack if such a stack fits
      the strip at all.
+   - *Leftovers*, in this order: the row's rooms grow; another fill room of the floor takes
+     the rest at its size (windowless ones on facades too, `priority: optional` fill rooms
+     only here: studios beside flats, a coffin motel's vending room); only then storerooms
+     (the program's `cluster_filler`), as many as keep each near its maximum area. A cluster's
+     extra width becomes such a fill room or wider columns; depth its stacks leave free at the
+     far end becomes a fill room across the whole cluster, entered from the end of the
+     shortened hallway, else the stacked rooms grow into it. Placing a requested room is
+     penalised if it leaves a rest of its segment too narrow for any fill room (rooms with
+     `next_to` relations excepted), so small rooms join an existing cluster instead.
+   - *Absorbing* (`layout/leftovers.py`, after allocation): a leftover storeroom merges into
+     a neighbour sharing one whole side if the union stays a rectangle and the neighbour
+     within 1.4x its maximum; slivers up to 8 cells thick may widen a corridor stub. Core,
+     unit, annex, host and stall rooms keep their shape; requested storerooms stay.
    - *Stalls*: a room with `stalls:` (public toilets, cell blocks) gets a row of stall
      rooms along the wall where most fit, each an annex entered only from the room, with
      a passage in front (`passage`, at least the `min_side` of what's left); places are
@@ -204,7 +216,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      fits the room becomes the `single` type (a one-person WC). Bathrooms have no stalls.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
-   need windows on facades and windowless ones inside. `near: core | entrance | service`
+   need windows on facades and windowless ones inside; `fill` rooms with
+   `priority: optional` only take leftovers the others don't fit. `near: core | entrance | service`
    pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 

@@ -38,14 +38,16 @@ floor_roles:
       - {room: manager_office, count: [0, 1]}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: contraband_store, count: [0, 1], wealth: [squatter, low, middle], priority: optional}
-      - {room: storage, fill: true}
+      - {room: loading_bay, fill: true}
+      - {room: office, fill: true}
   upper:
     applies: [upper, top]
     rooms:
       - {room: warehouse_floor, place: hall}
       - {room: toilet, count: [0, 1], near: core}
       - {room: office, count: [0, 2]}
-      - {room: storage, fill: true}
+      - {room: office, fill: true}
+      - {room: mechanical_room, fill: true}
   basement:
     applies: [basement]
     rooms:
@@ -53,4 +55,5 @@ floor_roles:
       - {room: utility, count: 1, priority: required}
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: contraband_store, count: [0, 1], priority: optional}
-      - {room: storage, fill: true}
+      - {room: storage, count: [0, 1], near: core}
+      - {room: mechanical_room, fill: true}

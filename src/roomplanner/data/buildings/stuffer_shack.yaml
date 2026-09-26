@@ -38,9 +38,10 @@ floor_roles:
     applies: [upper, top]
     rooms:
       - {room: stockroom, place: hall}
-      - {room: storage, fill: true}
+      - {room: staff_room, fill: true}
+      - {room: manager_office, fill: true}
   basement:
     applies: [basement]
     rooms:
       - {room: stockroom, place: hall}
-      - {room: storage, fill: true}
+      - {room: mechanical_room, fill: true}

@@ -12,7 +12,7 @@ strip_depth: [10, 14]
 facade:
   module: 3
   window: 2
-cluster_filler: records_room
+cluster_filler: storage
 service_rooms: [sally_port, evidence_room, locker_room, storage, utility]
 
 core:
@@ -44,8 +44,10 @@ floor_roles:
       - {room: sally_port, count: 1, near: service}
       - {room: generator_room, count: [0, 1], near: service, when: "floors_below == 0", priority: optional}
       - {room: drone_bay, count: [0, 1], when: "floors_below == 0", priority: optional}
+      - {room: records_room, count: [0, 1]}
       - {room: squad_room, fill: true}
-      - {room: records_room, fill: true}      # interior rows without facade
+      - {room: briefing_room, fill: true}     # interior rows without facade
+      - {room: locker_room, fill: true}
   upper:
     applies: [upper, top]
     rooms:
@@ -59,7 +61,8 @@ floor_roles:
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: squad_room, fill: true}
       - {room: office, fill: true}
-      - {room: archive, fill: true}           # interior rows without facade
+      - {room: briefing_room, fill: true}     # interior rows without facade
+      - {room: interview_room, fill: true}
   basement:
     applies: [basement]
     rooms:
@@ -72,4 +75,7 @@ floor_roles:
       - {room: garage, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: drone_bay, count: [0, 1], priority: optional}
       - {room: forensics_lab, count: [0, 1], priority: optional}
-      - {room: storage, fill: true}
+      - {room: storage, count: 1, near: core}
+      - {room: locker_room, count: [0, 1]}
+      - {room: cell_block, fill: true}
+      - {room: mechanical_room, fill: true}

@@ -71,4 +71,7 @@ floor_roles:
       - {room: subject_holding, count: [0, 1], priority: optional}
       - {room: body_bank, count: [0, 1], priority: optional}
       - {room: vault, count: [0, 1], security: [aaa], priority: optional}
-      - {room: storage, fill: true}
+      - {room: storage, count: [1, 2], near: core}
+      - {room: test_chamber, fill: true}
+      - {room: server_room, fill: true}
+      - {room: mechanical_room, fill: true}

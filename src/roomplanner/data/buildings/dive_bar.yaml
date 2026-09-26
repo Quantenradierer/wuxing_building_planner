@@ -36,13 +36,16 @@ floor_roles:
       - {room: cold_storage, count: [0, 1]}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: fixer_room, count: [0, 1]}
-      - {room: storage, fill: true}
+      - {room: storage, count: [0, 1]}
+      - {room: staff_room, fill: true}
+      - {room: prep_kitchen, fill: true}
   upper:
     applies: [upper, top]
     rooms:
       - {room: taproom, place: hall}
       - {room: toilet, count: [0, 1], near: core}
-      - {room: storage, fill: true}
+      - {room: vip_room, fill: true}           # back rooms: card games, deals
+      - {room: staff_room, fill: true}
   basement:
     applies: [basement]
     rooms:
@@ -50,4 +53,6 @@ floor_roles:
       - {room: utility, count: 1, priority: required}
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: fixer_room, count: [0, 1]}
-      - {room: storage, fill: true}
+      - {room: storage, count: [0, 1], near: core}
+      - {room: mechanical_room, fill: true}
+      - {room: cold_storage, fill: true}

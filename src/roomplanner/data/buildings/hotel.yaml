@@ -53,6 +53,8 @@ floor_roles:
       - {room: capsule_dorm, fill: true, wealth: [squatter, low]}
       - {room: hotel_room, fill: true, wealth: [middle, high, luxury]}
       - {room: staff_room, fill: true}         # interior rows without facade
+      - {room: laundry, fill: true, priority: optional}  # leftovers
+      - {room: mechanical_room, fill: true, priority: optional}
   capsules:
     applies: [upper, top]
     wealth: [squatter, low]
@@ -61,15 +63,17 @@ floor_roles:
       - {room: toilet, count: 2, near: core, priority: required}
       - {room: locker_room, count: 1, near: core}
       - {room: capsule_dorm, fill: true}
+      - {room: mechanical_room, fill: true, priority: optional}  # leftovers
   rooms:
     applies: [upper, top]
     wealth: [middle, high, luxury]
     rooms:
       - {room: linen_room, count: 1, near: core}
-      - {room: storage, count: [0, 1], near: core, priority: optional}
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: hotel_room, fill: true}
       - {room: staff_room, fill: true}         # interior rows without facade
+      - {room: laundry, fill: true, priority: optional}  # leftovers
+      - {room: mechanical_room, fill: true, priority: optional}
   basement:
     applies: [basement]
     rooms:
@@ -78,4 +82,7 @@ floor_roles:
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: generator_room, count: 1, when: "level + 1 == 0", wealth: [middle, high, luxury], priority: optional}
       - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
-      - {room: storage, fill: true}
+      - {room: storage, count: 1, near: core}
+      - {room: staff_room, count: [0, 1]}
+      - {room: laundry, count: [0, 1]}
+      - {room: mechanical_room, fill: true}

@@ -234,15 +234,16 @@ Decided by the author (2026-09-27):
 - No stalls in shower rooms and locker rooms for now.
 - Tactical layer: the unused `cover` field was removed from objects.
 
+Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
+(`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
+and neighbours before it becomes a storeroom; basements and hall back strips got real
+rooms (mechanical rooms, labs, staff rooms, …) instead of `storage` as their fill; archives
+are counted rooms. Generic storage (storage, archive, records room, linen room, closets)
+over 2 000 random buildings, all types: 19.8 % → 2.3 % of the area outside circulation,
+every type ≤ 5 % except apartments (9 %, a third of it flat closets).
+`tests/test_storage.py` keeps the share below 5 %.
+
 Known weaknesses:
-- Leftover space becomes storerooms full of crates. Apartment building 40 × 24: one flat
-  and four storerooms per floor (seeds 1–5). Hotel 56 × 36: eight guest rooms and six
-  storerooms per upper floor. Coffin block: every coffin row gets a storeroom behind it
-  (19 in 2 floors). Police station: storerooms fill the whole basement (about 20; the
-  ground floor has records rooms and a booking room instead). Office 48 × 32 × 2
-  and corp office 48 × 36 × 3 have 9 each; clinic, church, street doc and chop shop 2–5.
-  Filler should repeat the building's main room (flats, guest rooms, offices) before it
-  falls back to storage.
 - Toilets don't scale with the building: dive bar 11 × 8 m gets two toilets with three
   stalls each (about the taproom's area); stuffer shack, street doc and chop shop get 2–4
   stalls where one staff WC would do. Corp office 48 × 36 × 3: 18 stalls, office
@@ -299,10 +300,12 @@ Known weaknesses:
   look wrong.
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their
   catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
-- The storeroom behind the stairwell (deep core slots) can be walled in by apartments; it
-  then opens into the stairwell as a last resort, on some floors only (apartment
-  53 × 41 irregular, seed 123: floor 1 only). It should reach the corridor, or be a
-  stairwell closet on every floor.
+  Absorbing leftovers raised this by ~15 % (2 000 buildings: 621 → 719 rooms), mostly
+  coffin units and rooms beside thin slivers.
+- The storeroom behind the stairwell, now only where the stairwell would exceed its
+  maximum area, can be walled in by apartments; it then opens into the stairwell as a
+  last resort, on some floors only. It should reach the corridor, or be a stairwell
+  closet on every floor.
 - Leftover storerooms can open into the lobby or lounge instead of a corridor (hotel
   56 × 36: storeroom beside the lounge).
 - Apartment halls run the whole unit width in deep strips (up to ~90 cells, 22 m²);
@@ -311,6 +314,10 @@ Known weaknesses:
   entered through the kitchen (pantry) rather than the hall.
 - Church: a row holds only whole 8-cell pews with a cross aisle every three; in naves up
   to ~27 cells wide two pews meet in the middle without a central aisle.
+- Small apartment buildings (one or two segments per floor) still keep leftover
+  storerooms behind small service rooms; flat closets (`front_fill`) are ~3 % of the area.
+- Basements are mostly mechanical rooms side by side (one laundry, staff room and
+  storeroom); a garage level would be more realistic for big buildings.
 
 Possible extensions: surroundings (street, yard, parking, fire escapes, roof), more themes
 (corporate white, Barrens, print), a web UI with preview, more building types and variants

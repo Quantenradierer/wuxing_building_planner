@@ -37,6 +37,7 @@ class PlannedRoom:
     entry: bool = False  # the unit room that opens to the building's circulation
     # Annex (closet, pantry): carved out of this room and entered only through it.
     host: PlannedRoom | None = field(default=None, compare=False)
+    leftover: bool = False  # a storeroom filling space no room fits; neighbours may absorb it
 
 
 @dataclass(frozen=True)

@@ -8,47 +8,46 @@ D                                                               "
 D                                                               |
 D                                                               |
 |                                                               |
-|                            1                                  |
-|       +---+---+---+                 +-------+     +DDD--+-----+
-|       |  w|  w|  w|                U|sss sss|     |     D    w|
-|       |   |   |   |                 |       |     |     D     |
-|       |4  |5  |6  |                 D    KKK|     |  10 D  11 |
-|       |   |   |   |                 D    KKK|     |     |     |
-"       |   |   |   |    }            D    KKK|     |i i i|     |
-"       +DDD+DDD+DDD+                 |       |     +-----+-----+
-"       D           |    AAA          |      s|     |  00000 000|
-|       D           |    AAA          |      s|     |           |
-|       D    3      |    AAA          |      s|     D    12     |
-|       |           |                 |       |     D           |
-"       |i       i w|                 |s   KKK|     D           |
-"       +-----------+                 |s   KKK|     |           |
-"       |sss sss    |        2        |s 9 KKK|     |' 000 000  |
-|       |           |                 |       |     +-----------+
-|       D    7     s|  }              |s     s|     |sss   sss s|
-|       D          s|                 |s     s|     |          s|
-"       D          s|  AAA            |s     s|     D          s"
-"       |           |  AAA            |       |     D           "
-"       |  sss   sss|q AAA            |s     s|     D          s"
-|       +-----------+q                |s     s|     |          s|
-|       |sss sss    |q                |s     s|     |  KKK 13  s|
-|       |           |q                |       |     |  KKK      |
-"       D    8     s|q                |s     s|     |  KKK     k"
-"       D          s|q                |s     s|     |           "
-"       D          s|q                |s     s|^^^  |s         s"
-|       |           |                 |       |^^^  |s         s|
-|       |  sss   sss|*               *|sss k k|^^^  |s sss sss s|
-+--===--+===---===--+----DDDDDDD------+===----+-----+----===----+
-  objects: A armchair, 0 battery_bank, q bench, k cabinet, K crate, 0 electrical_panel, ' fire_extinguisher, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, w wc
-    1  corridor            226 cells
+|                      1                                        |
+|       +---+---+---+                 +--DDD------------+--DDD--+
+|       |  w|  w|  w|                 |k         ddddd F|s     s|
+|       |   |   |   |                 |          ddddd F|s     s|
+|       |4  |5  |6  |q               $|          ddddd F|s     s|
+|       |   |   |   |q                |                 |       |
+"       |   |   |   |q       AAA      |F           c    |s     s"
+"       +DDD+DDD+DDD+q       AAA      |F                |s     s"
+"       D           |q       AAA     q|F               F|s     s"
+|       D           |q               q|                F|       |
+|       D    3      |q               q|ddd             F|       |
+|       |           |                q|ddd              |       |
+"       |i w   i    |}               q|ddd c            |s     s"
+"       +-----+-----+                q|ddd              |s     s"
+"       D     D     |AAA     2       q|ddd     10    ddd|s 12  s"
+|       D     D     |AAA              |              ddd|       |
+|       D  7  D  8  |AAA              |ddddd       c ddd|      s|
+|       |     |     |                 |ddddd         ddd|      s|
+"       |i i w|w    |                 |ddddd         ddd|s     s"
+"       +-----+-----+                 +-------+         |s      "
+"       |000     000|                q|s sss  |         |s     s"
+|       |           |                q|s      |         |      s|
+|       D          0|2               q|s      D         |KKK   s|
+|       D          0|2               q|       D         |KKK    |
+"       D    9     0|2               q|  11   D      c  |KKK    "
+"       |           |2               q|       |         |       "
+"    ^^^|           |2               q|s      |    ddddd|      s"
+|    ^^^|           |                 |s      |    ddddd|      s|
+|    ^^^|00000 000 '|*               *|s sss  |k   ddddd|  sss s|
++--===--+-----------+----DDDDDDD------+===----+----===--+===----+
+  objects: A armchair, $ atm, 0 battery_bank, q bench, k cabinet, c chair, K crate, 0 electrical_panel, F filing_cabinet, ' fire_extinguisher, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, w urinal, 2 wall_screen, w wc
+    1  corridor            184 cells
     2  lobby               126 cells
     3  toilet               18 cells
     4  stall                 6 cells
     5  stall                 6 cells
     6  stall                 6 cells
-    7  storage              24 cells
-    8  storage              24 cells
-    9  storage              56 cells
-   10  toilet                9 cells
-   11  stall                 9 cells
-   12  electrical_room      24 cells
-   13  storage              42 cells
+    7  toilet                9 cells
+    8  stall                 9 cells
+    9  electrical_room      30 cells
+   10  office              106 cells
+   11  storage              20 cells
+   12  storage              56 cells

@@ -42,6 +42,7 @@ from roomplanner.pipeline.layout.frame import (
     LocalSide,
     free_intervals,
 )
+from roomplanner.pipeline.layout.leftovers import absorb_leftovers
 from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.layout.stalls import carve_stalls
 from roomplanner.pipeline.registry import register
@@ -388,14 +389,21 @@ class CorridorLayout:
         rooms: list[PlannedRoom] = []
         taken: set[Cell] = set()
 
-        # Deep strips: the core only takes what it needs, a storage room fills the back.
+        # Deep strips: the stairwell reaches the back of the strip while it stays within its
+        # maximum area; beyond that the core only takes what it needs, a storage room fills
+        # the back.
         filler = ctx.rules.program.cluster_filler
         core_depth = max(v for _, v in sizes)
-        if band.depth - core_depth >= ctx.rules.spec(filler).min_side + 1:
+        others = sum(u * v for u, v in sizes[1:])
+        stairwell_max = ctx.rules.spec(entries[0].room).area[1]
+        if (
+            band.depth - core_depth >= ctx.rules.spec(filler).min_side + 1
+            and slot.width * band.depth - others > stairwell_max
+        ):
             front = self._from_corridor(band, core_depth)
             back = (front[1], band.v1) if front[0] == band.v0 else (band.v0, front[0])
             cells = frame.rect(slot.u0, slot.u1, *back)
-            rooms.append(PlannedRoom(filler, cells))
+            rooms.append(PlannedRoom(filler, cells, leftover=True))
             taken |= cells
             depth = core_depth
         else:
@@ -540,6 +548,7 @@ class CorridorLayout:
         rooms += allocator.allocate(role, level, level_name(level))
         warnings += allocator.warnings
 
+        rooms = absorb_leftovers(rooms, ctx.rules)
         rooms = carve_stalls(_merge_corridors(rooms), ctx.rules)
         entrances = [
             EntranceRequest(kind, side, _room_index(rooms, hint), hint)

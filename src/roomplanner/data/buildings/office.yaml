@@ -32,13 +32,13 @@ floor_roles:
       - {room: toilet, share: 0.03}          # more toilets on bigger floors
       - {room: meeting_room, count: [0, 1]}
       - {room: security_room, count: 1, near: entrance, priority: required, security: [corporate, aaa]}
-      - {room: storage, count: 1, priority: optional}
+      - {room: storage, count: 1, priority: optional, when: "floors_below == 0"}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: spider_room, count: 1, security: [corporate, aaa], priority: optional}
       - {room: drone_bay, count: [0, 1], when: "floors_below == 0", security: [aaa], priority: optional}
+      - {room: archive, count: [0, 1], area: [60, 120], when: "floors_below == 0"}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
-      - {room: archive, fill: true}
   executive:
     applies: [top]
     when: "floors_above >= 3"
@@ -52,7 +52,7 @@ floor_roles:
       - {room: executive_quarters, count: [0, 1], priority: optional}
       - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional}
       - {room: executive_office, fill: true}
-      - {room: archive, fill: true}           # interior rows without facade
+      - {room: meeting_room, fill: true}      # interior rows without facade
   standard:
     applies: [upper, top]
     rooms:
@@ -64,19 +64,19 @@ floor_roles:
       - {room: open_office, share: 0.6, wealth: [squatter, low]}
       - {room: open_office, share: 0.4, wealth: [middle, high]}
       - {room: open_office, share: 0.2, wealth: [luxury]}
-      - {room: storage, count: [0, 1], priority: optional}
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
-      - {room: archive, fill: true}
   basement:
     applies: [basement]
     rooms:
       - {room: utility, count: 1, priority: required}
       - {room: server_room, count: [0, 1]}
-      - {room: archive, count: [0, 1]}
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: generator_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: drone_bay, count: [0, 1], when: "level + 1 == 0", security: [aaa], priority: optional}
-      - {room: storage, fill: true}
+      - {room: archive, count: [0, 1], area: [60, 120]}
+      - {room: storage, count: 1, near: core}
+      - {room: server_room, fill: true}
+      - {room: mechanical_room, fill: true}
