@@ -172,8 +172,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
    it. Rooms that need windows are never clustered. Leftover modules widen a fill room.
-   A clustered room whose `access` names a host type becomes an *annex* about half of the
-   time instead: carved out of the back corner of a host slot (an existing one, or a new
+   A clustered room whose `access` names a host type becomes an *annex* with the room's
+   `annex` probability (default 0.5; specimen storage 1.0) instead: carved out of the back corner of a host slot (an existing one, or a new
    host of a fill type), leaving the host at least `min_side` wide; its only door leads into
    the host and nobody passes through it (storage closets, pantries). Partition walls
    on facade strips snap to the facade `module` grid.

@@ -98,6 +98,12 @@ class RoomSpec(_Strict):
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
+    annex: float = Field(
+        default=0.5,
+        ge=0,
+        le=1,
+        description="Cluster rooms: chance to become a closet of a host from `access`",
+    )
     transit: bool = Field(default=True, description="Other rooms may be entered through it")
     furniture: list[FurnitureRule] = []
     wealth: dict[Wealth, RoomTier] = {}

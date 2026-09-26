@@ -38,6 +38,7 @@ rooms:
     windows: forbidden
     cluster: true
     access: [wet_lab, clean_room, lab]
+    annex: 1.0                # always behind a lab if one fits
     furniture:
       - {object: specimen_fridge, placement: wall, per: 5, count: [2, 8]}
   test_chamber:

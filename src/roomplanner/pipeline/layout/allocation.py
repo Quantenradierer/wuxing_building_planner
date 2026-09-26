@@ -29,7 +29,6 @@ from roomplanner.rules import (
     variables,
 )
 
-ANNEX_CHANCE = 0.5  # small rooms with hosts in `access` become annexes this often
 SMALL_ROOM_TOLERANCE = 1.25  # a full-depth room may exceed its max area by this factor
 MIN_CLUSTER_COLUMN = 4  # cells
 FACADE_PENALTY = 5
@@ -238,7 +237,7 @@ class Allocator:
         if (
             request.spec.cluster
             and request.spec.access
-            and self.rng.random() < ANNEX_CHANCE
+            and self.rng.random() < request.spec.annex
             and self._place_annex(request)
         ):
             return True
