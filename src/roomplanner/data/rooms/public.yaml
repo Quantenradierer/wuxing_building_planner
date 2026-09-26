@@ -54,8 +54,8 @@ rooms:
     windows: forbidden
     transit: false
     furniture:
-      - {object: bench, placement: wall}
       - {object: wc, placement: corner}
+      - {object: bench, placement: wall}
       - {object: sink, placement: wall, count: [0, 1]}
   evidence_room:
     area: [30, 120]

@@ -76,11 +76,11 @@ office 64x52 cells, wealth=middle, seed=2
 |                                                                       |       |  aaa|                   |                     |
 "                                                                       D       |  aaa|                   |      ddd ddd        "
 "                                                                       D       +-----+                   |      ddd ddd        "
-"                                                                       D  13   |  aaa|                   |    c ddd ddd c     F"
-|                                                                       |       |  aaa+--DDD------+       |      ddd ddd       F|
-|                                                                       |  iii  D15aaa|S          |       |      ddd ddd       F|
-+--DDD------+--DDD------+--DDD------+DDD--+---------------------+       |  iii  |     |S          |       |                     |
-"      FFF  |      FFF  |      FFF  |    s|  k                  |       |  iii w|     |S   23     |       |      ddd ddd        "
+"                                                                       D  13   D     |                   |    c ddd ddd c     F"
+|                                                                       |       |     +--DDD------+       |      ddd ddd       F|
+|                                                                       |  iii  |15aaa|S          |       |      ddd ddd       F|
++--DDD------+--DDD------+--DDD------+DDD--+---------------------+       |  iii  |  aaa|S          |       |                     |
+"      FFF  |      FFF  |      FFF  |    s|  k                  |       |  iii w|  aaa|S   23     |       |      ddd ddd        "
 "           |           |           |    s|                     |       +-------+-----+           |       |      ddd ddd        "
 "           |           |           |    s|                     D       |k           *|           |       |    c ddd ddd c      "
 |           |           |           |     |                     D       |             |           |       |      ddd ddd        |
@@ -173,17 +173,17 @@ office 64x52 cells, wealth=middle, seed=2
                                           |                    F|       |             |  TTTTT    |       D                     |
                                           |  c       c         F|       |k            |  TTTTT    |       D          27  c     F|
                                           |                     |       +---+---+-----+           |       |                    F|
-                                          "                     |       |WWW|WWW|WWW  |          <|       |  c       c         F"
-                                          "                     |       |WWW|WWW|WWW  |          <|       |                     "
-                                          "          6       ddd|       |WWW|WWW|WWW  |          <|       |ddddd   ddddd        "
+                                          "                     |       |WWW|WWW|  WWW|          <|       |  c       c         F"
+                                          "                     |       |WWW|WWW|  WWW|          <|       |                     "
+                                          "          6       ddd|       |WWW|WWW|16WWW|          <|       |ddddd   ddddd        "
                                           |                  ddd|       |   |   |     |          <|       |ddddd   ddddd        |
-                                          |ddd             c ddd|       |14 |15 |  16 |          <|       |ddddd   ddddd       k|
-                                          |ddd               ddd|       +D--+D--+--D--+           |       +---------------------+
-                                          "ddd c             ddd|       D      iii    |           |       |* FFF       ddddd   k"
-                                          "ddd                  |       D      iii    +-----------+       |            ddddd    "
-                                          "ddd           c      |       D    13iii    |*          |       D            ddddd    "
-                                          |                     |       |             |           |       D                     |
-                                          |F           ddddd   U|       |w           w|           D       D          28  c     F|
+                                          |ddd             c ddd|       |14 |15 |     |          <|       |ddddd   ddddd       k|
+                                          |ddd               ddd|       +D--+D--+D----+           |       +---------------------+
+                                          "ddd c             ddd|       D             |           |       |* FFF       ddddd   k"
+                                          "ddd                  |       D             +-----------+       |            ddddd    "
+                                          "ddd           c      |       D    13iii iii|*          |       D            ddddd    "
+                                          |                     |       |      iii iii|           |       D                     |
+                                          |F           ddddd   U|       |w w   iii iii|           D       D          28  c     F|
                                           |F           ddddd    |       +-------------+           D       |                    F|
                                           |F           ddddd   k|       |      #######|           D       |  c       c         F"
 +--DDD+------===--+===---===--+===---===--+--DDD----------------+       |      #######|           |       |                     "
