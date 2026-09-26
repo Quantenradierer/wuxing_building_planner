@@ -2,7 +2,7 @@ import pytest
 
 from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
-from roomplanner.geometry import Cell, Side
+from roomplanner.geometry import Cell, Edge, Side
 from roomplanner.model import OpeningKind
 from roomplanner.params import BuildingType, EntranceKind, Shape, Wealth
 from roomplanner.rules import rules_for
@@ -234,3 +234,29 @@ def test_row_leftovers_dont_inflate_rooms() -> None:
             for room in floor.rooms:
                 if room.type in ("coffin_unit", "consultation_room", "office"):
                     assert len(room.cells) <= rules.spec(room.type).area[1] * 1.5, room.type
+
+
+@pytest.mark.parametrize(
+    "building_type", [BuildingType.OFFICE, BuildingType.HOTEL, BuildingType.HOSPITAL]
+)
+def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingType) -> None:
+    params = make_params(
+        building_type=building_type, width=60, depth=44, floors_above=3, floors_below=1, seed=5
+    )
+    building = generate(params)
+    stairs = {
+        tuple(sorted((o.x, o.y, o.w, o.h) for o in f.objects if o.kind == "stairs"))
+        for f in building.floors
+    }
+    assert len(stairs) == 1
+    doors: set[tuple[Edge, ...]] = set()
+    for floor in building.floors:
+        stairwell = next(r for r in floor.rooms if r.type == "stairwell")
+        doors |= {
+            o.edges
+            for o in floor.openings
+            if o.kind is OpeningKind.DOOR
+            and any(c in stairwell.cells for e in o.edges for c in e.cells())
+            and o.entrance is None
+        }
+    assert len(doors) == 1

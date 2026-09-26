@@ -37,7 +37,8 @@ class RulesFurnishing:
             for room in floor.rooms:
                 rules = ctx.rules.spec(room.type).furniture
                 if room is hatch:
-                    rules = [FurnitureRule(object="roof_hatch", placement=Placement.CORNER), *rules]
+                    # After the stairs, so they stand where they do on the other floors.
+                    rules = [*rules, FurnitureRule(object="roof_hatch", placement=Placement.CORNER)]
                 if rules:
                     clearance = clearances.get(room.id, frozenset())
                     furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
@@ -176,6 +177,9 @@ class RoomFurnisher:
             case Placement.WALL:
                 candidates = self._against_walls(spec, corners_only=False)
                 self.rng.shuffle(candidates)
+            case Placement.BACK:
+                candidates = self._against_walls(spec, corners_only=False)
+                candidates.sort(key=lambda r: (-self._door_distance(r), r))
             case Placement.CORNER:
                 candidates = self._against_walls(spec, corners_only=True)
                 self.rng.shuffle(candidates)
@@ -223,6 +227,14 @@ class RoomFurnisher:
         first, last = back[0], back[-1]
         ends = (Side.W, Side.E) if side in (Side.N, Side.S) else (Side.N, Side.S)
         return Edge.of(first, ends[0]) in self.solid or Edge.of(last, ends[1]) in self.solid
+
+    def _door_distance(self, rect: Rect) -> float:
+        """How far a rectangle's centre is from the room's door clearances (deterministic)."""
+        if not self.clearance:
+            return 0.0
+        x, y, w, h, _ = rect
+        cx, cy = x + w / 2, y + h / 2
+        return min(abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in self.clearance)
 
     def _anywhere(self, spec: ObjectSpec) -> list[Rect]:
         along, deep = spec.size

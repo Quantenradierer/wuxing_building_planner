@@ -22,8 +22,9 @@ rooms:
   stairwell:
     area: [40, 240]
     min_side: 5
+    transit: false        # no rooms open into it (but the core's elevator may)
     furniture:
-      - {object: stairs, placement: wall}
+      - {object: stairs, placement: back}   # same spot on every floor
   elevator:
     area: [12, 80]
     min_side: 3

@@ -79,6 +79,7 @@ class Placement(StrEnum):
     SCATTER = "scatter"  # anywhere free
     NEAR_EXIT = "near_exit"  # close to the room's exterior door (checkouts)
     ROWS = "rows"  # parallel rows with aisles, filling the room (shelves, desks)
+    BACK = "back"  # against the wall farthest from the doors, same spot every time
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
 
 

@@ -384,7 +384,7 @@ class CorridorLayout:
         # Deep strips: the core only takes what it needs, a storage room fills the back.
         filler = ctx.rules.program.cluster_filler
         core_depth = max(v for _, v in sizes)
-        if band.depth - core_depth >= ctx.rules.spec(filler).min_side + 2:
+        if band.depth - core_depth >= ctx.rules.spec(filler).min_side + 1:
             front = self._from_corridor(band, core_depth)
             back = (front[1], band.v1) if front[0] == band.v0 else (band.v0, front[0])
             cells = frame.rect(slot.u0, slot.u1, *back)

@@ -231,6 +231,9 @@ along the unit so every room opens onto it. Rooms carry the unit id.
   circulation first, then into a type from the room's `access` list, then into any connected
   room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect
   only within their unit, except the unit's entry room, which opens to circulation.
+- Core rooms (stairwell, elevator) have the same cells on every floor, and so the same
+  door: it uses a wall that borders circulation on all floors, in the middle of that wall.
+  Only other core rooms may open into the stairwell (`transit: false`).
 - A room's door goes as close as possible to the doors of its `next_to` / `connect`
   partners (either direction; to their rooms if they have no door yet): the loading bay's
   door faces the warehouse floor's across the service corridor.
@@ -259,7 +262,9 @@ stairwell (or a circulation room).
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, cover, `walkable`, ASCII glyph).
-Placements: `wall`, `corner`, `center`, `scatter`, `near_exit` (checkouts) and `rows`
+Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, without
+randomness: stairs stand in the same spot on every floor), `center`, `scatter`, `near_exit`
+(checkouts) and `rows`
 (shelves, desks, racks with aisles and cross aisles; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules), and `at` (beside every object of kind `at`
 placed earlier in the room: chairs at desks and tables, stools at bar counters, monitors

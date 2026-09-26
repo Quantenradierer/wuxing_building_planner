@@ -39,6 +39,7 @@ class DefaultOpenings:
     def build(self, ctx: Context, footprint: frozenset[Cell], plan: BuildingPlan) -> list[Floor]:
         rng = ctx.rng("openings")
         drafts: list[_Draft] = []
+        core_walls = _core_walls(ctx, plan)
         for planned in plan.floors:
             rooms = tuple(
                 Room(f"{planned.level}.{i + 1}", r.type, r.cells, r.unit)
@@ -54,7 +55,14 @@ class DefaultOpenings:
                 if r.host is not None and id(r.host) in index
             }
             walls = _walls(footprint, owner, circulation)
-            doors = _interior_doors(ctx, rooms, owner, walls, circulation, entries, hosts, rng)
+            fixed = {
+                i: core_walls[key]
+                for i, r in enumerate(rooms)
+                if (key := (r.type, min(r.cells))) in core_walls
+            }
+            doors = _interior_doors(
+                ctx, rooms, owner, walls, circulation, entries, hosts, rng, fixed
+            )
             used: set[Edge] = set()
             grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
             for request in planned.entrances:
@@ -77,6 +85,23 @@ class DefaultOpenings:
                 Floor(d.level, footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)
             )
         return floors
+
+
+def _core_walls(ctx: Context, plan: BuildingPlan) -> dict[tuple[str, Cell], set[Edge]]:
+    """Per core room (type, first cell): walls it shares with circulation on every floor."""
+    core_types = {c.room for c in ctx.rules.program.core}
+    common: dict[tuple[str, Cell], set[Edge]] = {}
+    for planned in plan.floors:
+        flow = {c for r in planned.rooms if ctx.rules.spec(r.type).circulation for c in r.cells}
+        for room in planned.rooms:
+            if room.type not in core_types:
+                continue
+            edges = {
+                Edge.of(c, side) for c in room.cells for side in Side if c.neighbour(side) in flow
+            }
+            key = (room.type, min(room.cells))
+            common[key] = common[key] & edges if key in common else edges
+    return common
 
 
 def _walls(
@@ -140,8 +165,12 @@ def _interior_doors(
     entries: set[int],
     hosts: dict[int, int],
     rng: random.Random,
+    fixed: dict[int, set[Edge]] | None = None,
 ) -> list[Opening]:
     """One door per room, committed greedily: the best-ranked door of all pending rooms first.
+
+    `fixed`: walls a room's door into circulation should use if it can (core rooms: the
+    walls they share with circulation on every floor).
 
     Rank: into circulation, then into a type from the room's `access` list (in order), then
     anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
@@ -171,14 +200,25 @@ def _interior_doors(
             return unit_i is None or i in entries
         if unit_i != unit_j:
             return False
+        if rooms[i].type in core_types and rooms[j].type in core_types:
+            return True  # the elevator may open into the stairwell wrapped around it
         return ctx.rules.spec(rooms[j].type).transit
 
+    fixed = fixed or {}
+
     def best(i: int) -> tuple[tuple[int, int, int, Edge], Run] | None:
+        if i in fixed and (found := best_among(i, fixed[i])) is not None:
+            return found
+        return best_among(i, None)
+
+    def best_among(i: int, only: set[Edge] | None) -> tuple[tuple[int, int, int, Edge], Run] | None:
         spec = ctx.rules.spec(rooms[i].type)
         width = spec.door_width
         found: tuple[tuple[int, int, int, Edge], Run] | None = None
         for j in neighbours[i]:
             if j not in connected or not allowed(i, j):
+                continue
+            if only is not None and j not in circulation:
                 continue
             if j in circulation:
                 rank = -1
@@ -186,7 +226,10 @@ def _interior_doors(
                 rank = spec.access.index(rooms[j].type)
             else:
                 rank = len(spec.access)
-            for run in shared[(i, j)]:
+            runs = shared[(i, j)]
+            if only is not None:
+                runs = _runs({e for run in runs for e in run} & only)
+            for run in runs:
                 if len(run) >= width:
                     key = (rank, -len(run), i, run[0])
                     if found is None or key < found[0]:
@@ -205,7 +248,13 @@ def _interior_doors(
         return found
 
     def start_near(i: int, run: Run, width: int, margin: int) -> int:
-        """Door position: close to the partners' doors (else their rooms), else random."""
+        """Door position: close to the partners' doors (else their rooms), else random.
+
+        Core rooms (stairwell, elevator) share their cells on every floor: their door goes
+        in the middle of the wall, so it is in the same place on all floors.
+        """
+        if rooms[i].type in core_types:
+            return (len(run) - width) // 2
         others = partners(i)
         targets = [(e.x, e.y) for k in others for e in door_edges.get(k, [])]
         targets = targets or [(c.x, c.y) for k in others for c in rooms[k].cells]
@@ -218,6 +267,7 @@ def _interior_doors(
 
         return min(range(margin, len(run) - width - margin + 1), key=gap)
 
+    core_types = {c.room for c in ctx.rules.program.core}
     doors: list[Opening] = []
     door_edges: dict[int, list[Edge]] = defaultdict(list)
     linked: set[tuple[int, int]] = set()
