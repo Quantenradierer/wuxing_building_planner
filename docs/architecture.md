@@ -173,7 +173,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
-   it (small fill rooms such as coffins too). Rooms that need windows are never clustered.
+   it (small fill rooms such as coffins, and windowless fill rooms too big for the strip).
+   Rooms that need windows go into a *facade stack* instead when a full-depth slot would
+   make them far too big (exam rooms, wards and offices in deep strips): the side hallway
+   runs to the facade, the window room sits at its end and the floor's first windowless
+   fill room (or the cluster filler) fills the depth behind it.
    Partition walls on facade strips snap to the facade `module` grid.
    - *Annex*: a clustered room whose `access` names a host type becomes, with the room's
      `annex` probability (default 0.5), a closet carved out of the back corner of a host slot;

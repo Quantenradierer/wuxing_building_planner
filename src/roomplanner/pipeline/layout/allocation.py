@@ -141,6 +141,7 @@ class Allocator:
         self.units = 0
         self.level = 0
         self.fill_types: set[str] = set()
+        self.fills: list[RoomEntry] = []
         self.fill_widths: dict[tuple[str, int, int], int] = {}
 
     # --- public -----------------------------------------------------------------------
@@ -149,6 +150,7 @@ class Allocator:
         self.level = level
         requests, fills = self._requests(role, level)
         self.fill_types = {e.room for e in fills}
+        self.fills = fills
         queue = deque(requests)
         while queue:
             request = queue.popleft()
@@ -344,6 +346,16 @@ class Allocator:
         full = FullSlot(request, self._full_units(request, segment))
         # Cluster members mostly don't touch the facade, so rooms needing windows stay full.
         needs_window = request.spec.windows is WindowRule.REQUIRED
+        low, high = request.spec.area
+        if (column := self._facade_column(request.spec, low, high, segment)) is not None:
+            hall = math.ceil(self.hallway / segment.unit) * segment.unit
+            cluster = Cluster((hall + column) // segment.unit, hall, 1, column, [[]])
+            front = self._member_depth(request, cluster)
+            backs = self._backs(segment, column, front)
+            fits = front <= math.ceil(high / column) and cluster.units <= state.free_units
+            if backs is not None and fits:
+                cluster.stacks[0] = backs
+                return cluster
         if needs_window or not (request.spec.cluster or self._is_small(request, segment)):
             return full if full.units <= state.free_units else None
         for slot in state.slots:
@@ -419,8 +431,13 @@ class Allocator:
                 fitting = [RoomEntry(room=self.rules.program.cluster_filler, fill=True)]
             entry = self.rng.choice(fitting or fills)
             spec = self.rules.spec(entry.room)
-            if spec.cluster and (cluster := self._fill_cluster(entry, state)) is not None:
+            stackable = spec.cluster or spec.windows is not WindowRule.REQUIRED
+            if stackable and (cluster := self._fill_cluster(entry, state)) is not None:
                 # Small fill rooms (coffins, …) in deep strips: stacked along a hallway.
+                state.slots.append(cluster)
+                continue
+            if (cluster := self._facade_cluster(entry, state)) is not None:
+                # Small window rooms in deep facade strips: at the facade, back rooms behind.
                 state.slots.append(cluster)
                 continue
             min_units = self._fill_min_units(entry, segment)
@@ -481,6 +498,63 @@ class Allocator:
             for _ in range(columns)
         ]
         return Cluster(units, hall, columns, column, stacks)
+
+    def _facade_cluster(self, entry: RoomEntry, state: SegmentState) -> Cluster | None:
+        """Fill rooms needing windows in deep facade strips: two columns of facade stacks."""
+        spec = self.rules.spec(entry.room)
+        low, high = entry.area or spec.area
+        column = self._facade_column(spec, low, high, state.segment)
+        if column is None:
+            return None
+        front = min(high // column, max(spec.min_side, round((low + high) / 2 / column)))
+        stack = self._backs(state.segment, column, front)
+        if stack is None:
+            return None
+        stack.append((Request(entry.room, spec, front * column, Priority.OPTIONAL, None), front))
+        hall = math.ceil(self.hallway / state.segment.unit) * state.segment.unit
+        for columns in (2, 1):
+            units = (hall + columns * column) // state.segment.unit
+            if units <= state.free_units:
+                return Cluster(units, hall, columns, column, [list(stack) for _ in range(columns)])
+        return None
+
+    def _facade_column(self, spec: RoomSpec, low: int, high: int, segment: Segment) -> int | None:
+        """Column width of a facade stack if a room needing windows is too small for the strip.
+
+        Such rooms (exam rooms, offices) would be far too big spanning a deep strip; instead a
+        hallway leads to the facade, the room sits at its end and windowless rooms behind it.
+        """
+        if not segment.facade or spec.windows is not WindowRule.REQUIRED or spec.cluster:
+            return None
+        probe = Request("probe", spec, high, Priority.OPTIONAL, None)
+        if not self._is_small(probe, segment):
+            return None
+        unit = segment.unit
+        back_min = self.rules.spec(self._back_entry().room).min_side
+        smallest = max(MIN_CLUSTER_COLUMN, spec.min_side, back_min)
+        column = max(smallest, round(math.sqrt((low + high) / 2) / unit) * unit)
+        return math.ceil(column / unit) * unit
+
+    def _back_entry(self) -> RoomEntry:
+        """The room behind facade stacks: the floor's first windowless fill room, or storage."""
+        for entry in self.fills:
+            spec = self.rules.spec(entry.room)
+            if spec.windows is not WindowRule.REQUIRED and not spec.circulation:
+                return entry
+        return RoomEntry(room=self.rules.program.cluster_filler, fill=True)
+
+    def _backs(self, segment: Segment, column: int, front: int) -> list[tuple[Request, int]] | None:
+        """Back rooms filling the strip from the corridor up to a facade room `front` deep."""
+        back = self._back_entry()
+        spec = self.rules.spec(back.room)
+        rest = segment.depth - front
+        if rest < spec.min_side:
+            return None
+        high = (back.area or spec.area)[1]
+        count = max(1, min(rest // spec.min_side, math.ceil(rest * column / high)))
+        depths = [rest // count] * count
+        depths[-1] += rest - sum(depths)
+        return [(Request(back.room, spec, d * column, Priority.OPTIONAL, None), d) for d in depths]
 
     def _fill_min_units(self, entry: RoomEntry, segment: Segment) -> int:
         spec = self.rules.spec(entry.room)

@@ -149,3 +149,16 @@ def test_luxury_offices_have_bigger_rooms_than_squatter_ones() -> None:
         return sum(offices) / len(offices)
 
     assert mean_office(Wealth.SQUATTER) < mean_office(Wealth.LUXURY)
+
+
+def test_window_rooms_in_deep_strips_keep_their_size() -> None:
+    """Exam rooms and wards in a deep hospital go into facade stacks, not full-depth slots."""
+    params = make_params(
+        building_type=BuildingType.HOSPITAL, width=70, depth=44, floors_above=3, seed=3
+    )
+    building = generate(params)
+    rules = rules_for(params.building_type, params.wealth)
+    for floor in building.floors:
+        for room in floor.rooms:
+            if room.type in ("exam_room", "ward", "doctor_office"):
+                assert len(room.cells) <= rules.spec(room.type).area[1] * 1.5, room
