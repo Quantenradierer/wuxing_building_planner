@@ -16,11 +16,11 @@ rooms:
       - {object: cabinet, placement: wall, count: [1, 2]}
       - {object: desk, placement: wall, count: [0, 1]}
       - {object: armchair, placement: scatter, count: [0, 1]}
-  capsule_dorm:         # rows of sleeping pods
-    area: [60, 400]
-    min_side: 6
+  capsule_dorm:         # rows of sleeping pods, back to back
+    area: [240, 900]
+    min_side: 10
     furniture:
-      - {object: capsule, placement: rows, aisle: 2, margin: 1}
+      - {object: capsule, placement: rows, aisle: 3, margin: 0, paired: true}
   shower_room:
     area: [16, 48]
     min_side: 4

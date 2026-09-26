@@ -72,6 +72,7 @@ class FurnitureRule(_Strict):
     per: int | None = Field(default=None, gt=0, description="One object per this many cells")
     aisle: int = Field(default=3, gt=0, description="rows: free cells between rows")
     margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
+    paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
 
     @property
     def count_range(self) -> tuple[int, int]:

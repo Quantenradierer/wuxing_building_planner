@@ -8,41 +8,42 @@ D                                                               "
 D                                                               |
 D                                                               |
 |                                                               |
-|                              1                                |
-|       +------DDD--+                               +--DDD------+
-|       |w         w|q                              |          U|
-|       |           |q                              |           |
-|       |           |q                              |           |
-|       |           |q                              |           |
-"       |i   3      |q   AAA                        |    6      "
-"       |           |q   AAA                        |           "
-"       |           |q   AAA                        |           "
-|       |           |                               |           |
-|       |U     w   w|q                              |          w|
-|       +-----------+q                              |           |
-"       |    sss    |q                              |  w   i w w|
-"       |           |q                              +-----------+
-"       D    4     s|q     AAA 2                    |sss   sss s|
-|       D          s|q     AAA                      |          s|
-|       D          s|q     AAA                      |s         s|
-|       |           |                               |s          |
-"       |sss sss sss|q                              |s   KKK   s"
-"       +-----------+q                              |    KKK   s"
-"       |s     sss  |q                              |s   KKK   s"
-|       |s          |q                              |s          |
-|       |s   KKK    |q                              |s   7      |
-|       |    KKK    |q                              |           |
-"       D    KKK   s|q                              D      KKK s"
-"       D          s|                               D      KKK s"
-"       D    5     s|                            ^^^D      KKK s"
-|       |           |                            ^^^|           |
-|       |sss sss sss|*           U               ^^^|sss sss sss|
-+--===--+===---===--+----DDDDDDD-------===---===----+----===----+
+|                            1                                  |
+|       +--DDD------+                 +-------+     +------DDD--+
+|       |w     w   U|                U|s     s|     |w         w|
+|       |           |                 |s     s|     |           |
+|       |          i|                 |s     s|     |           |
+|       |           |                 |       |     |           |
+"       |w   3      |                 |s      |     |w   7     i"
+"       |           |                 |s      |     |           "
+"       |           |    AAA          |s     s|     |           "
+|       |           |    AAA          |      s|     |           |
+|       |  w        |    AAA          |KKK   s|     |           |
+|       +-----------+                 |KKK    |     |           |
+"       |    sss    |                 |KKK   s|     |    w   i U|
+"       |           |                 |      s|     +-----------+
+"       D    4     s|q       2        |s 6   s|     |s sss sss s|
+|       D          s|q                |s      |     |s         s|
+|       D          s|q                |s      |     |s         s|
+|       |           |q                |       |     |           |
+"       |sss sss sss|q                |s     s|     |    KKK   s"
+"       +-----------+q                |s     s|     |    KKK   s"
+"       |sss   sss  |q                |s     s|     |s   KKK   s"
+|       |           |                 |       |     |s          |
+|       D           |                 D    KKK|     |s   8 KKK s|
+|       D           |                 D    KKK|     |      KKK s|
+"       D    5 KKK s|AAA              D    KKK|     D      KKK s"
+"       |      KKK s|AAA              |       |     D           "
+"    ^^^|      KKK s|AAA              |s     s|     D          s"
+|    ^^^|           |                 |s     s|     |          s|
+|    ^^^|sss sss sss|*               *|s sss s|     |  sss sss s|
++--===--+===---===--+----DDDDDDD------+===----+-----+----===----+
   objects: A armchair, q bench, K crate, * plant, ^ roof_hatch, s shelf, i sink, U trash_bin, w wc
-    1  corridor            282 cells
+    1  corridor            226 cells
     2  lobby               126 cells
     3  toilet               30 cells
     4  storage              24 cells
     5  storage              30 cells
-    6  toilet               36 cells
-    7  storage              48 cells
+    6  storage              56 cells
+    7  toilet               36 cells
+    8  storage              48 cells

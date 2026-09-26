@@ -188,31 +188,31 @@ D                                                                               
    11  cold_storage         84 cells
 
 == Basement B1 ==
-+-----------+-----------------+-----------------+-----------+-----------+-----------------------+-----+-----------+-------------+
-|sss sss   s|sss   sss sss sss|  XXXXX          |s sss   sss|sss sss   s|                #######|     D        sss|s   sss   sss|
-|          s|                 |  XXXXX          |s          |          s|                #######|     D           |s            |
-|s         s|s               s|  XXXXX          |s          |s         s|                #######|     D    11     |s            |
-|s          |s               s|                 |           |s          |                #######|     |           |             |
-|s     KKK s|s KKK       KKK s|              XXX|s         s|s         s|                #######|     |sss sss sss|s   KKK     s|
-|      KKK s|  KKK       KKK  |              XXX|s         s|          s|                #######|     +-----------+s   KKK     s|
-|      KKK s|s KKK       KKK s|              XXX|s         s|    KKK   s|                #######|     |  sss      |s   KKK     s|
-|           |s               s|              XXX|           |    KKK    |                #######|     |           |             |
-|s          |s               s|              XXX|s         s|s   KKK    |                #######|     |           |             |
-|s          |                 |                 |s         s|s          |                #######|     |           |             |
-|s   5     s|s       6       s|        7     XXX|s   8 KKK s|s   9     s|          2     #######|     |          s|s   12KKK   s|
-|          s|s               s|              XXX|      KKK  |          s|             +---------+     |          s|s     KKK   s|
-|s         s|s               s|              XXX|      KKK s|          s|             |         |     |          s|s     KKK   s|
-|s          |                 |              XXX|          s|           |             |         |     |           |             |
-|s         s|s         KKK   s|              XXX|s     KKK s|s         s|             |  %%%%%  |     |    10     |      KKK    |
-|          s|s         KKK   s|                 |s     KKK  |s         s|             |  %%%%%  |     |           |      KKK    |
-|s KKK     s|s         KKK   s|              XXX|s     KKK s|s     KKK s|             |  %%%%%  |     |           |s     KKK   s|
-|s KKK      |                 |              XXX|          s|      KKK  |             |  %%%%%  |     |           |s           s|
-|s KKK      |                s|              XXX|s         s|      KKK s|             |  %%%%%  D     D           |s           s|
-|           |                s|              XXX|s          |          s|             |         D     D           |             |
-|          s|s               s|              XXX|s         s|s         s|             |    3    D     D           |            s|
-|          s|s                |                 |          s|s          |             |         |     |           |            s|
-|sss       s|s       sss   sss|                 |sss       s|s       sss|             |         |     |           |sss         s|
-+----DDD----+----DDD----------+----DDD----------+----DDD----+----DDD----+------DDD----+---------+     +-----------+------DDD----+
++-----------+-----------------+-----------+-----------------+-----------+-----------------------+-----+-----------+-------------+
+|sss sss   s|                 |sss   sss s|sss sss sss sss s|sss sss   s|                #######|     D    sss sss|sss sss sss s|
+|          s|                 |          s|                s|          s|                #######|     D           |            s|
+|s         s|            KKK  |s         s|s               s|s         s|                #######|     D    11KKK s|s KKK       s|
+|s          |            KKK  |s          |s                |s          |                #######|     |      KKK s|s KKK        |
+|s     KKK s|XXX         KKK  |s          |s               s|s         s|                #######|     |sss   KKK s|s KKK       s|
+|      KKK s|XXX              |           |                s|          s|                #######|     +-----------+            s|
+|      KKK s|XXX              |s KKK     s|        KKK     s|s         s|                #######|     |    sss    |s           s|
+|           |XXX              |s KKK     s|        KKK      |s          |                #######|     |           |s            |
+|s          |XXX           XXX|s KKK     s|s       KKK      |s          |                #######|     |s          |s   KKK KKK s|
+|s          |              XXX|           |s                |           |                #######|     |s          |    KKK KKK s|
+|s   5     s|        6     XXX|s 7 KKK   s|s       8       s|s KKK 9   s|          2     #######|     |s         s|    KKK KKK s|
+|          s|              XXX|s   KKK   s|                s|s KKK     s|             +---------+     |          s|             |
+|s         s|              XXX|s   KKK   s|        KKK     s|s KKK     s|             |         |     |s         s|s     12     |
+|s          |                 |           |        KKK      |           |             |         |     |s          |s            |
+|s         s|                 |          s|s       KKK      |s         s|             |  %%%%%  |     |s   10     |s           s|
+|          s|                 |          s|s                |s         s|             |  %%%%%  |     |           |            s|
+|s KKK     s|XXX              |s         s|s   KKK         s|s   KKK   s|             |  %%%%%  |     |          s|s           s|
+|s KKK      |XXX              |s          |    KKK         s|    KKK    |             |  %%%%%  |     |          s|s            |
+|s KKK      |XXX              |s         s|    KKK         s|s   KKK    |             |  %%%%%  D     D          s|s            |
+|           |XXX              |          s|                 |s          |             |         D     D           |             |
+|          s|XXX     XXXXX    |          s|s                |s         s|             |    3    D     D           |            s|
+|          s|        XXXXX    |           |s                |          s|             |         |     |           |            s|
+|sss       s|        XXXXX    |sss     sss|s         sss sss|sss       s|             |         |     |sss        |sss         s|
++----DDD----+----DDD----------+----DDD----+----DDD----------+----DDD----+------DDD----+---------+     +-----------+------DDD----+
 |                                                                                                                               |
 |                                                                                                                               |
 |                                                                    1                                                          |
@@ -275,9 +275,9 @@ D                                                                               
     3  elevator             30 cells
     4  stockroom          1536 cells
     5  storage              72 cells
-    6  storage             108 cells
-    7  utility             108 cells
-    8  storage              72 cells
+    6  utility             108 cells
+    7  storage              72 cells
+    8  storage             108 cells
     9  storage              72 cells
    10  cold_storage         54 cells
    11  storage              18 cells

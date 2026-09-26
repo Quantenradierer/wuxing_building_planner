@@ -140,6 +140,7 @@ class Allocator:
         self.units = 0
         self.level = 0
         self.fill_types: set[str] = set()
+        self.fill_widths: dict[tuple[str, int, int], int] = {}
 
     # --- public -----------------------------------------------------------------------
 
@@ -412,25 +413,38 @@ class Allocator:
                 state.slots.append(cluster)
                 continue
             min_units = self._fill_min_units(entry, segment)
-            low, high = entry.area or spec.area
-            units = max(
-                min_units, round(self.rng.randint(low, high) / segment.depth / segment.unit)
-            )
+            units = self._uniform_units(entry, segment, min_units)
             remaining = state.free_units
             if remaining < min_units and state.slots:
-                # Too little left for another room: widen an existing one instead, preferably
-                # one that the leftover suits (a fill room, not a small back room).
-                full = [s for s in state.slots if isinstance(s, FullSlot)]
-                wanted = {e.room for e in fills}
-                preferred = [s for s in full if s.request.type in wanted] or [
-                    s for s in full if not s.request.spec.cluster
-                ]
-                target = self.rng.choice(preferred or full or [state.slots[-1]])
-                target.units += remaining
+                self._spread(state, remaining, fills)
                 return
             if remaining - units < min_units:
-                units = remaining
+                # Room for this one, but not for another: the rest is spread over the row.
+                state.slots.append(self._fill_slot(entry, min(units, remaining), segment))
+                if remaining > units:
+                    self._spread(state, remaining - units, fills)
+                return
             state.slots.append(self._fill_slot(entry, units, segment))
+
+    def _uniform_units(self, entry: RoomEntry, segment: Segment, min_units: int) -> int:
+        """One width per fill room type and strip depth on a floor: rooms line up in a grid."""
+        key = (entry.room, segment.depth, segment.unit)
+        if key not in self.fill_widths:
+            low, high = entry.area or self.rules.spec(entry.room).area
+            target = (low + high) / 2 / segment.depth / segment.unit
+            self.fill_widths[key] = max(min_units, round(target))
+        return self.fill_widths[key]
+
+    def _spread(self, state: SegmentState, extra: int, fills: list[RoomEntry]) -> None:
+        """Widen the row's rooms by one unit each, in turn, preferring fill rooms."""
+        full = [s for s in state.slots if isinstance(s, FullSlot)]
+        wanted = {e.room for e in fills}
+        preferred = [s for s in full if s.request.type in wanted] or [
+            s for s in full if not s.request.spec.cluster
+        ]
+        targets = preferred or full or [state.slots[-1]]
+        for i in range(extra):
+            targets[i % len(targets)].units += 1
 
     def _fill_cluster(self, entry: RoomEntry, state: SegmentState) -> Cluster | None:
         """A hallway with one or two columns of stacked fill rooms, if full depth is too big."""
@@ -535,8 +549,17 @@ class Allocator:
     ) -> list[PlannedRoom]:
         band = segment.band
         rooms: list[PlannedRoom] = []
-        # Extra width (partial modules, widened leftovers) goes to the hallway, not the rooms.
+        # Extra width (partial modules, widened leftovers): a room of its own at the start if
+        # it is wide enough, else a slightly wider hallway; the cluster rooms keep their size.
         column_width = cluster.column_width
+        filler = self.rules.program.cluster_filler
+        filler_min = self.rules.spec(filler).min_side
+        extra = span.width - cluster.hall - cluster.columns * column_width
+        if extra >= filler_min:
+            rooms.append(
+                PlannedRoom(filler, self._rect(segment, Interval(span.u0, span.u0 + extra)))
+            )
+            span = Interval(span.u0 + extra, span.u1)
         if cluster.columns == 2:
             columns = [
                 Interval(span.u0, span.u0 + column_width),
@@ -549,8 +572,6 @@ class Allocator:
         rooms.append(PlannedRoom("corridor", self._rect(segment, hallway)))
 
         from_v0 = band.corridor_at is LocalSide.V0
-        filler = self.rules.program.cluster_filler
-        filler_min = self.rules.spec(filler).min_side
         for column, stack in zip(columns, cluster.stacks, strict=True):
             depths = [d for _, d in stack]
             types = [r.type for r, _ in stack]

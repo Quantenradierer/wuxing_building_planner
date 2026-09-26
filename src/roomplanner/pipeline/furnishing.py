@@ -236,13 +236,23 @@ class RoomFurnisher:
         length, width = (x1 - x0, y1 - y0) if horizontal else (y1 - y0, x1 - x0)
         m = rule.margin
         per_block = max(1, math.floor(12 / along))  # cross aisle roughly every 6 m
-        for across in range(m, width - m - deep + 1, deep + rule.aisle):
+        rows: list[tuple[int, Side]] = []  # offset across the room, facing
+        across = m
+        while across + deep <= width - m:
+            if rule.paired and across + 2 * deep <= width - m:
+                rows += [(across, Side.N), (across + deep, Side.S)]
+                across += 2 * deep + rule.aisle
+            else:
+                rows.append((across, Side.S))
+                across += deep + rule.aisle
+        for across, facing in rows:
             position, in_block = m, 0
             while position + along <= length - m:
                 if horizontal:
-                    rect = (x0 + position, y0 + across, along, deep, Side.S)
+                    rect = (x0 + position, y0 + across, along, deep, facing)
                 else:
-                    rect = (x0 + across, y0 + position, deep, along, Side.E)
+                    side = Side.W if facing is Side.N else Side.E
+                    rect = (x0 + across, y0 + position, deep, along, side)
                 self._try(rule.object, rect, spec.walkable)
                 position += along
                 in_block += 1
