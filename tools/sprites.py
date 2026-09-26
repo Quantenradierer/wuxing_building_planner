@@ -106,6 +106,11 @@ def generate(kinds: list[str], attempt: int) -> None:
             print(f"got {seeds[seed]}", flush=True)
         for seed in set(seeds) - set(found):
             print(f"MISSING {seeds[seed]} ({seed})", flush=True)
+        if not found:
+            # Nothing at all came back: most likely the Midjourney limit. Rerun later;
+            # finished grids are skipped.
+            print("STOP: empty batch (limit reached?)", flush=True)
+            return
 
 
 def _to_png(data: bytes) -> bytes:
