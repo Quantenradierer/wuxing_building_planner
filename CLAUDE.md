@@ -1,7 +1,7 @@
 # Roomplanner
 
 Generator for Shadowrun/cyberpunk building battle maps. Output: versioned JSON, ASCII debug
-view and themed images (Pillow); VTT export is planned (see requirements, Roadmap).
+view, themed images (Pillow) and VTT exports (Universal VTT, Foundry scenes).
 
 - Requirements, status and known limitations: `docs/requirements.md`
 - Architecture (coordinates, data model, pipeline, layouts, JSON contract): `docs/architecture.md`
@@ -18,6 +18,7 @@ uv run ruff check . && uv run ruff format --check .
 uv run pyright                   # strict mode
 uv run roomplanner generate --type office --width 60 --depth 40 --floors-above 3 --seed 1
 uv run roomplanner generate -t office -w 48 -d 30 -f png -o /tmp/office.png --labels
+uv run roomplanner generate -t hotel -w 56 -d 36 --floors-above 2 -f foundry -o /tmp/hotel
 ```
 
 uv is installed inside `.venv` (`.venv/bin/uv`) if it's not on PATH.

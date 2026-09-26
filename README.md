@@ -16,7 +16,13 @@ uv run roomplanner generate -t supermarket -w 80 -d 50 --wealth luxury -f json -
 uv run roomplanner render megamart.json
 uv run roomplanner render megamart.json -f png -o maps/megamart.png   # maps/megamart_F0.png, …
 uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
+uv run roomplanner generate -t nightclub -w 56 -d 36 -f dd2vtt -o vtt/club.dd2vtt    # Universal VTT
+uv run roomplanner generate -t corp_lab -w 60 -d 40 --floors-above 3 -f foundry -o vtt/lab
 ```
+
+Foundry: copy the `vtt/lab` folder to `<Foundry Data>/roomplanner/lab/`, create a script
+macro from `import-macro.js` and run it once. Stairs and elevators teleport tokens between
+the floor scenes (Foundry v12+ Scene Regions).
 
 ## Parameters
 
@@ -34,19 +40,21 @@ uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
 | `--security`           | none, low, corporate, aaa: locks, cameras, guards      |
 | `--entrances`          | override entrance kinds: main, service, emergency, roof|
 | `--seed`               | same seed, same building                               |
-| `-f/--format`          | ascii (debug view), json (full model), png, webp       |
+| `-f/--format`          | ascii, json (full model), png, webp, dd2vtt, foundry   |
 | `--theme`              | image theme: bundled name (neon) or a YAML file        |
 | `--cell-px`            | image pixels per cell (default 50, i.e. 100 px per m)  |
 | `--labels`, `--grid N` | room names in images; grid line every N cells          |
+| `--grid-m`             | VTT grid square in metres (default 1.0, multiple of 0.5)|
+| `--no-lights`          | VTT exports without light sources                      |
 
 Impossible inputs fail with an explanation (e.g. "too small for an L shape, both arms need
 at least 14 cells"); tight ones return a building plus warnings about dropped rooms.
 
 ## Output
 
-The JSON (`schema_version` 2) contains floors with rooms (cells, type, apartment unit),
-walls and openings (doors with swing, windows) as cell edges, and furniture as rectangles
-with facing and kind. It is the contract for the image renderer and the VTT exports.
+The JSON (`schema_version` 3) contains floors with rooms (cells, type, unit), walls and
+openings (doors with swing, state, lock, material; windows; breaches) as cell edges,
+furniture as rectangles with facing and kind, security devices and lights. It is the contract for the image renderer and the VTT exports.
 
 Images: one file per floor (`_F0`, `_F1`, `_B1` suffixes), procedural neon-noir look,
 padded by 1 m so a VTT grid of 100 px per metre lines up with the walls.

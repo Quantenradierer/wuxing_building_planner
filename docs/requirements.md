@@ -199,4 +199,8 @@ All seven milestones are implemented (2026-09-26).
 - No fire escapes (they need surroundings).
 - Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
-- The ASCII renderer is a debug view; image rendering is the next step.
+- The ASCII renderer is a debug view.
+- Universal VTT has no window type: windows are see-through and walkable there.
+- Foundry export needs the import macro (scenes keep their ids so the stairs stay linked).
+
+All v2 roadmap steps are implemented (2026-09-26).

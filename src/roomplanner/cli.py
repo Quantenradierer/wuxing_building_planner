@@ -9,6 +9,9 @@ import typer
 from pydantic import ValidationError
 
 from roomplanner.errors import RoomplannerError
+from roomplanner.export.common import ExportOptions
+from roomplanner.export.foundry import to_foundry
+from roomplanner.export.uvtt import uvtt_json
 from roomplanner.generator import generate as generate_building
 from roomplanner.geometry import Side
 from roomplanner.model import Building
@@ -35,6 +38,8 @@ class OutputFormat(StrEnum):
     JSON = "json"
     PNG = "png"
     WEBP = "webp"
+    DD2VTT = "dd2vtt"  # Universal VTT, one file per floor
+    FOUNDRY = "foundry"  # Foundry VTT scenes folder with an import macro
 
 
 IMAGE_FORMATS = (OutputFormat.PNG, OutputFormat.WEBP)
@@ -43,6 +48,10 @@ ThemeOption = Annotated[str, typer.Option(help="Bundled theme name or theme YAML
 CellPxOption = Annotated[int, typer.Option(min=4, max=400, help="Image pixels per cell")]
 LabelsOption = Annotated[bool, typer.Option(help="Write room types into images")]
 GridOption = Annotated[int, typer.Option(min=0, help="Image grid line every n cells (0: none)")]
+GridMOption = Annotated[
+    float, typer.Option("--grid-m", help="VTT exports: grid square size in metres")
+]
+LightsOption = Annotated[bool, typer.Option(help="VTT exports: include light sources")]
 
 
 @app.command()
@@ -67,12 +76,17 @@ def generate(
     seed: Annotated[int | None, typer.Option(help="Random if omitted")] = None,
     output_format: Annotated[OutputFormat, typer.Option("--format", "-f")] = OutputFormat.ASCII,
     output: Annotated[
-        Path | None, typer.Option("--output", "-o", help="Images: one file per floor, suffixed")
+        Path | None,
+        typer.Option(
+            "--output", "-o", help="Images, dd2vtt: one file per floor, suffixed; foundry: folder"
+        ),
     ] = None,
     theme: ThemeOption = "neon",
     cell_px: CellPxOption = DEFAULT_CELL_PX,
     labels: LabelsOption = False,
     grid: GridOption = 0,
+    grid_m: GridMOption = 1.0,
+    lights: LightsOption = True,
 ) -> None:
     """Generate a building."""
     try:
@@ -96,7 +110,12 @@ def generate(
         _fail(str(error))
     except RoomplannerError as error:
         _fail(str(error))
-    _emit(building, output_format, output, _ImageSettings(theme, cell_px, labels, grid))
+    _emit(
+        building,
+        output_format,
+        output,
+        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights),
+    )
 
 
 @app.command()
@@ -108,13 +127,20 @@ def render(
     cell_px: CellPxOption = DEFAULT_CELL_PX,
     labels: LabelsOption = False,
     grid: GridOption = 0,
+    grid_m: GridMOption = 1.0,
+    lights: LightsOption = True,
 ) -> None:
     """Render a saved JSON building as ASCII or images."""
     try:
         building = from_json(source.read_text(encoding="utf-8"))
     except RoomplannerError as error:
         _fail(str(error))
-    _emit(building, output_format, output, _ImageSettings(theme, cell_px, labels, grid))
+    _emit(
+        building,
+        output_format,
+        output,
+        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights),
+    )
 
 
 @dataclass(frozen=True)
@@ -123,6 +149,8 @@ class _ImageSettings:
     cell_px: int
     labels: bool
     grid: int
+    grid_m: float = 1.0
+    lights: bool = True
 
 
 def _emit(
@@ -130,6 +158,9 @@ def _emit(
 ) -> None:
     if output_format in IMAGE_FORMATS:
         _write_images(building, output_format, output, image)
+        return
+    if output_format in (OutputFormat.DD2VTT, OutputFormat.FOUNDRY):
+        _export_vtt(building, output_format, output, image)
         return
     text = render_building(building) if output_format is OutputFormat.ASCII else to_json(building)
     if output is None:
@@ -149,10 +180,37 @@ def _write_images(
         _fail(str(error))
     options = RenderOptions(settings.cell_px, labels=settings.labels, grid=settings.grid)
     base = output or Path(f"{building.params.building_type}_{building.seed}.{output_format}")
+    base.parent.mkdir(parents=True, exist_ok=True)
     for level, picture in render_images(building, theme, options).items():
         target = floor_path(base, level, output_format.value)
         picture.save(target)
         typer.echo(str(target))
+    for warning in building.warnings:
+        typer.echo(f"warning: {warning}", err=True)
+
+
+def _export_vtt(
+    building: Building, output_format: OutputFormat, output: Path | None, settings: _ImageSettings
+) -> None:
+    try:
+        theme = load_theme(settings.theme)
+        options = ExportOptions(settings.grid_m, settings.cell_px, settings.lights)
+        options.cells_per_square  # noqa: B018 - validates the grid size early
+        stem = f"{building.params.building_type}_{building.seed}"
+        if output_format is OutputFormat.DD2VTT:
+            base = output or Path(f"{stem}.dd2vtt")
+            base.parent.mkdir(parents=True, exist_ok=True)
+            for floor in building.floors:
+                target = floor_path(base, floor.level, "dd2vtt")
+                target.write_text(uvtt_json(building, floor, theme, options), encoding="utf-8")
+                typer.echo(str(target))
+        else:
+            folder = output or Path(stem)
+            export = to_foundry(building, theme, options, folder.name)
+            for path in export.write(folder):
+                typer.echo(str(path))
+    except (RoomplannerError, OSError) as error:
+        _fail(str(error))
     for warning in building.warnings:
         typer.echo(f"warning: {warning}", err=True)
 

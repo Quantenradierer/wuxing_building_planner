@@ -18,6 +18,9 @@ src/roomplanner/
   render/theme.py            theme model and loader
   render/shapes.py           procedural object shapes
   cli.py                     Typer CLI
+  export/common.py           grid scale, wall runs, stable ids
+  export/uvtt.py             Universal VTT (.dd2vtt)
+  export/foundry.py          Foundry VTT scenes + import macro
   pipeline/
     base.py                  Context, intermediate plan, stage protocols
     registry.py              strategies by name or `module:Class`
@@ -115,7 +118,8 @@ Invariants checked by `validation.py` (all hard unless noted):
   floor: from an exterior door; other floors: one connected area).
 - Every edge between a footprint and a non-footprint cell is a wall; walls touch the
   footprint; openings lie on walls and never share edges; door swings fit their wall.
-- With rules: every room is at least `min_side` wide everywhere; core rooms (stairs,
+- With rules: every room is at least `min_side` wide everywhere (circulation rooms are
+  measured across the open space they form together); core rooms (stairs,
   elevators) occupy the same cells on every floor; rooms that need windows have one (soft).
 - Objects lie inside their room and don't overlap; blocking objects keep door clearances
   free and leave the room's free floor connected.
@@ -314,6 +318,24 @@ marker), breaches as rubble, devices, optional labels and grid, then the blurred
 is screened on top and the light map applied (unlit areas dim to `ambient`, lights tint).
 Stains and graffiti come from the theme's `condition.decals` density for the building's
 condition. Themes are YAML (`data/themes/neon.yaml`) or any file passed by path.
+
+## VTT export
+
+ADR 0011. `ExportOptions(grid_m, cell_px, lights)`: the grid square is `grid_m / 0.5`
+cells (default 2), the image is padded by one square, `pixels_per_grid = cell_px × cells`.
+
+| Model                  | Universal VTT          | Foundry wall                                  |
+|------------------------|------------------------|-----------------------------------------------|
+| wall                   | line of sight          | blocks all                                    |
+| window                 | — (sight passes)       | move blocked, sight / light none, sound limited |
+| broken window, breach, missing door | —         | —                                             |
+| door (intact)          | closed portal          | door; locked if it has a lock                 |
+| door (broken)          | open portal            | open door                                     |
+| door (blocked)         | line of sight          | wall                                          |
+
+Foundry stairwells / elevators: an arrival region (in front of the door) and "up" /
+"down" halves of the stairs or car with Teleport Token behaviours to the arrival region of
+the same core room on the next floor. Scene, wall, light and region ids are stable hashes.
 
 ## ASCII debug renderer
 
