@@ -49,7 +49,10 @@ class Shape(StrEnum):
     RECTANGLE = "rectangle"
     L = "l"
     U = "u"
-    IRREGULAR = "irregular"
+    T = "t"
+    Z = "z"
+    STEPPED = "stepped"
+    IRREGULAR = "irregular"  # one of the others, picked by the seed
 
 
 class GenerationParams(BaseModel):

@@ -5,7 +5,7 @@ blocks. The main part is a maximal rectangle of blocks; wings are rectangles of 
 remaining blocks, each attached with one whole end to an already chosen part (its parent),
 so the wing's corridors can start at the junction. Among all main parts the decomposition
 that keeps a facade on the street, fits the minimum depths and has the biggest main part
-wins.
+wins (fitting first).
 """
 
 from __future__ import annotations
@@ -83,7 +83,7 @@ def decompose(
         fits = depth_of(pieces[0]) >= main_depth and all(
             depth_of(p) >= wing_depth for p in pieces[1:]
         )
-        score = (_touches(pieces[0].box, bbox, street), fits, _area(pieces[0].box), -len(pieces))
+        score = (fits, _touches(pieces[0].box, bbox, street), _area(pieces[0].box), -len(pieces))
         if best is None or score > best[0]:
             best = (score, pieces)
     assert best is not None, "a footprint always decomposes into rectangles"

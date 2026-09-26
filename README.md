@@ -26,7 +26,7 @@ uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
 | `--floors-above`       | floors incl. ground floor (default 1)                  |
 | `--floors-below`       | basements (default 0)                                  |
 | `--wealth`             | squatter, low, middle, high, luxury                    |
-| `--shape`              | rectangle, l, u                                        |
+| `--shape`              | rectangle, l, u, t, z, stepped, irregular              |
 | `--street-side`        | N, E, S, W: main entrance (default S)                  |
 | `--service-side`       | N, E, S, W: loading dock / back door (default opposite)|
 | `--condition`          | pristine … ruined: debris, broken doors, breaches, dark|

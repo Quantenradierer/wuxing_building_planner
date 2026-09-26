@@ -1,6 +1,6 @@
 import pytest
 
-from roomplanner.errors import InfeasibleError, NotSupportedError
+from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Side
 from roomplanner.model import OpeningKind
@@ -94,10 +94,20 @@ def test_too_small_footprint_fails_fast() -> None:
         generate(make_params(width=3))
 
 
-@pytest.mark.parametrize("shape", [Shape.IRREGULAR])
-def test_unimplemented_shapes_are_rejected(shape: Shape) -> None:
-    with pytest.raises(NotSupportedError):
-        generate(make_params(shape=shape))
+@pytest.mark.parametrize("shape", [Shape.T, Shape.Z, Shape.STEPPED, Shape.IRREGULAR])
+@pytest.mark.parametrize("building_type", list(BuildingType))
+def test_composite_shapes_are_valid(shape: Shape, building_type: BuildingType) -> None:
+    params = make_params(building_type=building_type, shape=shape, width=96, depth=80, seed=4)
+    building = generate(params)
+    footprint = building.floor(0).footprint
+    assert len(footprint) < 96 * 80
+    assert hard_violations(building, rules_for(building_type, building.params.wealth)) == []
+
+
+@pytest.mark.parametrize("shape", [Shape.T, Shape.Z, Shape.STEPPED, Shape.IRREGULAR])
+def test_small_composite_shapes_explain_the_minimum(shape: Shape) -> None:
+    with pytest.raises(InfeasibleError, match="too small for"):
+        generate(make_params(shape=shape, width=20, depth=20))
 
 
 def test_l_shape_misses_one_corner() -> None:

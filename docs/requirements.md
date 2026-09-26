@@ -187,7 +187,6 @@ All seven milestones are implemented (2026-09-26).
 
 ## Known limitations (v1)
 
-- Shapes `t`, `z`, `stepped` and `irregular` are rejected (roadmap step 5).
 - No fire escapes (they need surroundings).
 - Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.

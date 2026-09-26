@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import cast
 
-from roomplanner.errors import InfeasibleError, NotSupportedError
+from roomplanner.errors import InfeasibleError
 from roomplanner.model import Building
-from roomplanner.params import GenerationParams, Shape
+from roomplanner.params import GenerationParams
 from roomplanner.pipeline.base import (
     AllocationError,
     Context,
@@ -25,8 +25,6 @@ MIN_SIDE_CELLS = 4
 
 
 def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
-    if params.shape not in (Shape.RECTANGLE, Shape.L, Shape.U):  # others: roadmap step 5
-        raise NotSupportedError(f"shape '{params.shape}' is not implemented yet")
     width, height = params.width, params.depth
     if min(width, height) < MIN_SIDE_CELLS:
         raise InfeasibleError(

@@ -489,13 +489,13 @@ class CorridorLayout:
                     hall = next((e.room for e in role.rooms if e.place == "hall"), None)
                     if hall is None:
                         raise RulesError(f"floor role {role_name} needs a `place: hall` room")
-                    cells = frozenset[Cell]().union(
-                        *(
-                            part.frame.rect(span.u0, span.u1, band.v0, band.v1)
-                            for span in free_intervals(part.frame.length, part.blocked(band))
-                        )
-                    )
-                    rooms.append(PlannedRoom(hall, cells))
+                    # Connectors crossing the hall split it: one hall room per piece,
+                    # slivers too thin for a room join the connector corridor.
+                    minimum = ctx.rules.spec(hall).min_side
+                    for span in free_intervals(part.frame.length, part.blocked(band)):
+                        cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
+                        kind = hall if span.width >= minimum else "corridor"
+                        rooms.append(PlannedRoom(kind, cells))
                     continue
                 if band.kind is BandKind.CORRIDOR:
                     blocked = [part_slice] if part_slice else []

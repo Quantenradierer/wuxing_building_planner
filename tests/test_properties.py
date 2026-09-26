@@ -26,7 +26,7 @@ params_strategy = st.builds(
     wealth=st.sampled_from(Wealth),
     condition=st.sampled_from(Condition),
     security=st.sampled_from(Security),
-    shape=st.sampled_from([Shape.RECTANGLE, Shape.L, Shape.U]),
+    shape=st.sampled_from(Shape),
     street_side=st.sampled_from(Side),
     service_side=st.sampled_from(Side),
     seed=st.integers(min_value=0, max_value=2**32 - 1),
@@ -59,7 +59,11 @@ def test_generation_is_deterministic_and_serializable(params: GenerationParams) 
 
 @settings(max_examples=25, deadline=None)
 @given(
-    params_strategy.filter(lambda p: min(p.width, p.depth) >= 32 and p.shape is Shape.RECTANGLE),
+    params_strategy.map(
+        lambda p: p.model_copy(
+            update={"shape": Shape.RECTANGLE, "width": max(32, p.width), "depth": max(32, p.depth)}
+        )
+    ),
 )
 def test_reasonably_sized_rectangular_buildings_are_always_feasible(
     params: GenerationParams,

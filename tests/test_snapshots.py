@@ -26,6 +26,13 @@ CASES: dict[str, dict[str, Any]] = {
     },
     "office_l_shape": {"width": 64, "depth": 52, "shape": Shape.L, "floors_above": 2, "seed": 2},
     "office_u_shape": {"width": 64, "depth": 48, "shape": Shape.U, "seed": 3},
+    "clinic_t_shape": {
+        "building_type": BuildingType.CLINIC,
+        "width": 72,
+        "depth": 60,
+        "shape": Shape.T,
+        "seed": 5,
+    },
     "apartment_block": {
         "building_type": BuildingType.APARTMENT,
         "width": 54,

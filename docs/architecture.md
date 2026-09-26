@@ -22,7 +22,7 @@ src/roomplanner/
     base.py                  Context, intermediate plan, stage protocols
     registry.py              strategies by name or `module:Class`
     run.py                   feasibility check, attempts, validation, best-effort result
-    footprint.py             footprint strategies: rectangle, l, u
+    footprint.py             footprint strategies: rectangle, l, u, t, z, stepped, irregular
     layout/frame.py          local (u, v) frames, facade grid, bands, intervals
     layout/parts.py          splits a footprint into a main part and wings
     layout/corridor.py       corridor layout (parts, bands, core, lobby, connectors)
@@ -178,6 +178,13 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    need windows on facades and windowless ones inside. `near: core | entrance` pulls rooms
    towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
+
+Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
+(T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),
+then transposed and mirrored at random; `irregular` tries the shapes in a seeded order and
+takes the first that fits. Every arm and step is at least the layout's main depth.
+
+A connector that must cross a hall band splits it: each piece becomes its own hall room.
 
 ### Hall layout
 

@@ -6,11 +6,13 @@ stays as deep as the building's layout needs for its main part.
 
 from __future__ import annotations
 
+import random
+from collections.abc import Callable
 from typing import cast
 
 from roomplanner.errors import InfeasibleError
 from roomplanner.geometry import Cell, rectangle
-from roomplanner.pipeline.base import Context, LayoutStrategy
+from roomplanner.pipeline.base import Context, FootprintStrategy, LayoutStrategy
 from roomplanner.pipeline.registry import register, resolve
 
 
@@ -86,3 +88,104 @@ class UFootprint:
 
 
 MIN_COURT = 4  # cells; narrowest courtyard or notch
+
+type Cut = tuple[int, int, int, int]  # x, y, width, height
+type Planner = Callable[[int, int, int, random.Random], list[Cut] | None]
+
+
+def _t_cuts(w: int, h: int, arm: int, rng: random.Random) -> list[Cut] | None:
+    """A bar along the top, a stem down from its middle."""
+    bar = (max(arm, h // 3), h - max(MIN_COURT, h // 3))
+    stem = (max(arm, w // 4), w - 2 * MIN_COURT)
+    if bar[0] > bar[1] or stem[0] > stem[1]:
+        return None
+    b, s = rng.randint(*bar), rng.randint(*stem)
+    slack = (w - s) // 2
+    left = min(w - s - MIN_COURT, max(MIN_COURT, slack + rng.randint(-w // 8, w // 8)))
+    return [(0, b, left, h - b), (left + s, b, w - left - s, h - b)]
+
+
+def _z_cuts(w: int, h: int, arm: int, rng: random.Random) -> list[Cut] | None:
+    """Opposite corners cut: top-right and bottom-left, a full-width band between them."""
+    depth = (max(MIN_COURT, h // 5), (h - arm) // 2)
+    width = (max(MIN_COURT, w // 4), w - arm)
+    if depth[0] > depth[1] or width[0] > width[1]:
+        return None
+    ha, hb = rng.randint(*depth), rng.randint(*depth)
+    ca, cb = rng.randint(*width), rng.randint(*width)
+    return [(w - ca, 0, ca, ha), (0, h - hb, cb, hb)]
+
+
+def _stepped_cuts(w: int, h: int, arm: int, rng: random.Random) -> list[Cut] | None:
+    """Two steps down from the top-right corner, every step at least one arm wide and deep."""
+    if w < 3 * arm or h < 2 * arm + MIN_COURT:
+        return None
+    x1 = rng.randint(arm, w - 2 * arm)
+    x2 = rng.randint(x1 + arm, w - arm)
+    y1 = rng.randint(MIN_COURT, h - 2 * arm)
+    y2 = rng.randint(y1 + arm, h - arm)
+    return [(x1, 0, w - x1, y1), (x2, y1, w - x2, y2 - y1)]
+
+
+def _oriented(ctx: Context, planner: Planner, name: str, rng: random.Random) -> frozenset[Cell]:
+    """Plan the cuts in either orientation, then rotate / mirror the result at random."""
+    arm = arm_depth(ctx)
+    plans: list[tuple[bool, list[Cut]]] = []
+    for transpose in (False, True):
+        w, h = (ctx.height, ctx.width) if transpose else (ctx.width, ctx.height)
+        if (cuts := planner(w, h, arm, rng)) is not None:
+            plans.append((transpose, cuts))
+    if not plans:
+        raise InfeasibleError(
+            f"{ctx.width}x{ctx.height} is too small for {name} shape, every arm needs at "
+            f"least {arm} cells"
+        )
+    transpose, cuts = rng.choice(plans)
+    flip_x, flip_y = rng.random() < 0.5, rng.random() < 0.5
+    removed = frozenset[Cell]().union(*(rectangle(*cut) for cut in cuts))
+    cells: set[Cell] = set()
+    w, h = (ctx.height, ctx.width) if transpose else (ctx.width, ctx.height)
+    for cell in rectangle(0, 0, w, h) - removed:
+        x, y = (cell.y, cell.x) if transpose else (cell.x, cell.y)
+        x = ctx.width - 1 - x if flip_x else x
+        y = ctx.height - 1 - y if flip_y else y
+        cells.add(Cell(x, y))
+    return frozenset(cells)
+
+
+@register("footprint", "t")
+class TFootprint:
+    def footprint(self, ctx: Context) -> frozenset[Cell]:
+        return _oriented(ctx, _t_cuts, "a T", ctx.rng("footprint"))
+
+
+@register("footprint", "z")
+class ZFootprint:
+    def footprint(self, ctx: Context) -> frozenset[Cell]:
+        return _oriented(ctx, _z_cuts, "a Z", ctx.rng("footprint"))
+
+
+@register("footprint", "stepped")
+class SteppedFootprint:
+    def footprint(self, ctx: Context) -> frozenset[Cell]:
+        return _oriented(ctx, _stepped_cuts, "a stepped", ctx.rng("footprint"))
+
+
+@register("footprint", "irregular")
+class IrregularFootprint:
+    """One of the other non-rectangular shapes, picked by the seed among those that fit."""
+
+    SHAPES = ("l", "u", "t", "z", "stepped")
+
+    def footprint(self, ctx: Context) -> frozenset[Cell]:
+        order = list(self.SHAPES)
+        ctx.rng("footprint:irregular").shuffle(order)
+        for name in order:
+            try:
+                return cast(FootprintStrategy, resolve("footprint", name)).footprint(ctx)
+            except InfeasibleError:
+                continue
+        raise InfeasibleError(
+            f"{ctx.width}x{ctx.height} is too small for any irregular shape, "
+            f"every arm needs at least {arm_depth(ctx)} cells"
+        )
