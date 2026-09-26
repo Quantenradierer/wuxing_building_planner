@@ -112,7 +112,8 @@ def test_some_storage_rooms_are_closets_entered_through_their_host() -> None:
                 if any(c in room.cells for c in cells):
                     other = next(c for c in cells if c not in room.cells)
                     neighbour = ground.room_at(other)
-                    assert neighbour is not None
+                    if neighbour is None:  # an exterior (service) door
+                        continue
                     neighbours.add(neighbour.type)
             if neighbours and not any(rules.spec(t).circulation for t in neighbours):
                 assert neighbours <= set(rules.spec("storage").access)

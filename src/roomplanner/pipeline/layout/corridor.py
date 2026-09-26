@@ -628,15 +628,17 @@ class CorridorLayout:
                 target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
                 blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
                 junctions = tuple(main.no_facade.get(band.index, []))
-                span = self._choose(grid, width, target, blocked, avoid=junctions)
+                span = None
+                if program.service_stub:
+                    span = self._choose(grid, width, target, blocked, avoid=junctions)
                 if span is not None:
                     extra.setdefault(band.index, []).append(span)
                     cells = frame.rect(span.u0, span.u1, band.v0, band.v1)
                     rooms.append(PlannedRoom("corridor", cells))
                     hint = frame.cell(int(span.centre), v)
                 else:
-                    # No space for a corridor stub: the room on the facade at the core (or
-                    # the middle) gets the back door, e.g. a loading bay or the stairwell.
+                    # The back door opens into a room on that facade (openings prefer the
+                    # program's service rooms: storage, loading bay, staff room, …).
                     hint = frame.cell(int(target), v)
         hints.append((EntranceKind.SERVICE, service_side, hint))
         return anchor

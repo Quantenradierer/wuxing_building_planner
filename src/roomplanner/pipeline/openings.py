@@ -16,6 +16,7 @@ from dataclasses import dataclass, replace
 
 from roomplanner.geometry import Axis, Cell, Edge, Side, boundary_edges
 from roomplanner.model import Floor, Opening, OpeningKind, Room, Swing
+from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import BuildingPlan, Context, EntranceRequest
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import WindowRule
@@ -220,12 +221,20 @@ def _exterior_door(
     width = ctx.rules.entrances(ctx.params)[request.kind].width
     target = Edge.of(request.hint, request.side)
     hinted = rooms[request.room]
+    service = [
+        r
+        for r in rooms
+        if request.kind is EntranceKind.SERVICE
+        and r.unit is None
+        and r.type in ctx.rules.program.service_rooms
+    ]
     others = [
         r
         for r in rooms
         if r is not hinted and r.unit is None and not ctx.rules.spec(r.type).circulation
     ]
-    for candidates_from in ([hinted], others):
+    first = [hinted] if hinted.unit is None or request.kind is not EntranceKind.SERVICE else []
+    for candidates_from in (service, first, others):
         candidates: list[tuple[int, Run, int]] = []
         for room in candidates_from:
             facade = {

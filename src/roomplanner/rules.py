@@ -234,6 +234,25 @@ class BuildingProgram(_Strict):
     entrances: dict[EntranceKind, EntranceRule]
     floor_roles: dict[str, FloorRole]
     units: dict[str, UnitSpec] = Field(default={}, description="Room types that are units")
+    service_stub: bool = Field(
+        default=False, description="Carve a corridor to the service side instead of a back room"
+    )
+    service_rooms: list[str] = Field(
+        default=[
+            "loading_bay",
+            "storage",
+            "utility",
+            "staff_room",
+            "stockroom",
+            "cold_storage",
+            "laundry",
+            "kitchenette",
+            "commercial_kitchen",
+            "backstage",
+            "security_room",
+        ],
+        description="Room types the service entrance prefers to open into",
+    )
     furnishing: str = Field(default="rules", description="Furnishing strategy")
     lighting: str = Field(default="rules", description="Lights strategy")
     security: str = Field(default="rules", description="Security layer strategy")
