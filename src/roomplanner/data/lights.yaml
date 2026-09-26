@@ -1,0 +1,40 @@
+# Light sources. Positions are derived; lengths in cells (1 cell = 0.5 m).
+# The condition layer switches lights to flicker / off; security adds floodlights.
+ceiling: {kind: ceiling, spacing: 8, radius: 8, colour: "#fff1dc", intensity: 0.7}
+
+rooms:
+  corridor:      {spacing: 10, radius: 7, colour: "#d9f3ff", intensity: 0.6}
+  hallway:       {spacing: 8, radius: 6, intensity: 0.5}
+  stairwell:     {spacing: 8, radius: 6, colour: "#e8f0ff", intensity: 0.5}
+  elevator:      {radius: 3, intensity: 0.6}
+  storage:       {spacing: 10, radius: 6, intensity: 0.4}
+  archive:       {spacing: 10, radius: 6, intensity: 0.4}
+  utility:       {spacing: 10, radius: 6, colour: "#ffd9a0", intensity: 0.4}
+  server_room:   {colour: "#8c7bff", intensity: 0.5}
+  security_room: {colour: "#8fd6ff", intensity: 0.5}
+  operating_room: {radius: 10, colour: "#f4fbff", intensity: 0.95}
+  morgue:        {colour: "#cfe8ff", intensity: 0.5}
+  living_room:   {colour: "#ffd9a8", intensity: 0.6}
+  bedroom:       {colour: "#ffc98a", intensity: 0.5}
+  sales_floor:   {spacing: 10, radius: 10, colour: "#f5fbff", intensity: 0.85}
+  stockroom:     {spacing: 12, radius: 9, colour: "#ffe7c2", intensity: 0.6}
+
+accents:
+  stairwell:
+    - {kind: emergency, radius: 3, colour: "#ff3b30", intensity: 0.6}
+  lobby:
+    - {kind: neon, radius: 6, colour: "#ff3fa4", intensity: 0.6}
+    - {kind: neon, radius: 6, colour: "#00e5ff", intensity: 0.5}
+  corridor:
+    - {kind: emergency, radius: 3, colour: "#3dff7a", intensity: 0.5}   # exit sign
+  sales_floor:
+    - {kind: neon, radius: 8, colour: "#ff2e88", intensity: 0.6}
+  server_room:
+    - {kind: neon, radius: 4, colour: "#00ff9c", intensity: 0.5}
+  kitchenette:
+    - {kind: neon, radius: 4, colour: "#ffb347", intensity: 0.4}          # vending glow
+
+entrances:
+  main: {kind: sign, radius: 8, colour: "#ff3fa4", intensity: 0.9}
+  service: {kind: ceiling, radius: 6, colour: "#ffb347", intensity: 0.6}
+  emergency: {kind: emergency, radius: 4, colour: "#3dff7a", intensity: 0.6}

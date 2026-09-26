@@ -12,6 +12,7 @@ from roomplanner.pipeline.base import (
     Context,
     FootprintStrategy,
     FurnishingStrategy,
+    LayerStrategy,
     LayoutStrategy,
     OpeningsStrategy,
 )
@@ -24,7 +25,7 @@ MIN_SIDE_CELLS = 4
 
 
 def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
-    if params.shape not in (Shape.RECTANGLE, Shape.L, Shape.U):
+    if params.shape not in (Shape.RECTANGLE, Shape.L, Shape.U):  # others: roadmap step 5
         raise NotSupportedError(f"shape '{params.shape}' is not implemented yet")
     width, height = params.width, params.depth
     if min(width, height) < MIN_SIDE_CELLS:
@@ -37,6 +38,14 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
     layout = cast(LayoutStrategy, resolve("layout", rules.program.layout))
     openings = cast(OpeningsStrategy, resolve("openings", "default"))
     furnishing = cast(FurnishingStrategy, resolve("furnishing", rules.program.furnishing))
+    layers = [
+        cast(LayerStrategy, resolve(stage, name))
+        for stage, name in (
+            ("lights", rules.program.lighting),
+            ("security", rules.program.security),
+            ("condition", rules.program.condition),
+        )
+    ]
 
     if problems := layout.check_feasibility(ctx, footprint):
         raise InfeasibleError("; ".join(problems))
@@ -52,6 +61,8 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
             continue
         floors = openings.build(attempt_ctx, footprint, plan)
         floors = furnishing.furnish(attempt_ctx, floors)
+        for layer in layers:
+            floors = layer.apply(attempt_ctx, floors)
         building = Building(params, seed, width, height, tuple(floors), tuple(plan.warnings))
         violations = validate(building, rules)
         hard = sum(v.severity is Severity.HARD for v in violations)

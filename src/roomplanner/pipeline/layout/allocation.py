@@ -29,6 +29,7 @@ from roomplanner.rules import (
     variables,
 )
 
+ANNEX_CHANCE = 0.5  # small rooms with hosts in `access` become annexes this often
 SMALL_ROOM_TOLERANCE = 1.25  # a full-depth room may exceed its max area by this factor
 MIN_CLUSTER_COLUMN = 4  # cells
 FACADE_PENALTY = 5
@@ -79,6 +80,7 @@ class Request:
 class FullSlot:
     request: Request
     units: int
+    annex: Request | None = None  # small room carved out of the slot's back corner
 
 
 @dataclass
@@ -136,12 +138,14 @@ class Allocator:
         self.warnings: list[str] = []
         self.units = 0
         self.level = 0
+        self.fill_types: set[str] = set()
 
     # --- public -----------------------------------------------------------------------
 
     def allocate(self, role: FloorRole, level: int, floor_name: str) -> list[PlannedRoom]:
         self.level = level
         requests, fills = self._requests(role, level)
+        self.fill_types = {e.room for e in fills}
         queue = deque(requests)
         while queue:
             request = queue.popleft()
@@ -231,6 +235,13 @@ class Allocator:
         return max(minimum, round(request.area / segment.depth / segment.unit))
 
     def _place(self, request: Request) -> bool:
+        if (
+            request.spec.cluster
+            and request.spec.access
+            and self.rng.random() < ANNEX_CHANCE
+            and self._place_annex(request)
+        ):
+            return True
         options: list[tuple[float, float, SegmentState, Option]] = []
         for state in self.states:
             segment = state.segment
@@ -251,6 +262,71 @@ class Allocator:
                 state.slots.append(cluster)
             case FullSlot() as slot:
                 state.slots.append(slot)
+        return True
+
+    # --- annexes ----------------------------------------------------------------------
+
+    def _annex_size(
+        self, host: RoomSpec, annex: Request, width: int, depth: int
+    ) -> tuple[int, int] | None:
+        """(width, depth) of an annex in the back corner of a host slot, if it fits.
+
+        The host keeps its minimum side in front of and beside the annex.
+        """
+        low = annex.spec.min_side
+        max_w, max_d = width - host.min_side, depth - host.min_side
+        if max_w < low or max_d < low:
+            return None
+        annex_d = min(max_d, max(low, round(math.sqrt(annex.area))))
+        annex_w = min(max_w, max(low, math.ceil(annex.area / annex_d)))
+        return annex_w, annex_d
+
+    def _place_annex(self, request: Request) -> bool:
+        """Carve the room out of an existing host slot, or add a new host (a fill type)."""
+        hosts = [t for t in request.spec.access if t not in self.rules.program.units]
+        options: list[tuple[float, float, SegmentState, FullSlot, bool]] = []
+        for state in self.states:
+            segment = state.segment
+            for slot in state.slots:
+                if not isinstance(slot, FullSlot) or slot.annex is not None:
+                    continue
+                if slot.request.type not in hosts:
+                    continue
+                width = slot.units * segment.unit
+                if self._annex_size(slot.request.spec, request, width, segment.depth):
+                    options.append(
+                        (self._score(request, segment), self.rng.random(), state, slot, False)
+                    )
+            for host in hosts:
+                if host not in self.fill_types:
+                    continue
+                spec = self.rules.spec(host)
+                if spec.windows is WindowRule.REQUIRED and not segment.facade:
+                    continue
+                if spec.min_side > segment.depth:
+                    continue
+                low, high = spec.area
+                host_request = Request(
+                    host, spec, self.rng.randint(low, high), Priority.OPTIONAL, None
+                )
+                units = self._full_units(host_request, segment)
+                needed = spec.min_side + request.spec.min_side
+                units = max(units, math.ceil(needed / segment.unit))
+                if units > state.free_units:
+                    continue
+                if not self._annex_size(spec, request, units * segment.unit, segment.depth):
+                    continue
+                slot = FullSlot(host_request, units)
+                options.append(
+                    (self._score(request, segment), self.rng.random(), state, slot, True)
+                )
+        if not options:
+            return False
+        # Existing hosts first, then the best segment.
+        _, _, state, slot, new = min(options, key=lambda o: (o[4], o[0], o[1]))
+        slot.annex = request
+        if new:
+            state.slots.append(slot)
         return True
 
     def _option(self, request: Request, state: SegmentState) -> Option | None:
@@ -376,12 +452,32 @@ class Allocator:
                 rooms += subdivide(
                     segment.frame, segment.band, span, unit, spec, self.rules, self.rng
                 )
+            elif isinstance(slot, FullSlot) and slot.annex is not None:
+                rooms += self._with_annex(slot, slot.annex, segment, span)
             elif isinstance(slot, FullSlot):
                 rooms.append(PlannedRoom(slot.request.type, self._rect(segment, span)))
             else:
                 rooms += self._cluster_rooms(slot, segment, span)
             position = span.u1
         return rooms
+
+    def _with_annex(
+        self, slot: FullSlot, annex: Request, segment: Segment, span: Interval
+    ) -> list[PlannedRoom]:
+        """Host slot with the annex in a back corner (away from the corridor)."""
+        band = segment.band
+        size = self._annex_size(slot.request.spec, annex, span.width, band.depth)
+        if size is None:  # partial modules made it narrower than planned; keep the host
+            return [PlannedRoom(slot.request.type, self._rect(segment, span))]
+        width, depth = size
+        u0 = span.u0 if self.rng.random() < 0.5 else span.u1 - width
+        if band.corridor_at is LocalSide.V0:
+            v0, v1 = band.v1 - depth, band.v1
+        else:
+            v0, v1 = band.v0, band.v0 + depth
+        annex_cells = segment.frame.rect(u0, u0 + width, v0, v1)
+        host = PlannedRoom(slot.request.type, self._rect(segment, span) - annex_cells)
+        return [host, PlannedRoom(annex.type, annex_cells, host=host)]
 
     def _pull(self, slot: Slot, segment: Segment) -> int:
         """-1 to sort towards u0, +1 towards u1, 0 anywhere."""

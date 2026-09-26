@@ -20,6 +20,7 @@ rooms:
     area: [16, 80]
     min_side: 4
     cluster: true
+    access: [stockroom, prep_kitchen]
     windows: forbidden
     furniture:
       - {object: shelf, placement: wall, count: [2, 6]}

@@ -9,15 +9,19 @@ from __future__ import annotations
 
 import math
 import random
+from collections.abc import Iterable
 from dataclasses import replace
 
 from roomplanner.geometry import Cell, Edge, Side, connected
 from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
+from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import FurnitureRule, ObjectSpec, Placement
 
 type Rect = tuple[int, int, int, int, Side]  # x, y, w, h, facing
+
+SCATTER_TRIES = 80  # random positions tried per scattered object
 
 
 @register("furnishing", "rules")
@@ -28,16 +32,36 @@ class RulesFurnishing:
             rng = ctx.rng(f"furnish:{floor.level}")
             objects: list[PlacedObject] = []
             clearances = floor.door_clearances()
-            door_edges = {e for o in floor.openings if o.kind is OpeningKind.DOOR for e in o.edges}
-            solid = floor.walls - door_edges
+            solid = solid_walls(floor)
+            hatch = self._roof_hatch_room(ctx, floor)
             for room in floor.rooms:
                 rules = ctx.rules.spec(room.type).furniture
+                if room is hatch:
+                    rules = [FurnitureRule(object="roof_hatch", placement=Placement.CORNER), *rules]
                 if rules:
                     clearance = clearances.get(room.id, frozenset())
-                    furnisher = _RoomFurnisher(ctx, floor, room, rng, clearance, solid)
+                    furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
                     objects += furnisher.place(rules)
             furnished.append(replace(floor, objects=tuple(objects)))
         return furnished
+
+    @staticmethod
+    def _roof_hatch_room(ctx: Context, floor: Floor) -> Room | None:
+        """Top floor: the stairwell (or a circulation room) gets the roof hatch."""
+        if EntranceKind.ROOF not in ctx.rules.entrances(ctx.params):
+            return None
+        if floor.level != ctx.params.floors_above - 1:
+            return None
+        order = [r for r in floor.rooms if r.type == "stairwell"]
+        order += [r for r in floor.rooms if ctx.rules.spec(r.type).circulation]
+        return order[0] if order else None
+
+
+def solid_walls(floor: Floor) -> frozenset[Edge]:
+    """Walls objects can stand against (not doors or breaches)."""
+    return floor.walls - {
+        e for o in floor.openings if o.kind is not OpeningKind.WINDOW for e in o.edges
+    }
 
 
 def ring_is_one_run(free: frozenset[Cell] | set[Cell], x: int, y: int, w: int, h: int) -> bool:
@@ -57,7 +81,9 @@ def ring_is_one_run(free: frozenset[Cell] | set[Cell], x: int, y: int, w: int, h
     return runs <= 1
 
 
-class _RoomFurnisher:
+class RoomFurnisher:
+    """Places objects in one room; later layers reuse it to add objects around existing ones."""
+
     def __init__(
         self,
         ctx: Context,
@@ -66,6 +92,7 @@ class _RoomFurnisher:
         rng: random.Random,
         clearance: frozenset[Cell],
         solid: frozenset[Edge],
+        existing: Iterable[PlacedObject] = (),
     ) -> None:
         self.ctx = ctx
         self.floor = floor
@@ -77,11 +104,17 @@ class _RoomFurnisher:
         self._wall_rects: dict[tuple[int, int, bool], list[Rect]] = {}
         self.taken: set[Cell] = set()  # covered by any object
         self.blocking: set[Cell] = set()  # covered by objects that can't be walked over
+        for obj in existing:
+            self.taken |= obj.cells
+            if obj.blocking:
+                self.blocking |= obj.cells
         self.placed: list[PlacedObject] = []
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
-    def place(self, rules: list[FurnitureRule]) -> list[PlacedObject]:
+    def place(self, rules: list[FurnitureRule], scale: bool = True) -> list[PlacedObject]:
+        """Place objects by rule; `scale`: multiply counts by the wealth tier's factor."""
+        factor = self.ctx.rules.wealth.furniture if scale else 1.0
         for rule in rules:
             spec = self.ctx.rules.objects[rule.object]
             if rule.placement is Placement.ROWS:
@@ -89,10 +122,10 @@ class _RoomFurnisher:
                 continue
             low, high = rule.count_range
             if rule.per is not None:
-                count = round(len(self.cells) / rule.per * self.ctx.rules.wealth.furniture)
+                count = round(len(self.cells) / rule.per * factor)
                 count = min(high, max(low, count))
             else:
-                count = round(self.rng.randint(low, high) * self.ctx.rules.wealth.furniture)
+                count = round(self.rng.randint(low, high) * factor)
             if low > 0:
                 count = max(1, count)
             for _ in range(count):
@@ -115,8 +148,7 @@ class _RoomFurnisher:
                 candidates = self._anywhere(spec)
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - cx) + abs(r[1] + r[3] / 2 - cy))
             case Placement.SCATTER:
-                candidates = self._anywhere(spec)
-                self.rng.shuffle(candidates)
+                candidates = self._sample(spec, SCATTER_TRIES)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -166,6 +198,21 @@ class _RoomFurnisher:
                     rects.append((x, y, w, h, facing))
         return rects
 
+    def _sample(self, spec: ObjectSpec, tries: int) -> list[Rect]:
+        """Random positions (cheaper than shuffling every position of a big room)."""
+        along, deep = spec.size
+        x0, y0, x1, y1 = self.box
+        rects: list[Rect] = []
+        for _ in range(tries):
+            w, h, facing = (
+                (along, deep, Side.S) if self.rng.random() < 0.5 else (deep, along, Side.E)
+            )
+            if x1 - x0 < w or y1 - y0 < h:
+                continue
+            x, y = self.rng.randint(x0, x1 - w), self.rng.randint(y0, y1 - h)
+            rects.append((x, y, w, h, facing))
+        return rects
+
     def _exterior_door(self) -> tuple[float, float] | None:
         for door in self.floor.openings:
             if door.kind is not OpeningKind.DOOR:
@@ -212,6 +259,8 @@ class _RoomFurnisher:
             if cells & self.clearance:
                 return False
             free = self.cells - self.blocking - cells
+            if not free:  # never fill a room completely
+                return False
             if not ring_is_one_run(free, x, y, w, h) and not connected(free):
                 return False
             self.blocking |= cells

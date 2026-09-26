@@ -29,7 +29,9 @@ uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
 | `--shape`              | rectangle, l, u                                        |
 | `--street-side`        | N, E, S, W: main entrance (default S)                  |
 | `--service-side`       | N, E, S, W: loading dock / back door (default opposite)|
-| `--condition`, `--security` | stored for later layers                           |
+| `--condition`          | pristine … ruined: debris, broken doors, breaches, dark|
+| `--security`           | none, low, corporate, aaa: locks, cameras, guards      |
+| `--entrances`          | override entrance kinds: main, service, emergency, roof|
 | `--seed`               | same seed, same building                               |
 | `-f/--format`          | ascii (debug view), json (full model), png, webp       |
 | `--theme`              | image theme: bundled name (neon) or a YAML file        |

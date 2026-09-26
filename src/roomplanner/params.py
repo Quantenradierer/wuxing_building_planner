@@ -38,6 +38,13 @@ class Security(StrEnum):
     AAA = "aaa"
 
 
+class EntranceKind(StrEnum):
+    MAIN = "main"
+    SERVICE = "service"
+    EMERGENCY = "emergency"  # exit from a corridor end or the stairwell
+    ROOF = "roof"  # hatch from the top floor's stairwell
+
+
 class Shape(StrEnum):
     RECTANGLE = "rectangle"
     L = "l"
@@ -62,6 +69,9 @@ class GenerationParams(BaseModel):
     street_side: Side = Side.S
     # Always set after validation; None only as input meaning "opposite of street_side".
     service_side: Side = Field(default=None, validate_default=False)  # pyright: ignore[reportAssignmentType]
+    entrances: tuple[EntranceKind, ...] | None = Field(
+        default=None, description="Overrides the building type's entrances (main is implied)"
+    )
     seed: int | None = None
 
     @model_validator(mode="before")

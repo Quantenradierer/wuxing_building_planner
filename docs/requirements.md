@@ -187,8 +187,8 @@ All seven milestones are implemented (2026-09-26).
 
 ## Known limitations (v1)
 
-- Shape `irregular` is rejected; `condition` and `security` have no effect yet.
-- Only `main` and `service` entrances; no fire escapes or emergency exits.
+- Shapes `t`, `z`, `stepped` and `irregular` are rejected (roadmap step 5).
+- No fire escapes (they need surroundings).
 - Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view; image rendering is the next step.

@@ -22,6 +22,7 @@ from itertools import pairwise
 from roomplanner.errors import RulesError
 from roomplanner.geometry import Axis, Cell, Side
 from roomplanner.model import level_name
+from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import (
     AllocationError,
     BuildingPlan,
@@ -43,7 +44,7 @@ from roomplanner.pipeline.layout.frame import (
 )
 from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.registry import register
-from roomplanner.rules import CoreEntry, EntranceKind, Priority, RoomEntry, evaluate, variables
+from roomplanner.rules import CoreEntry, Priority, RoomEntry, evaluate, variables
 
 MIN_GAP_MODULES = 1  # free space left next to reserved slots, if any
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
@@ -478,6 +479,7 @@ class CorridorLayout:
         entrance: Box | None = None
         if level == 0:
             entrance = self._ground_floor(ctx, skeleton, rooms, extra, hints, rng, warnings)
+            self._emergency_exit(ctx, skeleton, hints, warnings)
 
         segments: list[Segment] = []
         for part in skeleton.parts:
@@ -595,7 +597,7 @@ class CorridorLayout:
             hints.append((EntranceKind.MAIN, street_side, hint))
             anchor = frame.box(0, frame.length, hall.v0, hall.v1)
 
-        if EntranceKind.SERVICE not in program.entrances:
+        if EntranceKind.SERVICE not in ctx.rules.entrances(ctx.params):
             return anchor
         corridors = [b for b in main.bands if b.kind is BandKind.CORRIDOR]
         if service is street and anchor is not None:
@@ -628,6 +630,46 @@ class CorridorLayout:
                     return anchor
         hints.append((EntranceKind.SERVICE, service_side, hint))
         return anchor
+
+    def _emergency_exit(
+        self,
+        ctx: Context,
+        skeleton: Skeleton,
+        hints: list[tuple[EntranceKind, Side, Cell]],
+        warnings: list[str],
+    ) -> None:
+        """An exit at a corridor end on a facade, else from the stairwell, far from the others."""
+        if EntranceKind.EMERGENCY not in ctx.rules.entrances(ctx.params):
+            return
+        inside = frozenset[Cell]().union(
+            *(p.frame.rect(0, p.frame.length, 0, p.frame.depth) for p in skeleton.parts)
+        )
+        options: list[tuple[Cell, Side]] = []
+        for part in skeleton.parts:
+            for band in part.bands:
+                if band.kind is not BandKind.CORRIDOR:
+                    continue
+                for end in (LocalSide.U0, LocalSide.U1):
+                    u = 0 if end is LocalSide.U0 else part.frame.length - 1
+                    cell = part.frame.cell(u, (band.v0 + band.v1) // 2)
+                    side = part.frame.side(end)
+                    if cell.neighbour(side) not in inside:
+                        options.append((cell, side))
+        if not options and skeleton.core_rooms:
+            for cell in sorted(skeleton.core_rooms[0].cells):
+                options += [(cell, s) for s in Side if cell.neighbour(s) not in inside]
+        if not options:
+            warnings.append("no facade for the emergency exit")
+            return
+        taken = [hint for _, _, hint in hints]
+
+        def distance(option: tuple[Cell, Side]) -> tuple[int, Cell]:
+            cell = option[0]
+            gaps = [abs(cell.x - t.x) + abs(cell.y - t.y) for t in taken]
+            return min(gaps, default=0), cell
+
+        cell, side = max(options, key=distance)
+        hints.append((EntranceKind.EMERGENCY, side, cell))
 
     # --- helpers ----------------------------------------------------------------------
 

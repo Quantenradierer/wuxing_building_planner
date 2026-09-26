@@ -2,47 +2,47 @@ office 32x18 cells, wealth=middle, seed=1
 
 == Ground floor ==
 +--===---===---===---===-------DDD-----===---===---===---===----+
-"                                                               "
-"                                                               "
-"                                                               "
+|                                                               "
+|                                                               "
+D                                                               "
+D                                                               |
+D                                                               |
 |                                                               |
-|                                                               |
-|                                                               |
-"                            1                                  |
-"     +--DDD--------+                       +------------DDD----+
-"     |w       w    |                       |w               w w|
+|                            1                                  |
+|     +--DDD--------+                       +------------DDD----+
+|     |w     w   w  |                       |      w           w|
 |     |             |                       |                   |
-|     |             |                       |                  w|
+|     |             |U                      |                   |
 |     |             |                       |                   |
-"     |      3      |                       |        5          "
+"     |      3      |                       |        6          "
 "     |             |                       |                   "
-"     |             |q         AAA          |                   "
-|     |             |q         AAA          |                   |
-|     |  w w   i    |q         AAA          |                   |
-|     +-------------+q                      |                   |
-"     |s   sss sss s|q                      |i     i           U|
-"     |s           s|q                      +-------------------+
-"     |s       KKK s|q       2              |sss   sss   sss    |
-|     |        KKK  |                       |                   |
-|     |        KKK s|                       D        6         s|
-|     |            s|                       D                  s|
-"     |s   KKK     s|AAA                    D                  s"
-"     |s   KKK      |AAA                    |                   "
-"     |s   KKK     s|AAA                    |sss   sss sss   sss"
-|     |            s|                       +-------------------+
-|     |      4     s|                       |sss sss sss   sss s|
-|     |             |                       |                  s|
-"     D             |                       D        7         s"
-"     D             |                       D                   "
-"     D            s|                       D      KKK          "
-|     |            s|                       |      KKK          |
-|     |sss   sss   s|*                      |  sss KKK sss sss  |
+"     |             |                       |                  i"
+|     |             |                       |                   |
+|     |w       i    |    AAA                |w                  |
+|     +-------------+    AAA                |                   |
+"     |  sss   sss s|    AAA                |      w            |
+"     |            s|                       +-------------------+
+"     D      4     s|U       2              |s sss   sss   sss s|
+|     D             |                       |s                 s|
+|     D             |                       |s                 s|
+|     |             |                       |                   |
+"     |sss sss   sss|  AAA                  |        KKK KKK    "
+"     +-------------+  AAA                  |        KKK KKK    "
+"     |s sss   sss s|q AAA                  |s       KKK KKK   s"
+|     |s           s|q                      |s                 s|
+|     |s     5     s|q                      |s       7   KKK   s|
+|     |             |q                      |            KKK    |
+"     D    KKK     s|q                      D            KKK   s"
+"     D    KKK     s|q                      D                  s"
+"     D    KKK     s|q                   ^^^D                  s"
+|     |             |                    ^^^|                   |
+|     |  sss sss    |*                   ^^^|sss sss   sss   sss|
 +--===+--===---===--+----DDDDDDD-------===--+===---===---===----+
-  objects: A armchair, q bench, K crate, * plant, s shelf, i sink, U trash_bin, w wc
+  objects: A armchair, q bench, K crate, * plant, ^ roof_hatch, s shelf, i sink, U trash_bin, w wc
     1  corridor            212 cells
     2  lobby               126 cells
     3  toilet               35 cells
-    4  storage              63 cells
-    5  toilet               60 cells
-    6  storage              40 cells
-    7  storage              40 cells
+    4  storage              28 cells
+    5  storage              35 cells
+    6  toilet               60 cells
+    7  storage              80 cells

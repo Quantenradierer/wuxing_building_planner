@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from roomplanner.geometry import Axis, Cell, Edge, Side
-from roomplanner.model import Building, Floor, Opening, OpeningKind, Room
+from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
 from roomplanner.render.shapes import SHAPES, Pen
 from roomplanner.render.theme import Colour, Pattern, Theme, colour
 
@@ -77,6 +77,7 @@ class _Canvas:
         self.draw_glow = ImageDraw.Draw(self.glow)
         self.draw_shadow = ImageDraw.Draw(self.shadow)
         self.owner = {cell: room for room in floor.rooms for cell in room.cells}
+        self.light: Image.Image | None = None
 
     # --- coordinates ------------------------------------------------------------------
 
@@ -101,6 +102,7 @@ class _Canvas:
         for room in self.floor.rooms:
             self._room_floor(room)
         self._grain()
+        self._decals()
         self._accents()
         self._object_shadows()
         self._walls_shadow()
@@ -108,6 +110,8 @@ class _Canvas:
         self._objects()
         self._walls()
         self._openings()
+        self._devices()
+        self._lights()
         if self.options.labels:
             self._labels()
         if self.options.grid:
@@ -283,10 +287,13 @@ class _Canvas:
 
     def _openings(self) -> None:
         for opening in self.floor.openings:
-            if opening.kind is OpeningKind.WINDOW:
-                self._window(opening)
-            else:
-                self._door(opening)
+            match opening.kind:
+                case OpeningKind.WINDOW:
+                    self._window(opening)
+                case OpeningKind.BREACH:
+                    self._breach(opening)
+                case OpeningKind.DOOR:
+                    self._door(opening)
 
     def _run(self, opening: Opening) -> tuple[tuple[float, float], tuple[float, float]]:
         first, last = opening.edges[0], opening.edges[-1]
@@ -306,8 +313,41 @@ class _Canvas:
             frame = (ax - half, ay, bx + half, by)
             glass = (ax - half * 0.35, ay, bx + half * 0.35, by)
         self.draw_base.rectangle(frame, fill=colour(style.frame))
+        if opening.state is OpeningState.BROKEN:
+            # Shattered: dull glass stubs at both ends, shards on the floor.
+            rng = random.Random(f"{self.building.seed}:{opening.edges[0]}")
+            shard = colour(style.glass)
+            dull = (*shard[:3], 110)
+            for _ in range(3 * len(opening.edges)):
+                x = rng.uniform(ax, bx) if horizontal else ax + rng.uniform(-3, 3) * half
+                y = ay + rng.uniform(-3, 3) * half if horizontal else rng.uniform(ay, by)
+                r = self.cell * rng.uniform(0.03, 0.08)
+                self.draw_base.polygon(
+                    [(x - r, y), (x, y - r * 1.5), (x + r, y + r * 0.5)], fill=dull
+                )
+            return
         self.draw_base.rectangle(glass, fill=colour(style.glass))
         self.draw_glow.rectangle(glass, fill=colour(style.glow)[:3])
+
+    def _breach(self, opening: Opening) -> None:
+        """Ragged hole: rubble chunks at the torn wall ends and spilled on both sides."""
+        rng = random.Random(f"{self.building.seed}:{opening.edges[0]}:breach")
+        (ax, ay), (bx, by) = self._run(opening)
+        half = self._thickness(opening.edges[0]) / 2
+        horizontal = opening.axis is Axis.H
+        rubble = colour(self.theme.condition.rubble)
+        wall = colour(self.theme.walls.colour)
+        for _ in range(10 * len(opening.edges)):
+            t = rng.random()
+            spread = rng.uniform(-4, 4) * half
+            x = ax + (bx - ax) * t + (0 if horizontal else spread)
+            y = ay + (by - ay) * t + (spread if horizontal else 0)
+            r = self.cell * rng.uniform(0.05, 0.16)
+            points = [
+                (x + r * math.cos(a), y + r * math.sin(a))
+                for a in sorted(rng.uniform(0, 2 * math.pi) for _ in range(5))
+            ]
+            self.draw_base.polygon(points, fill=rng.choice([rubble, wall]))
 
     def _door(self, opening: Opening) -> None:
         style = self.theme.doors
@@ -315,13 +355,33 @@ class _Canvas:
         if swing is None:
             return
         exterior = self._is_exterior(opening.edges[0])
-        leaf_colour = colour(
-            style.exterior_leaf if exterior and style.exterior_leaf else style.leaf
-        )
+        leaf = style.exterior_leaf if exterior and style.exterior_leaf else style.leaf
+        if opening.material is not None and opening.material in style.materials:
+            leaf = style.materials[opening.material]
+        leaf_colour = colour(leaf)
         (ax, ay), (bx, by) = self._run(opening)
         length = math.hypot(bx - ax, by - ay)
         tx, ty = swing.towards.delta
         width = max(2, round(self.cell * 0.09))
+        if opening.material in ("security", "blast"):
+            width = round(width * 1.6)
+        if opening.lock is not None and opening.lock in style.locks:
+            self._lock_marker(opening, style.locks[opening.lock])
+        match opening.state:
+            case OpeningState.MISSING:
+                return
+            case OpeningState.BLOCKED:
+                self._barricade(opening)
+                return
+            case OpeningState.BROKEN:
+                # The leaf hangs askew, half open, without a swing arc.
+                hx, hy = (ax, ay) if swing.hinge in (Side.W, Side.N) else (bx, by)
+                ox, oy = (bx, by) if (hx, hy) == (ax, ay) else (ax, ay)
+                mx, my = (hx + ox) / 2 + tx * length * 0.35, (hy + oy) / 2 + ty * length * 0.35
+                self.draw_base.line((hx, hy, mx, my), fill=leaf_colour, width=width)
+                return
+            case OpeningState.INTACT:
+                pass
         # Wide doors are double doors hinged at both ends.
         if len(opening.edges) >= 4:
             leaves = [((ax, ay), (bx, by), length / 2), ((bx, by), (ax, ay), length / 2)]
@@ -340,6 +400,110 @@ class _Canvas:
             self.draw_base.line(
                 (hx, hy, hx + tx * size, hy + ty * size), fill=leaf_colour, width=width
             )
+
+    def _lock_marker(self, opening: Opening, lock_colour: str) -> None:
+        """A small glowing box on the jamb opposite the hinge, on the swing side."""
+        assert opening.swing is not None
+        (ax, ay), (bx, by) = self._run(opening)
+        jx, jy = (bx, by) if opening.swing.hinge in (Side.W, Side.N) else (ax, ay)
+        tx, ty = opening.swing.towards.delta
+        half = self._thickness(opening.edges[0]) / 2 + self.cell * 0.08
+        x, y = jx + tx * half, jy + ty * half
+        r = self.cell * 0.09
+        fill = colour(lock_colour)
+        self.draw_base.rectangle((x - r, y - r, x + r, y + r), fill=fill, outline=(0, 0, 0, 255))
+        self.draw_glow.rectangle((x - r, y - r, x + r, y + r), fill=fill[:3])
+
+    def _barricade(self, opening: Opening) -> None:
+        """Planks nailed across the doorway."""
+        (ax, ay), (bx, by) = self._run(opening)
+        half = self._thickness(opening.edges[0]) / 2 + self.cell * 0.1
+        plank = colour(self.theme.doors.barricade)
+        width = max(2, round(self.cell * 0.14))
+        if opening.axis is Axis.H:
+            lines = [(ax, ay - half, bx, by + half), (ax, ay + half, bx, by - half)]
+        else:
+            lines = [(ax - half, ay, bx + half, by), (ax + half, ay, bx - half, by)]
+        for line in lines:
+            self.draw_base.line(line, fill=(0, 0, 0, 255), width=width + 2)
+            self.draw_base.line(line, fill=plank, width=width)
+
+    def _devices(self) -> None:
+        for device in self.floor.devices:
+            fill = colour(self.theme.devices.get(device.kind, "#ff3b30"))
+            x, y = self.px(device.x + 0.5, device.y + 0.5)
+            r = self.cell * 0.18
+            if device.kind == "camera":
+                dx, dy = device.facing.delta
+                # Wedge from the corner towards the view direction.
+                tip = (x + dx * r * 2.2, y + dy * r * 2.2)
+                side = (-dy * r, dx * r)
+                body = [
+                    (x + side[0], y + side[1]),
+                    (x - side[0], y - side[1]),
+                    tip,
+                ]
+                self.draw_base.polygon(body, fill=(30, 32, 40, 255), outline=fill)
+                self.draw_glow.ellipse((x - r / 2, y - r / 2, x + r / 2, y + r / 2), fill=fill[:3])
+            else:
+                self.draw_base.rounded_rectangle(
+                    (x - r, y - r, x + r, y + r), radius=r / 3, fill=(30, 32, 40, 255), outline=fill
+                )
+                self.draw_glow.ellipse((x - r / 3, y - r / 3, x + r / 3, y + r / 3), fill=fill[:3])
+
+    def _lights(self) -> None:
+        """Light map on a low-resolution layer: dims unlit areas, tints lit ones."""
+        if self.theme.ambient >= 1 and self.theme.light_strength <= 0:
+            return
+        factor = 8
+        size = (max(1, self.size[0] // factor), max(1, self.size[1] // factor))
+        layer = Image.new("RGB", size, (0, 0, 0))
+        draw = ImageDraw.Draw(layer)
+        for light in sorted(self.floor.lights, key=lambda li: li.intensity):
+            if light.state == "off":
+                continue
+            level = light.intensity * (0.5 if light.state == "flicker" else 1.0)
+            r, g, b, _ = colour(light.colour)
+            x, y = self.px(light.x, light.y)
+            radius = light.radius * self.cell * 0.5 / factor
+            cx, cy = x / factor, y / factor
+            fill = (round(r * level), round(g * level), round(b * level))
+            draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=fill)
+        blurred = layer.filter(ImageFilter.GaussianBlur(self.cell * 1.5 / factor))
+        self.light = blurred.resize(self.size, Image.Resampling.BILINEAR)
+
+    def _decals(self) -> None:
+        """Stains and graffiti, denser the worse the building's condition."""
+        style = self.theme.condition
+        density = style.decals.get(self.building.params.condition.value, 0.0)
+        if density <= 0:
+            return
+        rng = random.Random(f"{self.building.seed}:{self.floor.level}:decals")
+        cells = sorted(self.floor.footprint)
+        stain = colour(style.stain)
+        for _ in range(round(len(cells) * density / 40)):
+            c = rng.choice(cells)
+            x, y = self.px(c.x + rng.random(), c.y + rng.random())
+            r = self.cell * rng.uniform(0.4, 1.6)
+            self.draw_base.ellipse(
+                (x - r, y - r * rng.uniform(0.5, 1), x + r, y + r * rng.uniform(0.5, 1)),
+                fill=stain,
+            )
+        # Graffiti: neon scribbles along walls.
+        wall_cells = sorted(
+            {c for e in self.floor.walls for c in e.cells() if c in self.floor.footprint}
+        )
+        width = max(1, round(self.cell * 0.06))
+        for _ in range(round(len(wall_cells) * density / 25)):
+            c = rng.choice(wall_cells)
+            paint = colour(rng.choice(style.graffiti))
+            x, y = self.px(c.x + 0.5, c.y + 0.5)
+            points = [(x, y)]
+            for _ in range(rng.randint(4, 9)):
+                x += rng.uniform(-0.5, 0.5) * self.cell
+                y += rng.uniform(-0.5, 0.5) * self.cell
+                points.append((x, y))
+            self.draw_base.line(points, fill=(*paint[:3], 170), width=width, joint="curve")
 
     def _labels(self) -> None:
         size = max(8, round(self.cell * 0.7))
@@ -381,7 +545,7 @@ class _Canvas:
         radius = self.cell * self.theme.glow_radius
         base = self.image
         if radius <= 0:
-            return base
+            return self._apply_light(base)
         factor = 4
         small = self.glow.resize(
             (max(1, self.size[0] // factor), max(1, self.size[1] // factor)),
@@ -389,4 +553,17 @@ class _Canvas:
         )
         blurred = small.filter(ImageFilter.GaussianBlur(radius / factor))
         halo = blurred.resize(self.size, Image.Resampling.BILINEAR)
-        return ImageChops.screen(ImageChops.screen(base, halo), halo)
+        result = ImageChops.screen(ImageChops.screen(base, halo), halo)
+        return self._apply_light(result)
+
+    def _apply_light(self, image: Image.Image) -> Image.Image:
+        if self.light is None:
+            return image
+        ambient = self.theme.ambient
+        # Brightness factor per pixel: ambient where dark, 1 where fully lit.
+        grey = self.light.convert("L").point(
+            [round(255 * (ambient + (1 - ambient) * min(1.0, v / 160))) for v in range(256)]
+        )
+        shaded = ImageChops.multiply(image, Image.merge("RGB", (grey, grey, grey)))
+        tint = self.light.point([round(v * self.theme.light_strength) for v in range(256)] * 3)
+        return ImageChops.screen(shaded, tint)

@@ -19,6 +19,30 @@ doors:
   leaf: "#ffb347"
   exterior_leaf: "#ff4f9a"
   swing: "#ffb34766"
+  barricade: "#8a6a44"
+  materials:
+    glass: "#9fe8ffcc"
+    security: "#aab4c6"
+    blast: "#6f7a8c"
+  locks:
+    mechanical: "#c9cfdb"
+    maglock: "#00e5ff"
+    cardreader: "#ffb347"
+    biometric: "#ff3fa4"
+
+condition:
+  rubble: "#5f5a52"
+  stain: "#140c0660"
+  graffiti: ["#ff3fa4", "#00e5ff", "#c6ff00", "#ffb347"]
+  decals: {maintained: 0.02, run_down: 0.3, derelict: 0.6, ruined: 0.9}
+
+devices:
+  camera: "#ff3b30"
+  motion_sensor: "#ffb347"
+  alarm_panel: "#ff3fa4"
+
+light_strength: 0.12
+ambient: 0.72
 
 windows:
   frame: "#2a3040"
@@ -132,3 +156,12 @@ objects:
   copier:          {shape: machine, fill: "#bfc6cf", stroke: "#4d5563", detail: "#6d7788"}
   trash_bin:       {shape: circle, fill: "#3b4048", stroke: "#11131a", detail: "#5b616c"}
   rug:             {shape: rug, fill: "#3d2a44", stroke: "#1a1020", detail: "#a05ab4"}
+  roof_hatch:      {shape: hatch, fill: "#2a2f3a", stroke: "#ffb347", detail: "#6b7385"}
+  guard_desk:      {shape: counter, fill: "#23283a", stroke: "#0f1117", detail: "#00e5ff", glow: "#00e5ff"}
+  security_gate:   {shape: counter, fill: "#3b4254", stroke: "#0f1117", detail: "#ff3b30", glow: "#ff3b30"}
+  weapon_locker:   {shape: shelf, fill: "#3d4a3a", stroke: "#0f1117", detail: "#23301f"}
+  debris:          {shape: rubble, fill: "#4a4640", stroke: "#1a1814", detail: "#6a655c"}
+  trash_pile:      {shape: rubble, fill: "#3f3a2e", stroke: "#15130e", detail: "#5d4f3a"}
+  rubble:          {shape: rubble, fill: "#57524a", stroke: "#1a1814", detail: "#7a746a"}
+  rubble_heap:     {shape: rubble, fill: "#5f5a52", stroke: "#1a1814", detail: "#8a8378"}
+  collapsed_ceiling: {shape: rubble, fill: "#66615a", stroke: "#1a1814", detail: "#9a9388"}

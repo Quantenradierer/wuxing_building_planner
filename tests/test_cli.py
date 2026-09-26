@@ -110,3 +110,13 @@ def test_unknown_theme_fails(tmp_path: Path) -> None:
     result = runner.invoke(app, args)
     assert result.exit_code == 1
     assert "unknown theme" in result.output
+
+
+def test_entrances_option(tmp_path: Path) -> None:
+    target = tmp_path / "map.json"
+    args = [*BASE, "--entrances", "main, emergency", "-f", "json", "-o", str(target)]
+    assert runner.invoke(app, args).exit_code == 0
+    assert json.loads(target.read_text())["params"]["entrances"] == ["main", "emergency"]
+    bad = runner.invoke(app, [*BASE, "--entrances", "garage"])
+    assert bad.exit_code == 1
+    assert "garage" in bad.output

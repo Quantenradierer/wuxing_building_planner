@@ -8,6 +8,7 @@ src/roomplanner/
   model.py                   Room, Opening, Swing, PlacedObject, Floor, Building
   params.py                  GenerationParams (Pydantic) and parameter enums
   rules.py                   Pydantic models for the YAML, loaders, wealth, `when:` expressions
+  layer_rules.py             rules of the lights, security and condition layers
   generator.py               generate(params) -> Building
   validation.py              hard/soft invariant checks, independent of any algorithm
   serialization.py           JSON contract: to_json / from_json
@@ -30,9 +31,15 @@ src/roomplanner/
     layout/hall.py           hall layout (supermarket), a corridor layout variant
     openings.py              walls, doors, windows
     furnishing.py            furniture and fixtures
+    lights.py                light sources
+    security.py              locks, door materials, devices, floodlights, guard furniture
+    condition.py             wear and damage
   data/
     wealth.yaml              per-tier multipliers
     objects.yaml             furniture and fixture catalog
+    lights.yaml              ceiling grids, accents and entrance lights per room type
+    security.yaml            one tier per security level
+    condition.yaml           one tier per condition level
     themes/*.yaml            image renderer themes (default: neon)
     rooms/*.yaml             room catalogs (common + per building family)
     buildings/*.yaml         one program per building type
@@ -71,12 +78,19 @@ Floor
   walls: set[Edge]                     every wall edge, openings included
   openings: Opening[]                  cut into walls
   objects: PlacedObject[]              furniture and fixtures
+  devices: Device[]                    security devices
+  lights: Light[]                      light sources
 Room
   id, type, cells: set[Cell], unit     unit: apartment etc. the room belongs to, if any
 Opening
-  kind: door | window
+  kind: door | window | breach         breach: hole in a wall (condition), always passable
   edges: Edge[]                        straight, contiguous run of wall edges
   swing: Swing | None                  doors only
+  state                                intact | broken | missing | blocked (doors);
+                                       intact | broken (windows); blocked doors are impassable
+  material, lock, rating               doors, optional: standard | glass | security | blast;
+                                       none | mechanical | maglock | cardreader | biometric
+  entrance                             exterior doors: main | service | emergency
 Swing
   towards: Side                        side of the wall the leaf opens into
   hinge: Side                          end of the run the hinge sits at
@@ -85,6 +99,11 @@ PlacedObject
   facing: Side                         front of the object, away from its wall
   room                                 id of the room it stands in
   blocking                             false for objects walked over (stairs, elevator car)
+Device
+  kind, x, y, facing, room, rating     camera | motion_sensor | alarm_panel in a cell
+Light
+  kind, x, y, radius, colour,          continuous position in cells; kind: ceiling | neon |
+  intensity, state, room               emergency | flood | sign; state: on | flicker | off
 ```
 
 Model classes are immutable. Exterior vs. interior walls, room areas and door clearances
@@ -108,7 +127,7 @@ collections, each produced by its own pipeline stage.
 
 ```
 params ─► footprint ─► feasibility check ─► layout (core, corridors, rooms) ─► openings
-       ─► furnishing ─► [condition, planned] ─► validation ─► Building
+       ─► furnishing ─► lights ─► security ─► condition ─► validation ─► Building
 ```
 
 - Each stage is a **strategy** behind a small `Protocol` (`pipeline/base.py`), registered by
@@ -148,7 +167,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
-   it. Rooms that need windows are never clustered. Leftover modules widen a fill room. Partition walls
+   it. Rooms that need windows are never clustered. Leftover modules widen a fill room.
+   A clustered room whose `access` names a host type becomes an *annex* about half of the
+   time instead: carved out of the back corner of a host slot (an existing one, or a new
+   host of a fill type), leaving the host at least `min_side` wide; its only door leads into
+   the host and nobody passes through it (storage closets, pantries). Partition walls
    on facade strips snap to the facade `module` grid.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
@@ -189,6 +212,14 @@ along the unit so every room opens onto it. Rooms carry the unit id.
 overrides (`wealth:` in the catalog), and room entries / floor roles filtered by their
 `wealth:` lists (e.g. the office's executive top floor exists for high and luxury only).
 
+### Entrances
+
+The program lists its entrance kinds (`main`, `service`, `emergency`, `roof`) with widths;
+the `entrances` parameter replaces that list (main is always built, unknown widths default
+to 2). The emergency exit goes to the corridor end on a facade farthest from the other
+entrances, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
+stairwell (or a circulation room).
+
 ### Furnishing
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
@@ -201,15 +232,35 @@ placement is rejected if it covers another object or a door's clearance (as deep
 is wide) or splits the room's free floor; a ring test around the object avoids most flood
 fills.
 
+### Lights, security, condition
+
+Three more replaceable stages (`lighting`, `security`, `condition` in the program, default
+`rules`), data in `data/lights.yaml`, `security.yaml` and `condition.yaml` (ADR 0010).
+
+- **Lights**: a ceiling grid per room (spacing, radius, colour per room type, or none),
+  accent lights against walls (neon, emergency), a light outside each entrance.
+- **Security**: exterior doors get the tier's exterior lock; interior doors the lock of the
+  room they open into (`rooms`, else `interior`); a unit's front door the `unit` entry.
+  Cameras in corners of listed rooms, one per `corridor_per` corridor cells and inside
+  entrances; alarm panels beside exterior doors; motion sensors; floodlights outside
+  entrances; extra furniture (guard desk) through the furnisher.
+- **Condition**: removes furniture (never fixtures, never freeing a walled-in cell), breaks
+  / removes / blocks doors (blocking only where everything stays reachable, never exterior
+  doors), shatters windows, breaches interior walls between rooms, scatters debris and
+  collapsed spots through the furnisher (walkability checks included), switches lights to
+  flicker / off (no power: only emergency lights).
+
 ## JSON contract
 
 `serialization.py` maps the model to a JSON document explicitly (not via reflection),
 so internal refactors do not change the contract. Breaking changes bump `schema_version`;
 optional fields may be added without a bump, so readers must ignore unknown fields.
+Version 3 added the `breach` opening kind (a new value, hence the bump) together with
+optional fields; version 2 documents are still read.
 
 ```json
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "cell_size_m": 0.5,
   "width": 60, "height": 40,
   "seed": 42,
@@ -226,11 +277,16 @@ optional fields may be added without a bump, so readers must ignore unknown fiel
     "openings": [{
       "kind": "door",
       "edges": [[10, 40, "h"], [11, 40, "h"]],
-      "swing": {"towards": "S", "hinge": "W"}
-    }, {"kind": "window", "edges": [[3, 0, "h"], [4, 0, "h"]]}],
+      "swing": {"towards": "S", "hinge": "W"},
+      "entrance": "main", "lock": "maglock", "rating": 4, "material": "security"
+    }, {"kind": "window", "edges": [[3, 0, "h"], [4, 0, "h"]], "state": "broken"},
+       {"kind": "breach", "edges": [[12, 7, "v"], [12, 8, "v"]]}],
     "objects": [{"kind": "desk", "x": 4, "y": 1, "w": 3, "h": 2, "facing": "S", "room": "0.3"},
                 {"kind": "stairs", "x": 20, "y": 1, "w": 6, "h": 4, "facing": "S", "room": "0.2",
-                 "blocking": false}]
+                 "blocking": false}],
+    "devices": [{"kind": "camera", "x": 0, "y": 5, "facing": "E", "room": "0.1", "rating": 4}],
+    "lights": [{"kind": "ceiling", "x": 4.5, "y": 3.0, "radius": 8.0, "colour": "#fff1dc",
+                "intensity": 0.7, "state": "on", "room": "0.3"}]
   }]
 }
 ```
@@ -246,8 +302,11 @@ covers the building plus `padding` cells on each side (default 2 = one 1 m VTT s
 colour, pattern, optional neon accent strip along the walls), grain, blurred shadows of
 walls and blocking objects, objects (theme style → shape from `render/shapes.py`), walls
 (exterior thicker), windows, doors (leaf opened 90° towards `swing.towards` plus arc; runs
-of 4+ cells are double doors), optional labels and grid, then the blurred glow layer is
-screened on top. Themes are YAML (`data/themes/neon.yaml`) or any file passed by path.
+of 4+ cells are double doors; broken, missing and barricaded states; material colour; a lock
+marker), breaches as rubble, devices, optional labels and grid, then the blurred glow layer
+is screened on top and the light map applied (unlit areas dim to `ambient`, lights tint).
+Stains and graffiti come from the theme's `condition.decals` density for the building's
+condition. Themes are YAML (`data/themes/neon.yaml`) or any file passed by path.
 
 ## ASCII debug renderer
 
@@ -258,7 +317,8 @@ column `2x+1`, row `2y+1`; edges and vertices occupy the even positions in betwe
 |-----------|----------------------------------------------------------|
 | `-` `\|`  | wall                                                     |
 | `+`       | walls meeting at an angle                                |
-| `D`       | door edge                                                |
-| `=` `"`   | window edge (horizontal, vertical)                       |
+| `D`       | door edge (`/` broken, `O` missing, `X` blocked)         |
+| `=` `"`   | window edge (horizontal, vertical); `:` broken window    |
+| `%`       | breach                                                   |
 | letters   | furniture, see the per-floor `objects:` legend           |
 | digits    | room number, see the legend (with the unit in brackets)  |

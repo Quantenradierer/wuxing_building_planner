@@ -1,0 +1,42 @@
+# Condition levels: wear and damage applied after furnishing, lights and security.
+# The building always stays reachable: doors are only blocked where that cuts nothing
+# off, breaches only add connections and debris keeps every room walkable.
+fixtures: [stairs, elevator_car, wc, sink, shower, roof_hatch, checkout, server_rack,
+           morgue_drawers, machinery, guard_desk, security_gate, terminal]
+debris: [debris, trash_pile, debris, rubble]
+collapse: [rubble_heap, collapsed_ceiling]
+tiers:
+  pristine: {}
+  maintained:
+    lights_flicker: 0.02
+  run_down:
+    furniture_removed: 0.15
+    debris_per: 150
+    doors_broken: 0.08
+    doors_missing: 0.04
+    doors_blocked: 0.02
+    windows_broken: 0.1
+    lights_flicker: 0.15
+    lights_off: 0.15
+  derelict:
+    furniture_removed: 0.45
+    debris_per: 60
+    doors_broken: 0.25
+    doors_missing: 0.2
+    doors_blocked: 0.06
+    windows_broken: 0.5
+    breaches: 1.0
+    lights_flicker: 0.3
+    power: false
+  ruined:
+    furniture_removed: 0.7
+    debris_per: 30
+    doors_broken: 0.35
+    doors_missing: 0.35
+    doors_blocked: 0.1
+    windows_broken: 0.9
+    breaches: 3.0
+    collapses: 1.5
+    lights_flicker: 0.2
+    lights_off: 0.5
+    power: false

@@ -14,4 +14,5 @@ def generate(params: GenerationParams) -> Building:
     """Generate a building. Raises InfeasibleError / NotSupportedError for impossible input."""
     seed = params.seed if params.seed is not None else secrets.randbelow(2**32)
     params = params.model_copy(update={"seed": seed})
-    return run(params, rules_for(params.building_type, params.wealth), seed)
+    rules = rules_for(params.building_type, params.wealth, params.security)
+    return run(params, rules, seed)

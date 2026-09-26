@@ -2,9 +2,9 @@ import pytest
 
 from roomplanner.errors import InfeasibleError, NotSupportedError
 from roomplanner.generator import generate
-from roomplanner.geometry import Side
+from roomplanner.geometry import Cell, Side
 from roomplanner.model import OpeningKind
-from roomplanner.params import BuildingType, Shape, Wealth
+from roomplanner.params import BuildingType, EntranceKind, Shape, Wealth
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
 
@@ -43,7 +43,34 @@ def test_exterior_doors_face_street_and_service_side_and_open_outwards() -> None
         for o in ground.openings
         if o.kind is OpeningKind.DOOR and ground.is_exterior_wall(o.edges[0])
     ]
-    assert sorted(d.swing.towards for d in exits if d.swing) == [Side.E, Side.N]
+    by_kind = {d.entrance: d.swing.towards for d in exits if d.swing}
+    assert by_kind["main"] is Side.N
+    assert by_kind["service"] is Side.E
+    assert "emergency" in by_kind
+
+
+def test_entrances_parameter_overrides_the_building_type() -> None:
+    building = generate(make_params(entrances=(EntranceKind.SERVICE,)))
+    kinds = {o.entrance for o in building.floor(0).openings if o.entrance}
+    assert kinds == {"main", "service"}
+    assert not any(o.kind == "roof_hatch" for f in building.floors for o in f.objects)
+
+
+def test_emergency_exit_is_away_from_the_main_entrance() -> None:
+    building = generate(make_params(width=60, depth=30, floors_above=2))
+    ground = building.floor(0)
+    doors = {o.entrance: o.edges[0] for o in ground.openings if o.entrance}
+    main, emergency = doors["main"], doors["emergency"]
+    assert abs(main.x - emergency.x) + abs(main.y - emergency.y) >= 15
+
+
+def test_top_floor_stairwell_has_a_roof_hatch() -> None:
+    building = generate(make_params(floors_above=3))
+    top = building.floor(2)
+    hatches = [o for o in top.objects if o.kind == "roof_hatch"]
+    assert len(hatches) == 1
+    assert top.room_at(Cell(hatches[0].x, hatches[0].y)).type == "stairwell"  # type: ignore[union-attr]
+    assert not any(o.kind == "roof_hatch" for o in building.floor(1).objects)
 
 
 def test_basements_have_no_windows() -> None:

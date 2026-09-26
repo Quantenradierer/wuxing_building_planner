@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from roomplanner.geometry import Axis, Cell, Edge
-from roomplanner.model import Building, Floor, OpeningKind, Room
+from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
 from roomplanner.rules import load_objects
 
 
@@ -35,10 +35,7 @@ def render_floor(
     for opening in floor.openings:
         for edge in opening.edges:
             row, col = _edge_pos(edge)
-            if opening.kind is OpeningKind.DOOR:
-                canvas[row][col] = "D"
-            else:
-                canvas[row][col] = "=" if edge.axis is Axis.H else '"'
+            canvas[row][col] = _opening_glyph(opening, edge.axis)
     for row in range(0, 2 * height + 1, 2):
         for col in range(0, 2 * width + 1, 2):
             canvas[row][col] = _vertex_glyph(canvas, row, col)
@@ -61,6 +58,26 @@ def render_floor(
 
     lines = ["".join(row).rstrip() for row in canvas]
     return "\n".join([f"== {floor.name} ==", *lines, *legend])
+
+
+_DOOR_GLYPHS = {
+    OpeningState.INTACT: "D",
+    OpeningState.BROKEN: "/",
+    OpeningState.MISSING: "O",
+    OpeningState.BLOCKED: "X",
+}
+
+
+def _opening_glyph(opening: Opening, axis: Axis) -> str:
+    match opening.kind:
+        case OpeningKind.DOOR:
+            return _DOOR_GLYPHS[opening.state]
+        case OpeningKind.BREACH:
+            return "%"
+        case OpeningKind.WINDOW:
+            if opening.state is OpeningState.BROKEN:
+                return ":"
+            return "=" if axis is Axis.H else '"'
 
 
 def _vertex_glyph(canvas: list[list[str]], row: int, col: int) -> str:

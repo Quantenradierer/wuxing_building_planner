@@ -39,6 +39,9 @@ rooms:
     area: [12, 80]
     min_side: 3
     cluster: true
+    # Also a closet inside one of these (entered through it), about half of the time.
+    access: [office, executive_office, manager_office, kitchenette, kitchen, staff_room,
+             stockroom, treatment_room, lab, nurse_station, meeting_room]
     furniture:
       - {object: shelf, placement: wall, per: 5, count: [2, 16]}
       - {object: crate, placement: scatter, per: 30, count: [0, 3]}

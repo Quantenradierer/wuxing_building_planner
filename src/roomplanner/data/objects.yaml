@@ -5,6 +5,15 @@ objects:
   stairs:          {size: [6, 4], walkable: true, glyph: "#"}
   elevator_car:    {size: [3, 3], walkable: true, glyph: "%"}
   rug:             {size: [4, 3], walkable: true, glyph: "~"}
+  roof_hatch:      {size: [2, 2], walkable: true, glyph: "^"}
+  guard_desk:      {size: [4, 2], cover: heavy, glyph: G}
+  security_gate:   {size: [1, 3], cover: light, glyph: "!"}
+  weapon_locker:   {size: [2, 1], cover: heavy, glyph: L}
+  debris:          {size: [2, 2], cover: light, glyph: ","}
+  trash_pile:      {size: [2, 1], cover: light, glyph: ";"}
+  rubble:          {size: [3, 2], cover: heavy, glyph: "&"}
+  rubble_heap:     {size: [4, 4], cover: heavy, glyph: "@"}
+  collapsed_ceiling: {size: [5, 3], cover: heavy, glyph: "@"}
   filing_cabinet:  {size: [2, 1], cover: heavy, glyph: F}
   armchair:        {size: [2, 2], cover: light, glyph: A}
   crate:           {size: [2, 2], cover: heavy, glyph: K}

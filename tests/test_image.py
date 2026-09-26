@@ -56,6 +56,7 @@ def test_custom_theme_file(tmp_path: Path) -> None:
     source["name"] = "bright"
     source["background"] = "#ffffff"
     source["outside_pattern"] = "plain"
+    source["ambient"] = 1.0
     path = tmp_path / "bright.yaml"
     path.write_text(yaml.safe_dump(source))
     theme = load_theme(str(path))

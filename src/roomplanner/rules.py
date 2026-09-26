@@ -16,7 +16,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from roomplanner.errors import NotSupportedError, RulesError
-from roomplanner.params import BuildingType, GenerationParams, Wealth
+from roomplanner.params import BuildingType, EntranceKind, GenerationParams, Security, Wealth
 
 type Range = tuple[int, int]
 
@@ -118,6 +118,7 @@ class RoomEntry(_Strict):
     area: Range | None = Field(default=None, description="Overrides the catalog")
     when: str | None = None
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
+    security: list[Security] | None = Field(default=None, description="Only for these levels")
 
     @model_validator(mode="after")
     def _one_quantity(self) -> Self:
@@ -145,6 +146,7 @@ class FloorRole(_Strict):
     applies: list[Applies]
     when: str | None = None
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
+    security: list[Security] | None = Field(default=None, description="Only for these levels")
     rooms: list[RoomEntry]
 
     @model_validator(mode="after")
@@ -166,13 +168,11 @@ class CoreEntry(_Strict):
         return self
 
 
-class EntranceKind(StrEnum):
-    MAIN = "main"
-    SERVICE = "service"
-
-
 class EntranceRule(_Strict):
     width: int = Field(gt=0)
+
+
+DEFAULT_ENTRANCE_WIDTH = 2
 
 
 class CorridorRule(_Strict):
@@ -228,6 +228,9 @@ class BuildingProgram(_Strict):
     floor_roles: dict[str, FloorRole]
     units: dict[str, UnitSpec] = Field(default={}, description="Room types that are units")
     furnishing: str = Field(default="rules", description="Furnishing strategy")
+    lighting: str = Field(default="rules", description="Lights strategy")
+    security: str = Field(default="rules", description="Security layer strategy")
+    condition: str = Field(default="rules", description="Condition layer strategy")
     hall: HallRule | None = Field(default=None, description="Required by the hall layout")
     wealth: dict[Wealth, WealthRule] = Field(default={}, description="Overrides wealth.yaml")
 
@@ -242,6 +245,14 @@ class Rules:
 
     def spec(self, room: str) -> RoomSpec:
         return self.rooms[room]
+
+    def entrances(self, params: GenerationParams) -> dict[EntranceKind, EntranceRule]:
+        """The entrances to build: the program's, or the parameter's list (main implied)."""
+        program = self.program.entrances
+        if params.entrances is None:
+            return dict(program)
+        kinds = [EntranceKind.MAIN, *(k for k in params.entrances if k is not EntranceKind.MAIN)]
+        return {k: program.get(k, EntranceRule(width=DEFAULT_ENTRANCE_WIDTH)) for k in kinds}
 
     def active_core(self, params: GenerationParams) -> list[CoreEntry]:
         return [c for c in self.program.core if evaluate(c.when, variables(params))]
@@ -295,12 +306,14 @@ def load_objects() -> dict[str, ObjectSpec]:
 
 
 @cache
-def rules_for(building_type: BuildingType, wealth: Wealth) -> Rules:
-    """The rules of a building type with one wealth tier applied (see requirements, Wealth)."""
-    return apply_wealth(load_rules(building_type), wealth)
+def rules_for(
+    building_type: BuildingType, wealth: Wealth, security: Security = Security.LOW
+) -> Rules:
+    """The rules of a building type for one wealth tier and security level."""
+    return apply_wealth(load_rules(building_type), wealth, security)
 
 
-def apply_wealth(rules: Rules, wealth: Wealth) -> Rules:
+def apply_wealth(rules: Rules, wealth: Wealth, security: Security = Security.LOW) -> Rules:
     tier = rules.tiers.get(wealth, WealthRule())
 
     def scale(area: Range) -> Range:
@@ -320,10 +333,13 @@ def apply_wealth(rules: Rules, wealth: Wealth) -> Rules:
     for name, role in rules.program.floor_roles.items():
         if role.wealth is not None and wealth not in role.wealth:
             continue
+        if role.security is not None and security not in role.security:
+            continue
         entries = [
             e.model_copy(update={"area": scale(e.area) if e.area else None})
             for e in role.rooms
-            if e.wealth is None or wealth in e.wealth
+            if (e.wealth is None or wealth in e.wealth)
+            and (e.security is None or security in e.security)
         ]
         if not any(e.fill for e in entries):
             raise RulesError(f"{rules.program.building}: role {name} has no fill room for {wealth}")
@@ -344,9 +360,18 @@ def _data_file(kind: str, name: str) -> Any:
 
 def _load[M: BaseModel](model: type[M], path: Any) -> M:
     try:
-        return model.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
-    except (OSError, yaml.YAMLError, ValidationError) as error:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
         raise RulesError(f"{path}: {error}") from error
+    return load_yaml(model, text, str(path))
+
+
+def load_yaml[M: BaseModel](model: type[M], text: str, origin: str) -> M:
+    """Validate a YAML document against a model; errors become RulesError."""
+    try:
+        return model.model_validate(yaml.safe_load(text))
+    except (yaml.YAMLError, ValidationError) as error:
+        raise RulesError(f"{origin}: {error}") from error
 
 
 def _check_references(rules: Rules) -> None:
@@ -356,7 +381,7 @@ def _check_references(rules: Rules) -> None:
     for unit, spec in program.units.items():
         names += [unit, spec.hall, *spec.front, *spec.back]
         names += [spec.back_fill] if spec.back_fill else []
-    names += [a for spec in rules.rooms.values() for a in spec.access]
+    # `access` may name room types other buildings have; unknown ones are ignored.
     unknown = {f.object for s in rules.rooms.values() for f in s.furniture} - set(rules.objects)
     if unknown:
         raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")

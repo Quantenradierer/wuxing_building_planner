@@ -1,0 +1,77 @@
+# Security levels. Locks: none, mechanical, maglock, cardreader, biometric.
+# Door materials: standard, glass, security, blast. Ratings are generic 1-8 values;
+# map them to your game system's device ratings.
+tiers:
+  none:
+    rating: 1
+    exterior: {lock: mechanical}
+    rooms:
+      unit: {lock: mechanical}           # front doors of apartments
+  low:
+    rating: 2
+    exterior: {lock: mechanical}
+    rooms:
+      unit: {lock: mechanical}
+      server_room: {lock: mechanical}
+      pharmacy: {lock: mechanical}
+      security_room: {lock: mechanical}
+      manager_office: {lock: mechanical}
+    cameras: {entrances: true, rooms: [sales_floor]}
+  corporate:
+    rating: 4
+    exterior: {lock: maglock, material: security}
+    interior: {lock: none}
+    rooms:
+      unit: {lock: maglock, material: security}
+      server_room: {lock: cardreader, material: security, rating: 5}
+      security_room: {lock: cardreader, material: security}
+      archive: {lock: cardreader}
+      executive_office: {lock: cardreader}
+      board_room: {lock: cardreader}
+      pharmacy: {lock: cardreader, material: security}
+      operating_room: {lock: cardreader}
+      morgue: {lock: maglock}
+      lab: {lock: cardreader}
+      manager_office: {lock: maglock}
+      stockroom: {lock: maglock}
+      utility: {lock: mechanical}
+    cameras: {entrances: true, corridor_per: 120, rooms: [lobby, sales_floor, server_room, waiting_room]}
+    alarm_panels: true
+    motion_sensors: [server_room, archive]
+    floodlights: {kind: flood, radius: 10, colour: "#f4fbff", intensity: 0.9}
+    furniture:
+      lobby:
+        - {object: guard_desk, placement: center}
+      security_room:
+        - {object: terminal, placement: wall, count: [2, 4]}
+        - {object: weapon_locker, placement: wall}
+  aaa:
+    rating: 7
+    exterior: {lock: biometric, material: security, rating: 8}
+    interior: {lock: cardreader}
+    rooms:
+      unit: {lock: cardreader, material: security}
+      server_room: {lock: biometric, material: blast, rating: 8}
+      security_room: {lock: biometric, material: security}
+      archive: {lock: biometric, material: security}
+      executive_office: {lock: biometric}
+      board_room: {lock: biometric}
+      pharmacy: {lock: biometric, material: security}
+      lab: {lock: biometric, material: security}
+      operating_room: {lock: biometric}
+      morgue: {lock: cardreader}
+      stairwell: {lock: cardreader}
+      stockroom: {lock: cardreader}
+      utility: {lock: cardreader, material: security}
+      corridor: {lock: cardreader}
+    cameras: {entrances: true, corridor_per: 60, rooms: [lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office]}
+    alarm_panels: true
+    motion_sensors: [server_room, archive, executive_office, board_room, lab, stairwell, storage]
+    floodlights: {kind: flood, radius: 12, colour: "#f4fbff", intensity: 1.0}
+    furniture:
+      lobby:
+        - {object: guard_desk, placement: center}
+        - {object: security_gate, placement: scatter, count: 2}
+      security_room:
+        - {object: terminal, placement: wall, count: [3, 6]}
+        - {object: weapon_locker, placement: wall, count: [1, 2]}

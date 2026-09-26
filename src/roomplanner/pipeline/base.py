@@ -11,8 +11,8 @@ from typing import Protocol
 
 from roomplanner.geometry import Axis, Cell, Side
 from roomplanner.model import Floor
-from roomplanner.params import GenerationParams
-from roomplanner.rules import EntranceKind, Rules
+from roomplanner.params import EntranceKind, GenerationParams
+from roomplanner.rules import Rules
 
 
 @dataclass(frozen=True)
@@ -35,6 +35,8 @@ class PlannedRoom:
     cells: frozenset[Cell]
     unit: str | None = None  # rooms of one apartment etc. only connect among themselves
     entry: bool = False  # the unit room that opens to the building's circulation
+    # Annex (closet, pantry): carved out of this room and entered only through it.
+    host: PlannedRoom | None = field(default=None, compare=False)
 
 
 @dataclass(frozen=True)
@@ -88,6 +90,12 @@ class FurnishingStrategy(Protocol):
     def furnish(self, ctx: Context, floors: list[Floor]) -> list[Floor]:
         """Return the floors with furniture and fixtures (`Floor.objects`) added."""
         ...
+
+
+class LayerStrategy(Protocol):
+    """Lights, security, condition: change finished floors (after furnishing)."""
+
+    def apply(self, ctx: Context, floors: list[Floor]) -> list[Floor]: ...
 
 
 class OpeningsStrategy(Protocol):

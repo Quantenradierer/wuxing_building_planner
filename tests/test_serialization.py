@@ -16,11 +16,20 @@ def test_round_trip() -> None:
 
 def test_document_shape() -> None:
     document = to_dict(generate(make_params()))
-    assert document["schema_version"] == 2
+    assert document["schema_version"] == 3
     assert document["cell_size_m"] == 0.5
     door = next(o for o in document["floors"][0]["openings"] if o["kind"] == "door")
-    assert set(door) == {"kind", "edges", "swing"}
+    assert {"kind", "edges", "swing"} <= set(door)
     assert door["edges"][0][2] in {"h", "v"}
+
+
+def test_reads_version_2_documents() -> None:
+    building = generate(make_params())
+    document = to_dict(building)
+    document["schema_version"] = 2
+    for floor in document["floors"]:
+        del floor["devices"], floor["lights"]
+    assert from_json(json.dumps(document)).floors[0].rooms == building.floors[0].rooms
 
 
 def test_rejects_other_schema_versions() -> None:

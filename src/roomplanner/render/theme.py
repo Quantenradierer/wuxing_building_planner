@@ -62,6 +62,18 @@ class DoorStyle(_Strict):
     leaf: str
     swing: str
     exterior_leaf: str | None = None
+    materials: dict[str, str] = Field(default={}, description="Leaf colour by door material")
+    locks: dict[str, str] = Field(default={}, description="Lock marker colour by lock type")
+    barricade: str = "#7a5a3a"
+
+
+class ConditionStyle(_Strict):
+    rubble: str = "#5a5650"
+    stain: str = "#1a120c50"
+    graffiti: list[str] = ["#ff3fa4", "#00e5ff", "#c6ff00"]
+    decals: dict[str, float] = Field(
+        default={}, description="Density of stains and graffiti by condition level (0..1)"
+    )
 
 
 class WindowStyle(_Strict):
@@ -91,6 +103,12 @@ class Theme(_Strict):
     walls: WallStyle
     doors: DoorStyle
     windows: WindowStyle
+    condition: ConditionStyle = ConditionStyle()
+    devices: dict[str, str] = Field(default={}, description="Device colour by kind")
+    light_strength: float = Field(default=0.15, ge=0, le=1, description="Colour tint of lights")
+    ambient: float = Field(
+        default=1.0, ge=0, le=1, description="Brightness where no light reaches (1: no shading)"
+    )
     materials: dict[str, Material]
     default_material: str
     rooms: dict[str, str] = Field(default={}, description="Room type -> material")

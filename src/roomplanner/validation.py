@@ -117,7 +117,7 @@ def _check_connectivity(floor: Floor) -> list[str]:
     """
     if not floor.footprint:
         return ["floor has no footprint"]
-    doors = {e for o in floor.openings if o.kind is OpeningKind.DOOR for e in o.edges}
+    doors = set(floor.passable_edges())
     entrances = {
         cell
         for edge in doors

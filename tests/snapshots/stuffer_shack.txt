@@ -4,31 +4,31 @@ supermarket 30x26 cells, wealth=middle, seed=7
 +-----------------------+--DDDDDDDDDDD----+===---===---===--+
 |                       |                 |s sss       sss s|
 |                       |                 |s               s|
-|                  ppp  |                 |s               s"
-|                  ppp  |                 |                 "
-|                  ppp  |                 D    KKK 5 KKK    "
-|                       |                 D    KKK   KKK    |
-|          3            |                 D    KKK   KKK   s|
+|                       |                 |s     KKK       s"
+|                       |                 |      KKK        "
+|ppp                    |                 D      KKK        "
+|ppp                    |                 D                 |
+|ppp       3            |                 D        5       s|
 |                       |                 |                s|
 |                       |                 |sss sss sss sss s|
 |                       |                 +-----------------+
-|    ppp                |                 |w               i|
-|    ppp                |                 |                 |
-|    ppp                |                 |i       4        |
+|                    ppp|                 |w               i|
+|                    ppp|                 |                 |
+|                    ppp|                 |i       4        |
 |                       |                 |                 |
 |                       |      1          |w               w|
 +----------DDDDDDD------+                 +------DDD--------+
-|                                                           |
-|                                                           |
-|                                                           |
-|                                                           |
-"                                                           "
-"                                                           "
-"                                                           "
+|^^^                                                        |
+|^^^                                                        |
+D^^^                                                        |
+D                                                           |
+D                                                           "
+D                                                           "
+D                                                           "
 +--------------DDDDD----------------------------------------+
-|                            zzzzzzz     zzzzzzz            |
-|                            zzzzzzz     zzzzzzz            |
-"                            zzzzzzz     zzzzzzz            "
+|                                                           |
+|                                                           |
+"                                                           "
 "                                                           "
 "                                                           "
 |                                                           |
@@ -44,17 +44,17 @@ supermarket 30x26 cells, wealth=middle, seed=7
 "                                                           "
 "      ggggggggggggggg                                      "
 |      ggggggggggggggg                                      |
-|zzz   ggggggggggggggg                                      |
-|zzz                                                        |
-"zzz             CCC CCC             CCC                    "
-"zzz             CCC CCC             CCC                    "
-"zzz             CCC CCC             CCC                    "
-|zzz             CCC CCC             CCC                    |
-|zzz             CCC CCC             CCC                    |
-|                CCC CCC             CCC                    |
-|                CCC CCC             CCC                    |
+|      ggggggggggggggg                                      |
+|                                                           |
+"                    CCC                                    "
+"                    CCC                                    "
+"                    CCC                                    "
+|                    CCC                                    |
+|                    CCC                                    |
+|                    CCC                                    |
+|                    CCC                                    |
 +===---===---===---===---DDDDDDDDDDD-------===---===---===--+
-  objects: C checkout, K crate, z freezer, g gondola, p pallet, s shelf, i sink, w wc
+  objects: C checkout, K crate, g gondola, p pallet, ^ roof_hatch, s shelf, i sink, w wc
     1  corridor            192 cells
     2  sales_floor         420 cells
     3  loading_bay          96 cells

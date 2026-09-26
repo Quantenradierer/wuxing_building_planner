@@ -14,11 +14,15 @@ from pydantic import ValidationError
 from roomplanner.errors import SchemaError
 from roomplanner.geometry import CELL_SIZE_M, Axis, Cell, Edge, Side
 from roomplanner.model import (
+    READABLE_SCHEMA_VERSIONS,
     SCHEMA_VERSION,
     Building,
+    Device,
     Floor,
+    Light,
     Opening,
     OpeningKind,
+    OpeningState,
     PlacedObject,
     Room,
     Swing,
@@ -51,7 +55,7 @@ def to_dict(building: Building) -> JsonObject:
 
 def from_dict(data: JsonObject) -> Building:
     version = data.get("schema_version")
-    if version != SCHEMA_VERSION:
+    if version not in READABLE_SCHEMA_VERSIONS:
         raise SchemaError(f"unsupported schema_version {version!r}, expected {SCHEMA_VERSION}")
     try:
         return Building(
@@ -76,6 +80,8 @@ def _floor_to_dict(floor: Floor) -> JsonObject:
         "walls": [_edge(e) for e in sorted(floor.walls)],
         "openings": [_opening_to_dict(o) for o in floor.openings],
         "objects": [_object_to_dict(o) for o in floor.objects],
+        "devices": [_device_to_dict(d) for d in floor.devices],
+        "lights": [_light_to_dict(li) for li in floor.lights],
     }
 
 
@@ -90,6 +96,53 @@ def _floor_from_dict(data: JsonObject) -> Floor:
         openings=tuple(_opening_from_dict(o) for o in data["openings"]),
         role=data.get("role", ""),
         objects=tuple(_object_from_dict(o) for o in data.get("objects", [])),
+        devices=tuple(_device_from_dict(d) for d in data.get("devices", [])),
+        lights=tuple(_light_from_dict(li) for li in data.get("lights", [])),
+    )
+
+
+def _device_to_dict(device: Device) -> JsonObject:
+    return {
+        "kind": device.kind,
+        "x": device.x,
+        "y": device.y,
+        "facing": device.facing.value,
+        "room": device.room,
+        "rating": device.rating,
+    }
+
+
+def _device_from_dict(data: JsonObject) -> Device:
+    return Device(
+        data["kind"], data["x"], data["y"], Side(data["facing"]), data["room"], data["rating"]
+    )
+
+
+def _light_to_dict(light: Light) -> JsonObject:
+    result: JsonObject = {
+        "kind": light.kind,
+        "x": light.x,
+        "y": light.y,
+        "radius": light.radius,
+        "colour": light.colour,
+        "intensity": light.intensity,
+        "state": light.state,
+    }
+    if light.room is not None:
+        result["room"] = light.room
+    return result
+
+
+def _light_from_dict(data: JsonObject) -> Light:
+    return Light(
+        data["kind"],
+        data["x"],
+        data["y"],
+        data["radius"],
+        data["colour"],
+        data["intensity"],
+        data["state"],
+        data.get("room"),
     )
 
 
@@ -135,6 +188,11 @@ def _opening_to_dict(opening: Opening) -> JsonObject:
             "towards": opening.swing.towards.value,
             "hinge": opening.swing.hinge.value,
         }
+    if opening.state is not OpeningState.INTACT:
+        result["state"] = opening.state.value
+    for key in ("material", "lock", "rating", "entrance"):
+        if (value := getattr(opening, key)) is not None:
+            result[key] = value
     return result
 
 
@@ -144,6 +202,11 @@ def _opening_from_dict(data: JsonObject) -> Opening:
         kind=OpeningKind(data["kind"]),
         edges=tuple(_parse_edge(e) for e in data["edges"]),
         swing=Swing(Side(swing["towards"]), Side(swing["hinge"])) if swing else None,
+        state=OpeningState(data.get("state", OpeningState.INTACT)),
+        material=data.get("material"),
+        lock=data.get("lock"),
+        rating=data.get("rating"),
+        entrance=data.get("entrance"),
     )
 
 

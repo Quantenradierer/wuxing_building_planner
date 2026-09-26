@@ -7,6 +7,8 @@ the glow layer.
 
 from __future__ import annotations
 
+import math
+import random
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -229,6 +231,34 @@ def rug_shape(pen: Pen, box: Box, facing: Side) -> None:
     pen.base.rectangle(inset(inner, pen.cell * 0.15), outline=pen.detail, width=pen.line)
 
 
+def rubble_shape(pen: Pen, box: Box, facing: Side) -> None:
+    """Irregular chunks, deterministic from the box position."""
+    x0, y0, x1, y1 = box
+    rng = random.Random(f"{x0:.0f}:{y0:.0f}")
+    chunks = max(3, round((x1 - x0) * (y1 - y0) / (pen.cell * pen.cell) * 3))
+    for i in range(chunks):
+        cx, cy = rng.uniform(x0, x1), rng.uniform(y0, y1)
+        r = pen.cell * rng.uniform(0.12, 0.35)
+        points = [
+            (
+                min(x1, max(x0, cx + r * math.cos(a))),
+                min(y1, max(y0, cy + r * math.sin(a))),
+            )
+            for a in sorted(rng.uniform(0, 2 * math.pi) for _ in range(5))
+        ]
+        fill = pen.fill if i % 3 else pen.detail
+        pen.base.polygon(points, fill=fill, outline=pen.stroke)
+
+
+def hatch_shape(pen: Pen, box: Box, facing: Side) -> None:
+    inner = inset(box, pen.cell * 0.2)
+    pen.base.rectangle(inner, fill=pen.fill, outline=pen.stroke, width=pen.line * 2)
+    x0, y0, x1, y1 = inner
+    step = (x1 - x0) / 4
+    for i in range(1, 4):
+        pen.base.line((x0 + step * i, y0, x0 + step * i, y1), fill=pen.detail, width=pen.line)
+
+
 SHAPES: dict[str, Callable[[Pen, Box, Side], None]] = {
     "box": box_shape,
     "rounded": rounded_shape,
@@ -247,4 +277,6 @@ SHAPES: dict[str, Callable[[Pen, Box, Side], None]] = {
     "counter": counter_shape,
     "machine": machine_shape,
     "rug": rug_shape,
+    "rubble": rubble_shape,
+    "hatch": hatch_shape,
 }

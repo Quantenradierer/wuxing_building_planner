@@ -12,7 +12,15 @@ from roomplanner.errors import RoomplannerError
 from roomplanner.generator import generate as generate_building
 from roomplanner.geometry import Side
 from roomplanner.model import Building
-from roomplanner.params import BuildingType, Condition, GenerationParams, Security, Shape, Wealth
+from roomplanner.params import (
+    BuildingType,
+    Condition,
+    EntranceKind,
+    GenerationParams,
+    Security,
+    Shape,
+    Wealth,
+)
 from roomplanner.render.ascii import render_building
 from roomplanner.render.image import DEFAULT_CELL_PX, RenderOptions
 from roomplanner.render.image import render_building as render_images
@@ -52,6 +60,10 @@ def generate(
     service_side: Annotated[
         Side | None, typer.Option(case_sensitive=False, help="Default: opposite of street side")
     ] = None,
+    entrances: Annotated[
+        str | None,
+        typer.Option(help="Comma-separated entrance kinds (main, service, emergency, roof)"),
+    ] = None,
     seed: Annotated[int | None, typer.Option(help="Random if omitted")] = None,
     output_format: Annotated[OutputFormat, typer.Option("--format", "-f")] = OutputFormat.ASCII,
     output: Annotated[
@@ -76,10 +88,11 @@ def generate(
             shape=shape,
             street_side=street_side,
             service_side=service_side,  # pyright: ignore[reportArgumentType]  # None = default
+            entrances=_entrances(entrances),
             seed=seed,
         )
         building = generate_building(params)
-    except ValidationError as error:
+    except (ValidationError, ValueError) as error:
         _fail(str(error))
     except RoomplannerError as error:
         _fail(str(error))
@@ -142,6 +155,12 @@ def _write_images(
         typer.echo(str(target))
     for warning in building.warnings:
         typer.echo(f"warning: {warning}", err=True)
+
+
+def _entrances(value: str | None) -> tuple[EntranceKind, ...] | None:
+    if value is None:
+        return None
+    return tuple(EntranceKind(part.strip()) for part in value.split(",") if part.strip())
 
 
 def floor_path(base: Path, level: int, extension: str) -> Path:

@@ -8,12 +8,28 @@ from enum import StrEnum
 from roomplanner.geometry import Axis, Cell, Edge, Side
 from roomplanner.params import GenerationParams
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
+READABLE_SCHEMA_VERSIONS = (2, 3)  # version 3 only added fields and the `breach` kind
 
 
 class OpeningKind(StrEnum):
     DOOR = "door"
     WINDOW = "window"
+    BREACH = "breach"  # hole in a wall (condition layer); always passable
+
+
+class OpeningState(StrEnum):
+    INTACT = "intact"
+    BROKEN = "broken"  # door: smashed, stuck open; window: shattered
+    MISSING = "missing"  # door: no leaf left
+    BLOCKED = "blocked"  # door: barricaded or welded shut, impassable
+
+
+_STATES = {
+    OpeningKind.DOOR: set(OpeningState),
+    OpeningKind.WINDOW: {OpeningState.INTACT, OpeningState.BROKEN},
+    OpeningKind.BREACH: {OpeningState.INTACT},
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +45,13 @@ class Opening:
     kind: OpeningKind
     edges: tuple[Edge, ...]
     swing: Swing | None = None
+    state: OpeningState = OpeningState.INTACT
+    # Doors only (all optional): what the leaf is made of, its lock and the lock's rating,
+    # and for exterior doors which entrance they are (main, service, emergency).
+    material: str | None = None
+    lock: str | None = None
+    rating: int | None = None
+    entrance: str | None = None
 
     def __post_init__(self) -> None:
         if not self.edges:
@@ -49,10 +72,19 @@ class Opening:
                 raise ValueError("a door hinge must sit at one end of its wall run")
         elif self.swing is not None:
             raise ValueError(f"{self.kind} openings have no swing")
+        if self.state not in _STATES[self.kind]:
+            raise ValueError(f"a {self.kind} cannot be {self.state}")
 
     @property
     def axis(self) -> Axis:
         return self.edges[0].axis
+
+    @property
+    def passable(self) -> bool:
+        """Whether people can walk through (doors unless blocked, breaches)."""
+        if self.kind is OpeningKind.DOOR:
+            return self.state is not OpeningState.BLOCKED
+        return self.kind is OpeningKind.BREACH
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +121,32 @@ class PlacedObject:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class Device:
+    """Security device mounted in a cell: camera, alarm panel, motion sensor, …"""
+
+    kind: str
+    x: int
+    y: int
+    facing: Side  # cameras: view direction; wall devices: away from their wall
+    room: str
+    rating: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class Light:
+    """Light source at a continuous position in cells (0, 0 = north-west map corner)."""
+
+    kind: str  # ceiling, neon, emergency, flood, sign
+    x: float
+    y: float
+    radius: float  # cells
+    colour: str  # "#rrggbb"
+    intensity: float = 1.0  # 0..1
+    state: str = "on"  # on, flicker, off (broken or no power)
+    room: str | None = None  # None: outside the building
+
+
 def level_name(level: int) -> str:
     if level == 0:
         return "Ground floor"
@@ -106,6 +164,8 @@ class Floor:
     openings: tuple[Opening, ...] = ()
     role: str = ""
     objects: tuple[PlacedObject, ...] = ()
+    devices: tuple[Device, ...] = ()
+    lights: tuple[Light, ...] = ()
 
     @property
     def name(self) -> str:
@@ -141,6 +201,10 @@ class Floor:
                         if ahead in room.cells:
                             clear.setdefault(room.id, set()).add(ahead)
         return {room_id: frozenset(cells) for room_id, cells in clear.items()}
+
+    def passable_edges(self) -> frozenset[Edge]:
+        """Wall edges that can be walked through (open doors, breaches)."""
+        return frozenset(e for o in self.openings if o.passable for e in o.edges)
 
     def is_exterior_wall(self, edge: Edge) -> bool:
         a, b = edge.cells()

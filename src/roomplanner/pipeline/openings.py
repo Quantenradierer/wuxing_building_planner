@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import random
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from roomplanner.geometry import Axis, Cell, Edge, Side, boundary_edges
 from roomplanner.model import Floor, Opening, OpeningKind, Room, Swing
@@ -45,8 +45,14 @@ class DefaultOpenings:
             entries = {i for i, r in enumerate(planned.rooms) if r.entry}
             owner = {cell: i for i, room in enumerate(rooms) for cell in room.cells}
             circulation = {i for i, r in enumerate(rooms) if ctx.rules.spec(r.type).circulation}
+            index = {id(r): i for i, r in enumerate(planned.rooms)}
+            hosts = {
+                i: index[id(r.host)]
+                for i, r in enumerate(planned.rooms)
+                if r.host is not None and id(r.host) in index
+            }
             walls = _walls(footprint, owner, circulation)
-            doors = _interior_doors(ctx, rooms, owner, walls, circulation, entries, rng)
+            doors = _interior_doors(ctx, rooms, owner, walls, circulation, entries, hosts, rng)
             used: set[Edge] = set()
             for request in planned.entrances:
                 door = _exterior_door(ctx, footprint, rooms[request.room], request, used, rng)
@@ -129,6 +135,7 @@ def _interior_doors(
     walls: frozenset[Edge],
     circulation: set[int],
     entries: set[int],
+    hosts: dict[int, int],
     rng: random.Random,
 ) -> list[Opening]:
     """One door per room, committed greedily: the best-ranked door of all pending rooms first.
@@ -136,6 +143,7 @@ def _interior_doors(
     Rank: into circulation, then into a type from the room's `access` list (in order), then
     anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
     only connect within their unit, except its entry room, which opens to circulation.
+    An annex (closet) opens only into its host and is never passed through.
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
@@ -151,6 +159,10 @@ def _interior_doors(
         neighbours[i].append(j)
 
     def allowed(i: int, j: int) -> bool:
+        if i in hosts:
+            return j == hosts[i]
+        if j in hosts:
+            return False
         unit_i, unit_j = rooms[i].unit, rooms[j].unit
         if j in circulation:
             return unit_i is None or i in entries
@@ -204,7 +216,7 @@ def _exterior_door(
     used: set[Edge],
     rng: random.Random,
 ) -> Opening | None:
-    width = ctx.rules.program.entrances[request.kind].width
+    width = ctx.rules.entrances(ctx.params)[request.kind].width
     facade = {
         Edge.of(c, request.side) for c in room.cells if c.neighbour(request.side) not in footprint
     }
@@ -224,7 +236,7 @@ def _exterior_door(
     if not candidates:
         return None
     _, run, start = min(candidates, key=lambda c: (c[0], c[1][0], c[2]))
-    return _door(run, width, None, request.side, rng, start)
+    return replace(_door(run, width, None, request.side, rng, start), entrance=request.kind.value)
 
 
 def _inward(vertex: tuple[int, int], side: Side) -> Edge:
