@@ -8,8 +8,10 @@ rooms:
       - {object: checkout, placement: near_exit, count: [1, 4]}
       - {object: freezer, placement: wall, count: [0, 3]}
       - {object: gondola, placement: rows, aisle: 3, margin: 3}
+      - {object: guard_post, placement: near_exit, count: [0, 1], security: [low, corporate, aaa]}
       - {object: display_case, placement: wall, count: [0, 2]}
       - {object: atm, placement: wall, count: [0, 1]}
+      - {object: pay_station, placement: wall, count: [0, 2]}   # credstick readers
   stockroom:
     area: [40, 100000]
     min_side: 6
@@ -19,6 +21,7 @@ rooms:
       - {object: rack, placement: rows, aisle: 3, margin: 2}
       - {object: pallet, placement: scatter, count: [0, 4]}
       - {object: crate, placement: scatter, count: [0, 3]}
+      - {object: fire_extinguisher, placement: wall, count: [1, 2]}
   cold_storage:
     area: [16, 80]
     min_side: 4
@@ -58,3 +61,14 @@ rooms:
       - {object: fridge, placement: wall, count: [1, 2]}
       - {object: sink, placement: wall}
       - {object: coffee_machine, placement: wall, count: [0, 1]}
+  cashier_booth:        # armoured till behind a bulletproof pay window
+    area: [9, 24]
+    min_side: 3
+    windows: forbidden
+    transit: false
+    next_to: [shop_floor, sales_floor]
+    furniture:
+      - {object: counter, placement: wall}
+      - {object: safe, placement: corner}
+      - {object: terminal, placement: corner, count: [0, 1]}
+      - {object: stool, placement: at, at: counter, count: [0, 1]}

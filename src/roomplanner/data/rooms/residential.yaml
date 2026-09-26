@@ -23,7 +23,10 @@ rooms:
       - {object: armchair, placement: scatter, count: [0, 2]}
       - {object: shelf, placement: wall, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
-      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}   # the trid
+      - {object: sim_rig, placement: wall, count: [0, 1], wealth: [low, middle, high, luxury]}
+      - {object: mattress, placement: scatter, count: [1, 2], wealth: [squatter]}
+      - {object: fire_barrel, placement: scatter, count: [0, 1], wealth: [squatter]}
   bedroom:
     area: [40, 70]
     min_side: 5
@@ -60,7 +63,8 @@ rooms:
     access: [hallway, living_room]
     furniture:
       - {object: counter, placement: wall}
-      - {object: stove, placement: wall}
+      - {object: stove, placement: wall, wealth: [squatter, high, luxury]}   # hot plate / real cooking
+      - {object: autokitchen, placement: wall, wealth: [low, middle, high, luxury]}
       - {object: fridge, placement: wall}
       - {object: kitchen_table_set, placement: scatter, count: [0, 1]}
       - {object: sink, placement: wall, count: [0, 1]}

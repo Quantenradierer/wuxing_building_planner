@@ -38,6 +38,8 @@ floor_roles:
       - {room: staff_room, count: 1, wealth: [low, middle, high, luxury]}
       - {room: cold_storage, count: [1, 2]}
       - {room: prep_kitchen, count: [0, 1], wealth: [middle, high, luxury]}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: cashier_booth, count: [0, 1], near: entrance, wealth: [squatter, low], priority: optional}
       - {room: stockroom, fill: true}
   upper:
     applies: [upper, top]
@@ -51,4 +53,6 @@ floor_roles:
       - {room: stockroom, place: hall}
       - {room: utility, count: 1, priority: required}
       - {room: cold_storage, count: [0, 2]}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: storage, fill: true}

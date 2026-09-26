@@ -283,7 +283,9 @@ placed earlier in the room: chairs at desks and tables, stools at bar counters, 
 beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` — gone round in
 turn, and `count` is per target, never scaled). Counts are a range or `per: N` (one
 object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor;
-an exact count (`count: 1`, the default) is never scaled.
+an exact count (`count: 1`, the default) is never scaled. A rule with `wealth:` or `security:`
+lists applies only to those tiers of the building (squatter mattresses, a guard post at the
+checkout from low security up); `rules_for` drops the others.
 Rooms of one type with the same shape, door clearances and walls get the same layout,
 mirrored if they are mirror images, across all floors; doors without a partner to be near
 sit at the same spot of their wall, so same-sized rooms really are the same.

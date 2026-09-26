@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from roomplanner.params import BuildingType, Wealth
+from roomplanner.params import BuildingType, Security, Wealth
 from roomplanner.rules import (
     RoomEntry,
     apply_wealth,
@@ -66,6 +66,19 @@ def test_wealth_filters_roles_and_entries() -> None:
         e for e in squatter.program.floor_roles["standard"].rooms if e.room == "kitchenette"
     ]
     assert kitchens == []
+
+
+def test_wealth_and_security_filter_furniture() -> None:
+    def kinds(building: BuildingType, room: str, wealth: Wealth, security: Security) -> set[str]:
+        return {r.object for r in rules_for(building, wealth, security).spec(room).furniture}
+
+    squat = kinds(BuildingType.APARTMENT, "living_room", Wealth.SQUATTER, Security.LOW)
+    middle = kinds(BuildingType.APARTMENT, "living_room", Wealth.MIDDLE, Security.LOW)
+    assert "mattress" in squat and "sim_rig" not in squat
+    assert "sim_rig" in middle and "mattress" not in middle
+    unguarded = kinds(BuildingType.SUPERMARKET, "sales_floor", Wealth.MIDDLE, Security.NONE)
+    guarded = kinds(BuildingType.SUPERMARKET, "sales_floor", Wealth.MIDDLE, Security.CORPORATE)
+    assert "guard_post" not in unguarded and "guard_post" in guarded
 
 
 def test_executive_floor_on_top_of_tall_luxury_offices() -> None:

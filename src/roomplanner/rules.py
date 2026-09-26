@@ -95,6 +95,8 @@ class FurnitureRule(_Strict):
     beside: list[Literal["front", "back", "flanks"]] = Field(
         default=["front", "back", "flanks"], description="at: which sides of the target, in turn"
     )
+    wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
+    security: list[Security] | None = Field(default=None, description="Only for these levels")
 
     @model_validator(mode="after")
     def _at_needs_target(self) -> Self:
@@ -433,10 +435,17 @@ def apply_wealth(rules: Rules, wealth: Wealth, security: Security = Security.LOW
     rooms: dict[str, RoomSpec] = {}
     for name, spec in rules.rooms.items():
         override = spec.wealth.get(wealth, RoomTier())
+        furniture = [
+            r
+            for r in spec.furniture
+            if (r.wealth is None or wealth in r.wealth)
+            and (r.security is None or security in r.security)
+        ]
         rooms[name] = spec.model_copy(
             update={
                 "area": override.area or scale(spec.area),
                 "min_side": override.min_side or spec.min_side,
+                "furniture": furniture,
             }
         )
 

@@ -63,6 +63,7 @@ rooms:
     windows: forbidden
     cluster: true
     furniture:
+      - {object: evidence_locker, placement: wall, per: 8, count: [1, 4]}
       - {object: shelf, placement: rows, aisle: 2, margin: 1}
       - {object: counter, placement: wall, count: [0, 1]}
   records_room:         # case files and paper records, the front desk's back office
@@ -132,3 +133,37 @@ rooms:
     furniture:
       - {object: dining_set, placement: rows, aisle: 2, margin: 2}
       - {object: counter, placement: wall, count: [0, 1]}
+  # --- police extras ---
+  sally_port:           # secure vehicle bay: prisoners go from the car straight to booking
+    area: [90, 180]
+    min_side: 10
+    windows: forbidden
+    door_width: 4
+    furniture:
+      - {object: car, placement: wall}
+      - {object: weapon_locker, placement: wall, count: [1, 2]}   # guns stay out of the cells
+      - {object: bench, placement: wall, count: [0, 1]}
+      - {object: fire_extinguisher, placement: wall}
+  forensics_lab:        # Knight Errant / Lone Star crime lab
+    area: [40, 100]
+    min_side: 6
+    windows: optional
+    furniture:
+      - {object: lab_bench, placement: wall, count: [1, 2]}
+      - {object: fume_hood, placement: wall, count: [0, 1]}
+      - {object: specimen_fridge, placement: wall, count: [1, 2]}
+      - {object: evidence_locker, placement: wall, count: [1, 2]}
+      - {object: terminal, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall}
+      - {object: stool, placement: at, at: lab_bench, count: [0, 1]}
+  # --- church extras ---
+  shelter:              # night shelter for the Barrens' homeless
+    wealth_shift: -1
+    area: [60, 200]
+    min_side: 7
+    windows: optional
+    door_width: 3
+    furniture:
+      - {object: mattress, placement: rows, aisle: 2, margin: 1}
+      - {object: locker, placement: wall, count: [0, 4]}
+      - {object: fire_barrel, placement: scatter, count: [0, 1], wealth: [squatter]}

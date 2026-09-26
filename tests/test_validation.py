@@ -68,7 +68,7 @@ def test_detects_misaligned_core() -> None:
     building = generate(params)
     upper = building.floor(1)
     stairs = next(r for r in upper.rooms if r.type == "stairwell")
-    other = next(r for r in upper.rooms if r.type == "office")
+    other = next(r for r in upper.rooms if r.type not in ("stairwell", "elevator", "corridor"))
     moved_cell = min(other.cells)
     rooms = replace_room(
         upper,

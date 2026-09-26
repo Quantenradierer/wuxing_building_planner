@@ -119,6 +119,28 @@ objects:
   coffee_table:    {size: [2, 2], glyph: t}   # in front of sofas
   board_table:     {size: [6, 3], glyph: T}
 
+  # Building services, security tech, Sixth World details.
+  electrical_panel: {size: [2, 1], glyph: "0"}   # switchboard / breaker cabinet
+  battery_bank:    {size: [3, 1], glyph: "0"}    # UPS batteries
+  hvac_unit:       {size: [4, 3], glyph: X}      # air handler
+  generator:       {size: [5, 3], glyph: X}      # backup diesel generator
+  fuel_tank:       {size: [3, 2], glyph: "8"}
+  suppression_tanks: {size: [3, 1], glyph: "<"}  # inert gas bottles of a fire suppression system
+  fire_extinguisher: {size: [1, 1], glyph: "'"}
+  rigger_cocoon:   {size: [2, 3], glyph: Q}      # reclined rigger / decker chair with trodes
+  drone_dock:      {size: [2, 2], glyph: "0"}    # charging pad with a parked drone
+  drone_rack:      {size: [3, 1], glyph: s}      # small drones and spare parts on a wall rack
+  deposit_boxes:   {size: [4, 1], glyph: F}      # wall of safe deposit boxes
+  sim_rig:         {size: [2, 3], glyph: A}      # simsense recliner (BTL chips in the Barrens)
+  autokitchen:     {size: [2, 1], glyph: v}      # nuke-it autokitchen
+  mattress:        {size: [2, 4], glyph: b}      # on the floor
+  fire_barrel:     {size: [1, 1], glyph: "8"}
+  cyberware_rack:  {size: [3, 1], glyph: m}      # cyberlimbs and implants on hooks
+  cryo_pod:        {size: [2, 4], glyph: H}
+  ambulance:       {size: [4, 10], glyph: "="}   # DocWagon armoured ambulance, nose to the wall
+  evidence_locker: {size: [2, 1], glyph: L}
+  shipping_container: {size: [5, 12], glyph: "["}
+
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).
 groups:

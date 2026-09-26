@@ -41,13 +41,16 @@ rooms:
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
       - {object: coffee_machine, placement: wall}
+      - {object: autokitchen, placement: wall, count: [0, 1]}
       - {object: sink, placement: wall, count: [0, 1]}
   server_room:
     area: [40, 160]
     min_side: 6
     windows: forbidden
     furniture:
+      - {object: suppression_tanks, placement: wall, count: [0, 1]}
       - {object: server_rack, placement: rows, aisle: 2, margin: 1}
+      - {object: fire_extinguisher, placement: corner}
   archive:
     area: [60, 240]
     min_side: 6
@@ -77,3 +80,17 @@ rooms:
       - {object: board_set, placement: center}
       - {object: plant, placement: corner, count: [1, 2]}
       - {object: wall_screen, placement: wall}
+  executive_quarters:   # the exec's private bedroom and shower for long nights
+    wealth_shift: +1          # fancier than the rest of the building
+    area: [40, 90]
+    min_side: 5
+    windows: optional
+    transit: false
+    access: [executive_office]
+    next_to: [executive_office]
+    furniture:
+      - {object: double_bed_set, placement: wall}
+      - {object: shower, placement: corner}
+      - {object: sink, placement: wall}
+      - {object: wardrobe, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}

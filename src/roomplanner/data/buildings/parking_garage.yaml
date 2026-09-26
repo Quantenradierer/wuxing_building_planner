@@ -35,6 +35,7 @@ floor_roles:
       - {room: toilet, count: [0, 1], near: core}
       - {room: security_room, count: 1, security: [corporate, aaa]}
       - {room: utility, count: 1}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: storage, fill: true}
   deck:
     applies: [upper, top, basement]

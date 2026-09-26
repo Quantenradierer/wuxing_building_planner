@@ -77,6 +77,7 @@ rooms:
       - {object: barrel, placement: scatter, count: [0, 2]}
       - {object: workbench, placement: wall, count: [0, 1]}
       - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: fire_extinguisher, placement: wall}
   security_room:
     area: [16, 40]
     min_side: 4
@@ -105,3 +106,118 @@ rooms:
       - {object: coffee_machine, placement: wall, count: [0, 1]}
       - {object: fridge, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
+  # --- building services and security tech (Sixth World) ---
+  electrical_room:      # switchboards, UPS batteries, the building's network patch panels
+    wealth_shift: -1
+    area: [16, 48]
+    min_side: 4
+    windows: forbidden
+    cluster: true
+    # Also a closet inside a back-of-house room, `annex` of the time.
+    access: [utility, stockroom, loading_bay, staff_room, shipping_office, manager_office]
+    annex: 0.6
+    furniture:
+      - {object: electrical_panel, placement: wall, per: 8, count: [2, 6]}
+      - {object: server_rack, placement: wall, count: [0, 1]}
+      - {object: battery_bank, placement: wall, count: [0, 2]}
+      - {object: fire_extinguisher, placement: corner}
+  network_closet:       # a floor's switches and Matrix access points
+    area: [9, 24]
+    min_side: 3
+    windows: forbidden
+    cluster: true
+    furniture:
+      - {object: server_rack, placement: wall, count: [1, 2]}
+      - {object: electrical_panel, placement: wall, count: [0, 1]}
+  mechanical_room:      # air handlers; ducts from here run through the whole building
+    wealth_shift: -1
+    area: [30, 160]
+    min_side: 4
+    windows: forbidden
+    furniture:
+      - {object: hvac_unit, placement: wall, per: 30, count: [1, 4]}
+      - {object: electrical_panel, placement: wall, count: [1, 2]}
+      - {object: machinery, placement: wall, count: [0, 1]}
+      - {object: fire_extinguisher, placement: corner}
+  generator_room:       # backup power: diesel generator, fuel, switchover panel
+    wealth_shift: -1
+    area: [32, 90]
+    min_side: 6
+    windows: forbidden
+    furniture:
+      - {object: generator, placement: center}
+      - {object: fuel_tank, placement: wall, count: [1, 2]}
+      - {object: electrical_panel, placement: wall, count: [1, 2]}
+      - {object: battery_bank, placement: wall, count: [0, 2]}
+      - {object: fire_extinguisher, placement: corner}
+  host_room:            # the building's Matrix host: racks, cooling, gas suppression
+    area: [40, 120]
+    min_side: 6
+    windows: forbidden
+    furniture:
+      - {object: server_rack, placement: rows, aisle: 2, margin: 2}
+      - {object: console, placement: wall}
+      - {object: suppression_tanks, placement: wall, count: [1, 2]}
+      - {object: hvac_unit, placement: wall, count: [0, 1]}
+  spider_room:          # security rigger / spider: drones and cameras, jacked in
+    area: [24, 70]
+    min_side: 5
+    windows: forbidden
+    furniture:
+      - {object: rigger_cocoon, placement: wall, count: [1, 2]}
+      - {object: console, placement: wall, count: [1, 2]}
+      - {object: wall_screen, placement: wall, count: [2, 4]}
+      - {object: server_rack, placement: wall, count: [0, 1]}
+      - {object: weapon_locker, placement: wall, count: [0, 1]}
+  drone_bay:            # security drones charging, spares on the wall
+    area: [30, 100]
+    min_side: 5
+    windows: optional
+    door_width: 3
+    furniture:
+      - {object: drone_dock, placement: scatter, per: 12, count: [2, 8]}
+      - {object: drone_rack, placement: wall, count: [1, 3]}
+      - {object: workbench, placement: wall, count: [0, 1]}
+      - {object: electrical_panel, placement: wall, count: [0, 1]}
+      - {object: fire_extinguisher, placement: corner}
+  vault:                # cash, paydata on chips, deposit boxes
+    area: [16, 60]
+    min_side: 4
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: deposit_boxes, placement: wall, per: 6, count: [1, 6]}
+      - {object: safe, placement: corner, count: [1, 2]}
+      - {object: crate, placement: scatter, count: [0, 2]}
+      - {object: suppression_tanks, placement: wall, count: [0, 1]}
+  safe_room:            # panic room: supplies, a terminal, a way to call for help
+    area: [12, 40]
+    min_side: 4
+    windows: forbidden
+    transit: false
+    cluster: true
+    access: [executive_office, manager_office, board_room, vip_room]
+    annex: 0.8
+    furniture:
+      - {object: bench, placement: wall}
+      - {object: terminal, placement: wall}
+      - {object: shelf, placement: wall, count: [1, 2]}
+      - {object: weapon_locker, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+  vending_room:         # soykaf, stuffer snacks, Nuke-It meals
+    area: [12, 36]
+    min_side: 3
+    cluster: true
+    furniture:
+      - {object: vending_machine, placement: wall, per: 5, count: [2, 5]}
+      - {object: bench, placement: wall, count: [0, 1]}
+      - {object: trash_bin, placement: corner}
+  garage:               # vehicle bay: patrol cars, vans, the boss's limo
+    area: [100, 400]
+    min_side: 10
+    windows: optional
+    door_width: 4
+    furniture:
+      - {object: car, placement: rows, aisle: 8, margin: 0, block: 40}
+      - {object: tool_rack, placement: wall, count: [0, 2]}
+      - {object: fire_extinguisher, placement: wall}

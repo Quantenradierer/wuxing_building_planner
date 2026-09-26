@@ -13,7 +13,7 @@ facade:
   module: 3
   window: 2
 cluster_filler: records_room
-service_rooms: [evidence_room, locker_room, storage, utility]
+service_rooms: [sally_port, evidence_room, locker_room, storage, utility]
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
@@ -40,6 +40,10 @@ floor_roles:
       - {room: toilet, count: [1, 2], near: core, priority: required}
       - {room: locker_room, count: 1}
       - {room: booking_room, count: 1, near: service}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: sally_port, count: 1, near: service}
+      - {room: generator_room, count: [0, 1], near: service, when: "floors_below == 0", priority: optional}
+      - {room: drone_bay, count: [0, 1], when: "floors_below == 0", priority: optional}
       - {room: squad_room, fill: true}
       - {room: records_room, fill: true}      # interior rows without facade
   upper:
@@ -51,6 +55,8 @@ floor_roles:
       - {room: kitchenette, count: 1, near: core}
       - {room: interview_room, count: [0, 2]}
       - {room: observation_room, count: [0, 1]}
+      - {room: forensics_lab, count: [0, 1], priority: optional}
+      - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: squad_room, fill: true}
       - {room: office, fill: true}
       - {room: archive, fill: true}           # interior rows without facade
@@ -60,4 +66,10 @@ floor_roles:
       - {room: utility, count: 1, priority: required}
       - {room: cell_block, count: [0, 1]}
       - {room: evidence_room, count: [1, 2]}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: server_room, count: [0, 1], priority: optional}
+      - {room: garage, count: [0, 1], when: "level + 1 == 0", priority: optional}
+      - {room: drone_bay, count: [0, 1], priority: optional}
+      - {room: forensics_lab, count: [0, 1], priority: optional}
       - {room: storage, fill: true}

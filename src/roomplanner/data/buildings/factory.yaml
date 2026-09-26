@@ -39,6 +39,8 @@ floor_roles:
       - {room: shipping_office, count: 1}
       - {room: paint_booth, count: [0, 1]}
       - {room: security_room, count: 1, security: [corporate, aaa]}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: generator_room, count: [0, 1], near: service, when: "floors_below == 0", priority: optional}
       - {room: storage, fill: true}
   upper:
     applies: [upper, top]
@@ -53,4 +55,7 @@ floor_roles:
     rooms:
       - {room: stockroom, place: hall}
       - {room: utility, count: [1, 2], priority: required}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
+      - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: storage, fill: true}

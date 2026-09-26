@@ -31,6 +31,8 @@ floor_roles:
       - {room: toilet, count: 1, priority: required}
       - {room: manager_office, count: [0, 1]}
       - {room: cold_storage, count: [0, 1]}
+      - {room: cashier_booth, count: 1, near: entrance}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: stockroom, fill: true}
   upper:
     applies: [upper, top]

@@ -31,6 +31,8 @@ floor_roles:
       - {room: toilet, count: 1, priority: required}
       - {room: pharmacy, count: [0, 1]}
       - {room: storage, count: [1, 2]}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: cyberware_storage, count: [0, 1], priority: optional}
       - {room: recovery_room, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
   upstairs:
@@ -38,6 +40,7 @@ floor_roles:
     rooms:
       - {room: toilet, count: 1}
       - {room: treatment_room, count: [0, 1]}
+      - {room: cyber_surgery, count: [0, 1], wealth: [middle, high, luxury], priority: optional}
       - {room: recovery_room, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
   basement:
@@ -46,6 +49,9 @@ floor_roles:
       - {room: back_room_or, count: [0, 1]}
       - {room: morgue, count: [0, 1]}
       - {room: utility, count: 1}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: body_bank, count: [0, 1], priority: optional}
+      - {room: generator_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
       - {room: storage, fill: true}
 
 wealth:

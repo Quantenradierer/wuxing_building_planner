@@ -12,6 +12,7 @@ facade:
   module: 3
   window: 2
 cluster_filler: storage
+service_rooms: [docwagon_bay, storage, utility, staff_room, laundry]
 
 core:
   - {room: stairwell, size: [6, 10], when: "floors_total >= 2"}
@@ -38,6 +39,9 @@ floor_roles:
       - {room: nurse_station, count: 1, near: core}
       - {room: security_room, count: 1, near: entrance, security: [low, corporate, aaa]}
       - {room: cafeteria, count: [0, 1], wealth: [middle, high, luxury]}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: docwagon_bay, count: 1, near: service}
+      - {room: generator_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: exam_room, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
   surgery:
@@ -51,6 +55,8 @@ floor_roles:
       - {room: nurse_station, count: 1, near: core, priority: required}
       - {room: toilet, count: 2, near: core}
       - {room: staff_room, count: 1}
+      - {room: cyber_surgery, count: [0, 1], priority: optional}
+      - {room: cyberware_storage, count: [0, 1], priority: optional}
       - {room: recovery_room, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
   wards:
@@ -60,6 +66,7 @@ floor_roles:
       - {room: toilet, count: 2, near: core}
       - {room: doctor_office, count: [1, 3]}
       - {room: staff_room, count: 1}
+      - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: ward, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
   basement:
@@ -69,4 +76,8 @@ floor_roles:
       - {room: utility, count: [1, 2], priority: required}
       - {room: pharmacy, count: 1}
       - {room: lab, count: [1, 2]}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
+      - {room: body_bank, count: [0, 1], priority: optional}
       - {room: storage, fill: true}

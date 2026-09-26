@@ -33,6 +33,9 @@ floor_roles:
       - {room: meeting_room, count: [0, 1]}
       - {room: security_room, count: 1, near: entrance, priority: required, security: [corporate, aaa]}
       - {room: storage, count: 1, priority: optional}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: spider_room, count: 1, security: [corporate, aaa], priority: optional}
+      - {room: drone_bay, count: [0, 1], when: "floors_below == 0", security: [aaa], priority: optional}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
       - {room: archive, fill: true}
@@ -46,6 +49,8 @@ floor_roles:
       - {room: board_room, count: 1, priority: required}
       - {room: kitchenette, count: 1, near: core}
       - {room: meeting_room, count: [1, 2]}
+      - {room: executive_quarters, count: [0, 1], priority: optional}
+      - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional}
       - {room: executive_office, fill: true}
       - {room: archive, fill: true}           # interior rows without facade
   standard:
@@ -60,6 +65,7 @@ floor_roles:
       - {room: open_office, share: 0.4, wealth: [middle, high]}
       - {room: open_office, share: 0.2, wealth: [luxury]}
       - {room: storage, count: [0, 1], priority: optional}
+      - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
       - {room: archive, fill: true}
@@ -69,4 +75,8 @@ floor_roles:
       - {room: utility, count: 1, priority: required}
       - {room: server_room, count: [0, 1]}
       - {room: archive, count: [0, 1]}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
+      - {room: drone_bay, count: [0, 1], when: "level + 1 == 0", security: [aaa], priority: optional}
       - {room: storage, fill: true}

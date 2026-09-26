@@ -176,6 +176,31 @@ rooms:
   attendant_booth: tech
   workshop_floor: industrial
   taproom: club
+  electrical_room: industrial
+  network_closet: tech
+  mechanical_room: industrial
+  generator_room: industrial
+  host_room: tech
+  spider_room: tech
+  drone_bay: industrial
+  vault: tech
+  safe_room: tech
+  vending_room: shop
+  garage: concrete
+  fixer_room: club
+  cyber_surgery: sterile
+  cyberware_storage: sterile
+  body_bank: sterile
+  docwagon_bay: concrete
+  rigger_workshop: industrial
+  contraband_store: concrete
+  decon_room: wet
+  subject_holding: sterile
+  sally_port: concrete
+  forensics_lab: lab
+  shelter: concrete
+  cashier_booth: shop
+  executive_quarters: executive
 
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
@@ -290,3 +315,23 @@ objects:
   interview_table: {shape: table, fill: "#6d7788", stroke: "#15171d", detail: "#9aa6b5"}
   coffee_table:    {shape: table, fill: "#3b3029", stroke: "#15120f", detail: "#5a4a3c"}
   board_table:     {shape: table, fill: "#3a2f2a", stroke: "#0f1117", detail: "#ffcc66"}
+  electrical_panel: {shape: shelf, fill: "#4b505c", stroke: "#15171d", detail: "#ffb300"}
+  battery_bank:    {shape: shelf, fill: "#2e3138", stroke: "#0f1117", detail: "#6dffb0", glow: "#6dffb0"}
+  hvac_unit:       {shape: machine, fill: "#6a707c", stroke: "#15171d", detail: "#9aa6b5"}
+  generator:       {shape: machine, fill: "#3d4a3a", stroke: "#0f1117", detail: "#d9a21b", glow: "#ffb300"}
+  fuel_tank:       {shape: rounded, fill: "#8a3a2c", stroke: "#1f0d0a", detail: "#d9a21b"}
+  suppression_tanks: {shape: shelf, fill: "#c0392b", stroke: "#2a0d0a", detail: "#e6ebf1"}
+  fire_extinguisher: {shape: circle, fill: "#e0312b", stroke: "#2a0d0a", detail: "#1a1d26"}
+  rigger_cocoon:   {shape: bed, fill: "#23283a", stroke: "#0b0e14", detail: "#00e5ff", glow: "#00e5ff"}
+  drone_dock:      {shape: hatch, fill: "#1a1d26", stroke: "#ffb300", detail: "#00e5ff"}
+  drone_rack:      {shape: shelf, fill: "#3b3f47", stroke: "#0f1117", detail: "#00e5ff"}
+  deposit_boxes:   {shape: shelf, fill: "#8a8f99", stroke: "#15171d", detail: "#c9b27a"}
+  sim_rig:         {shape: seat, fill: "#3a2040", stroke: "#0b0e14", detail: "#ff3fa4", glow: "#ff3fa4"}
+  autokitchen:     {shape: machine, fill: "#c9d0da", stroke: "#4d5563", detail: "#ff6b3d", glow: "#ffb347"}
+  mattress:        {shape: bed, fill: "#5a5446", stroke: "#1a1814", detail: "#8a8378"}
+  fire_barrel:     {shape: circle, fill: "#4a3a2c", stroke: "#15120f", detail: "#ff6b3d", glow: "#ff8a3d"}
+  cyberware_rack:  {shape: shelf, fill: "#aab4c2", stroke: "#3b4350", detail: "#9fe8ff", glow: "#4fc3f7"}
+  cryo_pod:        {shape: bed, fill: "#bcd7e6", stroke: "#3b4350", detail: "#e6f7ff", glow: "#4fc3f7"}
+  ambulance:       {shape: rounded, fill: "#e6ebf1", stroke: "#3b4350", detail: "#e0312b", glow: "#e0312b"}
+  evidence_locker: {shape: shelf, fill: "#56606e", stroke: "#15171d", detail: "#ffb347"}
+  shipping_container: {shape: box, fill: "#8a4a2c", stroke: "#1f0d0a"}

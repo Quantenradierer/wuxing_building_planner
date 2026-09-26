@@ -35,6 +35,8 @@ floor_roles:
       - {room: parish_hall, count: [0, 1]}
       - {room: manager_office, count: [0, 1]}   # the priest's office
       - {room: kitchenette, count: [0, 1]}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: shelter, count: [0, 1], wealth: [squatter, low], priority: optional}
       - {room: storage, fill: true}
   upper:
     applies: [upper, top]
@@ -46,4 +48,6 @@ floor_roles:
     rooms:
       - {room: crypt, place: hall}
       - {room: utility, count: 1, priority: required}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: shelter, count: [0, 1], wealth: [squatter, low], priority: optional}
       - {room: storage, fill: true}

@@ -35,6 +35,9 @@ floor_roles:
       - {room: security_room, count: 1, near: entrance, security: [corporate, aaa]}
       - {room: xray, count: [0, 1], wealth: [low, middle, high, luxury]}
       - {room: exam_room, count: [2, 4]}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: docwagon_bay, count: [0, 1], near: service, wealth: [high, luxury], priority: optional}
+      - {room: generator_room, count: [0, 1], near: service, when: "floors_below == 0", wealth: [middle, high, luxury], priority: optional}
       - {room: exam_room, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
       - {room: lab, fill: true}
@@ -47,6 +50,7 @@ floor_roles:
       - {room: nurse_station, count: 1, near: core, priority: required}
       - {room: toilet, count: 2, near: core}
       - {room: staff_room, count: 1}
+      - {room: cyber_surgery, count: [0, 1], priority: optional}
       - {room: treatment_room, fill: true}
   wards:
     applies: [upper, top]
@@ -65,4 +69,7 @@ floor_roles:
       - {room: morgue, count: 1, priority: required}
       - {room: lab, count: [0, 1]}
       - {room: utility, count: 1, priority: required}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: [0, 1], when: "level + 1 == 0", priority: optional}
+      - {room: body_bank, count: [0, 1], priority: optional}
       - {room: storage, fill: true}

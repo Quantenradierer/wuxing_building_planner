@@ -39,6 +39,8 @@ floor_roles:
       - {room: mailroom, count: 1, near: entrance}
       - {room: security_room, count: 1, near: entrance, security: [aaa]}   # concierge
       - {room: storage, count: [0, 1], near: core, priority: optional}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: vending_room, count: [0, 1], near: entrance, wealth: [squatter, low, middle], priority: optional}
       - {room: apartment, fill: true}
       - {room: laundry, fill: true}            # interior rows without facade
   residential:
@@ -52,6 +54,8 @@ floor_roles:
     rooms:
       - {room: utility, count: 1, priority: required}
       - {room: laundry, count: 1, wealth: [low, middle, high, luxury]}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", wealth: [middle, high, luxury], priority: optional}
       - {room: storage, fill: true}
 
 wealth:

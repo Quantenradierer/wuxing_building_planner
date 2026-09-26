@@ -68,6 +68,7 @@ rooms:
       - {object: stove, placement: wall, count: [2, 4]}
       - {object: counter, placement: wall, count: [2, 4]}
       - {object: fridge, placement: wall, count: [1, 3]}
+      - {object: fire_extinguisher, placement: wall}
       - {object: counter, placement: center, count: [0, 1]}
       - {object: sink, placement: wall, count: [1, 2]}
       - {object: shelf, placement: wall, count: [0, 2]}
@@ -89,6 +90,8 @@ rooms:
     door_width: 4
     furniture:
       - {object: bar_set, placement: wall, count: [1, 2]}
+      - {object: guard_post, placement: near_exit}                      # bouncer at the door
+      - {object: security_gate, placement: near_exit, count: [0, 2]}   # MAD scanner
       - {object: cafe_table, placement: scatter, per: 60, count: [1, 6]}
       - {object: dj_booth, placement: wall}
       - {object: speaker, placement: corner, count: [2, 4]}
@@ -132,6 +135,7 @@ rooms:
     furniture:
       - {object: counter, placement: wall}
       - {object: shelf, placement: wall, count: [1, 3]}
+      - {object: weapon_locker, placement: wall, count: [1, 3]}   # weapons are checked here
       - {object: coat_rack, placement: scatter, count: [1, 3]}
   coffin_unit:          # coffin motel / squat block: a bunk and a locker, ~2 x 2 m
     area: [12, 20]
@@ -144,6 +148,7 @@ rooms:
     furniture:
       - {object: bed, placement: wall}
       - {object: locker, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}   # a trid panel over the bunk
       - {object: trash_bin, placement: corner, count: [0, 1]}
   taproom:              # a dive bar's hall: bar, booths, pool table
     area: [60, 100000]
@@ -152,9 +157,22 @@ rooms:
     door_width: 3
     furniture:
       - {object: bar_set, placement: wall}
+      - {object: guard_post, placement: near_exit, count: [0, 1]}   # the bouncer
       - {object: sofa_set, placement: wall, per: 80, count: [0, 3]}
       - {object: cafe_table, placement: scatter, per: 30, count: [2, 10]}
       - {object: pool_table, placement: center, count: [0, 1]}
       - {object: arcade_machine, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 2]}
+      - {object: sim_rig, placement: wall, count: [1, 2], wealth: [squatter, low]}   # BTL corner
       - {object: trash_bin, placement: corner, count: [1, 2]}
+  fixer_room:           # the back booth where the fixer meets runners
+    wealth_shift: -1
+    area: [20, 50]
+    min_side: 4
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: sofa_set, placement: wall}
+      - {object: safe, placement: corner, count: [0, 1]}
+      - {object: terminal, placement: corner, count: [0, 1]}
+      - {object: weapon_locker, placement: wall, count: [0, 1]}

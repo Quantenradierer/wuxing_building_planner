@@ -16,6 +16,10 @@ tiers:
       pharmacy: {lock: mechanical}
       security_room: {lock: mechanical}
       manager_office: {lock: mechanical}
+      vault: {lock: mechanical, material: security}
+      host_room: {lock: mechanical}
+      spider_room: {lock: mechanical}
+      cashier_booth: {lock: mechanical, material: security}
     cameras: {entrances: true, rooms: [sales_floor]}
   corporate:
     rating: 4
@@ -26,6 +30,20 @@ tiers:
       server_room: {lock: cardreader, material: security, rating: 5}
       security_room: {lock: cardreader, material: security}
       archive: {lock: cardreader}
+      host_room: {lock: cardreader, material: security, rating: 5}
+      spider_room: {lock: cardreader, material: security}
+      vault: {lock: cardreader, material: security, rating: 6}
+      safe_room: {lock: maglock, material: security, rating: 6}
+      drone_bay: {lock: cardreader}
+      electrical_room: {lock: mechanical}
+      generator_room: {lock: mechanical}
+      mechanical_room: {lock: mechanical}
+      sally_port: {lock: cardreader, material: security}
+      subject_holding: {lock: maglock, material: security}
+      cyber_surgery: {lock: cardreader}
+      body_bank: {lock: cardreader}
+      forensics_lab: {lock: cardreader}
+      cashier_booth: {lock: maglock, material: security}
       executive_office: {lock: cardreader}
       board_room: {lock: cardreader}
       pharmacy: {lock: cardreader, material: security}
@@ -37,7 +55,7 @@ tiers:
       utility: {lock: mechanical}
     cameras: {entrances: true, corridor_per: 120, rooms: [lobby, sales_floor, server_room, waiting_room]}
     alarm_panels: true
-    motion_sensors: [server_room, archive]
+    motion_sensors: [server_room, archive, host_room, vault]
     floodlights: {kind: flood, radius: 10, colour: "#f4fbff", intensity: 0.9}
     furniture:
       lobby:
@@ -45,6 +63,7 @@ tiers:
       security_room:
         - {object: terminal, placement: wall, count: [2, 4]}
         - {object: weapon_locker, placement: wall}
+        - {object: rigger_cocoon, placement: wall, count: [0, 1]}   # the security spider
   aaa:
     rating: 7
     exterior: {lock: biometric, material: security, rating: 8}
@@ -54,6 +73,20 @@ tiers:
       server_room: {lock: biometric, material: blast, rating: 8}
       security_room: {lock: biometric, material: security}
       archive: {lock: biometric, material: security}
+      host_room: {lock: biometric, material: blast, rating: 8}
+      spider_room: {lock: biometric, material: security}
+      vault: {lock: biometric, material: blast, rating: 8}
+      safe_room: {lock: biometric, material: blast, rating: 8}
+      drone_bay: {lock: cardreader, material: security}
+      electrical_room: {lock: cardreader}
+      generator_room: {lock: cardreader, material: security}
+      mechanical_room: {lock: cardreader}
+      sally_port: {lock: biometric, material: security}
+      subject_holding: {lock: biometric, material: security}
+      cyber_surgery: {lock: biometric}
+      body_bank: {lock: biometric, material: security}
+      forensics_lab: {lock: biometric}
+      cashier_booth: {lock: cardreader, material: security}
       executive_office: {lock: biometric}
       board_room: {lock: biometric}
       pharmacy: {lock: biometric, material: security}
@@ -66,7 +99,8 @@ tiers:
       corridor: {lock: cardreader}
     cameras: {entrances: true, corridor_per: 60, rooms: [lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office]}
     alarm_panels: true
-    motion_sensors: [server_room, archive, executive_office, board_room, lab, stairwell, storage]
+    motion_sensors: [server_room, archive, executive_office, board_room, lab, stairwell, storage,
+                     host_room, vault, drone_bay]
     floodlights: {kind: flood, radius: 12, colour: "#f4fbff", intensity: 1.0}
     furniture:
       lobby:
@@ -75,3 +109,4 @@ tiers:
       security_room:
         - {object: terminal, placement: wall, count: [3, 6]}
         - {object: weapon_locker, placement: wall, count: [1, 2]}
+        - {object: rigger_cocoon, placement: wall}                  # the security spider
