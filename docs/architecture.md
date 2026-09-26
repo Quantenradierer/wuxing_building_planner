@@ -13,6 +13,9 @@ src/roomplanner/
   serialization.py           JSON contract: to_json / from_json
   errors.py                  RoomplannerError hierarchy
   render/ascii.py            minimal debug renderer
+  render/image.py            image renderer (one picture per floor)
+  render/theme.py            theme model and loader
+  render/shapes.py           procedural object shapes
   cli.py                     Typer CLI
   pipeline/
     base.py                  Context, intermediate plan, stage protocols
@@ -30,6 +33,7 @@ src/roomplanner/
   data/
     wealth.yaml              per-tier multipliers
     objects.yaml             furniture and fixture catalog
+    themes/*.yaml            image renderer themes (default: neon)
     rooms/*.yaml             room catalogs (common + per building family)
     buildings/*.yaml         one program per building type
 ```
@@ -233,6 +237,17 @@ optional fields may be added without a bump, so readers must ignore unknown fiel
 
 Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`; cell and wall lists are sorted, the
 output as a whole is deterministic.
+
+## Image renderer
+
+`render/image.py` draws one RGB image per floor from the model alone (ADR 0009). The image
+covers the building plus `padding` cells on each side (default 2 = one 1 m VTT square), at
+`cell_px` pixels per cell (default 50). Layers: background, room floors (theme material:
+colour, pattern, optional neon accent strip along the walls), grain, blurred shadows of
+walls and blocking objects, objects (theme style → shape from `render/shapes.py`), walls
+(exterior thicker), windows, doors (leaf opened 90° towards `swing.towards` plus arc; runs
+of 4+ cells are double doors), optional labels and grid, then the blurred glow layer is
+screened on top. Themes are YAML (`data/themes/neon.yaml`) or any file passed by path.
 
 ## ASCII debug renderer
 

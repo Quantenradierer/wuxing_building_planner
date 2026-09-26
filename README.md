@@ -13,6 +13,8 @@ uv run roomplanner generate -t apartment -w 64 -d 36 --floors-above 4 --floors-b
 uv run roomplanner generate -t clinic -w 72 -d 48 --shape l --street-side E --service-side N
 uv run roomplanner generate -t supermarket -w 80 -d 50 --wealth luxury -f json -o megamart.json
 uv run roomplanner render megamart.json
+uv run roomplanner render megamart.json -f png -o maps/megamart.png   # maps/megamart_F0.png, …
+uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
 ```
 
 ## Parameters
@@ -24,12 +26,15 @@ uv run roomplanner render megamart.json
 | `--floors-above`       | floors incl. ground floor (default 1)                  |
 | `--floors-below`       | basements (default 0)                                  |
 | `--wealth`             | squatter, low, middle, high, luxury                    |
-| `--shape`              | rectangle, l                                           |
+| `--shape`              | rectangle, l, u                                        |
 | `--street-side`        | N, E, S, W: main entrance (default S)                  |
 | `--service-side`       | N, E, S, W: loading dock / back door (default opposite)|
 | `--condition`, `--security` | stored for later layers                           |
 | `--seed`               | same seed, same building                               |
-| `-f/--format`          | ascii (debug view) or json (full model)                |
+| `-f/--format`          | ascii (debug view), json (full model), png, webp       |
+| `--theme`              | image theme: bundled name (neon) or a YAML file        |
+| `--cell-px`            | image pixels per cell (default 50, i.e. 100 px per m)  |
+| `--labels`, `--grid N` | room names in images; grid line every N cells          |
 
 Impossible inputs fail with an explanation (e.g. "too small for an L shape, both arms need
 at least 14 cells"); tight ones return a building plus warnings about dropped rooms.
@@ -38,7 +43,10 @@ at least 14 cells"); tight ones return a building plus warnings about dropped ro
 
 The JSON (`schema_version` 2) contains floors with rooms (cells, type, apartment unit),
 walls and openings (doors with swing, windows) as cell edges, and furniture as rectangles
-with facing and cover-relevant kind. It is the contract for the image renderer to come.
+with facing and kind. It is the contract for the image renderer and the VTT exports.
+
+Images: one file per floor (`_F0`, `_F1`, `_B1` suffixes), procedural neon-noir look,
+padded by 1 m so a VTT grid of 100 px per metre lines up with the walls.
 
 In the ASCII view `- |` are walls, `D` doors, `=`/`"` windows, letters furniture and
 numbers rooms (legend below each floor).

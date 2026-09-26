@@ -84,3 +84,29 @@ def test_render_rejects_foreign_json(tmp_path: Path) -> None:
     result = runner.invoke(app, ["render", str(target)])
     assert result.exit_code == 1
     assert "schema_version" in result.output
+
+
+def test_generate_images_one_file_per_floor(tmp_path: Path) -> None:
+    target = tmp_path / "map.png"
+    args = [*BASE, "--floors-above", "2", "-f", "png", "-o", str(target), "--cell-px", "6"]
+    result = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "map_F0.png").is_file()
+    assert (tmp_path / "map_F1.png").is_file()
+
+
+def test_render_saved_json_as_webp(tmp_path: Path) -> None:
+    source = tmp_path / "map.json"
+    assert runner.invoke(app, [*BASE, "-f", "json", "-o", str(source)]).exit_code == 0
+    target = tmp_path / "map.webp"
+    args = ["render", str(source), "-f", "webp", "-o", str(target), "--cell-px", "6", "--labels"]
+    result = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "map_F0.webp").is_file()
+
+
+def test_unknown_theme_fails(tmp_path: Path) -> None:
+    args = [*BASE, "-f", "png", "-o", str(tmp_path / "x.png"), "--theme", "nope"]
+    result = runner.invoke(app, args)
+    assert result.exit_code == 1
+    assert "unknown theme" in result.output
