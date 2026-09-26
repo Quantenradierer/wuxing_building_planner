@@ -352,7 +352,9 @@ class Allocator:
             cluster = Cluster((hall + column) // segment.unit, hall, 1, column, [[]])
             front = self._member_depth(request, cluster)
             backs = self._backs(segment, column, front)
-            fits = front <= math.ceil(high / column) and cluster.units <= state.free_units
+            # Only with room to spare: the hallway costs width a full slot would not.
+            spare = cluster.units + self._full_units(request, segment) <= state.free_units
+            fits = front <= math.ceil(high / column) and spare
             if backs is not None and fits:
                 cluster.stacks[0] = backs
                 return cluster
@@ -440,6 +442,11 @@ class Allocator:
                 # Small window rooms in deep facade strips: at the facade, back rooms behind.
                 state.slots.append(cluster)
                 continue
+            low, high = entry.area or spec.area
+            if state.slots and self._facade_column(spec, low, high, segment) is not None:
+                # No room left for another stack: widen the row rather than a huge room.
+                self._spread(state, state.free_units, fills)
+                return
             min_units = self._fill_min_units(entry, segment)
             units = self._uniform_units(entry, segment, min_units)
             remaining = state.free_units

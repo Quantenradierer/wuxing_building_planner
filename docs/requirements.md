@@ -198,7 +198,9 @@ All seven milestones are implemented (2026-09-26).
 ## Known limitations (v1)
 
 - No fire escapes (they need surroundings).
-- Adjacency preferences are limited to `near: core | entrance` and door `access` lists.
+- Adjacency preferences are limited to `near`, `next_to`, `vestibule` and door `access` lists.
+- Small footprints can be infeasible for rich tiers or big programs: cosmetic clinics and
+  supermarkets need about 36 × 36 cells (18 m), hospitals 48 × 48, others 32 × 32.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.

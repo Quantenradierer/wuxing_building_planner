@@ -14,7 +14,13 @@ from roomplanner.validation import hard_violations
 
 IMPLEMENTED = list(BuildingType)
 # Big programs need more room; smaller buildings of these types are rejected with a reason.
-MIN_REASONABLE = {BuildingType.HOSPITAL: 48}
+# Smallest width and depth at which every tier fits (OR suite plus core; rich tiers'
+# bigger rooms in small shops).
+MIN_REASONABLE = {
+    BuildingType.HOSPITAL: 48,
+    BuildingType.COSMETIC_CLINIC: 36,
+    BuildingType.SUPERMARKET: 36,
+}
 
 cells = st.integers(min_value=8, max_value=90)
 
