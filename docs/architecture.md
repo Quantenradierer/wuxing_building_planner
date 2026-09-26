@@ -80,6 +80,7 @@ PlacedObject
   kind, x, y, w, h                     covers cells [x, x+w) × [y, y+h)
   facing: Side                         front of the object, away from its wall
   room                                 id of the room it stands in
+  blocking                             false for objects walked over (stairs, elevator car)
 ```
 
 Model classes are immutable. Exterior vs. interior walls, room areas and door clearances
@@ -93,8 +94,8 @@ Invariants checked by `validation.py` (all hard unless noted):
   footprint; openings lie on walls and never share edges; door swings fit their wall.
 - With rules: every room is at least `min_side` wide everywhere; core rooms (stairs,
   elevators) occupy the same cells on every floor; rooms that need windows have one (soft).
-- Objects lie inside their room, don't overlap, keep door clearances free and leave the
-  room's free floor connected.
+- Objects lie inside their room and don't overlap; blocking objects keep door clearances
+  free and leave the room's free floor connected.
 
 Future layers (tactical markup, security, condition) are added to `Floor` as further
 collections, each produced by its own pipeline stage.
@@ -141,8 +142,9 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    slice across the whole part (street on a short end). A service corridor stub reaches the
    service side when no corridor touches it; fallback is an exit from the stairwell.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
-   small rooms (toilets, storage) which go into *clusters*: a side hallway from the corridor
-   with rooms stacked along it. Rooms that need windows are never clustered. Partition walls
+   small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
+   slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
+   it. Rooms that need windows are never clustered. Leftover modules widen a fill room. Partition walls
    on facade strips snap to the facade `module` grid.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
@@ -186,9 +188,11 @@ overrides (`wealth:` in the catalog), and room entries / floor roles filtered by
 ### Furnishing
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
-`data/objects.yaml` (size in cells along the wall × deep, cover, ASCII glyph). Placements:
-`wall`, `corner`, `center`, `scatter`, `near_exit` (checkouts) and `rows` (shelves, desks,
-racks with aisles and cross aisles). Counts scale with the tier's `furniture` factor. A
+`data/objects.yaml` (size in cells along the wall × deep, cover, `walkable`, ASCII glyph).
+Placements: `wall`, `corner`, `center`, `scatter`, `near_exit` (checkouts) and `rows`
+(shelves, desks, racks with aisles and cross aisles). Counts are a range or `per: N` (one
+object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor.
+Walkable objects (stairs, elevator car, rugs) may cover door clearances and never block. A
 placement is rejected if it covers another object or a door's clearance (as deep as the door
 is wide) or splits the room's free floor; a ring test around the object avoids most flood
 fills.
@@ -220,7 +224,9 @@ optional fields may be added without a bump, so readers must ignore unknown fiel
       "edges": [[10, 40, "h"], [11, 40, "h"]],
       "swing": {"towards": "S", "hinge": "W"}
     }, {"kind": "window", "edges": [[3, 0, "h"], [4, 0, "h"]]}],
-    "objects": [{"kind": "desk", "x": 4, "y": 1, "w": 3, "h": 2, "facing": "S", "room": "0.3"}]
+    "objects": [{"kind": "desk", "x": 4, "y": 1, "w": 3, "h": 2, "facing": "S", "room": "0.3"},
+                {"kind": "stairs", "x": 20, "y": 1, "w": 6, "h": 4, "facing": "S", "room": "0.2",
+                 "blocking": false}]
   }]
 }
 ```

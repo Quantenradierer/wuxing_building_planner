@@ -33,7 +33,9 @@ floor_roles:
       - {room: xray, count: [0, 1], wealth: [low, middle, high, luxury]}
       - {room: exam_room, count: [2, 4]}
       - {room: exam_room, fill: true}
-      - {room: storage, fill: true}              # interior rows without facade
+      - {room: treatment_room, fill: true}       # interior rows without facade
+      - {room: lab, fill: true}
+      - {room: storage, fill: true}
   surgery:
     applies: [upper]
     when: "level == 1 and floors_above >= 3"
@@ -44,6 +46,7 @@ floor_roles:
       - {room: toilet, count: 2, near: core}
       - {room: staff_room, count: 1}
       - {room: treatment_room, fill: true}
+      - {room: sterilization, fill: true}
       - {room: storage, fill: true}
   wards:
     applies: [upper, top]
@@ -54,6 +57,8 @@ floor_roles:
       - {room: doctor_office, count: [1, 2]}
       - {room: staff_room, count: 1}
       - {room: ward, fill: true}
+      - {room: treatment_room, fill: true}       # interior rows without facade
+      - {room: staff_room, fill: true}
       - {room: storage, fill: true}
   basement:
     applies: [basement]

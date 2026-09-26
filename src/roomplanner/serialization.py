@@ -94,7 +94,7 @@ def _floor_from_dict(data: JsonObject) -> Floor:
 
 
 def _object_to_dict(obj: PlacedObject) -> JsonObject:
-    return {
+    result: JsonObject = {
         "kind": obj.kind,
         "x": obj.x,
         "y": obj.y,
@@ -103,11 +103,21 @@ def _object_to_dict(obj: PlacedObject) -> JsonObject:
         "facing": obj.facing.value,
         "room": obj.room,
     }
+    if not obj.blocking:
+        result["blocking"] = False
+    return result
 
 
 def _object_from_dict(data: JsonObject) -> PlacedObject:
     return PlacedObject(
-        data["kind"], data["x"], data["y"], data["w"], data["h"], Side(data["facing"]), data["room"]
+        data["kind"],
+        data["x"],
+        data["y"],
+        data["w"],
+        data["h"],
+        Side(data["facing"]),
+        data["room"],
+        data.get("blocking", True),
     )
 
 

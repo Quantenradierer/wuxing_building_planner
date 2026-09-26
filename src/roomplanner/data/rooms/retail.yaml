@@ -19,6 +19,7 @@ rooms:
   cold_storage:
     area: [16, 80]
     min_side: 4
+    cluster: true
     windows: forbidden
     furniture:
       - {object: shelf, placement: wall, count: [2, 6]}

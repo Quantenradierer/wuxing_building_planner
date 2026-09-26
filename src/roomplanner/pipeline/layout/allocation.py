@@ -262,7 +262,7 @@ class Allocator:
         full = FullSlot(request, self._full_units(request, segment))
         # Cluster members mostly don't touch the facade, so rooms needing windows stay full.
         needs_window = request.spec.windows is WindowRule.REQUIRED
-        if needs_window or not self._is_small(request, segment):
+        if needs_window or not (request.spec.cluster or self._is_small(request, segment)):
             return full if full.units <= state.free_units else None
         for slot in state.slots:
             if isinstance(slot, Cluster) and slot.column_width >= min_side:
@@ -332,9 +332,14 @@ class Allocator:
             )
             remaining = state.free_units
             if remaining < min_units and state.slots:
-                # Too little left for another room: widen an existing one instead.
+                # Too little left for another room: widen an existing one instead, preferably
+                # one that the leftover suits (a fill room, not a small back room).
                 full = [s for s in state.slots if isinstance(s, FullSlot)]
-                target = self.rng.choice(full) if full else state.slots[-1]
+                wanted = {e.room for e in fills}
+                preferred = [s for s in full if s.request.type in wanted] or [
+                    s for s in full if not s.request.spec.cluster
+                ]
+                target = self.rng.choice(preferred or full or [state.slots[-1]])
                 target.units += remaining
                 return
             if remaining - units < min_units:

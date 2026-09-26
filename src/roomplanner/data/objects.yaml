@@ -1,6 +1,15 @@
 # Furniture and fixtures. size: [cells along the wall / row, cells deep].
-# cover is for the tactical layer; glyph is the ASCII debug character.
+# cover is for the (postponed) tactical layer; glyph is the ASCII debug character.
+# walkable objects can be walked over and may stand in front of doors (stairs).
 objects:
+  stairs:          {size: [6, 4], walkable: true, glyph: "#"}
+  elevator_car:    {size: [3, 3], walkable: true, glyph: "%"}
+  rug:             {size: [4, 3], walkable: true, glyph: "~"}
+  filing_cabinet:  {size: [2, 1], cover: heavy, glyph: F}
+  armchair:        {size: [2, 2], cover: light, glyph: A}
+  crate:           {size: [2, 2], cover: heavy, glyph: K}
+  trash_bin:       {size: [1, 1], cover: light, glyph: U}
+  copier:          {size: [2, 1], cover: heavy, glyph: P}
   desk:            {size: [3, 2], cover: light, glyph: d}
   chair:           {size: [1, 1], cover: none,  glyph: c}
   table:           {size: [2, 2], cover: light, glyph: t}

@@ -46,6 +46,7 @@ class Cover(StrEnum):
 class ObjectSpec(_Strict):
     size: tuple[int, int] = Field(description="Cells along the wall / row, cells deep")
     cover: Cover = Cover.NONE
+    walkable: bool = Field(default=False, description="Can be walked over (stairs)")
     glyph: str = Field(min_length=1, max_length=1, description="ASCII debug glyph")
 
 
@@ -65,12 +66,17 @@ class Placement(StrEnum):
 class FurnitureRule(_Strict):
     object: str
     placement: Placement
-    count: int | tuple[int, int] = 1
+    count: int | tuple[int, int] | None = Field(
+        default=None, description="How many (default 1); with `per`: lower and upper bound"
+    )
+    per: int | None = Field(default=None, gt=0, description="One object per this many cells")
     aisle: int = Field(default=3, gt=0, description="rows: free cells between rows")
     margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
 
     @property
     def count_range(self) -> tuple[int, int]:
+        if self.count is None:
+            return (0, 1000) if self.per is not None else (1, 1)
         return (self.count, self.count) if isinstance(self.count, int) else self.count
 
 
@@ -86,6 +92,9 @@ class RoomSpec(_Strict):
     min_side: int = Field(gt=0)
     windows: WindowRule = WindowRule.OPTIONAL
     circulation: bool = Field(default=False, description="Corridor-like; no walls to others")
+    cluster: bool = Field(
+        default=False, description="Small back room: goes into clusters, not facade slots"
+    )
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
     access: list[str] = Field(default=[], description="Preferred room types to enter from")

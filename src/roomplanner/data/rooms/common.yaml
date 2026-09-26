@@ -12,29 +12,40 @@ rooms:
     wealth:
       luxury: {area: [160, 400]}   # grand lobby
     furniture:
-      - {object: plant, placement: corner, count: [0, 2]}
-      - {object: bench, placement: wall, count: [0, 2]}
+      - {object: plant, placement: corner, count: [1, 4]}
+      - {object: bench, placement: wall, count: [1, 3]}
+      - {object: armchair, placement: scatter, per: 60, count: [0, 4]}
+      - {object: trash_bin, placement: wall, count: [0, 2]}
   stairwell:
     area: [40, 240]
     min_side: 5
+    furniture:
+      - {object: stairs, placement: wall}
   elevator:
     area: [12, 80]
     min_side: 3
     windows: forbidden
+    furniture:
+      - {object: elevator_car, placement: center}
   toilet:
     area: [12, 32]
     min_side: 3
+    cluster: true
     furniture:
-      - {object: wc, placement: wall, count: [1, 3]}
+      - {object: wc, placement: wall, per: 8, count: [1, 4]}
       - {object: sink, placement: wall, count: [1, 2]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   storage:
     area: [12, 80]
     min_side: 3
+    cluster: true
     furniture:
-      - {object: shelf, placement: wall, count: [3, 10]}
+      - {object: shelf, placement: wall, per: 5, count: [2, 16]}
+      - {object: crate, placement: scatter, per: 30, count: [0, 3]}
   utility:
     area: [32, 120]
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: machinery, placement: wall, count: [1, 3]}
+      - {object: machinery, placement: wall, per: 25, count: [1, 5]}
+      - {object: crate, placement: scatter, count: [0, 2]}

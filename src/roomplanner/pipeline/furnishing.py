@@ -75,7 +75,8 @@ class _RoomFurnisher:
         self.clearance = clearance
         self.solid = solid
         self._wall_rects: dict[tuple[int, int, bool], list[Rect]] = {}
-        self.taken: set[Cell] = set()
+        self.taken: set[Cell] = set()  # covered by any object
+        self.blocking: set[Cell] = set()  # covered by objects that can't be walked over
         self.placed: list[PlacedObject] = []
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
@@ -87,7 +88,11 @@ class _RoomFurnisher:
                 self._rows(rule, spec)
                 continue
             low, high = rule.count_range
-            count = round(self.rng.randint(low, high) * self.ctx.rules.wealth.furniture)
+            if rule.per is not None:
+                count = round(len(self.cells) / rule.per * self.ctx.rules.wealth.furniture)
+                count = min(high, max(low, count))
+            else:
+                count = round(self.rng.randint(low, high) * self.ctx.rules.wealth.furniture)
             if low > 0:
                 count = max(1, count)
             for _ in range(count):
@@ -121,7 +126,7 @@ class _RoomFurnisher:
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - ex) + abs(r[1] + r[3] / 2 - ey))
             case Placement.ROWS:
                 return False
-        return any(self._try(rule.object, rect) for rect in candidates)
+        return any(self._try(rule.object, rect, spec.walkable) for rect in candidates)
 
     def _against_walls(self, spec: ObjectSpec, corners_only: bool) -> list[Rect]:
         """Rectangles whose back row lies entirely against a solid wall (cached per size)."""
@@ -189,7 +194,7 @@ class _RoomFurnisher:
                     rect = (x0 + position, y0 + across, along, deep, Side.S)
                 else:
                     rect = (x0 + across, y0 + position, deep, along, Side.E)
-                self._try(rule.object, rect)
+                self._try(rule.object, rect, spec.walkable)
                 position += along
                 in_block += 1
                 if in_block == per_block:
@@ -198,16 +203,20 @@ class _RoomFurnisher:
 
     # --- commit -----------------------------------------------------------------------
 
-    def _try(self, kind: str, rect: Rect) -> bool:
+    def _try(self, kind: str, rect: Rect, walkable: bool = False) -> bool:
         x, y, w, h, facing = rect
         cells = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
-        if not cells <= self.cells or cells & self.taken or cells & self.clearance:
+        if not cells <= self.cells or cells & self.taken:
             return False
-        free = self.cells - self.taken - cells
-        if not ring_is_one_run(free, x, y, w, h) and not connected(free):
-            return False
+        if not walkable:
+            if cells & self.clearance:
+                return False
+            free = self.cells - self.blocking - cells
+            if not ring_is_one_run(free, x, y, w, h) and not connected(free):
+                return False
+            self.blocking |= cells
         self.taken |= cells
-        self.placed.append(PlacedObject(kind, x, y, w, h, facing, self.room.id))
+        self.placed.append(PlacedObject(kind, x, y, w, h, facing, self.room.id, not walkable))
         return True
 
 

@@ -78,6 +78,7 @@ class PlacedObject:
     h: int
     facing: Side  # the side the object's front faces (away from the wall it stands at)
     room: str
+    blocking: bool = True  # False: can be walked over (stairs, elevator car, rug)
 
     @property
     def cells(self) -> frozenset[Cell]:

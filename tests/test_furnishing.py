@@ -19,14 +19,25 @@ def test_objects_stay_in_their_rooms_and_keep_doors_clear() -> None:
         for obj in floor.objects:
             room = rooms[obj.room]
             assert obj.cells <= room.cells
-            assert not obj.cells & floor.door_clearance(room)
+            if obj.blocking:
+                assert not obj.cells & floor.door_clearance(room)
+
+
+def test_stairwells_have_stairs_that_can_be_walked_over() -> None:
+    building = generate(make_params(width=60, depth=40, floors_above=3))
+    for floor in building.floors:
+        stairwells = {r.id for r in floor.rooms if r.type == "stairwell"}
+        stairs = [o for o in floor.objects if o.kind == "stairs"]
+        assert {o.room for o in stairs} == stairwells
+        assert not any(o.blocking for o in stairs)
+    assert from_json(to_json(building)) == building
 
 
 def test_furnished_rooms_stay_walkable() -> None:
     building = generate(make_params(building_type=BuildingType.SUPERMARKET, width=80, depth=50))
     floor = building.floor(0)
     for room in floor.rooms:
-        taken = {c for o in floor.objects if o.room == room.id for c in o.cells}
+        taken = {c for o in floor.objects if o.room == room.id and o.blocking for c in o.cells}
         if taken:
             assert connected(room.cells - taken)
 

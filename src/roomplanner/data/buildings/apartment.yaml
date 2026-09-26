@@ -35,12 +35,14 @@ floor_roles:
       - {room: mailroom, count: 1, near: entrance}
       - {room: storage, count: [0, 1], near: core, priority: optional}
       - {room: apartment, fill: true}
-      - {room: storage, fill: true}            # interior rows without facade
+      - {room: laundry, fill: true}            # interior rows without facade
+      - {room: storage, fill: true}
   residential:
     applies: [upper, top]
     rooms:
       - {room: storage, count: [0, 1], near: core, priority: optional}
       - {room: apartment, fill: true}
+      - {room: laundry, fill: true}            # interior rows without facade
       - {room: storage, fill: true}
   basement:
     applies: [basement]

@@ -227,6 +227,7 @@ def _check_objects(floor: Floor) -> list[Violation]:
     rooms = {room.id: room for room in floor.rooms}
     clearances = floor.door_clearances()
     taken: dict[str, set[Cell]] = {}
+    blocking: dict[str, set[Cell]] = {}
     for obj in floor.objects:
         room = rooms.get(obj.room)
         if room is None or not obj.cells <= room.cells:
@@ -236,7 +237,10 @@ def _check_objects(floor: Floor) -> list[Violation]:
         if cells & obj.cells:
             problems.append(f"{obj.kind} at ({obj.x}, {obj.y}) overlaps another object")
         cells |= obj.cells
-    for room_id, cells in taken.items():
+        if obj.blocking:
+            blocking.setdefault(obj.room, set()).update(obj.cells)
+    # Objects that can be walked over (stairs) may stand in front of doors.
+    for room_id, cells in blocking.items():
         room = rooms[room_id]
         if cells & clearances.get(room_id, frozenset()):
             problems.append(f"objects block a door of {room.type} {room_id}")

@@ -30,7 +30,9 @@ floor_roles:
       - {room: meeting_room, count: [0, 1]}
       - {room: storage, count: 1, priority: optional}
       - {room: office, fill: true}
-      - {room: storage, fill: true}           # interior rows without facade
+      - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: archive, fill: true}
+      - {room: storage, fill: true}
   executive:
     applies: [top]
     when: "floors_above >= 3"

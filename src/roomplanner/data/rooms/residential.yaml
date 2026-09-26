@@ -16,9 +16,12 @@ rooms:
     windows: required
     access: [hallway]
     furniture:
+      - {object: rug, placement: center, count: [0, 1]}
       - {object: sofa, placement: wall, count: 1}
-      - {object: table, placement: center, count: [0, 1]}
-      - {object: plant, placement: corner, count: [0, 1]}
+      - {object: armchair, placement: scatter, count: [0, 2]}
+      - {object: table, placement: scatter, count: [0, 1]}
+      - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: plant, placement: corner, count: [0, 2]}
   bedroom:
     area: [40, 70]
     min_side: 5
@@ -28,6 +31,8 @@ rooms:
     furniture:
       - {object: bed, placement: wall, count: 1}
       - {object: wardrobe, placement: wall, count: [0, 1]}
+      - {object: cabinet, placement: wall, count: [0, 2]}
+      - {object: desk, placement: wall, count: [0, 1]}
   bathroom:
     area: [12, 30]
     min_side: 3
@@ -45,6 +50,7 @@ rooms:
       - {object: counter, placement: wall}
       - {object: stove, placement: wall}
       - {object: fridge, placement: wall}
+      - {object: table, placement: scatter, count: [0, 1]}
   laundry:
     area: [24, 60]
     min_side: 4
@@ -54,5 +60,6 @@ rooms:
   mailroom:
     area: [12, 30]
     min_side: 3
+    cluster: true
     furniture:
       - {object: mailboxes, placement: wall, count: [1, 3]}

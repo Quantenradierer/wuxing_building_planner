@@ -9,42 +9,40 @@ office 32x18 cells, wealth=middle, seed=1
 |                                                               |
 |                                                               |
 "                            1                                  |
-"     +------DDD----+                       +------------DDD----+
-"     |w            |                       |i                  |
+"     +--DDD--------+                       +------------DDD----+
+"     |w       w    |                       |w               w w|
 |     |             |                       |                   |
-|     |             |                       |                   |
+|     |             |                       |                  w|
 |     |             |                       |                   |
 "     |      3      |                       |        5          "
 "     |             |                       |                   "
-"     |            i|                       |                   "
-|     |             |                       |                   |
-|     |  w i        |                       |                   |
-|     +-------------+                       |                   |
-"     |sss   sss sss|                       |                  w|
-"     |             |                       +-------------------+
-"     |s           s|        2              |sss     sss   sss  |
-|     |s           s|                       |                   |
-|     |s           s|                       D                   |
-|     |             |                       D                   |
-"     |             |                       D                   "
-"     |             |                       |                   "
-"     |s     4     s|                       |s       6          "
-|     |s           s|                       |s                  |
-|     |s           s|                       |s                  |
-|     |             |                       |                   |
-"     D            s|                       |                   "
-"     D            s|                       |                   "
-"     D            s|                       |                   "
-|     |             |                       |                   |
-|     |  sss sss    |*                      |            sss    |
+"     |             |q         AAA          |                   "
+|     |             |q         AAA          |                   |
+|     |  w w   i    |q         AAA          |                   |
+|     +-------------+q                      |                   |
+"     |s   sss sss s|q                      |i     i           U|
+"     |s           s|q                      +-------------------+
+"     |s       KKK s|q       2              |sss   sss   sss    |
+|     |        KKK  |                       |                   |
+|     |        KKK s|                       D        6         s|
+|     |            s|                       D                  s|
+"     |s   KKK     s|AAA                    D                  s"
+"     |s   KKK      |AAA                    |                   "
+"     |s   KKK     s|AAA                    |sss   sss sss   sss"
+|     |            s|                       +-------------------+
+|     |      4     s|                       |sss sss sss   sss s|
+|     |             |                       |                  s|
+"     D             |                       D        7         s"
+"     D             |                       D                   "
+"     D            s|                       D      KKK          "
+|     |            s|                       |      KKK          |
+|     |sss   sss   s|*                      |  sss KKK sss sss  |
 +--===+--===---===--+----DDDDDDD-------===--+===---===---===----+
-  objects: * plant, s shelf, i sink, w wc
+  objects: A armchair, q bench, K crate, * plant, s shelf, i sink, U trash_bin, w wc
     1  corridor            212 cells
     2  lobby               126 cells
     3  toilet               35 cells
     4  storage              63 cells
     5  toilet               60 cells
-    6  storage              80 cells
-
-Warnings:
-  - Ground floor: dropped storage (no space)
+    6  storage              40 cells
+    7  storage              40 cells
