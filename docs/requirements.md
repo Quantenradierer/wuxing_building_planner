@@ -26,7 +26,7 @@ In scope (v2, see "Roadmap"):
 Later (the model must allow them without redesign):
 
 - Tactical markup layer (cover, difficult terrain): postponed until it is clear how images
-  and VTT exports would use it. `objects.yaml` keeps its `cover` field, unused.
+  and VTT exports would use it. The unused `cover` field on objects was removed (2026-09-27).
 - Surroundings (lot, parking, loading area, street, fire escapes). The canvas may then be
   larger than the footprint; cells outside the footprint are the exterior zone.
 - Parking garage type with its own "deck" layout; basement garages.
@@ -226,15 +226,13 @@ To verify:
 - Re-render examples once the sprite set for the newer objects exists (desk/table kinds,
   church, garage and factory objects; Midjourney run from 2026-09-28).
 
-Decisions for the author:
-- Sprite wealth fallback: the author asked for "the next lower tier, else the default";
-  the sprite set now steps towards middle (luxury → high → middle, squatter → low →
-  middle) because the default sprites already look worn. Confirm or revert.
-- `wealth_shift` of rooms is relative to the building (executive office +1); a fixed tier
-  per room would be the alternative.
-- Stalls in shower rooms and locker rooms (one `stalls:` line in the catalog each).
-- Tactical layer: `cover` exists on objects but is shown nowhere (postponed until it is
-  clear how to show it in images and VTT exports).
+Decided by the author (2026-09-27):
+- Sprite wealth fallback steps towards middle (luxury → high → middle, squatter → low →
+  middle); it is only the fallback.
+- `wealth_shift` of rooms stays relative to the building (executive office +1); revisit
+  only if it gets in the way.
+- No stalls in shower rooms and locker rooms for now.
+- Tactical layer: the unused `cover` field was removed from objects.
 
 Known weaknesses:
 - Police station: interior rows on the ground floor are mostly storerooms; offices or

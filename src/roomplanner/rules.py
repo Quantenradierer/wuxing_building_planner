@@ -38,15 +38,8 @@ class Priority(StrEnum):
     OPTIONAL = "optional"
 
 
-class Cover(StrEnum):
-    NONE = "none"
-    LIGHT = "light"
-    HEAVY = "heavy"
-
-
 class ObjectSpec(_Strict):
     size: tuple[int, int] = Field(description="Cells along the wall / row, cells deep")
-    cover: Cover = Cover.NONE
     walkable: bool = Field(default=False, description="Can be walked over (stairs)")
     glyph: str = Field(min_length=1, max_length=1, description="ASCII debug glyph")
 

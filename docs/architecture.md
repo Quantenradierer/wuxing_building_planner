@@ -263,7 +263,7 @@ stairwell (or a circulation room).
 ### Furnishing
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
-`data/objects.yaml` (size in cells along the wall × deep, cover, `walkable`, ASCII glyph).
+`data/objects.yaml` (size in cells along the wall × deep, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, without
 randomness: stairs stand in the same spot on every floor), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`

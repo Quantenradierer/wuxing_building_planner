@@ -1,123 +1,123 @@
 # Furniture and fixtures. size: [cells along the wall / row, cells deep].
-# cover is for the (postponed) tactical layer; glyph is the ASCII debug character.
+# glyph is the ASCII debug character.
 # walkable objects can be walked over and may stand in front of doors (stairs).
 objects:
   stairs:          {size: [6, 4], walkable: true, glyph: "#"}
   elevator_car:    {size: [3, 3], walkable: true, glyph: "%"}
   rug:             {size: [4, 3], walkable: true, glyph: "~"}
   roof_hatch:      {size: [2, 2], walkable: true, glyph: "^"}
-  guard_desk:      {size: [4, 2], cover: heavy, glyph: G}
-  security_gate:   {size: [1, 3], cover: light, glyph: "!"}
-  weapon_locker:   {size: [2, 1], cover: heavy, glyph: L}
-  debris:          {size: [2, 2], cover: light, glyph: ","}
-  trash_pile:      {size: [2, 1], cover: light, glyph: ";"}
-  rubble:          {size: [3, 2], cover: heavy, glyph: "&"}
-  rubble_heap:     {size: [4, 4], cover: heavy, glyph: "@"}
-  collapsed_ceiling: {size: [5, 3], cover: heavy, glyph: "@"}
-  filing_cabinet:  {size: [2, 1], cover: heavy, glyph: F}
-  armchair:        {size: [2, 2], cover: light, glyph: A}
-  crate:           {size: [2, 2], cover: heavy, glyph: K}
-  trash_bin:       {size: [1, 1], cover: light, glyph: U}
-  copier:          {size: [2, 1], cover: heavy, glyph: P}
-  desk:            {size: [3, 2], cover: light, glyph: d}
-  chair:           {size: [1, 1], cover: none,  glyph: c}
-  table:           {size: [2, 2], cover: light, glyph: t}
-  meeting_table:   {size: [6, 3], cover: light, glyph: T}
-  shelf:           {size: [2, 1], cover: heavy, glyph: s}
-  cabinet:         {size: [1, 1], cover: heavy, glyph: k}
-  counter:         {size: [4, 1], cover: heavy, glyph: n}
-  reception_desk:  {size: [5, 2], cover: heavy, glyph: R}
-  bed:             {size: [2, 4], cover: light, glyph: b}
-  double_bed:      {size: [4, 4], cover: light, glyph: B}
-  sofa:            {size: [4, 2], cover: light, glyph: o}
-  wardrobe:        {size: [3, 1], cover: heavy, glyph: a}
-  wc:              {size: [1, 1], cover: none,  glyph: w}
-  sink:            {size: [1, 1], cover: none,  glyph: i}
-  shower:          {size: [2, 2], cover: none,  glyph: h}
-  stove:           {size: [2, 1], cover: heavy, glyph: v}
-  fridge:          {size: [1, 1], cover: heavy, glyph: f}
-  server_rack:     {size: [2, 1], cover: heavy, glyph: S}
-  gondola:         {size: [8, 2], cover: heavy, glyph: g}
-  checkout:        {size: [2, 4], cover: heavy, glyph: C}
-  freezer:         {size: [4, 2], cover: heavy, glyph: z}
-  pallet:          {size: [2, 2], cover: heavy, glyph: p}
-  rack:            {size: [6, 2], cover: heavy, glyph: r}
-  hospital_bed:    {size: [2, 4], cover: light, glyph: H}
-  exam_table:      {size: [2, 4], cover: light, glyph: e}
-  operating_table: {size: [2, 4], cover: light, glyph: O}
-  medical_cabinet: {size: [2, 1], cover: heavy, glyph: m}
-  morgue_drawers:  {size: [4, 2], cover: heavy, glyph: M}
-  locker:          {size: [1, 1], cover: heavy, glyph: l}
-  bench:           {size: [4, 1], cover: light, glyph: q}
-  plant:           {size: [1, 1], cover: light, glyph: "*"}
-  machinery:       {size: [3, 2], cover: heavy, glyph: X}
-  washing_machine: {size: [1, 1], cover: heavy, glyph: x}
-  mailboxes:       {size: [3, 1], cover: heavy, glyph: u}
-  terminal:        {size: [1, 1], cover: none,  glyph: j}
-  vending_machine: {size: [2, 1], cover: heavy, glyph: y}
-  capsule:         {size: [2, 4], cover: heavy, glyph: Q}   # 1 m wide, 2 m long, side by side
-  bar_counter:     {size: [8, 2], cover: heavy, glyph: N}
-  dj_booth:        {size: [4, 2], cover: heavy, glyph: J}
-  speaker:         {size: [1, 1], cover: heavy, glyph: E}
-  pool_table:      {size: [5, 3], cover: light, glyph: Y}
-  forklift:        {size: [2, 4], cover: heavy, glyph: Z}
-  lab_bench:       {size: [6, 2], cover: light, glyph: V}
-  fume_hood:       {size: [3, 1], cover: heavy, glyph: W}
-  specimen_fridge: {size: [2, 1], cover: heavy, glyph: I}
-  cubicle:         {size: [3, 3], cover: light, glyph: "["}
-  scanner:         {size: [4, 6], cover: heavy, glyph: "]"}
+  guard_desk:      {size: [4, 2], glyph: G}
+  security_gate:   {size: [1, 3], glyph: "!"}
+  weapon_locker:   {size: [2, 1], glyph: L}
+  debris:          {size: [2, 2], glyph: ","}
+  trash_pile:      {size: [2, 1], glyph: ";"}
+  rubble:          {size: [3, 2], glyph: "&"}
+  rubble_heap:     {size: [4, 4], glyph: "@"}
+  collapsed_ceiling: {size: [5, 3], glyph: "@"}
+  filing_cabinet:  {size: [2, 1], glyph: F}
+  armchair:        {size: [2, 2], glyph: A}
+  crate:           {size: [2, 2], glyph: K}
+  trash_bin:       {size: [1, 1], glyph: U}
+  copier:          {size: [2, 1], glyph: P}
+  desk:            {size: [3, 2], glyph: d}
+  chair:           {size: [1, 1], glyph: c}
+  table:           {size: [2, 2], glyph: t}
+  meeting_table:   {size: [6, 3], glyph: T}
+  shelf:           {size: [2, 1], glyph: s}
+  cabinet:         {size: [1, 1], glyph: k}
+  counter:         {size: [4, 1], glyph: n}
+  reception_desk:  {size: [5, 2], glyph: R}
+  bed:             {size: [2, 4], glyph: b}
+  double_bed:      {size: [4, 4], glyph: B}
+  sofa:            {size: [4, 2], glyph: o}
+  wardrobe:        {size: [3, 1], glyph: a}
+  wc:              {size: [1, 1], glyph: w}
+  sink:            {size: [1, 1], glyph: i}
+  shower:          {size: [2, 2], glyph: h}
+  stove:           {size: [2, 1], glyph: v}
+  fridge:          {size: [1, 1], glyph: f}
+  server_rack:     {size: [2, 1], glyph: S}
+  gondola:         {size: [8, 2], glyph: g}
+  checkout:        {size: [2, 4], glyph: C}
+  freezer:         {size: [4, 2], glyph: z}
+  pallet:          {size: [2, 2], glyph: p}
+  rack:            {size: [6, 2], glyph: r}
+  hospital_bed:    {size: [2, 4], glyph: H}
+  exam_table:      {size: [2, 4], glyph: e}
+  operating_table: {size: [2, 4], glyph: O}
+  medical_cabinet: {size: [2, 1], glyph: m}
+  morgue_drawers:  {size: [4, 2], glyph: M}
+  locker:          {size: [1, 1], glyph: l}
+  bench:           {size: [4, 1], glyph: q}
+  plant:           {size: [1, 1], glyph: "*"}
+  machinery:       {size: [3, 2], glyph: X}
+  washing_machine: {size: [1, 1], glyph: x}
+  mailboxes:       {size: [3, 1], glyph: u}
+  terminal:        {size: [1, 1], glyph: j}
+  vending_machine: {size: [2, 1], glyph: y}
+  capsule:         {size: [2, 4], glyph: Q}   # 1 m wide, 2 m long, side by side
+  bar_counter:     {size: [8, 2], glyph: N}
+  dj_booth:        {size: [4, 2], glyph: J}
+  speaker:         {size: [1, 1], glyph: E}
+  pool_table:      {size: [5, 3], glyph: Y}
+  forklift:        {size: [2, 4], glyph: Z}
+  lab_bench:       {size: [6, 2], glyph: V}
+  fume_hood:       {size: [3, 1], glyph: W}
+  specimen_fridge: {size: [2, 1], glyph: I}
+  cubicle:         {size: [3, 3], glyph: "["}
+  scanner:         {size: [4, 6], glyph: "]"}
   # Small things that go beside other objects (placement: at) or fill walls.
-  stool:           {size: [1, 1], cover: none,  glyph: c}
-  nightstand:      {size: [1, 1], cover: light, glyph: "1"}
-  side_table:      {size: [1, 1], cover: light, glyph: "}"}
-  wall_screen:     {size: [3, 1], cover: none,  glyph: "2"}   # trideo / camera feeds / holo display
-  whiteboard:      {size: [3, 1], cover: none,  glyph: ">"}
-  coffee_machine:  {size: [1, 1], cover: heavy, glyph: "3"}
-  water_cooler:    {size: [1, 1], cover: light, glyph: "4"}
-  iv_stand:        {size: [1, 1], cover: none,  glyph: "5"}
-  vital_monitor:   {size: [1, 1], cover: light, glyph: "?"}
-  medical_cart:    {size: [2, 1], cover: light, glyph: "6"}
-  gurney:          {size: [2, 4], cover: light, glyph: "7"}
-  barrel:          {size: [1, 1], cover: heavy, glyph: "8"}
-  workbench:       {size: [4, 2], cover: heavy, glyph: "9"}
-  display_case:    {size: [3, 1], cover: light, glyph: D}
-  atm:             {size: [1, 1], cover: heavy, glyph: $}
-  coat_rack:       {size: [1, 1], cover: none,  glyph: (}
-  safe:            {size: [1, 1], cover: heavy, glyph: )}
-  urinal:          {size: [1, 1], cover: none,  glyph: w}
-  dryer:           {size: [1, 1], cover: heavy, glyph: x}
-  laundry_cart:    {size: [1, 2], cover: light, glyph: "{"}
-  arcade_machine:  {size: [2, 1], cover: heavy, glyph: "`"}
+  stool:           {size: [1, 1], glyph: c}
+  nightstand:      {size: [1, 1], glyph: "1"}
+  side_table:      {size: [1, 1], glyph: "}"}
+  wall_screen:     {size: [3, 1], glyph: "2"}   # trideo / camera feeds / holo display
+  whiteboard:      {size: [3, 1], glyph: ">"}
+  coffee_machine:  {size: [1, 1], glyph: "3"}
+  water_cooler:    {size: [1, 1], glyph: "4"}
+  iv_stand:        {size: [1, 1], glyph: "5"}
+  vital_monitor:   {size: [1, 1], glyph: "?"}
+  medical_cart:    {size: [2, 1], glyph: "6"}
+  gurney:          {size: [2, 4], glyph: "7"}
+  barrel:          {size: [1, 1], glyph: "8"}
+  workbench:       {size: [4, 2], glyph: "9"}
+  display_case:    {size: [3, 1], glyph: D}
+  atm:             {size: [1, 1], glyph: $}
+  coat_rack:       {size: [1, 1], glyph: (}
+  safe:            {size: [1, 1], glyph: )}
+  urinal:          {size: [1, 1], glyph: w}
+  dryer:           {size: [1, 1], glyph: x}
+  laundry_cart:    {size: [1, 2], glyph: "{"}
+  arcade_machine:  {size: [2, 1], glyph: "`"}
   stage:           {size: [8, 4], walkable: true, glyph: _}
 
   # Vehicles, industry, church.
-  car:             {size: [4, 9], cover: heavy, glyph: "="}   # 2 x 4.5 m, nose to the wall
-  car_lift:        {size: [5, 10], cover: heavy, glyph: "="}  # a car up on a lift
+  car:             {size: [4, 9], glyph: "="}   # 2 x 4.5 m, nose to the wall
+  car_lift:        {size: [5, 10], glyph: "="}  # a car up on a lift
   ramp:            {size: [6, 14], walkable: true, glyph: "/"} # to the next parking level
-  pay_station:     {size: [1, 1], cover: heavy, glyph: $}
-  conveyor:        {size: [8, 2], cover: light, glyph: "-"}
-  robot_arm:       {size: [2, 2], cover: heavy, glyph: X}
-  tool_rack:       {size: [3, 1], cover: heavy, glyph: s}
-  pew:             {size: [8, 2], cover: light, glyph: q}
-  altar:           {size: [4, 2], cover: heavy, glyph: n}
-  pulpit:          {size: [2, 2], cover: heavy, glyph: n}
-  candle_stand:    {size: [1, 1], cover: none,  glyph: "*"}
-  confessional:    {size: [4, 2], cover: heavy, glyph: k}
-  organ:           {size: [4, 2], cover: heavy, glyph: N}
-  tomb:            {size: [3, 5], cover: heavy, glyph: M}
+  pay_station:     {size: [1, 1], glyph: $}
+  conveyor:        {size: [8, 2], glyph: "-"}
+  robot_arm:       {size: [2, 2], glyph: X}
+  tool_rack:       {size: [3, 1], glyph: s}
+  pew:             {size: [8, 2], glyph: q}
+  altar:           {size: [4, 2], glyph: n}
+  pulpit:          {size: [2, 2], glyph: n}
+  candle_stand:    {size: [1, 1], glyph: "*"}
+  confessional:    {size: [4, 2], glyph: k}
+  organ:           {size: [4, 2], glyph: N}
+  tomb:            {size: [3, 5], glyph: M}
 
   # Tables and desks by use (same sizes, their own sprites).
-  office_desk:     {size: [3, 2], cover: light, glyph: d}
-  executive_desk:  {size: [3, 2], cover: heavy, glyph: d}
-  home_desk:       {size: [3, 2], cover: light, glyph: d}
-  console_desk:    {size: [3, 2], cover: heavy, glyph: d}   # security / control consoles
-  dining_table:    {size: [2, 2], cover: light, glyph: t}   # restaurants, parish halls
-  bar_table:       {size: [2, 2], cover: light, glyph: t}   # bars, clubs
-  canteen_table:   {size: [2, 2], cover: light, glyph: t}   # cafeterias, staff rooms
-  kitchen_table:   {size: [2, 2], cover: light, glyph: t}   # homes, kitchenettes
-  interview_table: {size: [2, 2], cover: heavy, glyph: t}   # bolted down
-  coffee_table:    {size: [2, 2], cover: light, glyph: t}   # in front of sofas
-  board_table:     {size: [6, 3], cover: light, glyph: T}
+  office_desk:     {size: [3, 2], glyph: d}
+  executive_desk:  {size: [3, 2], glyph: d}
+  home_desk:       {size: [3, 2], glyph: d}
+  console_desk:    {size: [3, 2], glyph: d}   # security / control consoles
+  dining_table:    {size: [2, 2], glyph: t}   # restaurants, parish halls
+  bar_table:       {size: [2, 2], glyph: t}   # bars, clubs
+  canteen_table:   {size: [2, 2], glyph: t}   # cafeterias, staff rooms
+  kitchen_table:   {size: [2, 2], glyph: t}   # homes, kitchenettes
+  interview_table: {size: [2, 2], glyph: t}   # bolted down
+  coffee_table:    {size: [2, 2], glyph: t}   # in front of sofas
+  board_table:     {size: [6, 3], glyph: T}
 
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).

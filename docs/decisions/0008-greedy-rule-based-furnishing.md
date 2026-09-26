@@ -11,5 +11,7 @@ Status: accepted (2026-09-26)
   clearance free, the room's free floor stays connected. The connectivity check uses a
   ring test around the new object and only falls back to a flood fill when needed.
 - Objects carry a cover value now, so the tactical layer can derive cover later.
+  (Superseded 2026-09-27: the field was never used and was removed; the tactical layer
+  will define its own data when it comes.)
 - The stage is a strategy (`furnishing: rules`); WFC remains a candidate for clutter and
   the condition layer (ADR 0003).
