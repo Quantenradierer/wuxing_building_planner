@@ -34,25 +34,25 @@ office 60x44 cells, wealth=middle, seed=7
 |q                                                                                                                      |
 |q                                                                                                                      |
 |q          +---+-----+--DDD----+--DDD----------------+       +--DDD--------+--DDD----------------------------+--DDD----+
-"q          |  w|w    |s     sss|          16        *|       |'         000|            c c c c             *|i       U"
+"q          |  w|w    |s     sss|          16        *|       |'         EEE|            c c c c             *|i       U"
 "           |   |     |s        |                     |       |             |                                 |         "
 "           |13 |  14 |s       k|      c c c c        |       |             |          TTTTTTTTTTT            |    19   "
 |           |   |     |         |                     |       |             |          TTTTTTTTTTT            |         |
-|           |   |     |s   15KKK|    TTTTTTTTTTT     k|       |0     17    0|          TTTTTTTTTTT            |         |
-|           +DDD+DDD--+s     KKK|    TTTTTTTTTTT      |       |0           0|          TTTTTTTTTTT            +DDD+DDD--+
-|           D        i|s     KKK|    TTTTTTTTTTT      |       |0           0|          TTTTTTTTTTT            |   |     |
+|           |   |     |s   15KKK|    TTTTTTTTTTT     k|       |E     17    E|          TTTTTTTTTTT            |         |
+|           +DDD+DDD--+s     KKK|    TTTTTTTTTTT      |       |E           E|          TTTTTTTTTTT            +DDD+DDD--+
+|           D        i|s     KKK|    TTTTTTTTTTT      |       |E           E|          TTTTTTTTTTT            |   |     |
 |           D         |         |    TTTTTTTTTTT      |       |             |                                 |   |     |
 D           D    12   |s       s|    TTTTTTTTTTT      |       |S            |            c c c c              |20 |  21 |
 D           |         |s       s|                     |       |S            |                                 |   |     |
-D    2      |i       U|s k sss s|      c c c c        |      1|S   000   000|                18              *|  w|w    |
+D    2      |i       U|s k sss s|      c c c c        |      1|S   EEE   EEE|                18              *|  w|w    |
 D           +---------+---------+-------+-------------+       +-------------+-------------+---+-----+---------+---+-----+
-D           |*         c c c c         *|k 22222      |       |*         c c c c         *|  w|w    |      c c c c      "
+D           |*         c c c c         *|k <<<<<      |       |*         c c c c         *|  w|w    |      c c c c      "
 D           |                           |             |       |                           |   |     |                   "
-D           |k       TTTTTTTTTTT       2|TTTTTTTTTTT  |       |k       TTTTTTTTTTT       2|26 |  27 |2   TTTTTTTTTTT    "
-|           |        TTTTTTTTTTT       2|TTTTTTTTTTT  |       |        TTTTTTTTTTT       2|   |     |2   TTTTTTTTTTT    |
-|           |k       TTTTTTTTTTT       2|TTTTTTTTTTT  |       |k       TTTTTTTTTTT       2|   |     |2   TTTTTTTTTTT    |
-|           |        TTTTTTTTTTT       2|TTTTTTTTTTT  |       |        TTTTTTTTTTT       2+DDD+DDD--+2   TTTTTTTTTTT    |
-"           |        TTTTTTTTTTT       2|TTTTTTTTTTT  |       |        TTTTTTTTTTT       2|         |2   TTTTTTTTTTT    "
+D           |k       TTTTTTTTTTT       <|TTTTTTTTTTT  |       |k       TTTTTTTTTTT       <|26 |  27 |<   TTTTTTTTTTT    "
+|           |        TTTTTTTTTTT       <|TTTTTTTTTTT  |       |        TTTTTTTTTTT       <|   |     |<   TTTTTTTTTTT    |
+|           |k       TTTTTTTTTTT       <|TTTTTTTTTTT  |       |k       TTTTTTTTTTT       <|   |     |<   TTTTTTTTTTT    |
+|           |        TTTTTTTTTTT       <|TTTTTTTTTTT  |       |        TTTTTTTTTTT       <+DDD+DDD--+<   TTTTTTTTTTT    |
+"           |        TTTTTTTTTTT       <|TTTTTTTTTTT  |       |        TTTTTTTTTTT       <|         |<   TTTTTTTTTTT    "
 "           |                           |             |       |                           |         |                   "
 "$          |          c c c c          |      23     |       |          c c c c          |    25   |      c c c c      "
 |           |                           |             |       |                           |         |                   |
@@ -90,7 +90,7 @@ D           |k       TTTTTTTTTTT       2|TTTTTTTTTTT  |       |k       TTTTTTTTT
 |           |           |ddddd      |ddddd      |ddddd      |ddddd      |ddddd      |ddddd      |ddddd      |ddddd      |
 |           |    FFF    |ddddd     *|ddddd     *|ddddd     *|ddddd     *|ddddd     *|ddddd     *|ddddd     *|ddddd     *|
 +===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+
-  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, 0 electrical_panel, F filing_cabinet, ' fire_extinguisher, T meeting_table, d office_desk, * plant, ^ roof_hatch, S server_rack, s shelf, } side_table, i sink, U trash_bin, 2 wall_screen, w wc, > whiteboard
+  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, E electrical_panel, F filing_cabinet, ' fire_extinguisher, T meeting_table, d office_desk, * plant, ^ roof_hatch, S server_rack, s shelf, } side_table, i sink, U trash_bin, < wall_screen, w wc, > whiteboard
     1  corridor            480 cells
     2  lobby               264 cells
     3  office               72 cells

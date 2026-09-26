@@ -434,5 +434,5 @@ column `2x+1`, row `2y+1`; edges and vertices occupy the even positions in betwe
 | `D`       | door edge (`/` broken, `O` missing, `X` blocked)         |
 | `=` `"`   | window edge (horizontal, vertical); `:` broken window    |
 | `%`       | breach                                                   |
-| letters   | furniture, see the per-floor `objects:` legend           |
+| letters   | furniture, see the per-floor `objects:` legend (one glyph per kind and floor; the catalog glyph is a preference) |
 | digits    | room number, see the legend (with the unit in brackets)  |

@@ -10,7 +10,7 @@ D                                                               |
 |                                                               |
 |                      1                                        |
 |       +---+---+---+                 +--DDD------------+--DDD--+
-|       |  w|  w|  w|                 |k         ddddd F|s     s|
+|       |  W|  W|  W|                 |k         ddddd F|s     s|
 |       |   |   |   |                 |          ddddd F|s     s|
 |       |4  |5  |6  |q               $|          ddddd F|s     s|
 |       |   |   |   |q                |                 |       |
@@ -26,19 +26,19 @@ D                                                               |
 |       D     D     |AAA              |              ddd|       |
 |       D  7  D  8  |AAA              |ddddd       c ddd|      s|
 |       |     |     |                 |ddddd         ddd|      s|
-"       |i i w|w    |                 |ddddd         ddd|s     s"
+"       |i i w|W    |                 |ddddd         ddd|s     s"
 "       +-----+-----+                 +-------+         |s      "
-"       |000     000|                q|s sss  |         |s     s"
+"       |EEE     EEE|                q|s sss  |         |s     s"
 |       |           |                q|s      |         |      s|
-|       D          0|2               q|s      D         |KKK   s|
-|       D          0|2               q|       D         |KKK    |
-"       D    9     0|2               q|  11   D      c  |KKK    "
-"       |           |2               q|       |         |       "
-"    ^^^|           |2               q|s      |    ddddd|      s"
+|       D          E|<               q|s      D         |KKK   s|
+|       D          E|<               q|       D         |KKK    |
+"       D    9     E|<               q|  11   D      c  |KKK    "
+"       |           |<               q|       |         |       "
+"    ^^^|           |<               q|s      |    ddddd|      s"
 |    ^^^|           |                 |s      |    ddddd|      s|
-|    ^^^|00000 000 '|*               *|s sss  |k   ddddd|  sss s|
+|    ^^^|bbbbb EEE '|*               *|s sss  |k   ddddd|  sss s|
 +--===--+-----------+----DDDDDDD------+===----+----===--+===----+
-  objects: A armchair, $ atm, 0 battery_bank, q bench, k cabinet, c chair, K crate, 0 electrical_panel, F filing_cabinet, ' fire_extinguisher, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, w urinal, 2 wall_screen, w wc
+  objects: A armchair, $ atm, b battery_bank, q bench, k cabinet, c chair, K crate, E electrical_panel, F filing_cabinet, ' fire_extinguisher, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, w urinal, < wall_screen, W wc
     1  corridor            184 cells
     2  lobby               126 cells
     3  toilet               18 cells

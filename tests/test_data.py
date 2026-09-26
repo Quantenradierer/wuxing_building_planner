@@ -43,3 +43,10 @@ def test_neon_theme_styles_every_room_type_and_object() -> None:
     theme = load_theme("neon")
     assert all_room_types() - set(theme.rooms) == set()
     assert set(load_objects()) - set(theme.objects) == set()
+
+
+def test_object_glyphs_avoid_wall_door_and_room_number_glyphs() -> None:
+    from roomplanner.render.ascii import RESERVED_GLYPHS
+
+    clashes = {k: s.glyph for k, s in load_objects().items() if s.glyph in RESERVED_GLYPHS}
+    assert not clashes

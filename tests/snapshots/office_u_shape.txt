@@ -8,17 +8,17 @@ office 64x48 cells, wealth=middle, seed=3
 |                                                                                                             |                 |
 |                                                                                                             |F     c          |
 |                                                                                                     +-------+F                |
-|                                                                                                     |000    |F U           ddd"
+|                                                                                                     |EEE    |F U           ddd"
 +--DDD------+--DDD------+DDD--+-----+     +-----------+--DDD------+     +--DDD----------------+       |       |              ddd"
-|k     ddddd|k     ddddd|     D  28 |     |k       ddd|s     sss k|     |                     |       D      0|ddd     7   c ddd"
-|      ddddd|      ddddd|     D     |     |        ddd|s          |     |                     |       D      0|ddd           ddd|
-|      ddddd|      ddddd|  27 D    w|     D      c ddd|s   25     |     |      sss sss sss    |       D  8   0|ddd c         ddd|
+|k     ddddd|k     ddddd|     D  28 |     |k       ddd|s     sss k|     |                     |       D      E|ddd     7   c ddd"
+|      ddddd|      ddddd|     D     |     |        ddd|s          |     |                     |       D      E|ddd           ddd|
+|      ddddd|      ddddd|  27 D    W|     D      c ddd|s   25     |     |      sss sss sss    |       D  8   E|ddd c         ddd|
 |           |           |     +-----+     D        ddd|           |     |                     |       |       |ddd              |
-"        c  |        c  |w    D  29 |     D        ddd|sss   sss  |     |                     |       |0      |ddd           ddd"
-"           |           |     D     |     |           +-----------+DDD--+                     |       |0      |              ddd"
-"           |           |i    D    w|     |ddd       F|FFF   FFF       *|                     |       |0      |            c ddd"
+"        c  |        c  |w    D  29 |     D        ddd|sss   sss  |     |                     |       |E      |ddd           ddd"
+"           |           |     D     |     |           +-----------+DDD--+                     |       |E      |              ddd"
+"           |           |i    D    W|     |ddd       F|FFF   FFF       *|                     |       |E      |            c ddd"
 |           |           +---+-+-+---+     |ddd       F|                 |                     |       |       |              ddd|
-|           |           |  w|  w|  w|     |ddd c     F|ddd              |  sss sss sss sss    |       |      '|k FFF         ddd|
+|           |           |  W|  W|  W|     |ddd c     F|ddd              |  sss sss sss sss    |       |      '|k FFF         ddd|
 |           |           |   |   |   |     |ddd        |ddd              |                     |       +-------+-----------------+
 "    35  ddd|    34  ddd|31 |32 |33 |     |ddd 26     |ddd c            |          3          |       |k FFF   ddddd       ddddd"
 "        ddd|        ddd|   |   |   |     |           |ddd              |                     |       |        ddddd       ddddd"
@@ -72,13 +72,13 @@ D                                                                               
 +--DDD------+DDD--+-----+     +-----+--DDD------+--DDD------+--DDD------+--DDD----------------+       |                         "
 |*     ddddd|     D  21 |     |sss  |*     ddddd|*     ddddd|*     ddddd|*       >>>>>       k|       |  ddddd     ddddd       U"
 |      ddddd|     D     |     |     |      ddddd|      ddddd|      ddddd|                     |       |  ddddd     ddddd        |
-|      ddddd|     D    w|     D     |      ddddd|      ddddd|      ddddd|        TTTTT        |       |* ddddd     ddddd   FFF *|
+|      ddddd|     D    W|     D     |      ddddd|      ddddd|      ddddd|        TTTTT        |       |* ddddd     ddddd   FFF *|
 |           |     +-----+     D     |           |           |           |        TTTTT        |       +-------------------------+
 "ddd     c  |i 20 D     |     D     |ddd     c  |ddd     c  |ddd     c  |      c TTTTT c      |       |*         ddddd     ddddd"
 "ddd        |     D     |     |     |ddd        |ddd        |ddd        |        TTTTT        |       |          ddddd     ddddd"
 "ddd c      |w    D  22 |     |s    |ddd c      |ddd c      |ddd c      |    6 c TTTTT c      |       |ddd       ddddd     ddddd"
 |ddd        |     |     |     |s    |ddd        |ddd        |ddd        |        TTTTT        |       |ddd                      |
-|ddd        |i w i|    w|     |s    |ddd        |ddd        |ddd        |      c TTTTT c      |       |ddd c       c         c  |
+|ddd        |i w i|    W|     |s    |ddd        |ddd        |ddd        |      c TTTTT c      |       |ddd c       c         c  |
 |           +-----+-----+DDD--+     |           |           |           |        TTTTT        |       |ddd                      |
 "        ddd|ddddd           F|s   s|        ddd|        ddd|        ddd|      c TTTTT c      |       |ddd     c   14           "
 "        ddd|ddddd           F|s   s|        ddd|        ddd|        ddd|        TTTTT        |       |                         "
@@ -98,7 +98,7 @@ D                                                                               
 |           |ddddd         ddd|s    |           |           |           |              AAA                                      |
 |          k|ddddd FFF     ddd|s sss|          k|          k|          k|* qqqqqqq     AAA                             qqqqqqq *|
 +===---===--+===---===---===--+===--+===---===--+===---===--+===---===--+===---===---===---===---DDDDDDD-----===---===---===----+
-  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, 0 electrical_panel, F filing_cabinet, ' fire_extinguisher, T meeting_table, d office_desk, * plant, ^ roof_hatch, s shelf, i sink, U trash_bin, w urinal, w wc, > whiteboard
+  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, E electrical_panel, F filing_cabinet, ' fire_extinguisher, T meeting_table, d office_desk, * plant, ^ roof_hatch, s shelf, i sink, U trash_bin, w urinal, W wc, > whiteboard
     1  corridor            613 cells
     2  lobby               168 cells
     3  archive             121 cells

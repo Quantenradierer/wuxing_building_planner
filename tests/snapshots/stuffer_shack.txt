@@ -2,19 +2,19 @@ supermarket 30x26 cells, wealth=middle, seed=7
 
 == Ground floor ==
 +===--+===--+-----+----DDDDDDDDDDD--+-----------------------+
-|^^^  |i    D  4 w|                 |    ppp                |
+|^^^  |i    D  4 W|                 |    ppp                |
 |^^^  |     D     |                 |    ppp                |
 "^^^  D     D     |                s|    ppp   ppp          |
 "     D     +-----+                s|          ppp          |
-"     D     D  5 w|                s|          ppp       ppp|
+"     D     D  5 W|                s|          ppp       ppp|
 |     |     D     |                 |                    ppp|
 |     |  3  D     |        8        |          9         ppp|
 |     |     +-----+                 |                       |
-"     |     D  6 w|                 |          ppp          |
+"     |     D  6 W|                 |          ppp          |
 "     |     D     |                 |          ppp          |
 "     |     D     |                s|          ppp          |
 |     |     +-----+                s|                       |
-|     |     D  7 w|s               s|                    ppp|
+|     |     D  7 W|s               s|                    ppp|
 |     |     D     |s                |                    ppp|
 |     |w    D     |s                |                    ppp|
 |     +-----+-----+--DDD------------+--DDDDDDD--------------+
@@ -26,7 +26,7 @@ D                                                           "
 |                                                           "
 |                                                           "
 +--DDDDD----------------------------------------------------+
-|$                                                          |
+|P                                                          |
 |                                                           |
 "                                                           "
 "                                                           "
@@ -52,9 +52,9 @@ D                                                           "
 |                    CCC                                    |
 |                    CCC                                    |
 |                    CCC                                    |
-|              $     CCC               $                    |
+|              $     CCC               P                    |
 +===---===---===---===---DDDDDDDDDDD-------===---===---===--+
-  objects: $ atm, C checkout, g gondola, p pallet, $ pay_station, ^ roof_hatch, s shelf, i sink, w urinal, w wc
+  objects: $ atm, C checkout, g gondola, p pallet, P pay_station, ^ roof_hatch, s shelf, i sink, w urinal, W wc
     1  corridor            144 cells
     2  sales_floor         420 cells
     3  toilet               24 cells

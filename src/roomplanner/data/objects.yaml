@@ -3,7 +3,7 @@
 # walkable objects can be walked over and may stand in front of doors (stairs).
 objects:
   stairs:          {size: [6, 4], walkable: true, glyph: "#"}
-  elevator_car:    {size: [3, 3], walkable: true, glyph: "%"}
+  elevator_car:    {size: [3, 3], walkable: true, glyph: e}
   rug:             {size: [4, 3], walkable: true, glyph: "~"}
   roof_hatch:      {size: [2, 2], walkable: true, glyph: "^"}
   guard_desk:      {size: [4, 2], glyph: G}
@@ -44,13 +44,13 @@ objects:
   rack:            {size: [6, 2], glyph: r}
   hospital_bed:    {size: [2, 4], glyph: H}
   exam_table:      {size: [2, 4], glyph: e}
-  operating_table: {size: [2, 4], glyph: O}
+  operating_table: {size: [2, 4], glyph: o}
   medical_cabinet: {size: [2, 1], glyph: m}
   morgue_drawers:  {size: [4, 2], glyph: M}
   locker:          {size: [1, 1], glyph: l}
   bench:           {size: [4, 1], glyph: q}
   plant:           {size: [1, 1], glyph: "*"}
-  machinery:       {size: [3, 2], glyph: X}
+  machinery:       {size: [3, 2], glyph: m}
   washing_machine: {size: [1, 1], glyph: x}
   mailboxes:       {size: [3, 1], glyph: u}
   terminal:        {size: [1, 1], glyph: j}
@@ -68,19 +68,19 @@ objects:
   scanner:         {size: [4, 6], glyph: "]"}
   # Small things that go beside other objects (placement: at) or fill walls.
   stool:           {size: [1, 1], glyph: c}
-  nightstand:      {size: [1, 1], glyph: "1"}
+  nightstand:      {size: [1, 1], glyph: n}
   side_table:      {size: [1, 1], glyph: "}"}
-  wall_screen:     {size: [3, 1], glyph: "2"}   # trideo / camera feeds / holo display
+  wall_screen:     {size: [3, 1], glyph: "<"}   # trideo / camera feeds / holo display
   whiteboard:      {size: [3, 1], glyph: ">"}
-  coffee_machine:  {size: [1, 1], glyph: "3"}
-  water_cooler:    {size: [1, 1], glyph: "4"}
-  iv_stand:        {size: [1, 1], glyph: "5"}
-  vital_monitor:   {size: [1, 1], glyph: "?"}
-  medical_cart:    {size: [2, 1], glyph: "6"}
-  gurney:          {size: [2, 4], glyph: "7"}
-  barrel:          {size: [1, 1], glyph: "8"}
-  workbench:       {size: [4, 2], glyph: "9"}
-  display_case:    {size: [3, 1], glyph: D}
+  coffee_machine:  {size: [1, 1], glyph: "'"}
+  water_cooler:    {size: [1, 1], glyph: w}
+  iv_stand:        {size: [1, 1], glyph: i}
+  vital_monitor:   {size: [1, 1], glyph: v}
+  medical_cart:    {size: [2, 1], glyph: m}
+  gurney:          {size: [2, 4], glyph: g}
+  barrel:          {size: [1, 1], glyph: o}
+  workbench:       {size: [4, 2], glyph: b}
+  display_case:    {size: [3, 1], glyph: d}
   atm:             {size: [1, 1], glyph: $}
   coat_rack:       {size: [1, 1], glyph: (}
   safe:            {size: [1, 1], glyph: )}
@@ -91,12 +91,12 @@ objects:
   stage:           {size: [8, 4], walkable: true, glyph: _}
 
   # Vehicles, industry, church.
-  car:             {size: [4, 9], glyph: "="}   # 2 x 4.5 m, nose to the wall
-  car_lift:        {size: [5, 10], glyph: "="}  # a car up on a lift
-  ramp:            {size: [6, 14], walkable: true, glyph: "/"} # to the next parking level
+  car:             {size: [4, 9], glyph: c}   # 2 x 4.5 m, nose to the wall
+  car_lift:        {size: [5, 10], glyph: L}  # a car up on a lift
+  ramp:            {size: [6, 14], walkable: true, glyph: '\'} # to the next parking level
   pay_station:     {size: [1, 1], glyph: $}
-  conveyor:        {size: [8, 2], glyph: "-"}
-  robot_arm:       {size: [2, 2], glyph: X}
+  conveyor:        {size: [8, 2], glyph: "."}
+  robot_arm:       {size: [2, 2], glyph: r}
   tool_rack:       {size: [3, 1], glyph: s}
   pew:             {size: [8, 2], glyph: q}
   altar:           {size: [4, 2], glyph: n}
@@ -120,24 +120,24 @@ objects:
   board_table:     {size: [6, 3], glyph: T}
 
   # Building services, security tech, Sixth World details.
-  electrical_panel: {size: [2, 1], glyph: "0"}   # switchboard / breaker cabinet
-  battery_bank:    {size: [3, 1], glyph: "0"}    # UPS batteries
-  hvac_unit:       {size: [4, 3], glyph: X}      # air handler
-  generator:       {size: [5, 3], glyph: X}      # backup diesel generator
-  fuel_tank:       {size: [3, 2], glyph: "8"}
+  electrical_panel: {size: [2, 1], glyph: E}    # switchboard / breaker cabinet
+  battery_bank:    {size: [3, 1], glyph: b}    # UPS batteries
+  hvac_unit:       {size: [4, 3], glyph: H}      # air handler
+  generator:       {size: [5, 3], glyph: G}      # backup diesel generator
+  fuel_tank:       {size: [3, 2], glyph: f}
   suppression_tanks: {size: [3, 1], glyph: "<"}  # inert gas bottles of a fire suppression system
   fire_extinguisher: {size: [1, 1], glyph: "'"}
   rigger_cocoon:   {size: [2, 3], glyph: Q}      # reclined rigger / decker chair with trodes
-  drone_dock:      {size: [2, 2], glyph: "0"}    # charging pad with a parked drone
+  drone_dock:      {size: [2, 2], glyph: d}    # charging pad with a parked drone
   drone_rack:      {size: [3, 1], glyph: s}      # small drones and spare parts on a wall rack
   deposit_boxes:   {size: [4, 1], glyph: F}      # wall of safe deposit boxes
   sim_rig:         {size: [2, 3], glyph: A}      # simsense recliner (BTL chips in the Barrens)
   autokitchen:     {size: [2, 1], glyph: v}      # nuke-it autokitchen
   mattress:        {size: [2, 4], glyph: b}      # on the floor
-  fire_barrel:     {size: [1, 1], glyph: "8"}
+  fire_barrel:     {size: [1, 1], glyph: f}
   cyberware_rack:  {size: [3, 1], glyph: m}      # cyberlimbs and implants on hooks
   cryo_pod:        {size: [2, 4], glyph: H}
-  ambulance:       {size: [4, 10], glyph: "="}   # DocWagon armoured ambulance, nose to the wall
+  ambulance:       {size: [4, 10], glyph: a}   # DocWagon armoured ambulance, nose to the wall
   evidence_locker: {size: [2, 1], glyph: L}
   shipping_container: {size: [5, 12], glyph: "["}
 

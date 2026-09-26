@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import string
+
 from roomplanner.geometry import Axis, Cell, Edge
 from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
 from roomplanner.rules import load_objects
@@ -40,17 +42,18 @@ def render_floor(
         for col in range(0, 2 * width + 1, 2):
             canvas[row][col] = _vertex_glyph(canvas, row, col)
 
+    kinds = sorted({o.kind for o in floor.objects})
+    floor_glyphs = _unique_glyphs(kinds, glyphs)
     # Objects fill their cells and the grid positions between them, so they read as blocks.
     for obj in floor.objects:
-        glyph = glyphs.get(obj.kind, "?")
+        glyph = floor_glyphs[obj.kind]
         for row in range(2 * obj.y + 1, 2 * (obj.y + obj.h)):
             for col in range(2 * obj.x + 1, 2 * (obj.x + obj.w)):
                 canvas[row][col] = glyph
 
     legend: list[str] = []
-    kinds = sorted({o.kind for o in floor.objects})
     if kinds:
-        legend.append("  objects: " + ", ".join(f"{glyphs.get(k, '?')} {k}" for k in kinds))
+        legend.append("  objects: " + ", ".join(f"{floor_glyphs[k]} {k}" for k in kinds))
     for number, room in enumerate(floor.rooms, start=1):
         _place_label(canvas, room, str(number))
         unit = f"  [{room.unit}]" if room.unit else ""
@@ -58,6 +61,35 @@ def render_floor(
 
     lines = ["".join(row).rstrip() for row in canvas]
     return "\n".join([f"== {floor.name} ==", *lines, *legend])
+
+
+# Walls, openings and room numbers; objects never use these, so every glyph means one thing.
+RESERVED_GLYPHS = frozenset(' -|+DOX/:=%"?' + string.digits)
+_SPARE = [c for c in string.ascii_letters + string.punctuation if c not in RESERVED_GLYPHS]
+
+
+def _unique_glyphs(kinds: list[str], preferred: dict[str, str]) -> dict[str, str]:
+    """One distinct glyph per object kind of a floor.
+
+    The catalog glyph wins if it is free, else the kind's initial (lower, then upper case),
+    else the first spare character; '?' only once all are taken.
+    """
+    result: dict[str, str] = {}
+    used: set[str] = set()
+    pending: list[str] = []
+    for kind in kinds:
+        glyph = preferred.get(kind, "")
+        if glyph and glyph not in RESERVED_GLYPHS and glyph not in used:
+            result[kind] = glyph
+            used.add(glyph)
+        else:
+            pending.append(kind)
+    for kind in pending:
+        candidates = [kind[0].lower(), kind[0].upper(), *_SPARE]
+        glyph = next((c for c in candidates if c not in RESERVED_GLYPHS and c not in used), "?")
+        result[kind] = glyph
+        used.add(glyph)
+    return result
 
 
 _DOOR_GLYPHS = {
