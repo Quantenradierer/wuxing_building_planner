@@ -8,6 +8,8 @@
 A name `<kind>.<wealth>` (e.g. `bed.high`) is a wealth variant from `variants:` in the
 prompt file, with its own style and style reference; it is cut to `<kind>.<wealth>.png`.
 
+Workflow, conventions and prompting rules: docs/sprites.md.
+
 `generate` stores the raw 2x2 grids in `.sprites_raw/` (not versioned). `tools/sprite_picks.yaml`
 names the chosen quadrant per kind (0..3, reading order), optionally with the attempt and
 a rotation in degrees counter-clockwise to bring the back of the object to the top.
@@ -17,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import re
 import sys
 import time
 import zlib
@@ -89,8 +92,18 @@ def _aspect(size: tuple[int, int]) -> str:
     return f"--ar 2:{round(2 / ratio)}"
 
 
+def _fresh_style_references(prompts: dict[str, str]) -> dict[str, str]:
+    """Re-sign the --sref links: they are Discord CDN links that expire after a day."""
+    links = {m for p in prompts.values() for m in re.findall(r"--sref (\S+)", p)}
+    fresh = {link: mj.refresh_url(link) for link in links}
+    return {
+        name: re.sub(r"--sref (\S+)", lambda m: f"--sref {fresh[m.group(1)]}", prompt)
+        for name, prompt in prompts.items()
+    }
+
+
 def generate(kinds: list[str], attempt: int) -> None:
-    prompts = _prompts()
+    prompts = _fresh_style_references(_prompts())
     RAW.mkdir(exist_ok=True)
     todo = [k for k in kinds if not _raw_path(k, attempt).exists()]
     for start in range(0, len(todo), BATCH):

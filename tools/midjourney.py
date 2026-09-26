@@ -81,6 +81,12 @@ def imagine(prompt: str) -> None:
     )
 
 
+def refresh_url(url: str) -> str:
+    """A freshly signed Discord CDN link (links expire after about a day)."""
+    answer = _request(f"{_API}/attachments/refresh-urls", {"attachment_urls": [url]})
+    return answer["refreshed_urls"][0]["refreshed"]
+
+
 def latest_messages(limit: int = 100) -> list[dict[str, Any]]:
     return _request(f"{_API}/channels/{_env('MJ_CHANNEL_ID')}/messages?limit={limit}")
 

@@ -6,6 +6,8 @@ view, themed images (Pillow) and VTT exports (Universal VTT, Foundry scenes).
 - Requirements, status and known limitations: `docs/requirements.md`
 - Architecture (coordinates, data model, pipeline, layouts, JSON contract): `docs/architecture.md`
 - Decisions and their reasons: `docs/decisions/`
+- Sprites (Midjourney object pictures): `docs/sprites.md`; read it before generating sprites
+  or adding an object kind
 
 Read the architecture doc before changing the model, the pipeline or the JSON format.
 
