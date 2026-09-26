@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import random
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 
 from roomplanner.geometry import Axis, Cell, Edge, Side, boundary_edges
@@ -55,8 +56,9 @@ class DefaultOpenings:
             walls = _walls(footprint, owner, circulation)
             doors = _interior_doors(ctx, rooms, owner, walls, circulation, entries, hosts, rng)
             used: set[Edge] = set()
+            grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
             for request in planned.entrances:
-                door = _exterior_door(ctx, footprint, rooms, request, used, rng)
+                door = _exterior_door(ctx, footprint, rooms, request, used, grid, rng)
                 if door is None:
                     plan.warnings.append(f"no facade for the {request.kind} entrance")
                     continue
@@ -257,12 +259,16 @@ def _interior_doors(
     return doors
 
 
+DOOR_WIDTH = 2  # a plain door, cells
+
+
 def _exterior_door(
     ctx: Context,
     footprint: frozenset[Cell],
     rooms: tuple[Room, ...],
     request: EntranceRequest,
     used: set[Edge],
+    windows: list[Opening],
     rng: random.Random,
 ) -> Opening | None:
     """The door in the requested room's facade; if that is too short, the nearest room's."""
@@ -282,30 +288,70 @@ def _exterior_door(
         if r is not hinted and r.unit is None and not ctx.rules.spec(r.type).circulation
     ]
     first = [hinted] if hinted.unit is None or request.kind is not EntranceKind.SERVICE else []
-    for candidates_from in (service, first, others):
-        candidates: list[tuple[int, Run, int]] = []
-        for room in candidates_from:
-            facade = {
-                Edge.of(c, request.side)
-                for c in room.cells
-                if c.neighbour(request.side) not in footprint
-            }
-            for run in _runs(facade):
-                if len(run) < width:
-                    continue
-                margin = 1 if len(run) >= width + 2 else 0
-                for start in range(margin, len(run) - width - margin + 1):
-                    edges = run[start : start + width]
-                    if used.intersection(edges):
-                        continue
-                    centre = edges[len(edges) // 2]
-                    distance = abs(centre.x - target.x) + abs(centre.y - target.y)
-                    candidates.append((distance, run, start))
-        if candidates:
-            _, run, start = min(candidates, key=lambda c: (c[0], c[1][0], c[2]))
-            door = _door(run, width, None, request.side, rng, start)
+
+    def needs_window(room: Room) -> bool:
+        return ctx.rules.spec(room.type).windows is WindowRule.REQUIRED
+
+    # Rooms that need windows only as a last resort: a door may take their only window.
+    tiers = (
+        service,
+        [r for r in first if not needs_window(r)],
+        [r for r in others if not needs_window(r)],
+        first,
+        others,
+    )
+    # A wide door (loading dock) that would blind a room needing windows: a plain door.
+    widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
+    for candidates_from in tiers:
+        for size in widths:
+            found = _facade_spots(
+                candidates_from, size, request.side, footprint, used, windows, target, needs_window
+            )
+            if not found:
+                continue
+            blind, _, _, run, start = min(found, key=lambda c: (c[0], c[1], c[2], c[3][0], c[4]))
+            if blind and size != widths[-1]:
+                continue
+            door = _door(run, size, None, request.side, rng, start)
             return replace(door, entrance=request.kind.value)
     return None
+
+
+type Spot = tuple[bool, bool, int, Run, int]  # blind, tight, distance, run, start
+
+
+def _facade_spots(
+    rooms: list[Room],
+    width: int,
+    side: Side,
+    footprint: frozenset[Cell],
+    used: set[Edge],
+    windows: list[Opening],
+    target: Edge,
+    needs_window: Callable[[Room], bool],
+) -> list[Spot]:
+    """Every place for an exterior door of `width` in these rooms' facades on `side`."""
+    spots: list[Spot] = []
+    for room in rooms:
+        facade = {Edge.of(c, side) for c in room.cells if c.neighbour(side) not in footprint}
+        own = [w for w in windows if facade.issuperset(w.edges)]
+        for run in _runs(facade):
+            if len(run) < width:
+                continue
+            margin = 1 if len(run) >= width + 2 else 0
+            for start in range(0, len(run) - width + 1):
+                edges = run[start : start + width]
+                if used.intersection(edges):
+                    continue
+                centre = edges[len(edges) // 2]
+                distance = abs(centre.x - target.x) + abs(centre.y - target.y)
+                # A room needing windows must keep one beside the door.
+                probe = Opening(OpeningKind.BREACH, tuple(edges))  # only its edges count
+                blind = needs_window(room) and bool(own) and not _clear_of_doors(own, [probe])
+                # Off the wall's ends unless that saves the room's window.
+                tight = start < margin or start > len(run) - width - margin
+                spots.append((blind, tight, distance, run, start))
+    return spots
 
 
 def _inward(vertex: tuple[int, int], side: Side) -> Edge:

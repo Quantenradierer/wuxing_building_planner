@@ -66,7 +66,7 @@ class Part:
 
     def blocked(self, band: Band, *extra: Interval | None) -> list[Interval]:
         spans = [*self.reserved.get(band.index, []), *(e for e in extra if e is not None)]
-        if self.cross is not None:
+        if self.cross is not None and not band.facade:  # the cross only joins the corridors
             spans.append(self.cross)
         return spans
 
@@ -189,9 +189,9 @@ class CorridorLayout:
                 target = length / 2 + rng.uniform(-1, 1) * length / 8
                 blocked = [skeleton.lobby_slice] if part is main and skeleton.lobby_slice else []
                 blocked += [i for spans in part.reserved.values() for i in spans]
-                part.cross = self._choose(
-                    part.grid, part.grid.round_up(corridor_width), target, blocked
-                )
+                # As wide as the corridors: it only crosses the interior strips, which
+                # don't follow the facade grid.
+                part.cross = self._choose(part.grid, corridor_width, target, blocked)
                 if part.cross is None:
                     raise AllocationError("no space for the cross corridor")
 
@@ -484,7 +484,7 @@ class CorridorLayout:
                     rooms.append(PlannedRoom(connector.type, cells))
             if part.cross is not None:
                 for band in part.bands:
-                    if band.kind is BandKind.STRIP:
+                    if band.kind is BandKind.STRIP and not band.facade:
                         cells = part.frame.rect(part.cross.u0, part.cross.u1, band.v0, band.v1)
                         rooms.append(PlannedRoom("corridor", cells))
 
