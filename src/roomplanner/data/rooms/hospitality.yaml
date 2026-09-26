@@ -107,9 +107,13 @@ rooms:
     furniture:
       - {object: counter, placement: wall}
       - {object: shelf, placement: wall, count: [1, 3]}
-  coffin_unit:          # coffin motel / squat block: a bunk and a locker
-    area: [16, 40]
-    min_side: 4
+  coffin_unit:          # coffin motel / squat block: a bunk and a locker, ~2 x 2 m
+    area: [12, 20]
+    min_side: 4                 # the 2 m bunk must fit beside the door
+    wealth:                     # a capsule can't shrink further: the bunk must still fit
+      squatter: {area: [14, 20]}
+      low: {area: [14, 20]}
+    cluster: true         # stacked along side hallways where strips are deep
     max_aspect: 3
     furniture:
       - {object: bed, placement: wall}

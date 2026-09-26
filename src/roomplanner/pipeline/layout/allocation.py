@@ -114,9 +114,11 @@ class Anchors:
 
     core: Box | None
     entrance: Box | None
+    service: Box | None = None  # the service entrance's facade cell (ground floor)
 
     def get(self, near: str | None) -> Box | None:
-        return {"core": self.core, "entrance": self.entrance}.get(near or "")
+        anchors = {"core": self.core, "entrance": self.entrance, "service": self.service}
+        return anchors.get(near or "")
 
 
 class Allocator:
@@ -405,6 +407,10 @@ class Allocator:
                 fitting = [RoomEntry(room=self.rules.program.cluster_filler, fill=True)]
             entry = self.rng.choice(fitting or fills)
             spec = self.rules.spec(entry.room)
+            if spec.cluster and (cluster := self._fill_cluster(entry, state)) is not None:
+                # Small fill rooms (coffins, …) in deep strips: stacked along a hallway.
+                state.slots.append(cluster)
+                continue
             min_units = self._fill_min_units(entry, segment)
             low, high = entry.area or spec.area
             units = max(
@@ -425,6 +431,31 @@ class Allocator:
             if remaining - units < min_units:
                 units = remaining
             state.slots.append(self._fill_slot(entry, units, segment))
+
+    def _fill_cluster(self, entry: RoomEntry, state: SegmentState) -> Cluster | None:
+        """A hallway with one or two columns of stacked fill rooms, if full depth is too big."""
+        segment = state.segment
+        spec = self.rules.spec(entry.room)
+        low, high = entry.area or spec.area
+        probe = Request(entry.room, spec, high, Priority.OPTIONAL, None)
+        if not self._is_small(probe, segment):
+            return None
+        unit = segment.unit
+        hall = math.ceil(self.hallway / unit) * unit
+        column = math.ceil(max(MIN_CLUSTER_COLUMN, spec.min_side) / unit) * unit
+        for columns in (2, 1):
+            units = (hall + columns * column) // unit
+            if units <= state.free_units:
+                break
+        else:
+            return None
+        depth = max(spec.min_side, round((low + high) / 2 / column))
+        count = max(1, segment.depth // depth)
+        stacks = [
+            [(Request(entry.room, spec, depth * column, Priority.OPTIONAL, None), depth)] * count
+            for _ in range(columns)
+        ]
+        return Cluster(units, hall, columns, column, stacks)
 
     def _fill_min_units(self, entry: RoomEntry, segment: Segment) -> int:
         return math.ceil(self._min_width(self.rules.spec(entry.room), segment.depth) / segment.unit)
@@ -504,17 +535,16 @@ class Allocator:
     ) -> list[PlannedRoom]:
         band = segment.band
         rooms: list[PlannedRoom] = []
-        hall = cluster.hall
-        width = span.width
-        column_width = (width - hall) // cluster.columns
+        # Extra width (partial modules, widened leftovers) goes to the hallway, not the rooms.
+        column_width = cluster.column_width
         if cluster.columns == 2:
             columns = [
                 Interval(span.u0, span.u0 + column_width),
-                Interval(span.u1 - (width - hall - column_width), span.u1),
+                Interval(span.u1 - column_width, span.u1),
             ]
             hallway = Interval(columns[0].u1, columns[1].u0)
         else:
-            hallway = Interval(span.u0, span.u0 + hall)
+            hallway = Interval(span.u0, span.u1 - column_width)
             columns = [Interval(hallway.u1, span.u1)]
         rooms.append(PlannedRoom("corridor", self._rect(segment, hallway)))
 

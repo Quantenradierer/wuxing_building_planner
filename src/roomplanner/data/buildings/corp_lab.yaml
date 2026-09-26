@@ -7,7 +7,7 @@ layout: corridor
 corridor:
   width: 4
   hallway_width: 3
-strip_depth: [12, 18]
+strip_depth: [10, 16]
 facade:
   module: 3
   window: 2
@@ -36,7 +36,6 @@ floor_roles:
       - {room: specimen_storage, count: [1, 2]}
       - {room: office, fill: true}
       - {room: test_chamber, fill: true}       # interior rows without facade
-      - {room: storage, fill: true}
   labs:
     applies: [upper, top]
     rooms:

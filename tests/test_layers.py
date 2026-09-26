@@ -127,3 +127,15 @@ def test_corporate_offices_get_a_security_room() -> None:
 
     assert has_security_room(Security.CORPORATE)
     assert not has_security_room(Security.NONE)
+
+
+def test_coffin_units_are_small_and_stacked() -> None:
+    building = generate(
+        make_params(building_type=BuildingType.COFFIN_BLOCK, width=48, depth=36, seed=6)
+    )
+    coffins = [r for r in building.floor(0).rooms if r.type == "coffin_unit"]
+    assert len(coffins) >= 20
+    small = [r for r in coffins if r.area <= 24]
+    assert len(small) >= 0.8 * len(coffins)
+    ground = building.floor(0)
+    assert all(any(o.room == r.id and o.kind == "bed" for o in ground.objects) for r in coffins)

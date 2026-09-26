@@ -13,6 +13,8 @@ from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
 IMPLEMENTED = list(BuildingType)
+# Big programs need more room; smaller buildings of these types are rejected with a reason.
+MIN_REASONABLE = {BuildingType.HOSPITAL: 48}
 
 cells = st.integers(min_value=8, max_value=90)
 
@@ -61,7 +63,11 @@ def test_generation_is_deterministic_and_serializable(params: GenerationParams) 
 @given(
     params_strategy.map(
         lambda p: p.model_copy(
-            update={"shape": Shape.RECTANGLE, "width": max(32, p.width), "depth": max(32, p.depth)}
+            update={
+                "shape": Shape.RECTANGLE,
+                "width": max(MIN_REASONABLE.get(p.building_type, 32), p.width),
+                "depth": max(MIN_REASONABLE.get(p.building_type, 32), p.depth),
+            }
         )
     ),
 )

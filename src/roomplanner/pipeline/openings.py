@@ -55,7 +55,7 @@ class DefaultOpenings:
             doors = _interior_doors(ctx, rooms, owner, walls, circulation, entries, hosts, rng)
             used: set[Edge] = set()
             for request in planned.entrances:
-                door = _exterior_door(ctx, footprint, rooms[request.room], request, used, rng)
+                door = _exterior_door(ctx, footprint, rooms, request, used, rng)
                 if door is None:
                     plan.warnings.append(f"no facade for the {request.kind} entrance")
                     continue
@@ -211,32 +211,44 @@ def _interior_doors(
 def _exterior_door(
     ctx: Context,
     footprint: frozenset[Cell],
-    room: Room,
+    rooms: tuple[Room, ...],
     request: EntranceRequest,
     used: set[Edge],
     rng: random.Random,
 ) -> Opening | None:
+    """The door in the requested room's facade; if that is too short, the nearest room's."""
     width = ctx.rules.entrances(ctx.params)[request.kind].width
-    facade = {
-        Edge.of(c, request.side) for c in room.cells if c.neighbour(request.side) not in footprint
-    }
     target = Edge.of(request.hint, request.side)
-    candidates: list[tuple[int, Run, int]] = []
-    for run in _runs(facade):
-        if len(run) < width:
-            continue
-        margin = 1 if len(run) >= width + 2 else 0
-        for start in range(margin, len(run) - width - margin + 1):
-            edges = run[start : start + width]
-            if used.intersection(edges):
-                continue
-            centre = edges[len(edges) // 2]
-            distance = abs(centre.x - target.x) + abs(centre.y - target.y)
-            candidates.append((distance, run, start))
-    if not candidates:
-        return None
-    _, run, start = min(candidates, key=lambda c: (c[0], c[1][0], c[2]))
-    return replace(_door(run, width, None, request.side, rng, start), entrance=request.kind.value)
+    hinted = rooms[request.room]
+    others = [
+        r
+        for r in rooms
+        if r is not hinted and r.unit is None and not ctx.rules.spec(r.type).circulation
+    ]
+    for candidates_from in ([hinted], others):
+        candidates: list[tuple[int, Run, int]] = []
+        for room in candidates_from:
+            facade = {
+                Edge.of(c, request.side)
+                for c in room.cells
+                if c.neighbour(request.side) not in footprint
+            }
+            for run in _runs(facade):
+                if len(run) < width:
+                    continue
+                margin = 1 if len(run) >= width + 2 else 0
+                for start in range(margin, len(run) - width - margin + 1):
+                    edges = run[start : start + width]
+                    if used.intersection(edges):
+                        continue
+                    centre = edges[len(edges) // 2]
+                    distance = abs(centre.x - target.x) + abs(centre.y - target.y)
+                    candidates.append((distance, run, start))
+        if candidates:
+            _, run, start = min(candidates, key=lambda c: (c[0], c[1][0], c[2]))
+            door = _door(run, width, None, request.side, rng, start)
+            return replace(door, entrance=request.kind.value)
+    return None
 
 
 def _inward(vertex: tuple[int, int], side: Side) -> Edge:

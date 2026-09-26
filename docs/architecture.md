@@ -237,7 +237,8 @@ stairwell (or a circulation room).
 `data/objects.yaml` (size in cells along the wall × deep, cover, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `center`, `scatter`, `near_exit` (checkouts) and `rows`
 (shelves, desks, racks with aisles and cross aisles). Counts are a range or `per: N` (one
-object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor.
+object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor;
+an exact count (`count: 1`, the default) is never scaled.
 Walkable objects (stairs, elevator car, rugs) may cover door clearances and never block. A
 placement is rejected if it covers another object or a door's clearance (as deep as the door
 is wide) or splits the room's free floor; a ring test around the object avoids most flood

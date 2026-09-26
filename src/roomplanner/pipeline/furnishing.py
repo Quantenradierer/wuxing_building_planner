@@ -124,6 +124,8 @@ class RoomFurnisher:
             if rule.per is not None:
                 count = round(len(self.cells) / rule.per * factor)
                 count = min(high, max(low, count))
+            elif low == high:
+                count = low  # an exact count (one staircase, one bed) never scales
             else:
                 count = round(self.rng.randint(low, high) * factor)
             if low > 0:

@@ -38,7 +38,6 @@ floor_roles:
       - {room: security_room, count: 1, near: entrance, security: [corporate, aaa]}
       - {room: consultation_room, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
-      - {room: storage, fill: true}
   suites:
     applies: [upper, top]
     rooms:
@@ -49,7 +48,6 @@ floor_roles:
       - {room: staff_room, count: 1}
       - {room: recovery_suite, fill: true}
       - {room: treatment_room, fill: true}       # interior rows without facade
-      - {room: storage, fill: true}
   basement:
     applies: [basement]
     rooms:

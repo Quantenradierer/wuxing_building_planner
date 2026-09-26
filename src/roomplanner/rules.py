@@ -119,7 +119,7 @@ class RoomEntry(_Strict):
     share: float | None = Field(default=None, gt=0, le=1)
     fill: bool = False
     place: Literal["entrance", "hall"] | None = None
-    near: Literal["core", "entrance"] | None = None
+    near: Literal["core", "entrance", "service"] | None = None
     priority: Priority = Priority.NORMAL
     area: Range | None = Field(default=None, description="Overrides the catalog")
     when: str | None = None

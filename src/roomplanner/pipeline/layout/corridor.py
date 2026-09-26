@@ -46,7 +46,7 @@ from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import CoreEntry, Priority, RoomEntry, evaluate, variables
 
-MIN_GAP_MODULES = 1  # free space left next to reserved slots, if any
+MIN_GAP_CELLS = 3  # free space left next to reserved slots, if any: the smallest room
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
 
 
@@ -178,7 +178,7 @@ class CorridorLayout:
             else:
                 lobby_slice = Interval(grid.floor(frame.length - length), frame.length)
             reserved = [i for spans in main.reserved.values() for i in spans]
-            skeleton.lobby_slice = _absorb_gaps(lobby_slice, reserved, frame.length, grid.module)
+            skeleton.lobby_slice = _absorb_gaps(lobby_slice, reserved, frame.length, _min_gap(grid))
 
         # Parallel corridors of the main part need a cross corridor; a wing's corridors are
         # already joined through their connectors into the main part.
@@ -235,7 +235,7 @@ class CorridorLayout:
             for span in spans:
                 others = [s for s in spans if s != span]
                 others += parent.reserved.get(band.index, [])
-                span = _absorb_gaps(span, others, frame.length, parent.grid.module)
+                span = _absorb_gaps(span, others, frame.length, _min_gap(parent.grid))
                 # Stubs of several wings may now overlap: join them.
                 for taken in [r for r in parent.reserved.get(band.index, []) if r.overlaps(span)]:
                     span = Interval(min(span.u0, taken.u0), max(span.u1, taken.u1))
@@ -258,11 +258,13 @@ class CorridorLayout:
             if any(b.kind is BandKind.CORRIDOR for b in overlapping):
                 continue
             for band in overlapping:
-                if end in parent.reserved.get(band.index, []):
+                taken = parent.reserved.get(band.index, [])
+                if any(t.u0 <= end.u0 and end.u1 <= t.u1 for t in taken):
                     continue
-                parent.reserved.setdefault(band.index, []).append(end)
+                span = _absorb_gaps(end, taken, frame.length, _min_gap(parent.grid))
+                parent.reserved.setdefault(band.index, []).append(span)
                 parent.connectors.append(
-                    PlannedRoom("corridor", frame.rect(end.u0, end.u1, band.v0, band.v1))
+                    PlannedRoom("corridor", frame.rect(span.u0, span.u1, band.v0, band.v1))
                 )
 
     def _bands(
@@ -270,7 +272,9 @@ class CorridorLayout:
     ) -> list[Band]:
         low, high = ctx.rules.program.strip_depth
         depth = frame.depth
-        if depth < corridor + 2 * low:
+        # Single-loaded only while one row is not too deep; otherwise two rows, even if
+        # they are a bit shallower than `low` (deep rows make oversized rooms).
+        if depth - corridor <= high or (depth - corridor) // 2 < _shallowest(low):
             # Single-loaded: one row of rooms, on the street side if the street is a long side.
             corridor_first = street is LocalSide.V1 if not street.is_end else rng.random() < 0.5
             if corridor_first:
@@ -422,7 +426,7 @@ class CorridorLayout:
 
         `avoid` intervals must not be overlapped but are no neighbours (e.g. junctions).
         """
-        min_gap = MIN_GAP_MODULES * grid.module
+        min_gap = _min_gap(grid)
         starts = {*grid.points(), *(b.u1 for b in blocked), *(b.u0 - width for b in blocked)}
         options = {Interval(start, start + width) for start in starts}
         # Flush with an end of the part, widened to the next grid point (partial modules).
@@ -518,9 +522,10 @@ class CorridorLayout:
         if skeleton.core_band is not None and skeleton.core_slot is not None:
             band, slot = skeleton.core_band, skeleton.core_slot
             core_box = main.frame.box(slot.u0, slot.u1, band.v0, band.v1)
-        allocator = Allocator(
-            ctx, ctx.rules, segments, Anchors(core_box, entrance), ctx.rng(f"allocate:{level}")
-        )
+        service = next((c for kind, _, c in hints if kind is EntranceKind.SERVICE), None)
+        service_box = Box(service.x, service.y, service.x + 1, service.y + 1) if service else None
+        anchors = Anchors(core_box, entrance, service_box)
+        allocator = Allocator(ctx, ctx.rules, segments, anchors, ctx.rng(f"allocate:{level}"))
         rooms += allocator.allocate(role, level, level_name(level))
         warnings += allocator.warnings
 
@@ -629,12 +634,10 @@ class CorridorLayout:
                     cells = frame.rect(span.u0, span.u1, band.v0, band.v1)
                     rooms.append(PlannedRoom("corridor", cells))
                     hint = frame.cell(int(span.centre), v)
-                elif skeleton.core_band is band and skeleton.core_slot is not None:
-                    # No space for a corridor stub: the stairwell gets the exit instead.
-                    hint = frame.cell(skeleton.core_slot.u0, v)
                 else:
-                    warnings.append("no space for the service entrance")
-                    return anchor
+                    # No space for a corridor stub: the room on the facade at the core (or
+                    # the middle) gets the back door, e.g. a loading bay or the stairwell.
+                    hint = frame.cell(int(target), v)
         hints.append((EntranceKind.SERVICE, service_side, hint))
         return anchor
 
@@ -693,6 +696,16 @@ class CorridorLayout:
     @staticmethod
     def _facade_band(bands: list[Band], side: LocalSide) -> Band:
         return bands[0] if side is LocalSide.V0 else bands[-1]
+
+
+def _min_gap(grid: Grid) -> int:
+    """Smallest gap worth leaving beside a reserved slot: whole modules, a room wide."""
+    return grid.round_up(MIN_GAP_CELLS)
+
+
+def _shallowest(low: int) -> int:
+    """Shallowest acceptable strip when a deeper one would be far too deep."""
+    return max(INTERIOR_STRIP_MIN, low * 2 // 3)
 
 
 def _absorb_gaps(span: Interval, others: list[Interval], length: int, min_gap: int) -> Interval:

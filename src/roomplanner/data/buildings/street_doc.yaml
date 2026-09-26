@@ -32,14 +32,14 @@ floor_roles:
       - {room: pharmacy, count: [0, 1]}
       - {room: storage, count: [1, 2]}
       - {room: recovery_room, fill: true}
-      - {room: storage, fill: true}
+      - {room: treatment_room, fill: true}       # interior rows without facade
   upstairs:
     applies: [upper, top]
     rooms:
       - {room: toilet, count: 1}
       - {room: treatment_room, count: [0, 1]}
       - {room: recovery_room, fill: true}
-      - {room: storage, fill: true}
+      - {room: treatment_room, fill: true}       # interior rows without facade
   basement:
     applies: [basement]
     rooms:

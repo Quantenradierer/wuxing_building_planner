@@ -30,7 +30,7 @@ floor_roles:
     applies: [ground]
     rooms:
       - {room: sales_floor, place: hall}
-      - {room: loading_bay, count: 1, priority: required}
+      - {room: loading_bay, count: 1, near: service, priority: required}
       - {room: toilet, count: [1, 2], near: core, priority: required}
       - {room: manager_office, count: 1}
       - {room: security_room, count: [0, 1], wealth: [middle, high, luxury], security: [none, low]}

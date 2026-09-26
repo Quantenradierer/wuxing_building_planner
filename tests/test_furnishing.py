@@ -84,3 +84,9 @@ def test_ring_shortcut() -> None:
     # A wall-to-wall bar splits the free cells into two runs on its ring.
     bar = {Cell(x, 2) for x in range(5)}
     assert not ring_is_one_run(free - bar, 0, 2, 5, 1)
+
+
+def test_exact_counts_do_not_scale_with_wealth() -> None:
+    building = generate(make_params(width=56, depth=36, floors_above=2, wealth=Wealth.LUXURY))
+    for floor in building.floors:
+        assert sum(o.kind == "stairs" for o in floor.objects) == 1
