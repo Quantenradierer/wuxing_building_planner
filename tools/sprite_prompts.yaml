@@ -6,7 +6,8 @@ style: >-
   {subject}, orthographic plan view, camera pointing straight down, flat lay, 2D top-down
   asset for a tabletop RPG battlemap, hand-painted digital art, cyberpunk, gritty, muted colours
   with small neon accents, single object isolated on a flat solid white background
-suffix: "--no drop shadow, cast shadow, perspective, isometric, side view, text, people, floor, walls, border, frame --style raw"
+suffix: "--no drop shadow, cast shadow, perspective, isometric, side view, text, people, floor, walls, border, frame --raw --v 8.2"
+# Model: --v 8.2 (V8 uses --raw instead of --style raw); our account defaults to an older one.
 # Style reference for every job (one of our own grids) so all sprites share one look.
 # Discord CDN links expire after about a day; replace it with a fresh link to that grid.
 sref_weight: 60
@@ -121,7 +122,7 @@ variants:
       flat solid bright magenta background
     sref: "https://cdn.discordapp.com/attachments/1189970972279853087/1553476480712052777/leto_single_bed_pillow_at_the_top_edge_blanket_towards_the_bot_dcb9a504-e0bf-4993-acb7-9fcb1b37127e.webp?ex=6ab96337&is=6ab811b7&hm=d61fbdad78da94572f3239ec517fedef9a565567b5a56f5cae8b75cc366bcae2"
     sref_weight: 35
-    suffix: "--no drop shadow, cast shadow, perspective, isometric, side view, photo, photorealistic, 3d render, text, people, floor, walls, border, frame --style raw"
+    suffix: "--no drop shadow, cast shadow, perspective, isometric, side view, photo, photorealistic, 3d render, text, people, floor, walls, border, frame --raw --v 8.2"
     subjects:
       bed: "luxury single bed with silk sheets, pillow at the top edge"
       double_bed: "luxury king size bed with silk sheets and many pillows at the top edge"
