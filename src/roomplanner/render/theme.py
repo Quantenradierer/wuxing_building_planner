@@ -121,6 +121,9 @@ class Theme(_Strict):
     objects: dict[str, ObjectStyle] = {}
     default_object: ObjectStyle = ObjectStyle()
     sprites: str | None = Field(default=None, description="Directory of <kind>.png sprites")
+    sprite_fallbacks: dict[str, str] = Field(
+        default={}, description="Kind -> kind whose sprite stands in while it has none"
+    )
 
     def material(self, room_type: str) -> Material:
         return self.materials[self.rooms.get(room_type, self.default_material)]

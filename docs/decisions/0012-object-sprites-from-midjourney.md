@@ -31,6 +31,8 @@ author has Midjourney access (the Discord accessor used by the SINner project).
   One shared prompt style plus a style reference (`--sref`, one of our own grids) keeps
   the set in a single look. The chosen quadrant (and a correcting rotation) per kind is a
   manual pick recorded in `tools/sprite_picks.yaml`.
+- A theme's `sprite_fallbacks` maps a kind without a sprite to a stand-in kind (e.g.
+  `office_desk: desk`), so new object kinds look right before their sprites exist.
 - Stairs, elevator cars, wall screens and whiteboards stay procedural: their exact geometry
   matters more than texture, or they are too thin to read from above.
 

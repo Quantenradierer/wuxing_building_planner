@@ -374,7 +374,8 @@ object whose kind has `<kind>.png` there is drawn as that picture instead of its
 `facing` and stretched to its box; their shadow follows the sprite's alpha. Wealth
 variants are named `<kind>.<wealth>.png`: the renderer uses the object's tier
 (`obj.wealth`, else the building's), else the next tier's variant towards middle, else
-`<kind>.png`, else the shape.
+`<kind>.png`, else the theme's `sprite_fallbacks` stand-in kind (same lookup), else the
+shape.
 
 ## VTT export
 

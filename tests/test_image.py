@@ -145,3 +145,26 @@ def test_wealth_sprite_falls_back_towards_middle(tier: Wealth, expected: str) ->
     sprites = {"bed": blank, "bed.squatter": blank, "bed.high": blank}
     assert sprite_name(sprites, "bed", tier) == expected
     assert sprite_name(sprites, "sofa", tier) is None
+
+
+def test_sprite_fallback_stands_in_for_a_kind_without_sprite(tmp_path: Path) -> None:
+    building = generate(make_params(width=30, depth=20))
+    floor = building.floor(0)
+    marked = {(d.x, d.y) for d in floor.devices}
+    obj = next(
+        o for o in floor.objects if o.blocking and not {(c.x, c.y) for c in o.cells} & marked
+    )
+    sprites = tmp_path / "sprites"
+    sprites.mkdir()
+    Image.new("RGBA", (40, 20), (255, 0, 0, 255)).save(sprites / "stand_in.png")
+    path = tmp_path / "sprited.yaml"
+    path.write_text(
+        "extends: neon\nname: sprited\nsprites: sprites\nambient: 1.0\nglow_radius: 0\n"
+        f"noise: 0\nsprite_fallbacks: {{{obj.kind}: stand_in}}\n"
+    )
+    options = RenderOptions(cell_px=20, padding=2, lighting=False)
+    image = render_floor(building, floor, load_theme(str(path)), options)
+    centre = (round((obj.x + 2 + obj.w / 2) * 20), round((obj.y + 2 + obj.h / 2) * 20))
+    pixel = image.getpixel(centre)
+    assert isinstance(pixel, tuple)
+    assert pixel[0] > 150 and pixel[0] > 3 * max(pixel[1], pixel[2])

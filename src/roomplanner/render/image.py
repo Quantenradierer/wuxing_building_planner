@@ -289,7 +289,10 @@ class _Canvas:
         if directory is None:
             return None
         tier = obj.wealth or self.building.params.wealth
-        name = sprite_name(_sprites(directory), obj.kind, tier)
+        sprites = _sprites(directory)
+        name = sprite_name(sprites, obj.kind, tier)
+        if name is None and (stand_in := self.theme.sprite_fallbacks.get(obj.kind)):
+            name = sprite_name(sprites, stand_in, tier)
         if name is None:
             return None
         return _placed_sprite(directory, name, obj.facing, obj.w * self.cell, obj.h * self.cell)
