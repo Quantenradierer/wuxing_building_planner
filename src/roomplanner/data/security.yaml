@@ -29,6 +29,7 @@ tiers:
       unit: {lock: maglock, material: security}
       server_room: {lock: cardreader, material: security, rating: 5}
       security_room: {lock: cardreader, material: security}
+      guard_room: {lock: cardreader}
       archive: {lock: cardreader}
       host_room: {lock: cardreader, material: security, rating: 5}
       spider_room: {lock: cardreader, material: security}
@@ -74,6 +75,7 @@ tiers:
       unit: {lock: cardreader, material: security}
       server_room: {lock: biometric, material: blast, rating: 8}
       security_room: {lock: biometric, material: security}
+      guard_room: {lock: cardreader, material: security}
       archive: {lock: biometric, material: security}
       host_room: {lock: biometric, material: blast, rating: 8}
       spider_room: {lock: biometric, material: security}

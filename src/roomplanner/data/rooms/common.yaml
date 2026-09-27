@@ -101,6 +101,19 @@ rooms:
       - {object: locker, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [1, 2]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
+  guard_room:           # the security staff's break room between patrols
+    area: [30, 80]
+    min_side: 5
+    windows: forbidden
+    next_to: [security_room]
+    furniture:
+      - {object: canteen_set, placement: center}
+      - {object: locker, placement: perimeter, count: [4, 8]}
+      - {object: weapon_locker, placement: wall, count: [1, 2]}
+      - {object: bed, placement: wall, count: [0, 1]}             # a cot for the night shift
+      - {object: wall_screen, placement: wall}                    # the camera feeds
+      - {object: coffee_machine, placement: corner}
+      - {object: fridge, placement: wall, count: [0, 1]}
   reception:
     area: [16, 40]
     min_side: 4

@@ -34,6 +34,7 @@ floor_roles:
       - {room: toilet, share: 0.03}          # more toilets on bigger floors
       - {room: meeting_room, count: [0, 1]}
       - {room: security_room, count: 1, near: entrance, priority: required, security: [corporate, aaa]}
+      - {room: guard_room, count: 1, near: entrance, security: [corporate, aaa]}   # guards off patrol
       - {room: storage, count: 1, priority: optional, when: "floors_below == 0"}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: spider_room, count: 1, security: [corporate, aaa], priority: optional}

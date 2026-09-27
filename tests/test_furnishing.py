@@ -458,3 +458,12 @@ def test_vending_rooms_are_open_on_one_or_two_sides_and_take_no_other_doors() ->
                     ]
                     assert not doors
     assert rooms
+
+
+def test_corp_offices_have_a_guard_room_with_lockers_and_weapons() -> None:
+    params = make_params(building_type=BuildingType.CORP_OFFICE, width=60, depth=40, seed=1)
+    ground = generate(params).floor(0)
+    room = next(r for r in ground.rooms if r.type == "guard_room")
+    kinds = [o.kind for o in ground.objects if o.room == room.id]
+    assert kinds.count("locker") >= 2
+    assert "weapon_locker" in kinds

@@ -30,6 +30,7 @@ floor_roles:
     rooms:
       - {room: corp_lobby, place: entrance, area: [80, 180], priority: required}
       - {room: security_room, count: 1, near: entrance, priority: required}
+      - {room: guard_room, count: 1, near: entrance, priority: required}   # guards off patrol
       - {room: toilet, count: 2, near: core, priority: required}
       - {room: meeting_room, count: [1, 2]}
       - {room: server_room, count: 1}
