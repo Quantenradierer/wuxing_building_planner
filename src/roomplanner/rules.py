@@ -6,6 +6,7 @@ All lengths are in cells, all areas in cells (number of cells covered).
 from __future__ import annotations
 
 import ast
+import zlib
 from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cache
@@ -266,6 +267,7 @@ class Applies(StrEnum):
     GROUND = "ground"
     UPPER = "upper"
     TOP = "top"
+    BELOW_TOP = "below_top"  # the floor under the top one (also `upper`)
     BASEMENT = "basement"
 
 
@@ -458,6 +460,8 @@ def _level_tags(level: int, params: GenerationParams) -> set[Applies]:
         return {Applies.GROUND}
     if level == params.floors_above - 1:
         return {Applies.TOP}
+    if level == params.floors_above - 2:
+        return {Applies.UPPER, Applies.BELOW_TOP}
     return {Applies.UPPER}
 
 
@@ -469,6 +473,8 @@ def variables(params: GenerationParams, level: int = 0) -> dict[str, int]:
         "level": level,
         "width": params.width,
         "depth": params.depth,
+        # 0-99, fixed per building: for "sometimes" (a penthouse on half the towers)
+        "roll": zlib.crc32(f"{params.seed}:roll".encode()) % 100,
     }
 
 
@@ -619,7 +625,7 @@ def _check_references(rules: Rules) -> None:
 # --- `when:` expressions ------------------------------------------------------------
 # A deliberately tiny language: integer variables, + -, comparisons, and/or/not.
 
-_VARIABLES = {"floors_above", "floors_below", "floors_total", "level", "width", "depth"}
+_VARIABLES = {"floors_above", "floors_below", "floors_total", "level", "width", "depth", "roll"}
 
 
 def evaluate(expression: str | None, values: dict[str, int]) -> bool:

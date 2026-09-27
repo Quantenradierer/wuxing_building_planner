@@ -522,7 +522,14 @@ class CorridorLayout:
             self._emergency_exit(ctx, skeleton, hints, warnings)
 
         segments: list[Segment] = []
-        balcony_band = self._balcony_band(ctx, main) if role.balcony is not None else None
+        # A balcony on this floor, or on one below: then this floor is set back above it.
+        balcony_role = role if role.balcony is not None else None
+        for lower in range(1, level):
+            below = ctx.rules.role_for(lower, ctx.params)[1]
+            if balcony_role is None and below.balcony is not None:
+                balcony_role = below
+        balcony_band = self._balcony_band(ctx, main) if balcony_role is not None else None
+        cut: frozenset[Cell] = frozenset()
         for part in skeleton.parts:
             part_slice = slice_ if part is main else None
             for band in part.bands:
@@ -555,11 +562,14 @@ class CorridorLayout:
                     continue
                 own = extra.get(band.index, []) if part is main else []
                 blocked = part.blocked(band, part_slice, *own)
-                if part is main and role.balcony is not None and band is balcony_band:
-                    found = self._balcony(ctx, part, band, blocked, role)
-                    if found is not None:
+                if part is main and balcony_role is not None and band is balcony_band:
+                    found = self._balcony(ctx, part, band, blocked, balcony_role)
+                    if found is not None and balcony_role.balcony is not None:
                         cells, span, back = found
-                        rooms.append(PlannedRoom(role.balcony.room, cells))
+                        if balcony_role is role:
+                            rooms.append(PlannedRoom(balcony_role.balcony.room, cells))
+                        else:  # open to the sky: not part of this floor
+                            cut = cells
                         blocked = [*blocked, span]
                         segments.append(
                             Segment(part.frame, back, span, True, part.grid.module, part.grid)
@@ -583,7 +593,7 @@ class CorridorLayout:
             EntranceRequest(kind, side, _room_index(rooms, hint), hint)
             for kind, side, hint in hints
         ]
-        return FloorPlan(level, role_name, rooms, entrances)
+        return FloorPlan(level, role_name, rooms, entrances, cut)
 
     @staticmethod
     def _balcony_band(ctx: Context, main: Part) -> Band | None:

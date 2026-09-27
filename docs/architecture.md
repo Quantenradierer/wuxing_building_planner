@@ -232,6 +232,9 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    `depth` cells of a stretch of the street-side facade strip become an open-air room
    (`outdoor: true`); the rooms behind it get a shallower segment and their windows look
    onto it. The renderer draws its facade as a railing (theme `walls.open_air`).
+   Floors above a balcony floor leave its cells out of their footprint (`FloorPlan.cut`): it
+   stays open to the sky and their rows are shallower there (corp towers: a penthouse on top
+   of half of them, by the building's `roll`, with the executive floor moved one down).
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
 (T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),

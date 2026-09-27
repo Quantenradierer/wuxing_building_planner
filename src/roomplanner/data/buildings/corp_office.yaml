@@ -1,7 +1,7 @@
 # Units are cells: lengths in cells, areas in number of cells.
 # Corp branch office: checkpoint lobby, cubicle floors, server room, executive suite on top.
 building: corp_office
-catalogs: [common, office, industry]
+catalogs: [common, office, industry, residential]
 layout: corridor
 
 corridor:
@@ -51,9 +51,28 @@ floor_roles:
       - {room: copy_room, fill: true, limit: 1}
       - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
       - {room: training_room, fill: true, priority: optional, limit: 1}   # big leftovers
-  executive:
+  penthouse:                # half the towers: the CEO lives on top, above the executive floor
     applies: [top]
-    when: "floors_above >= 3"
+    when: "floors_above >= 4 and roll < 50"
+    core_back: living_room    # the home cinema behind the stairwell
+    rooms:
+      - {room: living_room, count: 1, area: [120, 240], priority: required}
+      - {room: bedroom, count: [1, 2], area: [100, 240], priority: required}
+      - {room: bathroom, count: [2, 3], priority: required}
+      - {room: kitchen, count: 1, area: [30, 60], priority: required}
+      - {room: executive_office, count: 1}                 # the home study
+      - {room: security_room, count: 1, near: core}
+      - {room: safe_room, count: 1, priority: optional}
+      - {room: closet, count: [1, 2], priority: optional}
+      - {room: living_room, fill: true, area: [150, 450]}     # big rooms in the deep strips
+      - {room: bedroom, fill: true, weight: 0.5, area: [100, 300]}
+      - {room: closet, fill: true, weight: 0.2, area: [20, 140]}   # walk-in wardrobes behind
+      - {room: laundry, fill: true, limit: 1}
+  executive:                # on top, or under the penthouse
+    applies: [top, below_top]
+    when: >-
+      floors_above >= 3 and ((level == floors_above - 1 and (floors_above < 4 or roll >= 50))
+      or (level == floors_above - 2 and floors_above >= 4 and roll < 50))
     core_back: meeting_room   # no training room on the executive floor
     balcony: {depth: 5, share: 0.5}   # a terrace along the street; the rooms move back
     rooms:

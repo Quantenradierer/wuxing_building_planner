@@ -34,15 +34,17 @@ class _Draft:
     rooms: tuple[Room, ...]
     walls: frozenset[Edge]
     doors: list[Opening]
+    footprint: frozenset[Cell]  # the building's, less what this floor lacks (under a balcony)
 
 
 @register("openings", "default")
 class DefaultOpenings:
-    def build(self, ctx: Context, footprint: frozenset[Cell], plan: BuildingPlan) -> list[Floor]:
+    def build(self, ctx: Context, building: frozenset[Cell], plan: BuildingPlan) -> list[Floor]:
         rng = ctx.rng("openings")
         drafts: list[_Draft] = []
         core_walls = _core_walls(ctx, plan)
         for planned in plan.floors:
+            footprint = building - planned.cut
             rooms = tuple(
                 Room(f"{planned.level}.{i + 1}", r.type, r.cells, r.unit)
                 for i, r in enumerate(planned.rooms)
@@ -108,21 +110,22 @@ class DefaultOpenings:
                     if door is not None:
                         doors.append(door)
                         used |= set(door.edges)
-            drafts.append(_Draft(planned.level, planned.role, rooms, walls, doors))
+            drafts.append(_Draft(planned.level, planned.role, rooms, walls, doors, footprint))
 
-        candidates = _window_grid(ctx, footprint, plan.facade_grid)
+        candidates = _window_grid(ctx, building, plan.facade_grid)
         floors: list[Floor] = []
         for d in drafts:
             windows: list[Opening] = []
             if d.level >= 0:
                 # Open-air rooms (a balcony): the windows look out onto them.
                 outdoor = {c for r in d.rooms if ctx.rules.spec(r.type).outdoor for c in r.cells}
-                indoor = footprint - outdoor
-                grid = _window_grid(ctx, indoor, plan.facade_grid) if outdoor else candidates
+                indoor = d.footprint - outdoor
+                same = indoor == building
+                grid = candidates if same else _window_grid(ctx, indoor, plan.facade_grid)
                 fitting = [w for w, side in grid if _window_fits(ctx, indoor, d, w, side)]
                 windows = _clear_of_doors(fitting, d.doors)
             floors.append(
-                Floor(d.level, footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)
+                Floor(d.level, d.footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)
             )
         return floors
 

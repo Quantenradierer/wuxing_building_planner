@@ -58,6 +58,7 @@ class FloorPlan:
     role: str
     rooms: list[PlannedRoom]
     entrances: list[EntranceRequest] = field(default_factory=list[EntranceRequest])
+    cut: frozenset[Cell] = frozenset()  # footprint cells this floor lacks (under a balcony's sky)
 
 
 @dataclass

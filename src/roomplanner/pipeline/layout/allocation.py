@@ -733,6 +733,7 @@ class Allocator:
             for e in sorted(self.fills, key=lambda e: e.priority is Priority.OPTIONAL)
             if self.rules.spec(e.room).windows is not WindowRule.REQUIRED
             and not self.rules.spec(e.room).circulation
+            and e.limit is None  # a limited room (one laundry) can't back every stack
         ]
         fitting = [e for e in backs if self.rules.spec(e.room).min_side <= rest]
         return (fitting or backs or [RoomEntry(room=self.rules.program.cluster_filler, fill=True)])[
