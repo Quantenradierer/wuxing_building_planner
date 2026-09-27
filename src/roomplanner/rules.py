@@ -361,6 +361,11 @@ class BuildingProgram(_Strict):
     entrances: dict[EntranceKind, EntranceRule]
     floor_roles: dict[str, FloorRole]
     units: dict[str, UnitSpec] = Field(default={}, description="Room types that are units")
+    core_back: str | None = Field(
+        default=None,
+        description="Room behind the core in strips too deep for the stairwell "
+        "(default: the cluster filler)",
+    )
     service_stub: bool = Field(
         default=False, description="Carve a corridor to the service side instead of a back room"
     )
@@ -561,6 +566,7 @@ def load_yaml[M: BaseModel](model: type[M], text: str, origin: str) -> M:
 def _check_references(rules: Rules) -> None:
     program = rules.program
     names = [program.cluster_filler, *(c.room for c in program.core)]
+    names += [program.core_back] if program.core_back else []
     names += [e.room for role in program.floor_roles.values() for e in role.rooms]
     for unit, spec in program.units.items():
         names += [unit, spec.hall, *spec.front, *spec.back]

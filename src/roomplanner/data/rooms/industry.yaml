@@ -85,7 +85,7 @@ rooms:
     circulation: true         # no wall to the corridor: the traffic passes the cubicles
     door_width: 3
     furniture:
-      - {object: cubicle, placement: rows, aisle: 2, margin: 2}
+      - {object: cubicle, placement: rows, aisle: 2, paired: true, block: 30}   # back to back
       - {object: copier, placement: wall, count: [1, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: water_cooler, placement: wall, count: [0, 1]}

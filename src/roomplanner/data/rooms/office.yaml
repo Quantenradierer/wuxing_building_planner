@@ -51,6 +51,13 @@ rooms:
       - {object: huddle_set, placement: center}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
+  training_room:            # seminars and mandatory corporate loyalty briefings
+    area: [100, 320]
+    min_side: 8
+    furniture:
+      - {object: wall_screen, placement: end}
+      - {object: chair, placement: rows, aisle: 1, margin: 2, block: 10, toward: wall_screen}
+      - {object: plant, placement: corner, count: [0, 2]}
   copy_room:                # printers, paper, mail
     area: [20, 48]
     min_side: 4

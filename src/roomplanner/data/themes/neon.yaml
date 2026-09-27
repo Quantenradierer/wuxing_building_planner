@@ -89,6 +89,7 @@ rooms:
   meeting_room: carpet
   focus_room: carpet
   huddle_room: carpet
+  training_room: carpet
   copy_room: carpet
   doctor_office: carpet
   manager_office: carpet
@@ -264,7 +265,7 @@ objects:
   lab_bench:       {shape: counter, fill: "#eef2f6", stroke: "#8a95a5", detail: "#b8c2cf"}
   fume_hood:       {shape: machine, fill: "#c5ced9", stroke: "#5b6474", detail: "#7b8595", glow: "#6dffb0"}
   specimen_fridge: {shape: screen, fill: "#dfe6ee", stroke: "#5b6474", detail: "#9fe8ff", glow: "#4fc3f7"}
-  cubicle:         {shape: desk, fill: "#4a4f5c", stroke: "#15171d", detail: "#1b1f2a", glow: "#29b6f6"}
+  cubicle:         {shape: cubicle, fill: "#6b7382", stroke: "#15171d", detail: "#3a404c", glow: "#29b6f6"}
   scanner:         {shape: machine, fill: "#e6ebf1", stroke: "#5b6474", detail: "#9aa6b5", glow: "#4fc3f7"}
   roof_hatch:      {shape: hatch, fill: "#2a2f3a", stroke: "#ffb347", detail: "#6b7385"}
   guard_desk:      {shape: counter, fill: "#23283a", stroke: "#0f1117", detail: "#00e5ff", glow: "#00e5ff"}

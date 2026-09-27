@@ -97,6 +97,25 @@ def desk_shape(pen: Pen, box: Box, facing: Side) -> None:
         pen.glow.rectangle(monitor, fill=glow)
 
 
+def cubicle_shape(pen: Pen, box: Box, facing: Side) -> None:
+    """Partitions on the back and both flanks, open at the front; the desk along the back."""
+    wall = pen.cell * 0.14
+    x0, y0, x1, y1 = box
+    flanks = (Side.W, Side.E) if facing in (Side.N, Side.S) else (Side.N, Side.S)
+    for side in (facing.opposite, *flanks):
+        extent = x1 - x0 if side in (Side.W, Side.E) else y1 - y0
+        panel = strip(box, side, wall / extent)
+        pen.base.rectangle(panel, fill=pen.fill, outline=pen.stroke, width=pen.line)
+    inner = (x0 + wall, y0 + wall, x1 - wall, y1 - wall)
+    depth = y1 - y0 - 2 * wall if facing in (Side.N, Side.S) else x1 - x0 - 2 * wall
+    desk = strip(inner, facing.opposite, pen.cell * 0.9 / depth)
+    pen.base.rectangle(desk, fill=pen.detail, outline=pen.stroke, width=pen.line)
+    monitor = inset(strip(desk, facing.opposite, 0.35), pen.cell * 0.3)
+    pen.base.rectangle(monitor, fill=pen.stroke)
+    if (glow := pen.glow_colour()) is not None:
+        pen.glow.rectangle(monitor, fill=glow)
+
+
 def bed_shape(pen: Pen, box: Box, facing: Side) -> None:
     inner = inset(box, pen.cell * 0.08)
     _rounded(pen, inner, radius=0.12)
@@ -277,6 +296,7 @@ SHAPES: dict[str, Callable[[Pen, Box, Side], None]] = {
     "elevator": elevator_shape,
     "wc": wc_shape,
     "urinal": urinal_shape,
+    "cubicle": cubicle_shape,
     "sink": sink_shape,
     "shelf": shelf_shape,
     "table": table_shape,

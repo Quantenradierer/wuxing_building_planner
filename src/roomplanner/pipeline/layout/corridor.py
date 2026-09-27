@@ -391,8 +391,8 @@ class CorridorLayout:
 
         # Deep strips: the stairwell reaches the back of the strip while it stays within its
         # maximum area; beyond that the core only takes what it needs, a storage room fills
-        # the back.
-        filler = ctx.rules.program.cluster_filler
+        # the back (the program's `core_back`, else a storeroom).
+        filler = ctx.rules.program.core_back or ctx.rules.program.cluster_filler
         core_depth = max(v for _, v in sizes)
         others = sum(u * v for u, v in sizes[1:])
         stairwell_max = ctx.rules.spec(entries[0].room).area[1]
@@ -403,7 +403,8 @@ class CorridorLayout:
             front = self._from_corridor(band, core_depth)
             back = (front[1], band.v1) if front[0] == band.v0 else (band.v0, front[0])
             cells = frame.rect(slot.u0, slot.u1, *back)
-            rooms.append(PlannedRoom(filler, cells, leftover=True))
+            leftover = filler == ctx.rules.program.cluster_filler
+            rooms.append(PlannedRoom(filler, cells, leftover=leftover))
             taken |= cells
             depth = core_depth
         else:

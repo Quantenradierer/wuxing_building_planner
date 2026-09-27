@@ -606,11 +606,15 @@ class RoomFurnisher:
                 horizontal = toward in (Side.N, Side.S)
         length, width = (x1 - x0, y1 - y0) if horizontal else (y1 - y0, x1 - x0)
         m = rule.margin
+        # No margin along an open side (an open office's side to the corridor).
+        start, end = (Side.N, Side.S) if horizontal else (Side.W, Side.E)
+        m0 = 0 if toward is None and self._open_side(start) else m
+        m1 = 0 if toward is None and self._open_side(end) else m
         per_block = max(1, math.floor(rule.block / along))  # cross aisle every `block` cells
         rows: list[tuple[int, Side]] = []  # offset across the room, facing
-        across = m
-        while across + deep <= width - m:
-            if rule.paired and toward is None and across + 2 * deep <= width - m:
+        across = m0
+        while across + deep <= width - m1:
+            if rule.paired and toward is None and across + 2 * deep <= width - m1:
                 rows += [(across, Side.N), (across + deep, Side.S)]
                 across += 2 * deep + rule.aisle
             else:
@@ -618,9 +622,11 @@ class RoomFurnisher:
                 across += deep + rule.aisle
         positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle)]
         if toward is None and rows and positions:
-            # The block of rows centred in the room: equal margins on opposite walls.
-            spare = width - m - (rows[-1][0] + deep)
-            rows = [(across + spare // 2, facing) for across, facing in rows]
+            # The block of rows centred in the room: equal margins on opposite walls; against
+            # an open side if there is one.
+            spare = width - m1 - (rows[-1][0] + deep)
+            shift = 0 if m0 < m1 else spare if m1 < m0 else spare // 2
+            rows = [(across + shift, facing) for across, facing in rows]
             spare = length - m - (positions[-1] + along)
             positions = [p + spare // 2 for p in positions]
         if toward is not None and positions:  # centred, the side aisles equally wide
@@ -643,6 +649,22 @@ class RoomFurnisher:
                 if toward is not None:
                     rect = (*rect[:4], toward)
                 self._try(rule.object, rect, spec.walkable)
+
+    def _open_side(self, side: Side) -> bool:
+        """True if most of the room's box edge on `side` has no wall (open to a corridor)."""
+        x0, y0, x1, y1 = self.box
+        match side:
+            case Side.N:
+                edge = [Cell(x, y0) for x in range(x0, x1)]
+            case Side.S:
+                edge = [Cell(x, y1 - 1) for x in range(x0, x1)]
+            case Side.W:
+                edge = [Cell(x0, y) for y in range(y0, y1)]
+            case Side.E:
+                edge = [Cell(x1 - 1, y) for y in range(y0, y1)]
+        inside = [c for c in edge if c in self.cells]
+        walled = sum(Edge.of(c, side) in self.floor.walls for c in inside)
+        return 2 * walled < len(inside)
 
     def _at(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
         """`count` objects beside every placed `rule.at`, going round its `beside` sides in turn.

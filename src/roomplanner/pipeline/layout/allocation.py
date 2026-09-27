@@ -584,11 +584,14 @@ class Allocator:
         if rest == 0:
             return
         if rest * segment.unit <= MAX_SLIVER:
-            # A sliver too thin to be a useful room widens rooms that stay within bounds.
-            while given < extra and (open_ := [t for t in targets if has_room(t, SLIVER_LIMIT)]):
-                for target in open_[: extra - given]:
-                    target.units += 1
-                    given += 1
+            # A sliver too thin to be a useful room widens rooms that stay within bounds,
+            # the other rooms of the row too (a cubicle farm beside full meeting rooms).
+            others = [s for s in full if s not in targets and not s.request.spec.cluster]
+            for tier in (targets, others):
+                while given < extra and (open_ := [t for t in tier if has_room(t, SLIVER_LIMIT)]):
+                    for target in open_[: extra - given]:
+                        target.units += 1
+                        given += 1
             rest = extra - given
             if rest == 0:
                 return
