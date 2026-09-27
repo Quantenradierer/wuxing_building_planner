@@ -200,14 +200,19 @@ groups:
       - {object: chair, at: [6, 4], facing: N}
       - {object: chair, at: [0, 2], facing: E}
       - {object: chair, at: [7, 2], facing: W}
-  bar_set:              # bar counter with a row of stools
-    size: [8, 3]
+  bar_set:              # back bar on the wall, 1 m for the bartender, counter, stools
+    size: [8, 6]
     parts:
-      - {object: bar_counter, at: [0, 0]}
-      - {object: stool, at: [1, 2], facing: N}
-      - {object: stool, at: [3, 2], facing: N}
-      - {object: stool, at: [5, 2], facing: N}
-      - {object: stool, at: [7, 2], facing: N}
+      - {object: shelf, at: [0, 0]}
+      - {object: fridge, at: [2, 0]}
+      - {object: shelf, at: [3, 0]}
+      - {object: fridge, at: [5, 0]}
+      - {object: shelf, at: [6, 0]}
+      - {object: bar_counter, at: [0, 3]}
+      - {object: stool, at: [1, 5], facing: N}
+      - {object: stool, at: [3, 5], facing: N}
+      - {object: stool, at: [5, 5], facing: N}
+      - {object: stool, at: [7, 5], facing: N}
   sofa_set:             # sofa, side tables, coffee table in front
     size: [6, 4]
     parts:

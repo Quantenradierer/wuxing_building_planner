@@ -156,7 +156,7 @@ rooms:
     windows: optional
     door_width: 3
     furniture:
-      - {object: bar_set, placement: wall}
+      - {object: bar_set, placement: back}   # away from the street door
       - {object: guard_post, placement: near_exit, count: [0, 1]}   # the bouncer
       - {object: sofa_set, placement: wall, per: 80, count: [0, 3]}
       - {object: cafe_table, placement: scatter, per: 30, count: [2, 10]}
