@@ -225,6 +225,12 @@ To verify:
   Universal VTT viewer; so far only checked against the format descriptions.
 - Re-render examples once the sprite set for the newer objects exists (desk/table kinds,
   church, garage and factory objects; Midjourney run from 2026-09-28).
+- 41 object kinds have a prompt in `tools/sprite_prompts.yaml` but no pick yet and are drawn
+  with stand-ins: the desk/table kinds, church and factory objects, `round_table`, and the
+  Sixth World objects (electrical_panel, battery_bank, hvac_unit, generator, fuel_tank,
+  suppression_tanks, fire_extinguisher, rigger_cocoon, drone_dock, drone_rack,
+  deposit_boxes, sim_rig, autokitchen, mattress, fire_barrel, cyberware_rack, cryo_pod,
+  ambulance, evidence_locker, shipping_container). Needs a Midjourney round.
 
 Decided by the author (2026-09-27):
 - Sprite wealth fallback steps towards middle (luxury → high → middle, squatter → low →
@@ -277,10 +283,10 @@ Known weaknesses:
   are furniture instead (rigger cocoon in the security room, drone docks in the hall).
 - Optional rooms that don't fit still add a "dropped … (no space)" warning; at minimum
   footprints that is several warnings per floor.
-- The vault can be entered through another room of its cluster (corp office basement:
-  through the electrical room).
-- Hospital 70 × 44 × 3: the top floor's doctor's office reaches 171–190 cells (limit
-  105) in about half the seeds.
+- Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
+  105), 1 of 12 seeds.
+- Stuffer shack 24 × 16 is infeasible at luxury wealth (the wider corridor leaves 16 of 17
+  cells needed).
 - Reception should be next to the lobby (or part of it), not a separate room elsewhere.
 - Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
   between corridor, bathroom and guest room.
