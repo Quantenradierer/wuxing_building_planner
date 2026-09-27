@@ -95,7 +95,8 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 
 - Rules are data: YAML files validated with Pydantic.
   - A shared **room catalog** (toilet, storage, stairwell, corridor, …) with area ranges,
-    minimum side, window requirement, door width, which rooms it is entered from
+    minimum side, window requirement, door width, its own exterior door
+    (`exterior_door`: loading bays, workshops), which rooms it is entered from
     (`access`), whether it may be walked through (`transit`), wealth overrides, furniture.
   - One **program** per building type: layout strategy, corridor and strip sizes, facade
     grid, vertical core, entrances, units, floor roles (matched by ground / upper / top /
@@ -268,12 +269,12 @@ Known weaknesses:
   interview room; nightclub backstage isn't next to the stage; warehouse loading bays are
   separated from the hall by a corridor; supermarket stockroom/loading bay only reach the
   sales floor via the corridor.
-- Vehicle and delivery access: loading bays can lack an exterior door (warehouse NE bay,
-  supermarket loading bay, whose delivery door opens into the stockroom next to it); the
-  service-side double door can open into a storeroom (chop shop, police station) or the
-  pharmacy (clinic); the chop shop workshop (with car lifts) and the warehouse hall have
-  no vehicle door, only a pedestrian door; the stuffer shack's back door can open into
-  the cold storage.
+- Vehicle and delivery access: every loading bay and every warehouse, factory and chop
+  shop hall has its own roller door now (`exterior_door`), and the service door tries the
+  `service_rooms` in order (loading bay first, cold storage last). Still open: a hall's
+  roller door can end up on a side facade (the hall rarely reaches the service side); the
+  clinic's ambulance door can open into the pharmacy or an exam room; the police
+  station's garage exists only in the basement, without a ramp.
 - Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
   have one thin back-of-house strip; it is full before the optional Sixth World rooms
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they

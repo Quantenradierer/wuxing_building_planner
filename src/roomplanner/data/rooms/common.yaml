@@ -230,6 +230,7 @@ rooms:
     min_side: 10
     windows: optional
     door_width: 4
+    exterior_door: 6     # a roller door
     furniture:
       - {object: car, placement: rows, aisle: 8, margin: 0, block: 40}
       - {object: tool_rack, placement: wall, count: [0, 2]}

@@ -64,6 +64,37 @@ def test_emergency_exit_is_away_from_the_main_entrance() -> None:
     assert abs(main.x - emergency.x) + abs(main.y - emergency.y) >= 15
 
 
+@pytest.mark.parametrize(
+    ("building_type", "seed"),
+    [(t, s) for t in ("warehouse", "chop_shop", "supermarket", "factory") for s in (1, 2, 3)],
+)
+def test_vehicle_rooms_have_their_own_roller_door(building_type: str, seed: int) -> None:
+    params = make_params(building_type=BuildingType(building_type), width=48, depth=36, seed=seed)
+    building = generate(params)
+    rules = rules_for(params.building_type, params.wealth)
+    ground = building.floor(0)
+    exterior = [o for o in ground.openings if o.entrance]
+    for room in ground.rooms:
+        width = rules.spec(room.type).exterior_door
+        if width is None:
+            continue
+        cells = room.cells
+        assert any(
+            len(d.edges) >= width and any(c in cells for e in d.edges for c in e.cells())
+            for d in exterior
+        ), room.type
+
+
+def test_service_door_prefers_the_loading_bay() -> None:
+    building = generate(
+        make_params(building_type=BuildingType.SUPERMARKET, width=48, depth=36, seed=1)
+    )
+    ground = building.floor(0)
+    service = next(o for o in ground.openings if o.entrance == "service")
+    rooms = {ground.room_at(c) for c in service.edges[0].cells()} - {None}
+    assert [r.type for r in rooms if r is not None] == ["loading_bay"]
+
+
 def test_top_floor_stairwell_has_a_roof_hatch() -> None:
     building = generate(make_params(floors_above=3))
     top = building.floor(2)

@@ -170,7 +170,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
    slice across the whole part (street on a short end). When no corridor touches the service
    side, the back door opens into a room on that facade, preferring the program's
-   `service_rooms` (storage, loading bay, staff room, …); programs with `service_stub: true`
+   `service_rooms` in their order (loading bay, stockroom, storage, …, cold storage last);
+   programs with `service_stub: true`
    (apartments, hotels) carve a corridor stub to the service side instead.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
@@ -291,6 +292,12 @@ the `entrances` parameter replaces that list (main is always built, unknown widt
 to 2). The emergency exit goes to the corridor end on a facade farthest from the other
 entrances, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
 stairwell (or a circulation room).
+
+Rooms with `exterior_door: <width>` in the catalog (loading bays, warehouse, factory and
+workshop halls) get their own roller door on the ground floor, unless an entrance at least
+that wide already opens into them: on the service side if they reach it, the street side
+last, in the middle of their longest facade wall. These doors are exported as `service`
+entrances.
 
 ### Furnishing
 

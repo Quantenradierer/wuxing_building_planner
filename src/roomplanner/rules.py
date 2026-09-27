@@ -169,6 +169,11 @@ class RoomSpec(_Strict):
     )
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
+    exterior_door: int | None = Field(
+        default=None,
+        gt=0,
+        description="On the ground floor its own exterior door this wide (a roller door)",
+    )
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
     vestibule: str | None = Field(
         default=None, description="Entered only through this room type, placed beside it"
@@ -345,18 +350,18 @@ class BuildingProgram(_Strict):
     service_rooms: list[str] = Field(
         default=[
             "loading_bay",
+            "stockroom",
             "storage",
             "utility",
             "staff_room",
-            "stockroom",
-            "cold_storage",
             "laundry",
             "kitchenette",
             "commercial_kitchen",
             "backstage",
             "security_room",
+            "cold_storage",
         ],
-        description="Room types the service entrance prefers to open into",
+        description="Room types the service entrance prefers to open into, best first",
     )
     furnishing: str = Field(default="rules", description="Furnishing strategy")
     lighting: str = Field(default="rules", description="Lights strategy")
