@@ -362,6 +362,65 @@ def test_small_hall_buildings_have_no_service_corridor(
         assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []
 
 
+@pytest.mark.parametrize(
+    ("building_type", "lobby"),
+    [
+        (BuildingType.CLINIC, "reception_lobby"),
+        (BuildingType.HOTEL, "reception_lobby"),
+        (BuildingType.POLICE_STATION, "police_lobby"),
+    ],
+)
+def test_the_reception_desk_stands_in_the_lobby(building_type: BuildingType, lobby: str) -> None:
+    ground = generate(make_params(building_type=building_type, width=60, depth=40)).floor(0)
+    lobbies = {r.id for r in ground.rooms if r.type == lobby}
+    assert len(lobbies) == 1 and "reception" not in {r.type for r in ground.rooms}
+    desks = [o for o in ground.objects if o.kind == "reception_desk"]
+    assert desks and all(o.room in lobbies for o in desks)
+
+
+def test_the_police_lobby_has_one_door_into_the_station() -> None:
+    ground = generate(
+        make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)
+    ).floor(0)
+    lobby = next(r for r in ground.rooms if r.type == "police_lobby")
+    inner = [
+        o
+        for o in ground.openings
+        if o.kind is OpeningKind.DOOR
+        and o.entrance is None
+        and any(c in lobby.cells for e in o.edges for c in e.cells())
+    ]
+    assert len(inner) == 1
+    outside = next(c for c in inner[0].edges[0].cells() if c not in lobby.cells)
+    room = ground.room_at(outside)
+    assert room is not None and room.type == "corridor"
+
+
+def test_the_waiting_room_opens_onto_the_reception_lobby() -> None:
+    ground = generate(
+        make_params(building_type=BuildingType.CLINIC, width=60, depth=32, floors_above=2, seed=1)
+    ).floor(0)
+    waiting = next(r for r in ground.rooms if r.type == "waiting_room")
+    door = next(
+        o
+        for o in ground.openings
+        if o.kind is OpeningKind.DOOR and any(c in waiting.cells for c in o.edges[0].cells())
+    )
+    outside = next(c for c in door.edges[0].cells() if c not in waiting.cells)
+    room = ground.room_at(outside)
+    assert room is not None and room.type == "reception_lobby"
+
+
+def test_the_club_checks_coats_at_the_door() -> None:
+    ground = generate(make_params(building_type=BuildingType.NIGHTCLUB, width=40, depth=32)).floor(
+        0
+    )
+    hall = next(r for r in ground.rooms if r.type == "dance_floor")
+    kinds = {o.kind for o in ground.objects if o.room == hall.id}
+    assert {"coat_rack", "counter"} <= kinds
+    assert "cloakroom" not in {r.type for r in ground.rooms}
+
+
 def test_police_station_has_holding_cells_behind_the_lockup() -> None:
     building = generate(
         make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)

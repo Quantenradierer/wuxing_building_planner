@@ -36,8 +36,7 @@ floor_roles:
   ground:
     applies: [ground]
     rooms:
-      - {room: lobby, place: entrance, area: [80, 200], priority: required}
-      - {room: reception, count: 1, near: entrance, priority: required}
+      - {room: reception_lobby, place: entrance, area: [80, 200], priority: required}
       - {room: toilet, count: 2, near: core, priority: required}
       - {room: restaurant, count: 1, wealth: [middle, high, luxury]}
       - {room: commercial_kitchen, count: 1, wealth: [middle, high, luxury]}

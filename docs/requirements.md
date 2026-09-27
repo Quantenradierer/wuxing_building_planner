@@ -254,12 +254,11 @@ Known weaknesses:
   room for its 2 × 2 sink (about 5 % of toilets).
 - Cluster hallways run on to the facade past their last door (clinic toilets and storage),
   and apartment and hotel floors have a corridor stub to the service door.
-- Public sequence is broken: entrance, reception and waiting aren't chained. Clinic: the
-  entrance opens into an empty lobby; reception is a closed room across the corridor and
-  the waiting room is elsewhere. Police station: the reception desk is in a closed room
-  behind the lobby; the lobby opens onto the main corridor, so the public reaches lockup,
-  armory and evidence room; no secure zone. Nightclub: the cloakroom is off the corridor,
-  not at the entrance, and the security room is dropped for lack of space (40 × 32).
+- Waiting rooms open onto the reception lobby only when they end up beside it (about 60 %
+  in clinics and hospitals); the others open onto the corridor. The police station's
+  public area is just the front office: public toilets are behind its locked door.
+- A storeroom behind the elevator, walled in by the stairwell and toilet stalls, can open
+  into the elevator (3 of ~1000 rooms beside cores, supermarket upper floors).
 - Rooms that belong together aren't adjacent: police observation room isn't next to an
   interview room; nightclub backstage isn't next to the stage; warehouse loading bays are
   separated from the hall by a corridor; supermarket stockroom/loading bay only reach the
@@ -283,7 +282,6 @@ Known weaknesses:
   footprints that is several warnings per floor.
 - Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
   105), 1 of 12 seeds.
-- Reception should be next to the lobby (or part of it), not a separate room elsewhere.
 - Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
   between corridor, bathroom and guest room.
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their

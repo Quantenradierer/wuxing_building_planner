@@ -178,7 +178,8 @@ def _interior_doors(
     `fixed`: walls a room's door into circulation should use if it can (core rooms: the
     walls they share with circulation on every floor).
 
-    Rank: into circulation, then into a type from the room's `access` list (in order), then
+    Rank: into circulation (one in the room's `access` list first), then into a type from
+    the `access` list (in order), then
     anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
     only connect within their unit, except its entry room, which opens to circulation.
     An annex (closet) opens only into its host and is never passed through.
@@ -234,7 +235,7 @@ def _interior_doors(
             if only is not None and j not in circulation:
                 continue
             if j in circulation:
-                rank = -1
+                rank = -2 if rooms[j].type in spec.access else -1
             elif rooms[j].type in core_types:
                 rank = len(spec.access) + 1
             elif rooms[j].type in spec.access:

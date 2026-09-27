@@ -266,7 +266,8 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
 
 - Walls separate different rooms, except between two circulation rooms (corridor, lobby).
 - One door per non-circulation room, committed greedily over all pending rooms: into
-  circulation first, then into a type from the room's `access` list, then into any connected
+  circulation first (one named in the room's `access`, e.g. the waiting room's reception
+  lobby, before the corridor), then into a type from the room's `access` list, then into any connected
   room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect
   only within their unit, except the unit's entry room, which opens to circulation.
 - Core rooms (stairwell, elevator) have the same cells on every floor, and so the same

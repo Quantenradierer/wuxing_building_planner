@@ -289,6 +289,14 @@ groups:
     parts:
       - {object: chair, at: [2, 0]}
       - {object: reception_desk, at: [0, 1]}
+  coat_check:           # a club's cloakroom counter at the door: coats and checked weapons
+    size: [6, 3]
+    parts:
+      - {object: coat_rack, at: [0, 0]}
+      - {object: coat_rack, at: [1, 0]}
+      - {object: weapon_locker, at: [2, 0]}
+      - {object: weapon_locker, at: [4, 0]}
+      - {object: counter, at: [1, 2]}
   guard_post:
     size: [4, 3]
     parts:

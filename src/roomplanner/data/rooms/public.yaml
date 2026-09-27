@@ -48,6 +48,16 @@ rooms:
     windows: forbidden
     furniture:
       - {object: guard_post, placement: wall}
+  police_lobby:         # public front office: the desk sergeant, one door into the station
+    area: [40, 400]       # the program asks for less; a slice across the building is bigger
+    min_side: 6
+    transit: false        # the public goes no further
+    furniture:
+      - {object: reception_post, placement: back}
+      - {object: bench, placement: wall, count: [1, 3]}
+      - {object: plant, placement: corner, count: [0, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: trash_bin, placement: wall, count: [0, 1]}
   holding_cell:         # 2 x 2 m: a bench, a toilet
     area: [16, 60]
     min_side: 4
