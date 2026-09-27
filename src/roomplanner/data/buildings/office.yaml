@@ -75,6 +75,7 @@ floor_roles:
       - {room: open_office, share: 0.4, wealth: [middle, high]}
       - {room: open_office, share: 0.2, wealth: [luxury]}
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
+      - {room: executive_office, count: [0, 1]}   # now and then a manager with a view
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
       - {room: huddle_room, fill: true}      # thin interior rows: huddle and focus rooms,

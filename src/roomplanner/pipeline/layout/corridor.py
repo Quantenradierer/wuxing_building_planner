@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import math
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from itertools import pairwise
 
 from roomplanner.errors import RulesError
@@ -485,7 +485,9 @@ class CorridorLayout:
     ) -> FloorPlan:
         main = skeleton.main
         role_name, role = ctx.rules.role_for(level, ctx.params)
-        rooms: list[PlannedRoom] = list(skeleton.core_rooms)
+        rooms: list[PlannedRoom] = [
+            self._core_back(ctx, room, role.core_back) for room in skeleton.core_rooms
+        ]
         extra: dict[int, list[Interval]] = {}  # this floor's reservations in the main part
         hints: list[tuple[EntranceKind, Side, Cell]] = []
         slice_ = skeleton.lobby_slice if level == 0 else None
@@ -555,7 +557,7 @@ class CorridorLayout:
         service_box = Box(service.x, service.y, service.x + 1, service.y + 1) if service else None
         anchors = Anchors(core_box, entrance, service_box)
         allocator = Allocator(ctx, ctx.rules, segments, anchors, ctx.rng(f"allocate:{level}"))
-        rooms += allocator.allocate(role, level, level_name(level))
+        rooms += allocator.allocate(role, level, level_name(level), [r.type for r in rooms])
         warnings += allocator.warnings
 
         rooms = absorb_leftovers(rooms, ctx.rules)
@@ -565,6 +567,15 @@ class CorridorLayout:
             for kind, side, hint in hints
         ]
         return FloorPlan(level, role_name, rooms, entrances)
+
+    @staticmethod
+    def _core_back(ctx: Context, room: PlannedRoom, back: str | None) -> PlannedRoom:
+        """The room behind the core as this floor's role wants it (executive floors)."""
+        program = ctx.rules.program
+        cores = {c.room for c in program.core}
+        if back is None or room.type in cores:
+            return room
+        return replace(room, type=back, leftover=back == program.cluster_filler)
 
     @staticmethod
     def _segments(part: Part, band: Band, blocked: list[Interval]) -> list[Segment]:

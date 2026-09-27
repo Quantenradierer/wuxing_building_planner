@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import math
 import random
-from collections import deque
+from collections import Counter, deque
+from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
 
 from roomplanner.geometry import Cell
@@ -154,12 +155,16 @@ class Allocator:
 
     # --- public -----------------------------------------------------------------------
 
-    def allocate(self, role: FloorRole, level: int, floor_name: str) -> list[PlannedRoom]:
+    def allocate(
+        self, role: FloorRole, level: int, floor_name: str, existing: Iterable[str] = ()
+    ) -> list[PlannedRoom]:
+        """The floor's rooms in its strip segments; `existing`: types already on the floor
+        (core rooms), which count against the fill rooms' `limit`."""
         self.level = level
         requests, fills = self._requests(role, level)
         self.fill_types = {e.room for e in fills}
         self.fills = fills
-        self.fill_counts = {}
+        self.fill_counts = dict(Counter(existing))
         # Optional fill rooms only take leftovers the others don't fit (studios beside flats).
         self.main_fills = [e for e in fills if e.priority is not Priority.OPTIONAL] or fills
         queue = deque(requests)
@@ -474,6 +479,7 @@ class Allocator:
             for e in self.fills
             if self.rules.spec(e.room).min_side <= segment.depth
             and (segment.facade or self.rules.spec(e.room).windows is not WindowRule.REQUIRED)
+            and not self._at_limit(e)
         ]
 
     def _fill(self, state: SegmentState, all_fills: list[RoomEntry]) -> None:
@@ -616,7 +622,10 @@ class Allocator:
         """A fill room that takes `units` of full-depth leftover at its size, if there is one."""
         width = units * segment.unit
         room = self._leftover_room(segment, width, segment.depth, units=True)
-        return None if room is None else RoomEntry(room=room, fill=True)
+        if room is None:
+            return None
+        self.fill_counts[room] = self.fill_counts.get(room, 0) + 1
+        return RoomEntry(room=room, fill=True)
 
     def _leftover_room(
         self, segment: Segment, width: int, depth: int, units: bool = False

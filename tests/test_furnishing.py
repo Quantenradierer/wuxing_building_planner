@@ -399,3 +399,18 @@ def test_office_kitchens_are_sometimes_open_to_the_corridor() -> None:
                 if shared:
                     kinds.add(any(e in floor.walls for e in shared))
     assert kinds == {True, False}
+
+
+def test_corp_offices_have_one_training_room_per_floor_at_most_and_none_upstairs() -> None:
+    for seed in range(3):
+        params = make_params(
+            building_type=BuildingType.CORP_OFFICE,
+            width=72,
+            depth=52,
+            floors_above=4,
+            wealth=Wealth.HIGH,
+            seed=seed,
+        )
+        for floor in generate(params).floors:
+            count = sum(r.type == "training_room" for r in floor.rooms)
+            assert count <= (0 if floor.role == "executive" else 1)

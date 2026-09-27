@@ -268,6 +268,9 @@ class FloorRole(_Strict):
     when: str | None = None
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
+    core_back: str | None = Field(
+        default=None, description="Overrides the program's `core_back` on these floors"
+    )
     rooms: list[RoomEntry]
 
     @model_validator(mode="after")
@@ -574,6 +577,7 @@ def _check_references(rules: Rules) -> None:
     program = rules.program
     names = [program.cluster_filler, *(c.room for c in program.core)]
     names += [program.core_back] if program.core_back else []
+    names += [r.core_back for r in program.floor_roles.values() if r.core_back]
     names += [e.room for role in program.floor_roles.values() for e in role.rooms]
     for unit, spec in program.units.items():
         names += [unit, spec.hall, *spec.front, *spec.back]
