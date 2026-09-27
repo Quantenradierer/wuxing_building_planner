@@ -39,6 +39,8 @@ floor_roles:
       - {room: archive, count: [0, 1], area: [60, 120], when: "floors_below == 0"}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: focus_room, fill: true}        # thin interior rows
+      - {room: copy_room, fill: true, priority: optional}
   executive:
     applies: [top]
     when: "floors_above >= 3"
@@ -53,6 +55,8 @@ floor_roles:
       - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional}
       - {room: executive_office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: focus_room, fill: true}        # thin interior rows
+      - {room: copy_room, fill: true, priority: optional}
   standard:
     applies: [upper, top]
     rooms:
@@ -67,6 +71,8 @@ floor_roles:
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: focus_room, fill: true}        # thin interior rows
+      - {room: copy_room, fill: true, priority: optional}
   basement:
     applies: [basement]
     rooms:

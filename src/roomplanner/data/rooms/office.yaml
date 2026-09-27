@@ -23,8 +23,9 @@ rooms:
       - {object: water_cooler, placement: wall, count: [0, 1]}
       - {object: whiteboard, placement: wall, count: [0, 2]}
   meeting_room:
-    area: [48, 100]
-    min_side: 6
+    area: [64, 128]
+    min_side: 8               # 4 m: the table with its chairs and room to walk round them
+    max_aspect: 2
     furniture:
       # The table fits the room: round in small ones, long or a U in big ones.
       - {object: meeting_set, placement: center,
@@ -33,6 +34,21 @@ rooms:
       - {object: cabinet, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: whiteboard, placement: wall, count: [0, 1]}
+  focus_room:               # windowless quiet room for one or two: calls, focused work
+    area: [20, 48]
+    min_side: 4
+    furniture:
+      - {object: workstation, placement: wall, count: [1, 2]}
+      - {object: armchair, placement: corner, count: [0, 1]}
+      - {object: plant, placement: corner, count: [0, 1]}
+  copy_room:                # printers, paper, mail
+    area: [20, 48]
+    min_side: 4
+    furniture:
+      - {object: copier, placement: wall, count: [1, 2]}
+      - {object: counter, placement: wall, count: [0, 1]}
+      - {object: shelf, placement: wall, count: [1, 3]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
   kitchenette:
     area: [24, 60]
     min_side: 4

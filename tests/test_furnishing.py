@@ -241,3 +241,20 @@ def test_the_stalls_of_a_toilet_all_face_the_same_way(
                 rows.setdefault(toilet.id, set()).add(wc.facing)
         assert rows
         assert all(len(facings) == 1 for facings in rows.values())
+
+
+def test_meeting_rooms_are_roomy_and_every_table_has_chairs() -> None:
+    for seed in range(4):
+        params = make_params(
+            width=72, depth=30, floors_above=2, wealth=Wealth.SQUATTER, seed=519501 + seed
+        )
+        for floor in generate(params).floors:
+            for room in floor.rooms:
+                if room.type != "meeting_room":
+                    continue
+                xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
+                short, long = sorted((max(xs) - min(xs) + 1, max(ys) - min(ys) + 1))
+                assert short >= 8
+                assert long <= 2 * short
+                kinds = [o.kind for o in floor.objects if o.room == room.id]
+                assert "chair" in kinds

@@ -695,24 +695,30 @@ class Allocator:
         if not self._is_small(probe, segment):
             return None
         unit = segment.unit
-        back_min = self.rules.spec(self._back_entry().room).min_side
+        back_min = self.rules.spec(self._back_entry(segment.depth - spec.min_side).room).min_side
         smallest = max(MIN_CLUSTER_COLUMN, spec.min_side, back_min)
         column = max(smallest, round(math.sqrt((low + high) / 2) / unit) * unit)
         return math.ceil(column / unit) * unit
 
-    def _back_entry(self) -> RoomEntry:
-        """The room behind facade stacks: the floor's first windowless fill room, or storage."""
-        for entry in sorted(self.fills, key=lambda e: e.priority is Priority.OPTIONAL):
-            spec = self.rules.spec(entry.room)
-            if spec.windows is not WindowRule.REQUIRED and not spec.circulation:
-                return entry
-        return RoomEntry(room=self.rules.program.cluster_filler, fill=True)
+    def _back_entry(self, rest: int) -> RoomEntry:
+        """The room behind facade stacks: the floor's first windowless fill room that fits
+        `rest` cells deep (else the first one at all), or storage."""
+        backs = [
+            e
+            for e in sorted(self.fills, key=lambda e: e.priority is Priority.OPTIONAL)
+            if self.rules.spec(e.room).windows is not WindowRule.REQUIRED
+            and not self.rules.spec(e.room).circulation
+        ]
+        fitting = [e for e in backs if self.rules.spec(e.room).min_side <= rest]
+        return (fitting or backs or [RoomEntry(room=self.rules.program.cluster_filler, fill=True)])[
+            0
+        ]
 
     def _backs(self, segment: Segment, column: int, front: int) -> list[tuple[Request, int]] | None:
         """Back rooms filling the strip from the corridor up to a facade room `front` deep."""
-        back = self._back_entry()
-        spec = self.rules.spec(back.room)
         rest = segment.depth - front
+        back = self._back_entry(rest)
+        spec = self.rules.spec(back.room)
         if rest < spec.min_side:
             return None
         high = (back.area or spec.area)[1]
