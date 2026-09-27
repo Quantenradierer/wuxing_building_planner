@@ -34,9 +34,9 @@ rooms:
       - {object: meeting_set, placement: center,
          choose: [round_meeting_set, long_meeting_set, u_meeting_set]}
       - {object: plant, placement: corner, count: [0, 2]}
+      - {object: wall_screen, placement: axis, count: [0, 1]}   # at the end of the table
+      - {object: whiteboard, placement: axis, count: [0, 1]}    # the other end
       - {object: cabinet, placement: wall, count: [0, 2]}
-      - {object: wall_screen, placement: wall, count: [0, 1]}
-      - {object: whiteboard, placement: wall, count: [0, 1]}
   focus_room:               # windowless quiet room for one or two: calls, focused work
     area: [20, 48]
     min_side: 4
@@ -49,7 +49,7 @@ rooms:
     min_side: 5
     furniture:
       - {object: huddle_set, placement: center}
-      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: axis, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
   training_room:            # seminars and mandatory corporate loyalty briefings
     area: [100, 320]
@@ -113,8 +113,8 @@ rooms:
     door_width: 3
     furniture:
       - {object: board_set, placement: center}
+      - {object: wall_screen, placement: axis}
       - {object: plant, placement: corner, count: [1, 2]}
-      - {object: wall_screen, placement: wall}
   executive_quarters:   # the exec's private bedroom and shower for long nights
     wealth_shift: +1          # fancier than the rest of the building
     area: [40, 90]

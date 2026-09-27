@@ -365,3 +365,20 @@ def test_open_plan_offices_have_no_wall_to_the_corridor(
                         shared += 1
                         assert Edge.of(cell, side) not in floor.walls
     assert shared
+
+
+def test_meeting_room_screens_sit_on_the_axis_of_the_table() -> None:
+    found = 0
+    for seed in range(4):
+        for floor in generate(make_params(width=60, depth=40, floors_above=3, seed=seed)).floors:
+            for room in (r for r in floor.rooms if r.type in ("meeting_room", "huddle_room")):
+                objects = [o for o in floor.objects if o.room == room.id]
+                table = max((o for o in objects if o.blocking), key=lambda o: o.w * o.h)
+                for screen in (o for o in objects if o.kind in ("wall_screen", "whiteboard")):
+                    found += 1
+                    if screen.facing in (Side.E, Side.W):
+                        off = screen.y + screen.h / 2 - (table.y + table.h / 2)
+                    else:
+                        off = screen.x + screen.w / 2 - (table.x + table.w / 2)
+                    assert abs(off) <= 1
+    assert found

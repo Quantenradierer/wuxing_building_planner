@@ -79,6 +79,7 @@ class Placement(StrEnum):
     GRID = "grid"  # on one lattice, all alike, from the walls inwards (cafe tables)
     FACING_EXIT = "facing_exit"  # on the entrance's axis, facing it (reception desk)
     FILL = "fill"  # the whole room but `margin` rows in front of its doors (elevator car)
+    AXIS = "axis"  # on a wall at an end of the biggest object's long axis, facing it (screen)
 
 
 class FurnitureRule(_Strict):

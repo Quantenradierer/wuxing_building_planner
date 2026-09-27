@@ -414,6 +414,8 @@ class RoomFurnisher:
                 candidates = self._facing_exit(spec, rule.margin)
             case Placement.FILL:
                 candidates = self._filling(rule.margin)
+            case Placement.AXIS:
+                candidates = self._on_axis(spec)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -482,6 +484,27 @@ class RoomFurnisher:
         dy = sum(c.y + 0.5 for c in self.clearance) / len(self.clearance) - (y + h / 2)
         fx, fy = facing.delta
         return fx * dx + fy * dy
+
+    def _on_axis(self, spec: ObjectSpec) -> list[Rect]:
+        """Wall spots centred on the biggest object's axis, facing it: the ends of its long
+        axis first, then of its short one (a screen at the end of the meeting table)."""
+        walls = self._against_walls(spec, corners_only=False)
+        solid = [o for o in self.placed if o.blocking]
+        if not solid:
+            return walls
+        target = max(solid, key=lambda o: o.w * o.h)
+        cx, cy = target.x + target.w / 2, target.y + target.h / 2
+        long_ends = (Side.E, Side.W) if target.w >= target.h else (Side.N, Side.S)
+        spots: list[tuple[bool, float, Rect]] = []
+        for rect in walls:
+            x, y, w, h, facing = rect
+            if facing in (Side.E, Side.W):  # on a west or east wall: centred on the y axis
+                off, beyond = abs(y + h / 2 - cy), (x < target.x) == (facing is Side.E)
+            else:
+                off, beyond = abs(x + w / 2 - cx), (y < target.y) == (facing is Side.S)
+            if beyond and off <= 1:
+                spots.append((facing not in long_ends, off, rect))
+        return [rect for *_, rect in sorted(spots)]
 
     def _anywhere(self, spec: ObjectSpec) -> list[Rect]:
         along, deep = spec.size
