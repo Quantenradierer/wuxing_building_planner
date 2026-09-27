@@ -467,3 +467,27 @@ def test_corp_offices_have_a_guard_room_with_lockers_and_weapons() -> None:
     kinds = [o.kind for o in ground.objects if o.room == room.id]
     assert kinds.count("locker") >= 2
     assert "weapon_locker" in kinds
+
+
+def test_the_corp_executive_floor_has_a_balcony_the_rooms_behind_it_look_onto() -> None:
+    params = make_params(
+        building_type=BuildingType.CORP_OFFICE,
+        width=72,
+        depth=52,
+        floors_above=4,
+        wealth=Wealth.HIGH,
+        seed=2077,
+    )
+    building = generate(params)
+    top = building.floor(3)
+    assert top.role == "executive"
+    balcony = next(r for r in top.rooms if r.type == "balcony")
+    windows = [
+        o
+        for o in top.openings
+        if o.kind is OpeningKind.WINDOW
+        and any(c in balcony.cells for e in o.edges for c in e.cells())
+    ]
+    assert windows  # onto the balcony, not out of it
+    assert all(not top.is_exterior_wall(e) for o in windows for e in o.edges)
+    assert all(r.type != "balcony" for f in building.floors[:-1] for r in f.rooms)

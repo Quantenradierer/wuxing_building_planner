@@ -51,6 +51,18 @@ rooms:
       - {object: huddle_set, placement: center}
       - {object: wall_screen, placement: axis, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
+  balcony:                  # the executive floor's terrace above the street
+    area: [20, 100000]
+    min_side: 3
+    outdoor: true
+    windows: forbidden
+    door_width: 3
+    access: [board_room, executive_office, meeting_room, kitchenette]
+    furniture:
+      - {object: plant, placement: wall, count: [3, 6]}
+      - {object: sofa_set, placement: wall, count: [0, 1]}
+      - {object: armchair, placement: scatter, count: [1, 4]}
+      - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
   training_room:            # seminars and mandatory corporate loyalty briefings
     area: [100, 320]
     min_side: 8

@@ -46,7 +46,14 @@ from roomplanner.pipeline.layout.leftovers import absorb_leftovers
 from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.layout.stalls import carve_stalls
 from roomplanner.pipeline.registry import register
-from roomplanner.rules import CoreEntry, Priority, RoomEntry, evaluate, variables
+from roomplanner.rules import (
+    CoreEntry,
+    FloorRole,
+    Priority,
+    RoomEntry,
+    evaluate,
+    variables,
+)
 
 MIN_GAP_CELLS = 3  # free space left next to reserved slots, if any: the smallest room
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
@@ -515,6 +522,7 @@ class CorridorLayout:
             self._emergency_exit(ctx, skeleton, hints, warnings)
 
         segments: list[Segment] = []
+        balcony_band = self._balcony_band(ctx, main) if role.balcony is not None else None
         for part in skeleton.parts:
             part_slice = slice_ if part is main else None
             for band in part.bands:
@@ -547,6 +555,15 @@ class CorridorLayout:
                     continue
                 own = extra.get(band.index, []) if part is main else []
                 blocked = part.blocked(band, part_slice, *own)
+                if part is main and role.balcony is not None and band is balcony_band:
+                    found = self._balcony(ctx, part, band, blocked, role)
+                    if found is not None:
+                        cells, span, back = found
+                        rooms.append(PlannedRoom(role.balcony.room, cells))
+                        blocked = [*blocked, span]
+                        segments.append(
+                            Segment(part.frame, back, span, True, part.grid.module, part.grid)
+                        )
                 segments += self._segments(part, band, blocked)
 
         core_box = None
@@ -567,6 +584,48 @@ class CorridorLayout:
             for kind, side, hint in hints
         ]
         return FloorPlan(level, role_name, rooms, entrances)
+
+    @staticmethod
+    def _balcony_band(ctx: Context, main: Part) -> Band | None:
+        """The facade strip a balcony goes on: the street side's, else the deepest."""
+        strips = [b for b in main.bands if b.kind is BandKind.STRIP and b.facade]
+        if not strips:
+            return None
+        street = main.frame.local(ctx.params.street_side)
+        on_street = [
+            b
+            for b in strips
+            if (street is LocalSide.V0 and b.v0 == 0)
+            or (street is LocalSide.V1 and b.v1 == main.frame.depth)
+        ]
+        return (on_street or sorted(strips, key=lambda b: -b.depth))[0]
+
+    @staticmethod
+    def _balcony(
+        ctx: Context, part: Part, band: Band, blocked: list[Interval], role: FloorRole
+    ) -> tuple[frozenset[Cell], Interval, Band] | None:
+        """Balcony cells along the facade of the longest free stretch of the strip, the
+        stretch it takes and the shallower strip behind it, if the rooms there still fit."""
+        rule = role.balcony
+        spans = free_intervals(part.frame.length, blocked)
+        if rule is None or not spans:
+            return None
+        longest = max(spans, key=lambda s: s.width)
+        grid = part.grid
+        width = grid.round_up(round(longest.width * rule.share))
+        start = grid.ceil(longest.u0 + (longest.width - width) // 2)
+        end = min(grid.floor(longest.u1), start + width)
+        fill = min(ctx.rules.spec(e.room).min_side for e in role.rooms if e.fill)
+        if end - start < 2 * grid.module or band.depth - rule.depth < fill:
+            return None
+        span = Interval(start, end)
+        if band.v0 == 0:  # facade at v0: the balcony there, the rooms behind it
+            cells = part.frame.rect(start, end, band.v0, band.v0 + rule.depth)
+            back = replace(band, v0=band.v0 + rule.depth)
+        else:
+            cells = part.frame.rect(start, end, band.v1 - rule.depth, band.v1)
+            back = replace(band, v1=band.v1 - rule.depth)
+        return cells, span, back
 
     @staticmethod
     def _core_back(ctx: Context, room: PlannedRoom, back: str | None) -> PlannedRoom:

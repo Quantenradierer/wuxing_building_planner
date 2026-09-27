@@ -228,6 +228,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    huddle rooms, some focus rooms, one copy room and one break room. `near: core | entrance | service`
    pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
+8. **Balcony** (`balcony:` of a floor role: the corp office's executive floor): the outer
+   `depth` cells of a stretch of the street-side facade strip become an open-air room
+   (`outdoor: true`); the rooms behind it get a shallower segment and their windows look
+   onto it. The renderer draws its facade as a railing (theme `walls.open_air`).
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
 (T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),

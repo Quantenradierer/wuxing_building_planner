@@ -17,7 +17,7 @@ from __future__ import annotations
 import math
 import random
 from dataclasses import dataclass
-from functools import cache
+from functools import cache, cached_property
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -297,11 +297,26 @@ class _Canvas:
             return None
         return _placed_sprite(directory, name, obj.facing, obj.w * self.cell, obj.h * self.cell)
 
+    @cached_property
+    def _open_air(self) -> frozenset[Cell]:
+        """Cells of rooms open to the sky (a balcony)."""
+        kinds = set(self.theme.walls.open_air)
+        return frozenset(c for r in self.floor.rooms if r.type in kinds for c in r.cells)
+
+    def _is_railing(self, edge: Edge) -> bool:
+        """The facade of an open-air room."""
+        return self.floor.is_exterior_wall(edge) and any(c in self._open_air for c in edge.cells())
+
     def _is_exterior(self, edge: Edge) -> bool:
-        return self.floor.is_exterior_wall(edge)
+        if self.floor.is_exterior_wall(edge):
+            return True
+        a, b = edge.cells()  # indoors against the open air
+        return (a in self._open_air) != (b in self._open_air)
 
     def _thickness(self, edge: Edge) -> float:
         walls = self.theme.walls
+        if self._is_railing(edge):
+            return self.cell * walls.railing
         return self.cell * (walls.exterior if self._is_exterior(edge) else walls.interior)
 
     def _wall_rect(self, edge: Edge) -> tuple[float, float, float, float]:

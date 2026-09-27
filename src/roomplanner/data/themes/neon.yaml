@@ -14,6 +14,8 @@ walls:
   edge: "#1a1c24"
   exterior: 0.45
   interior: 0.22
+  railing: 0.1
+  open_air: [balcony]
 
 doors:
   leaf: "#ffb347"
@@ -66,6 +68,7 @@ materials:
   club:       {floor: "#16121e", pattern: tiles, tile: 2, lines: "#ff3fa426", accent: "#ff3fa4"}
   pods:       {floor: "#1c2230", pattern: tiles, tile: 2, lines: "#00e5ff18", accent: "#00e5ff"}
   lab:        {floor: "#dfe6ee", pattern: tiles, tile: 2, lines: "#00000018", accent: "#6dffb0"}
+  terrace:    {floor: "#2f3432", pattern: planks, tile: 1, lines: "#00000060", accent: "#6dffb0"}
 
 rooms:
   corridor: corridor
@@ -90,6 +93,7 @@ rooms:
   focus_room: carpet
   huddle_room: carpet
   training_room: carpet
+  balcony: terrace
   copy_room: carpet
   doctor_office: carpet
   manager_office: carpet

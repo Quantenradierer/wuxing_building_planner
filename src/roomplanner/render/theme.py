@@ -62,6 +62,12 @@ class WallStyle(_Strict):
     edge: str = Field(description="Thin outline of the wall body")
     exterior: float = Field(default=0.4, gt=0, description="Thickness in cells")
     interior: float = Field(default=0.22, gt=0)
+    railing: float = Field(default=0.1, gt=0, description="Thickness of an open-air facade")
+    open_air: list[str] = Field(
+        default=[],
+        description="Room types open to the sky (balcony): a railing on their facade, walls "
+        "beside them drawn as exterior walls",
+    )
 
 
 class DoorStyle(_Strict):

@@ -177,6 +177,11 @@ class RoomSpec(_Strict):
     min_side: int = Field(gt=0)
     windows: WindowRule = WindowRule.OPTIONAL
     circulation: bool = Field(default=False, description="Corridor-like; no walls to others")
+    outdoor: bool = Field(
+        default=False,
+        description="Open air (balcony): the rooms beside it get windows onto it, its facade "
+        "is a railing",
+    )
     open: float = Field(
         default=0.0,
         ge=0,
@@ -264,6 +269,14 @@ class Applies(StrEnum):
     BASEMENT = "basement"
 
 
+class BalconyRule(_Strict):
+    room: str = "balcony"
+    depth: int = Field(default=5, gt=0, description="Cells deep, from the facade in")
+    share: float = Field(
+        default=0.5, gt=0, le=1, description="Of the longest free facade stretch it takes"
+    )
+
+
 class FloorRole(_Strict):
     applies: list[Applies]
     when: str | None = None
@@ -271,6 +284,9 @@ class FloorRole(_Strict):
     security: list[Security] | None = Field(default=None, description="Only for these levels")
     core_back: str | None = Field(
         default=None, description="Overrides the program's `core_back` on these floors"
+    )
+    balcony: BalconyRule | None = Field(
+        default=None, description="A balcony cut from a facade strip; the rooms move in"
     )
     rooms: list[RoomEntry]
 
@@ -579,6 +595,7 @@ def _check_references(rules: Rules) -> None:
     names = [program.cluster_filler, *(c.room for c in program.core)]
     names += [program.core_back] if program.core_back else []
     names += [r.core_back for r in program.floor_roles.values() if r.core_back]
+    names += [r.balcony.room for r in program.floor_roles.values() if r.balcony]
     names += [e.room for role in program.floor_roles.values() for e in role.rooms]
     for unit, spec in program.units.items():
         names += [unit, spec.hall, *spec.front, *spec.back]

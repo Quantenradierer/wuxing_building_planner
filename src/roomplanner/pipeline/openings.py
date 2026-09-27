@@ -115,7 +115,11 @@ class DefaultOpenings:
         for d in drafts:
             windows: list[Opening] = []
             if d.level >= 0:
-                fitting = [w for w, side in candidates if _window_fits(ctx, footprint, d, w, side)]
+                # Open-air rooms (a balcony): the windows look out onto them.
+                outdoor = {c for r in d.rooms if ctx.rules.spec(r.type).outdoor for c in r.cells}
+                indoor = footprint - outdoor
+                grid = _window_grid(ctx, indoor, plan.facade_grid) if outdoor else candidates
+                fitting = [w for w, side in grid if _window_fits(ctx, indoor, d, w, side)]
                 windows = _clear_of_doors(fitting, d.doors)
             floors.append(
                 Floor(d.level, footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)

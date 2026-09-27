@@ -55,6 +55,7 @@ floor_roles:
     applies: [top]
     when: "floors_above >= 3"
     core_back: meeting_room   # no training room on the executive floor
+    balcony: {depth: 5, share: 0.5}   # a terrace along the street; the rooms move back
     rooms:
       - {room: toilet, count: 2, near: core, priority: required}
       - {room: board_room, count: 1, priority: required}
