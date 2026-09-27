@@ -524,9 +524,16 @@ class CorridorLayout:
                     minimum = ctx.rules.spec(hall).min_side
                     rules = ctx.rules.program.hall
                     hub = rules is not None and not rules.corridor  # back rooms open onto it
+                    foyer = rules.foyer if rules and level == 0 and part is main else None
+                    street = part.frame.local(ctx.params.street_side)
                     for span in free_intervals(part.frame.length, part.blocked(band)):
                         cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
                         kind = hall if span.width >= minimum else "corridor"
+                        if foyer is not None and kind == hall:
+                            lobby = _foyer(part.frame, span, band, street, foyer.depth, minimum)
+                            if lobby:
+                                rooms.append(PlannedRoom(foyer.room, lobby))
+                                cells -= lobby
                         rooms.append(PlannedRoom(kind, cells, hub=hub))
                     continue
                 if band.kind is BandKind.CORRIDOR:
@@ -755,6 +762,24 @@ def _absorb_gaps(span: Interval, others: list[Interval], length: int, min_gap: i
 def _u_range(frame: Frame, cells: list[Cell]) -> Interval:
     us = [frame.to_local(c.x + 0.5, c.y + 0.5)[0] for c in cells]
     return Interval(math.floor(min(us)), math.floor(max(us)) + 1)
+
+
+def _foyer(
+    frame: Frame, span: Interval, band: Band, street: LocalSide, depth: int, minimum: int
+) -> frozenset[Cell]:
+    """The part of a hall piece a foyer takes at the street side (across a short end, else
+    along the facade), if the piece touches the street and the hall stays big enough."""
+    match street:
+        case LocalSide.V0 if band.v0 == 0 and band.depth - depth >= minimum:
+            return frame.rect(span.u0, span.u1, band.v0, band.v0 + depth)
+        case LocalSide.V1 if band.v1 == frame.depth and band.depth - depth >= minimum:
+            return frame.rect(span.u0, span.u1, band.v1 - depth, band.v1)
+        case LocalSide.U0 if span.u0 == 0 and span.width - depth >= minimum:
+            return frame.rect(span.u0, span.u0 + depth, band.v0, band.v1)
+        case LocalSide.U1 if span.u1 == frame.length and span.width - depth >= minimum:
+            return frame.rect(span.u1 - depth, span.u1, band.v0, band.v1)
+        case _:
+            return frozenset()
 
 
 def _merge_corridors(rooms: list[PlannedRoom]) -> list[PlannedRoom]:

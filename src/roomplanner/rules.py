@@ -266,8 +266,16 @@ class FacadeRule(_Strict):
     window: int = Field(gt=0)
 
 
+class FoyerRule(_Strict):
+    room: str = Field(description="Room type of the foyer (narthex)")
+    depth: int = Field(gt=0, description="Cells from the street facade into the hall")
+
+
 class HallRule(_Strict):
     min_depth: int = Field(gt=0, description="Minimum depth of the hall band")
+    foyer: FoyerRule | None = Field(
+        default=None, description="Ground floor: a foyer cut off the hall at the street side"
+    )
     corridor: bool = Field(
         default=True,
         description="Service corridor between hall and back rooms (else they open onto the hall)",

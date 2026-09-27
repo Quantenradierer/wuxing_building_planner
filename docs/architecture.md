@@ -241,6 +241,9 @@ Connectors that must cross a hall band become a short corridor across its end.
 Small halls (`hall: {corridor: false}`: stuffer shack, dive bar) drop the service corridor:
 the hall room is a *hub* (`PlannedRoom.hub`), which the openings stage treats as
 circulation, so the back rooms, cluster hallways and the stairwell open straight onto it.
+`hall: {foyer: {room, depth}}` cuts a foyer off the ground-floor hall at the street side
+(across the short end if the street is there, else along the facade): the church's
+narthex, which the portal opens into and the nave opens onto (`connect`).
 
 ### Units
 

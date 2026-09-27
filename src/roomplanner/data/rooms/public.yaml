@@ -97,12 +97,21 @@ rooms:
     min_side: 10
     windows: required
     door_width: 4
+    connect: [narthex]      # a door from the foyer, whatever else it opens onto
     furniture:
       - {object: altar, placement: end}
       - {object: pulpit, placement: at, at: altar, beside: [flanks]}
       - {object: pew, placement: rows, aisle: 2, margin: 3, block: 24, toward: altar}
       - {object: candle_stand, placement: wall, count: [2, 6]}
       - {object: confessional, placement: wall, count: [0, 2]}
+  narthex:              # the church foyer between portal and nave
+    area: [20, 100000]
+    min_side: 4
+    circulation: true
+    furniture:
+      - {object: bench, placement: wall, count: [1, 2]}
+      - {object: candle_stand, placement: corner, count: [0, 2]}
+      - {object: coat_rack, placement: corner, count: [0, 1]}
   choir_loft:           # the gallery upstairs
     area: [60, 100000]
     min_side: 8

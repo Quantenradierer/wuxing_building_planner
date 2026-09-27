@@ -270,3 +270,18 @@ def test_cafe_tables_stand_on_one_lattice_facing_the_same_way(building_type: Bui
         steps = {b - a for a, b in zip(sorted(values), sorted(values)[1:], strict=False)}
         if steps:  # one pitch: every gap is a multiple of the smallest
             assert all(step % min(steps) == 0 for step in steps)
+
+
+@pytest.mark.parametrize(("width", "depth"), [(40, 48), (56, 32), (48, 60)])
+def test_the_church_portal_opens_into_a_narthex_leading_to_the_nave(width: int, depth: int) -> None:
+    params = make_params(building_type=BuildingType.CHURCH, width=width, depth=depth)
+    ground = generate(params).floor(0)
+    owner = {c: r for r in ground.rooms for c in r.cells}
+    portal = next(o for o in ground.openings if o.entrance == "main")
+    assert {owner[c].type for c in portal.edges[0].cells() if c in owner} == {"narthex"}
+    pairs = [
+        {owner[c].type for c in door.edges[0].cells() if c in owner}
+        for door in ground.openings
+        if door.kind is OpeningKind.DOOR
+    ]
+    assert {"narthex", "nave"} in pairs

@@ -11,6 +11,7 @@ corridor:
 strip_depth: [8, 12]
 hall:
   min_depth: 14
+  foyer: {room: narthex, depth: 5}   # the portal opens into the narthex, not the nave
 facade:
   module: 3
   window: 2
@@ -20,7 +21,7 @@ core:
   - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
 
 entrances:
-  main: {width: 4}         # the portal, straight into the nave
+  main: {width: 4}         # the portal
   service: {width: 2}
   emergency: {width: 2}
   roof: {width: 2}         # the bell tower

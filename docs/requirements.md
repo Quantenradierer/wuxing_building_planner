@@ -273,7 +273,6 @@ Known weaknesses:
   pharmacy (clinic); the chop shop workshop (with car lifts) and the warehouse hall have
   no vehicle door, only a pedestrian door; the stuffer shack's back door can open into
   the cold storage.
-- Church: no narthex; the portal opens straight into the nave.
 - Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
   have one thin back-of-house strip; it is full before the optional Sixth World rooms
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they
