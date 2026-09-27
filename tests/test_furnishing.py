@@ -414,3 +414,19 @@ def test_corp_offices_have_one_training_room_per_floor_at_most_and_none_upstairs
         for floor in generate(params).floors:
             count = sum(r.type == "training_room" for r in floor.rooms)
             assert count <= (0 if floor.role == "executive" else 1)
+
+
+def test_vending_machines_line_the_walls_of_an_office_vending_room() -> None:
+    rooms = 0
+    for seed in range(4):
+        params = make_params(width=72, depth=52, floors_above=3, seed=seed)
+        for floor in generate(params).floors:
+            vending = [r for r in floor.rooms if r.type == "vending_room"]
+            assert len(vending) <= 1
+            for room in vending:
+                rooms += 1
+                machines = [o for o in floor.objects if o.room == room.id]
+                machines = [o for o in machines if o.kind == "vending_machine"]
+                # a machine per metre of wall, roughly: the room's perimeter less doors
+                assert len(machines) * 2 >= len(room.cells) // 6
+    assert rooms

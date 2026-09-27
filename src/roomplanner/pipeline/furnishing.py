@@ -416,6 +416,8 @@ class RoomFurnisher:
                 candidates = self._filling(rule.margin)
             case Placement.AXIS:
                 candidates = self._on_axis(spec)
+            case Placement.PERIMETER:
+                candidates = self._along_walls(spec)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -484,6 +486,18 @@ class RoomFurnisher:
         dy = sum(c.y + 0.5 for c in self.clearance) / len(self.clearance) - (y + h / 2)
         fx, fy = facing.delta
         return fx * dx + fy * dy
+
+    def _along_walls(self, spec: ObjectSpec) -> list[Rect]:
+        """Wall spots wall by wall, in order along each: placed one after another they
+        stand side by side, lining the room."""
+
+        def order(rect: Rect) -> tuple[int, int, int, int]:
+            x, y, w, h, facing = rect
+            if facing in (Side.N, Side.S):  # on a north or south wall: along x
+                return (facing is Side.N, y + h if facing is Side.N else y, x, y)
+            return (2 + (facing is Side.W), x + w if facing is Side.W else x, y, x)
+
+        return sorted(self._against_walls(spec, corners_only=False), key=order)
 
     def _on_axis(self, spec: ObjectSpec) -> list[Rect]:
         """Wall spots centred on the biggest object's axis, facing it: the ends of its long

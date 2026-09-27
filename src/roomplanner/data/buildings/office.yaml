@@ -45,6 +45,7 @@ floor_roles:
       - {room: focus_room, fill: true, weight: 0.5}   # a copy room and a break room
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
+      - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
   executive:
     applies: [top]
     when: "floors_above >= 3"
@@ -63,6 +64,7 @@ floor_roles:
       - {room: focus_room, fill: true, weight: 0.5}   # a copy room and a break room
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
+      - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
   standard:
     applies: [upper, top]
     rooms:
@@ -82,6 +84,7 @@ floor_roles:
       - {room: focus_room, fill: true, weight: 0.5}   # a copy room and a break room
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
+      - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
   basement:
     applies: [basement]
     rooms:
