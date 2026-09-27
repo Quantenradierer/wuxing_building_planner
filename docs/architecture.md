@@ -302,7 +302,9 @@ every floor, the wcs of a row of stalls all face their doors), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts), `grid` (one lattice centred in the room, `aisle` apart and `margin` from the
-walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs) and `rows`
+walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs),
+`facing_exit` (on the axis of the room's exterior door, `margin` cells past its clearance,
+facing it: the reception desk) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two

@@ -280,7 +280,9 @@ Known weaknesses:
   are furniture instead (rigger cocoon in the security room, drone docks in the hall).
 - Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
   105), 1 of 12 seeds.
-- Reception should be next to the lobby (or part of it), not a separate room elsewhere.
+- Waiting rooms are still separate rooms near the entrance, not always beside the lobby.
+  (The reception is part of the lobby now: `reception_lobby` with the desk facing the
+  entrance in clinics, cosmetic clinics, hospitals, hotels and police stations.)
 - Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
   between corridor, bathroom and guest room.
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their

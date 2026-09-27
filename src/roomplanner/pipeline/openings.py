@@ -365,13 +365,20 @@ def _exterior_door(
         if r is not hinted and r.unit is None and not ctx.rules.spec(r.type).circulation
     ]
     first = [hinted] if hinted.unit is None or request.kind is not EntranceKind.SERVICE else []
+    last: list[Room] = []
+    if request.kind is EntranceKind.SERVICE and hinted.type in {
+        c.room for c in ctx.rules.program.core
+    }:
+        # Deliveries don't go through the stairwell (its stairs need that wall): only if
+        # no other room on that facade can take the door.
+        first, last = [], [hinted]
 
     def needs_window(room: Room) -> bool:
         return ctx.rules.spec(room.type).windows is WindowRule.REQUIRED
 
     # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them.
     roomy = [r for r in first if r.area >= ROOMY], [r for r in others if r.area >= ROOMY]
-    tiers = (service, *roomy, first, others)
+    tiers = (service, *roomy, first, others, last)
     # A wide door (loading dock) that would blind a room needing windows: a plain door.
     widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
     for candidates_from in tiers:

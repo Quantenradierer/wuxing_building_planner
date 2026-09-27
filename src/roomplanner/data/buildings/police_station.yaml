@@ -29,8 +29,7 @@ floor_roles:
   ground:
     applies: [ground]
     rooms:
-      - {room: lobby, place: entrance, area: [60, 140], priority: required}
-      - {room: reception, count: 1, near: entrance, priority: required}
+      - {room: reception_lobby, place: entrance, area: [60, 140], priority: required}
       - {room: cell_block, count: 1, near: service, priority: required}
       - {room: interview_room, count: [1, 3], priority: required}
       - {room: observation_room, count: [1, 2]}

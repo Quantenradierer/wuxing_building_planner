@@ -53,12 +53,14 @@ tiers:
       manager_office: {lock: maglock}
       stockroom: {lock: maglock}
       utility: {lock: mechanical}
-    cameras: {entrances: true, corridor_per: 120, rooms: [lobby, sales_floor, server_room, waiting_room]}
+    cameras: {entrances: true, corridor_per: 120, rooms: [lobby, reception_lobby, sales_floor, server_room, waiting_room]}
     alarm_panels: true
     motion_sensors: [server_room, archive, host_room, vault]
     floodlights: {kind: flood, radius: 10, colour: "#f4fbff", intensity: 0.9}
     furniture:
       lobby:
+        - {object: guard_post, placement: center}
+      reception_lobby:
         - {object: guard_post, placement: center}
       security_room:
         - {object: terminal, placement: wall, count: [2, 4]}
@@ -97,13 +99,16 @@ tiers:
       stockroom: {lock: cardreader}
       utility: {lock: cardreader, material: security}
       corridor: {lock: cardreader}
-    cameras: {entrances: true, corridor_per: 60, rooms: [lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office]}
+    cameras: {entrances: true, corridor_per: 60, rooms: [lobby, reception_lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office]}
     alarm_panels: true
     motion_sensors: [server_room, archive, executive_office, board_room, lab, stairwell, storage,
                      host_room, vault, drone_bay]
     floodlights: {kind: flood, radius: 12, colour: "#f4fbff", intensity: 1.0}
     furniture:
       lobby:
+        - {object: guard_post, placement: center}
+        - {object: security_gate, placement: near_exit, count: 2}
+      reception_lobby:
         - {object: guard_post, placement: center}
         - {object: security_gate, placement: near_exit, count: 2}
       security_room:

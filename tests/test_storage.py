@@ -14,7 +14,15 @@ from .conftest import make_params
 
 # Generic storage (not the program rooms a building exists for, like stockrooms).
 STORAGE = {"storage", "archive", "records_room", "linen_room", "closet"}
-CIRCULATION = {"corridor", "hallway", "stairwell", "elevator", "lobby", "corp_lobby"}
+CIRCULATION = {
+    "corridor",
+    "hallway",
+    "stairwell",
+    "elevator",
+    "lobby",
+    "reception_lobby",
+    "corp_lobby",
+}
 SMALLEST = {BuildingType.HOSPITAL: 48, BuildingType.FACTORY: 40}
 
 

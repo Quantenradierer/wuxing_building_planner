@@ -28,8 +28,7 @@ floor_roles:
   ground:
     applies: [ground]
     rooms:
-      - {room: lobby, place: entrance, area: [80, 200], priority: required}
-      - {room: reception, count: 1, near: entrance, priority: required}
+      - {room: reception_lobby, place: entrance, area: [80, 200], priority: required}
       - {room: waiting_room, count: [1, 2], near: entrance, priority: required}
       - {room: trauma_bay, count: 1, priority: required}
       - {room: trauma_bay, count: [1, 3]}

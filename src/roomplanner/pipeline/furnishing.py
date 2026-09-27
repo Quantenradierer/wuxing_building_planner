@@ -329,6 +329,8 @@ class RoomFurnisher:
                 candidates = self._sample(spec, SCATTER_TRIES)
             case Placement.GRID:
                 candidates = self._grid(spec, rule.aisle, rule.margin)
+            case Placement.FACING_EXIT:
+                candidates = self._facing_exit(spec, rule.margin)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -446,6 +448,37 @@ class RoomFurnisher:
             x, y = self.rng.randint(x0, x1 - w), self.rng.randint(y0, y1 - h)
             rects.append((x, y, w, h, facing))
         return rects
+
+    def _facing_exit(self, spec: ObjectSpec, margin: int) -> list[Rect]:
+        """Spots on the axis of each exterior door into the room, facing it, nearest first,
+        `margin` cells beyond the door's clearance."""
+        along, deep = spec.size
+        spots: list[Rect] = []
+        for door in self.floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            a, b = door.edges[0].cells()
+            inside, outside = (a, b) if a in self.cells else (b, a)
+            if inside not in self.cells or outside in self.floor.footprint:
+                continue
+            dx, dy = inside.x - outside.x, inside.y - outside.y
+            facing = next(s for s in Side if s.delta == (-dx, -dy))
+            start = len(door.edges) + margin
+            if dx == 0:  # a door in a horizontal wall: the object stands north or south of it
+                centre = sum(e.x for e in door.edges) / len(door.edges) + 0.5
+                x = round(centre - along / 2)
+                wall = inside.y if dy > 0 else inside.y + 1
+                for k in range(start, start + 40):
+                    y = wall + k if dy > 0 else wall - k - deep
+                    spots.append((x, y, along, deep, facing))
+            else:
+                centre = sum(e.y for e in door.edges) / len(door.edges) + 0.5
+                y = round(centre - along / 2)
+                wall = inside.x if dx > 0 else inside.x + 1
+                for k in range(start, start + 40):
+                    x = wall + k if dx > 0 else wall - k - deep
+                    spots.append((x, y, deep, along, facing))
+        return spots
 
     def _exterior_door(self) -> tuple[float, float] | None:
         for door in self.floor.openings:
