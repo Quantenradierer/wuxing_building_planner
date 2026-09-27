@@ -118,6 +118,7 @@ objects:
   interview_table: {size: [2, 2], glyph: t}   # bolted down
   coffee_table:    {size: [2, 2], glyph: t}   # in front of sofas
   board_table:     {size: [6, 3], glyph: T}
+  round_table:     {size: [4, 4], glyph: T}   # round meeting table, 2 m across
 
   # Building services, security tech, Sixth World details.
   electrical_panel: {size: [2, 1], glyph: E}    # switchboard / breaker cabinet
@@ -182,6 +183,51 @@ groups:
       - {object: chair, at: [2, 4], facing: N}
       - {object: chair, at: [3, 4], facing: N}
       - {object: chair, at: [4, 4], facing: N}
+  round_meeting_set:    # round table, two chairs on each side
+    size: [6, 6]
+    parts:
+      - {object: round_table, at: [1, 1]}
+      - {object: chair, at: [2, 0]}
+      - {object: chair, at: [3, 0]}
+      - {object: chair, at: [2, 5], facing: N}
+      - {object: chair, at: [3, 5], facing: N}
+      - {object: chair, at: [0, 2], facing: E}
+      - {object: chair, at: [0, 3], facing: E}
+      - {object: chair, at: [5, 2], facing: W}
+      - {object: chair, at: [5, 3], facing: W}
+  long_meeting_set:     # two meeting tables end to end, six chairs per side
+    size: [12, 5]
+    parts:
+      - {object: meeting_table, at: [0, 1]}
+      - {object: meeting_table, at: [6, 1]}
+      - {object: chair, at: [1, 0]}
+      - {object: chair, at: [3, 0]}
+      - {object: chair, at: [5, 0]}
+      - {object: chair, at: [6, 0]}
+      - {object: chair, at: [8, 0]}
+      - {object: chair, at: [10, 0]}
+      - {object: chair, at: [1, 4], facing: N}
+      - {object: chair, at: [3, 4], facing: N}
+      - {object: chair, at: [5, 4], facing: N}
+      - {object: chair, at: [6, 4], facing: N}
+      - {object: chair, at: [8, 4], facing: N}
+      - {object: chair, at: [10, 4], facing: N}
+  u_meeting_set:        # three tables in a U open towards the front, chairs outside
+    size: [14, 8]
+    parts:
+      - {object: meeting_table, at: [1, 1], facing: E}
+      - {object: meeting_table, at: [4, 1]}
+      - {object: meeting_table, at: [10, 1], facing: W}
+      - {object: chair, at: [4, 0]}
+      - {object: chair, at: [6, 0]}
+      - {object: chair, at: [7, 0]}
+      - {object: chair, at: [9, 0]}
+      - {object: chair, at: [0, 2], facing: E}
+      - {object: chair, at: [0, 4], facing: E}
+      - {object: chair, at: [0, 6], facing: E}
+      - {object: chair, at: [13, 2], facing: W}
+      - {object: chair, at: [13, 4], facing: W}
+      - {object: chair, at: [13, 6], facing: W}
   board_set:            # boardroom table: six chairs per side and one at each head
     size: [8, 5]
     parts:

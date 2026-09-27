@@ -316,6 +316,9 @@ group is drawn facing S with its parts at [along, deep] positions; a rule places
 one object of the group's size, then rotates the parts with it. Its empty cells stay free
 floor. If a group doesn't fit, its biggest part is placed alone (the bed without the
 nightstands).
+`choose: [kinds]` offers alternatives for one place: the largest option whose size plus
+`clearance` on every side fits the room's box is tried first, then the largest that fits at
+all (meeting rooms: round, standard, long or U-shaped table).
 Walkable objects (stairs, elevator car, rugs) may cover door clearances and never block. A
 placement is rejected if it covers another object or a door's clearance (as deep as the door
 is wide) or splits the room's free floor; a ring test around the object avoids most flood

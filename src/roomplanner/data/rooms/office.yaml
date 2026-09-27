@@ -23,10 +23,12 @@ rooms:
       - {object: water_cooler, placement: wall, count: [0, 1]}
       - {object: whiteboard, placement: wall, count: [0, 2]}
   meeting_room:
-    area: [48, 120]
+    area: [48, 100]
     min_side: 6
     furniture:
-      - {object: meeting_set, placement: center}
+      # The table fits the room: round in small ones, long or a U in big ones.
+      - {object: meeting_set, placement: center,
+         choose: [round_meeting_set, long_meeting_set, u_meeting_set]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: cabinet, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}

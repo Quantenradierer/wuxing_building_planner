@@ -218,6 +218,12 @@ class RoomFurnisher:
         """Place objects by rule; `scale`: multiply counts by the wealth tier's factor."""
         factor = self.ctx.rules.wealth.furniture if scale else 1.0
         for rule in rules:
+            if rule.choose:
+                kinds = [*self._choices(rule), self._main_part(rule.object) or rule.object]
+                for kind in kinds:
+                    if self._place_one(rule.model_copy(update={"object": kind}), self._spec(kind)):
+                        break
+                continue
             spec = self._spec(rule.object)
             if rule.placement is Placement.ROWS:
                 self._rows(rule, spec)
@@ -245,6 +251,21 @@ class RoomFurnisher:
                 if not self._place_one(alone, self._spec(main)):
                     break
         return self.placed
+
+    def _choices(self, rule: FurnitureRule) -> list[str]:
+        """`object` and `choose` in the order to try: largest first among those that fit the
+        room's box with `clearance` all round, then among those that fit at all (no
+        randomness: rooms of one shape get the same table)."""
+        options = sorted([rule.object, *rule.choose], key=lambda k: -math.prod(self._spec(k).size))
+        x0, y0, x1, y1 = self.box
+
+        def fits(kind: str, margin: int) -> bool:
+            short, long = sorted((x1 - x0 - margin, y1 - y0 - margin))
+            a, b = sorted(self._spec(kind).size)
+            return a <= short and b <= long
+
+        roomy = [k for k in options if fits(k, 2 * rule.clearance)]
+        return roomy + [k for k in options if k not in roomy and fits(k, 0)]
 
     def _spec(self, kind: str) -> ObjectSpec:
         """An object's spec; a group is placed like one object of its size."""

@@ -96,6 +96,13 @@ class FurnitureRule(_Strict):
     beside: list[Literal["front", "back", "flanks"]] = Field(
         default=["front", "back", "flanks"], description="at: which sides of the target, in turn"
     )
+    choose: list[str] = Field(
+        default=[],
+        description="Other objects or groups for the same place: the largest of these and "
+        "`object` whose size plus `clearance` on every side fits the room (else the largest "
+        "that fits at all) is used",
+    )
+    clearance: int = Field(default=2, ge=0, description="choose: free cells around it")
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 
@@ -510,6 +517,7 @@ def _check_references(rules: Rules) -> None:
         names += [spec.front_fill] if spec.front_fill else []
     # `access` may name room types other buildings have; unknown ones are ignored.
     used = {f.object for s in rules.rooms.values() for f in s.furniture}
+    used |= {c for s in rules.rooms.values() for f in s.furniture for c in f.choose}
     used |= {f.at for s in rules.rooms.values() for f in s.furniture if f.at}
     used |= {f.toward for s in rules.rooms.values() for f in s.furniture if f.toward}
     unknown = used - set(rules.objects) - set(rules.groups)

@@ -195,3 +195,16 @@ def test_a_small_stuffer_shack_has_more_than_one_row_of_gondolas() -> None:
         ground = generate(params).floor(0)
         gondolas = [o for o in ground.objects if o.kind == "gondola"]
         assert len({o.y if o.w > o.h else o.x for o in gondolas}) >= 2
+
+
+def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
+    kinds: set[str] = set()
+    for seed in range(3):
+        params = make_params(width=60, depth=40, floors_above=2, wealth=Wealth.LUXURY, seed=seed)
+        for floor in generate(params).floors:
+            for room in floor.rooms:
+                if room.type != "meeting_room":
+                    continue
+                tables = [o.kind for o in floor.objects if o.room == room.id and "table" in o.kind]
+                kinds.add("long" if len(tables) == 2 else tables[0])
+    assert {"round_table", "meeting_table", "long"} <= kinds
