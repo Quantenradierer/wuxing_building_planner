@@ -49,15 +49,15 @@ floor_roles:
       - {room: apartment, fill: true}
       - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
       - {room: laundry, fill: true}            # interior rows without facade
-      - {room: drone_bay, fill: true, priority: optional}  # leftovers: parcel drones
-      - {room: mechanical_room, fill: true, priority: optional}
+      - {room: drone_bay, fill: true}          # parcel drones
+      - {room: mechanical_room, fill: true}
   residential:
     applies: [upper, top]
     rooms:
       - {room: apartment, fill: true}
       - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
       - {room: laundry, fill: true}            # interior rows without facade
-      - {room: mechanical_room, fill: true, priority: optional}  # leftovers
+      - {room: mechanical_room, fill: true}
   basement:
     applies: [basement]
     rooms:

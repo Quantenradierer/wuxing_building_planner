@@ -62,7 +62,9 @@ floor_roles:
       - {room: squad_room, fill: true}
       - {room: office, fill: true}
       - {room: briefing_room, fill: true}     # interior rows without facade
-      - {room: interview_room, fill: true}
+      - {room: locker_room, fill: true}
+      - {room: server_room, fill: true}
+      - {room: staff_room, fill: true}
   basement:
     applies: [basement]
     rooms:
