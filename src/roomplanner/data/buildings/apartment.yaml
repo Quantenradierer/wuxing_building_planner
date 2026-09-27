@@ -16,6 +16,8 @@ service_stub: true         # a back corridor to the yard, not through a flat
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
   - {room: elevator, size: [4, 4], when: "floors_total >= 5"}
+  - {room: elevator, size: [4, 4], when: "floors_total >= 5 and width + depth >= 100"}   # bigger floors: more cars
+  - {room: elevator, size: [4, 4], when: "floors_total >= 5 and width + depth >= 150"}
 
 entrances:
   main: {width: 2}

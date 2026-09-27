@@ -19,6 +19,7 @@ cluster_filler: storage
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
   - {room: elevator, size: [6, 8], when: "floors_total >= 2"}   # freight lift
+  - {room: elevator, size: [6, 8], when: "floors_total >= 2 and width + depth >= 100"}   # bigger floors: more cars
 
 entrances:
   main: {width: 2}         # the staff entrance

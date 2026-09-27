@@ -2,43 +2,43 @@ office 32x18 cells, wealth=middle, seed=1
 
 == Ground floor ==
 +--===---===---===---===-------DDD-----===---===---===---===----+
-|                                                               "
-|                                                               "
-D                                                               "
+|                                                            ^^^"
+|                                                            ^^^"
+D                                                            ^^^"
 D                                                               |
 D                                                               |
 |                                                               |
 |                      1                                        |
-|       +---+---+---+                 +--DDD------------+--DDD--+
-|       |WWW|WWW|WWW|q                |*     ddddd     *|s     s|
-|       |WWW|WWW|WWW|q                |      ddddd      |s     s|
-|       |WWW|WWW|WWW|q                |      ddddd      |s     s|
-|       |   |   |   |q                |                 |       |
-"       |4  |5  |6  |q               q|ddd     c        |       "
-"       +D--+D--+D--+q               q|ddd              |       "
-"       |          w|q     AAA }     q|ddd c         ddd|s     s"
-|       |           |      AAA       q|ddd           ddd|s     s|
-|       D        iii|      AAA       q|ddd         c ddd|s     s|
-|       D        iii|                q|              ddd|       |
-"       D        iii|                q|              ddd|s      "
-"       |           |                 |                 |s      "
-"       |w   3      |        2        |    c   8        |s 10   "
-|       |           |                 |                 |       |
-|       |w       iii|                 |F ddddd         F|s     s|
-|       |        iii|                 |F ddddd         F|s     s|
-"       |iii     iii|                 |F ddddd         F|s     s"
-"       |iii        |                 +-------+         |       "
-"       |iii       U|                q|s sss  |         |       "
-|       +-----------+                q|s      |         |       |
-|       |    WWW iii|<               q|s      D         |      s|
-|       |    WWW iii|<               q|       D         |      s|
-"       D    WWW iii|<               q|KKK 9  D      ddd|  KKK s"
-"       D           |<               q|KKK    |      ddd|  KKK  "
-"^^^    D    7      |<               q|KKK   s|F   c ddd|s KKK s"
-|^^^    |           |                 |      s|F     ddd|s     s|
-|^^^    |U          |                *|sss k s|F     ddd|s sss s|
-+--===--+===---===--+----DDDDDDD------+===----+----===--+===----+
-  objects: A armchair, q bench, k cabinet, c chair, K crate, F filing_cabinet, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, < wall_screen, W wc
+|       +---+---+---+                 +-------------------------+
+|       |WWW|WWW|WWW|                $|              FFF       F|
+|       |WWW|WWW|WWW|                 |                        F|
+|       |WWW|WWW|WWW|                 D                        F|
+|       |   |   |   |                 D                         |
+"       |4  |5  |6  |                 D                         "
+"       +D--+D--+D--+                 |                         "
+"       |          U|<     AAA }     q|    ddddd     ddddd      "
+|       |           |<     AAA       q|    ddddd     ddddd      |
+|       D           |<     AAA       q|    ddddd     ddddd      |
+|       D           |<               q|                         |
+"       D           |<               q|      c         c       F"
+"       |           |                q|                        F"
+"       |    3     w|        2       q|          8             F"
+|       |           |                 |                         |
+|       |           |                 |                         |
+|       |           |                 |                         |
+"       |iii   iii  |q                |    ddddd               *|
+"       |iii   iii  |q                |    ddddd      +--DDD----+
+"       |iii   iii  |q               q|    ddddd      |k     sss|
+|       +-----------+q               q|               |         |
+|       |U     WWW  |q               q|      c        |s        |
+|       |      WWW  |q               q|               |s        |
+"       D    7 WWW  |q               q|               |s 9 KKK k"
+"       D           |                q|               |    KKK  "
+"       D           |                q|               |    KKK s"
+|       |           |                 |               |        s|
+|       |           |*               *|k              |sss sss s|
++--===--+===---===--+----DDDDDDD------+===---===---===+--===----+
+  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, F filing_cabinet, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, < wall_screen, W wc
     1  corridor            184 cells
     2  lobby               126 cells
     3  toilet               42 cells
@@ -46,6 +46,5 @@ D                                                               |
     5  stall                 6 cells
     6  stall                 6 cells
     7  wc                   24 cells
-    8  office              106 cells
-    9  storage              20 cells
-   10  storage              56 cells
+    8  office              157 cells
+    9  storage              25 cells

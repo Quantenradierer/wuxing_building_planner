@@ -1,11 +1,12 @@
 # Units are cells: lengths in cells, areas in number of cells.
 rooms:
   office:
-    area: [36, 80]
-    min_side: 5
+    area: [56, 110]
+    min_side: 7
+    max_aspect: 1.6           # roughly square, not a corridor of desks
     windows: required
     furniture:
-      - {object: workstation, placement: wall, per: 22, count: [1, 6]}
+      - {object: workstation, placement: grid, per: 22, count: [1, 6], aisle: 2, margin: 1}
       - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
       - {object: cabinet, placement: corner, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
@@ -38,7 +39,7 @@ rooms:
     area: [20, 48]
     min_side: 4
     furniture:
-      - {object: workstation, placement: wall, count: [1, 2]}
+      - {object: workstation, placement: grid, count: [1, 2], aisle: 2, margin: 1}
       - {object: armchair, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
   copy_room:                # printers, paper, mail

@@ -78,6 +78,7 @@ class Placement(StrEnum):
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
     GRID = "grid"  # on one lattice, all alike, from the walls inwards (cafe tables)
     FACING_EXIT = "facing_exit"  # on the entrance's axis, facing it (reception desk)
+    FILL = "fill"  # the whole room but `margin` rows in front of its doors (elevator car)
 
 
 class FurnitureRule(_Strict):
@@ -91,7 +92,7 @@ class FurnitureRule(_Strict):
     margin: int = Field(
         default=2,
         ge=0,
-        description="rows, grid: free cells along walls; facing_exit: beyond the door clearance",
+        description="rows, grid: cells along walls; facing_exit: past the door; fill: at doors",
     )
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
     block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
@@ -407,6 +408,8 @@ def variables(params: GenerationParams, level: int = 0) -> dict[str, int]:
         "floors_below": params.floors_below,
         "floors_total": params.floors_above + params.floors_below,
         "level": level,
+        "width": params.width,
+        "depth": params.depth,
     }
 
 
@@ -554,7 +557,7 @@ def _check_references(rules: Rules) -> None:
 # --- `when:` expressions ------------------------------------------------------------
 # A deliberately tiny language: integer variables, + -, comparisons, and/or/not.
 
-_VARIABLES = {"floors_above", "floors_below", "floors_total", "level"}
+_VARIABLES = {"floors_above", "floors_below", "floors_total", "level", "width", "depth"}
 
 
 def evaluate(expression: str | None, values: dict[str, int]) -> bool:

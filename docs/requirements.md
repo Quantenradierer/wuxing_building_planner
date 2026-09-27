@@ -101,7 +101,8 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
     grid, vertical core, entrances, units, floor roles (matched by ground / upper / top /
     basement plus `when:` and `wealth:`) and room entries with `count`, `share`, `fill` or
     `place`, a priority (`required`, `normal`, `optional`) and `near: core | entrance`.
-  - `when:` conditions are a deliberately tiny expression language.
+  - `when:` conditions are a deliberately tiny expression language (floors, level and the
+    building's `width` and `depth`: bigger buildings get more elevators).
 - Logic that data cannot express goes into Python strategies, referenced from the YAML by
   name or import path (e.g. `layout: my_pkg.layouts:Mine`).
 

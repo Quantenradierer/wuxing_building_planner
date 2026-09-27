@@ -17,6 +17,8 @@ service_rooms: [docwagon_bay, storage, utility, staff_room, laundry]
 core:
   - {room: stairwell, size: [6, 10], when: "floors_total >= 2"}
   - {room: elevator, size: [5, 7], when: "floors_total >= 2"}   # bed elevator
+  - {room: elevator, size: [5, 7], when: "floors_total >= 2 and width + depth >= 100"}   # bigger floors: more cars
+  - {room: elevator, size: [5, 7], when: "floors_total >= 2 and width + depth >= 150"}
 
 entrances:
   main: {width: 4}

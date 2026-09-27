@@ -244,7 +244,10 @@ class RoomFurnisher:
             for _ in range(count):
                 if self._place_one(rule, spec):
                     continue
-                # A group that doesn't fit: at least its main object (the bed, the desk).
+                # A group that doesn't fit: at least its main object (the bed, the desk);
+                # not on a grid, whose objects must all be alike.
+                if rule.placement is Placement.GRID:
+                    break
                 if (main := self._main_part(rule.object)) is None:
                     break
                 alone = rule.model_copy(update={"object": main})
@@ -331,6 +334,8 @@ class RoomFurnisher:
                 candidates = self._grid(spec, rule.aisle, rule.margin)
             case Placement.FACING_EXIT:
                 candidates = self._facing_exit(spec, rule.margin)
+            case Placement.FILL:
+                candidates = self._filling(rule.margin)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -448,6 +453,19 @@ class RoomFurnisher:
             x, y = self.rng.randint(x0, x1 - w), self.rng.randint(y0, y1 - h)
             rects.append((x, y, w, h, facing))
         return rects
+
+    def _filling(self, margin: int) -> list[Rect]:
+        """The room's box less `margin` rows along each wall with a door, facing a door."""
+        x0, y0, x1, y1 = self.box
+        sides = self._door_sides()
+        x0 += margin if Side.W in sides else 0
+        x1 -= margin if Side.E in sides else 0
+        y0 += margin if Side.N in sides else 0
+        y1 -= margin if Side.S in sides else 0
+        if x1 <= x0 or y1 <= y0:
+            return []
+        facing = next((s for s in (Side.S, Side.N, Side.E, Side.W) if s in sides), Side.S)
+        return [(x0, y0, x1 - x0, y1 - y0, facing)]
 
     def _facing_exit(self, spec: ObjectSpec, margin: int) -> list[Rect]:
         """Spots on the axis of each exterior door into the room, facing it, nearest first,

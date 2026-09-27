@@ -78,9 +78,9 @@ def test_leftover_storeroom_joins_the_room_beside_it() -> None:
 
 
 def test_leftover_stays_if_the_neighbour_would_grow_too_big_or_is_core() -> None:
-    office = PlannedRoom("office", _rect(0, 0, 8, 10))  # 80 + 40 > 1.4 x 80
-    stairwell = PlannedRoom("stairwell", _rect(12, 0, 17, 10))
-    leftover = PlannedRoom("storage", _rect(8, 0, 12, 10), leftover=True)
+    office = PlannedRoom("office", _rect(0, 0, 12, 10))  # 120 + 40 > 1.4 x 110
+    stairwell = PlannedRoom("stairwell", _rect(16, 0, 21, 10))
+    leftover = PlannedRoom("storage", _rect(12, 0, 16, 10), leftover=True)
     rooms = absorb_leftovers([office, stairwell, leftover], RULES)
     assert leftover in rooms and len(rooms) == 3
 

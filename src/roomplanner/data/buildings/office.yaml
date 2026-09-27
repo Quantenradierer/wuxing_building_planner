@@ -15,6 +15,8 @@ cluster_filler: storage    # fills leftover space next to toilet/storage cluster
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
   - {room: elevator, size: [4, 4], when: "floors_total >= 3"}
+  - {room: elevator, size: [4, 4], when: "floors_total >= 3 and width + depth >= 100"}   # bigger floors: more cars
+  - {room: elevator, size: [4, 4], when: "floors_total >= 3 and width + depth >= 150"}
 
 entrances:
   main: {width: 4}

@@ -285,3 +285,15 @@ def test_the_church_portal_opens_into_a_narthex_leading_to_the_nave(width: int, 
         if door.kind is OpeningKind.DOOR
     ]
     assert {"narthex", "nave"} in pairs
+
+
+def test_bigger_buildings_get_more_elevators_whose_cars_fill_the_shaft() -> None:
+    def elevators(width: int, depth: int) -> list[tuple[int, int]]:
+        floor = generate(make_params(width=width, depth=depth, floors_above=3)).floor(1)
+        shafts = [r for r in floor.rooms if r.type == "elevator"]
+        cars = [o for o in floor.objects if o.kind == "elevator_car"]
+        return [(len(r.cells), next(c.w * c.h for c in cars if c.room == r.id)) for r in shafts]
+
+    small, large = elevators(40, 24), elevators(60, 44)
+    assert len(small) == 1 < len(large)
+    assert all(car >= shaft * 0.7 for shaft, car in small + large)

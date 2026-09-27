@@ -42,7 +42,7 @@ rooms:
     min_side: 3
     windows: forbidden
     furniture:
-      - {object: elevator_car, placement: center}
+      - {object: elevator_car, placement: fill, margin: 1}   # the car fills the shaft
   toilet:               # public toilet: stalls along one wall, sinks and urinals outside
     area: [24, 56]
     min_side: 3

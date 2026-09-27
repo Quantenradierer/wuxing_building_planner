@@ -304,7 +304,8 @@ the room's shape only: parking ramps line up across levels), `center`, `scatter`
 (checkouts), `grid` (one lattice centred in the room, `aisle` apart and `margin` from the
 walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs),
 `facing_exit` (on the axis of the room's exterior door, `margin` cells past its clearance,
-facing it: the reception desk) and `rows`
+facing it: the reception desk), `fill` (the room's box less `margin` rows at its doors, the
+object stretched to it: the elevator car fills its shaft) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two
@@ -317,6 +318,8 @@ object per N cells of room, bounded by `count`), scaled by the tier's `furniture
 an exact count (`count: 1`, the default) is never scaled. A rule with `wealth:` or `security:`
 lists applies only to those tiers of the building (squatter mattresses, a guard post at the
 checkout from low security up); `rules_for` drops the others.
+On a `grid` a group that doesn't fit is left out rather than placed as its main part
+alone, so the grid's objects all look alike (desks in offices and focus rooms).
 Rooms of one type with the same shape, door clearances and walls get the same layout,
 mirrored if they are mirror images, across all floors; doors without a partner to be near
 sit at the same spot of their wall, so same-sized rooms really are the same.
