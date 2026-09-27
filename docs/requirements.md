@@ -252,10 +252,8 @@ every type ≤ 5 % except apartments (9 %, a third of it flat closets).
 Known weaknesses:
 - Toilets: a public toilet whose stalls leave only a passage between two doors has no
   room for its 2 × 2 sink (about 5 % of toilets).
-- Small buildings get a full-width corridor: stuffer shack and dive bar spend ~85 cells on
-  it, and a 22 × 16 dive bar is rejected ("needs at least 19 for its corridor").
-  Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade
-  (one in the clinic only holds a roof hatch).
+- Cluster hallways run on to the facade past their last door (clinic toilets and storage),
+  and apartment and hotel floors have a corridor stub to the service door.
 - Public sequence is broken: entrance, reception and waiting aren't chained. Clinic: the
   entrance opens into an empty lobby; reception is a closed room across the corridor and
   the waiting room is elsewhere. Police station: the reception desk is in a closed room
@@ -285,8 +283,6 @@ Known weaknesses:
   footprints that is several warnings per floor.
 - Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
   105), 1 of 12 seeds.
-- Stuffer shack 24 × 16 is infeasible at luxury wealth (the wider corridor leaves 16 of 17
-  cells needed).
 - Reception should be next to the lobby (or part of it), not a separate room elsewhere.
 - Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
   between corridor, bathroom and guest room.

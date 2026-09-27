@@ -514,16 +514,29 @@ class RoomFurnisher:
             else:
                 shift = (length - positions[-1] - along - m) // 2
                 positions = [p + shift for p in positions]
-        for across, facing in rows:
-            for position in positions:
-                if horizontal:
-                    rect = (x0 + position, y0 + across, along, deep, facing)
-                else:
-                    side = Side.W if facing is Side.N else Side.E
-                    rect = (x0 + across, y0 + position, deep, along, side)
-                if toward is not None:
-                    rect = (*rect[:4], toward)
-                self._try(rule.object, rect, spec.walkable)
+
+        def rects(shift: int) -> list[Rect]:
+            found: list[Rect] = []
+            for across, facing in rows:
+                for position in positions:
+                    if horizontal:
+                        rect = (x0 + position, y0 + across + shift, along, deep, facing)
+                    else:
+                        side = Side.W if facing is Side.N else Side.E
+                        rect = (x0 + across + shift, y0 + position, deep, along, side)
+                    found.append(rect if toward is None else (*rect[:4], toward))
+            return found
+
+        def free(rect: Rect) -> bool:
+            x, y, w, h, _ = rect
+            cells = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+            return cells <= self.cells and not cells & (self.taken | self.clearance)
+
+        # Rows shifted across the spare width to where most fit (clear of doors on one side).
+        spare = width - m - (rows[-1][0] + deep) if rows else 0
+        shift = max(range(spare + 1), key=lambda s: (sum(map(free, rects(s))), -s))
+        for rect in rects(shift):
+            self._try(rule.object, rect, spec.walkable)
 
     def _at(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
         """`count` objects beside every placed `rule.at`, going round its `beside` sides in turn.

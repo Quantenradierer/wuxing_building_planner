@@ -177,8 +177,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    (apartments, hotels) carve a corridor stub to the service side instead.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
-   slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
-   it (small fill rooms such as coffins, and windowless fill rooms too big for the strip).
+   slot, unless no room could stack behind them) which go into *clusters*: a side hallway
+   from the corridor with rooms stacked along it (small fill rooms such as coffins, and windowless fill rooms too big for the strip).
    Rooms that need windows go into a *facade stack* instead when a full-depth slot would
    make them far too big (exam rooms, wards and offices in deep strips): the side hallway
    runs to the facade, the window room sits at its end and the floor's first windowless
@@ -243,7 +243,11 @@ A connector that must cross a hall band splits it: each piece becomes its own ha
 `[hall | service corridor | back-of-house strip]`, hall on the street side (and away from an
 L's junction). Each floor role names the hall's room type with `place: hall` (sales floor;
 stockroom in the basement). Without a lobby the main entrance opens into the hall.
-Connectors that must cross a hall band become a short corridor across its end.
+Connectors that must cross a hall band become a short corridor across its end. Parts shorter
+than `hall.corridor_from` (small shops, bars, churches) have no service corridor: the back
+rooms open onto the hall (`PlannedRoom.hub`: doors treat it as circulation, on every
+floor, so the stairwell opens into it too), the emergency exit goes to a hall end and an
+end-side service door into a back-of-house room.
 
 ### Units
 
@@ -290,7 +294,7 @@ overrides (`wealth:` in the catalog), and room entries / floor roles filtered by
 The program lists its entrance kinds (`main`, `service`, `emergency`, `roof`) with widths;
 the `entrances` parameter replaces that list (main is always built, unknown widths default
 to 2). The emergency exit goes to the corridor end on a facade farthest from the other
-entrances, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
+entrances, else to a hall end, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
 stairwell (or a circulation room).
 
 ### Furnishing
@@ -305,7 +309,8 @@ catalog: stairs span the stairwell, the elevator car is the shaft), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts) and `rows`
-(shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
+(shelves, desks, racks with aisles and a cross aisle every `block` cells, shifted across
+the spare width to where most fit, e.g. clear of doors along one wall; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two
 halves fit: pews facing the altar), and `at`

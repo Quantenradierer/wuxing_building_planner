@@ -47,7 +47,11 @@ class DefaultOpenings:
             )
             entries = {i for i, r in enumerate(planned.rooms) if r.entry}
             owner = {cell: i for i, room in enumerate(rooms) for cell in room.cells}
-            circulation = {i for i, r in enumerate(rooms) if ctx.rules.spec(r.type).circulation}
+            circulation = {
+                i
+                for i, r in enumerate(planned.rooms)
+                if ctx.rules.spec(r.type).circulation or r.hub
+            }
             index = {id(r): i for i, r in enumerate(planned.rooms)}
             hosts = {
                 i: index[id(r.host)]
@@ -92,7 +96,9 @@ def _core_walls(ctx: Context, plan: BuildingPlan) -> dict[tuple[str, Cell], set[
     core_types = {c.room for c in ctx.rules.program.core}
     common: dict[tuple[str, Cell], set[Edge]] = {}
     for planned in plan.floors:
-        flow = {c for r in planned.rooms if ctx.rules.spec(r.type).circulation for c in r.cells}
+        flow = {
+            c for r in planned.rooms if ctx.rules.spec(r.type).circulation or r.hub for c in r.cells
+        }
         for room in planned.rooms:
             if room.type not in core_types:
                 continue

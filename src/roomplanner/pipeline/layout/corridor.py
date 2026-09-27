@@ -96,6 +96,10 @@ class CorridorLayout:
         """Depth the main part needs; subclasses with other band patterns override it."""
         return ctx.rules.program.corridor.width + ctx.rules.program.strip_depth[0]
 
+    def main_corridor(self, ctx: Context, frame: Frame) -> int:
+        """Width of the main part's corridors (0: none)."""
+        return ctx.rules.program.corridor.width
+
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         program = ctx.rules.program
         corridor = program.corridor.width
@@ -103,6 +107,7 @@ class CorridorLayout:
         problems: list[str] = []
         pieces = decompose(footprint, ctx.params.street_side, self.main_min_depth(ctx), wing_depth)
         frames = [("building", Frame.for_rect(pieces[0].box), self.main_min_depth(ctx))]
+        main_corridor = self.main_corridor(ctx, frames[0][1])
         for piece in pieces[1:]:
             assert piece.junction is not None
             frames.append(("wing", wing_frame(piece.box, piece.junction), wing_depth))
@@ -113,7 +118,8 @@ class CorridorLayout:
                     f"{min_depth} for its corridor and rooms"
                 )
         core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
-        corridors = sum(corridor * frame.length for _, frame, _ in frames)
+        corridors = main_corridor * frames[0][1].length
+        corridors += sum(corridor * frame.length for _, frame, _ in frames[1:])
         for level in ctx.params.levels:
             _, role = ctx.rules.role_for(level, ctx.params)
             needed = core + corridors
@@ -526,10 +532,14 @@ class CorridorLayout:
                     # Connectors crossing the hall split it: one hall room per piece,
                     # slivers too thin for a room join the connector corridor.
                     minimum = ctx.rules.spec(hall).min_side
+                    # Without a service corridor the back rooms open onto the hall.
+                    hub = not any(b.kind is BandKind.CORRIDOR for b in part.bands)
                     for span in free_intervals(part.frame.length, part.blocked(band)):
                         cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
-                        kind = hall if span.width >= minimum else "corridor"
-                        rooms.append(PlannedRoom(kind, cells))
+                        if span.width >= minimum:
+                            rooms.append(PlannedRoom(hall, cells, hub=hub))
+                        else:
+                            rooms.append(PlannedRoom("corridor", cells))
                     continue
                 if band.kind is BandKind.CORRIDOR:
                     blocked = [part_slice] if part_slice else []
@@ -640,7 +650,10 @@ class CorridorLayout:
 
         if EntranceKind.SERVICE not in ctx.rules.entrances(ctx.params):
             return anchor
-        corridors = [b for b in main.bands if b.kind is BandKind.CORRIDOR]
+        # Without corridors (small hall buildings) through a back-of-house room.
+        corridors = [b for b in main.bands if b.kind is BandKind.CORRIDOR] or [
+            b for b in main.bands if b.kind is BandKind.STRIP
+        ]
         if service is street and anchor is not None:
             hint = hints[0][2]
         elif service.is_end:
@@ -679,23 +692,27 @@ class CorridorLayout:
         hints: list[tuple[EntranceKind, Side, Cell]],
         warnings: list[str],
     ) -> None:
-        """An exit at a corridor end on a facade, else from the stairwell, far from the others."""
+        """An exit at a corridor end on a facade, else at a hall end (small hall buildings
+        without a corridor), else from the stairwell, far from the others."""
         if EntranceKind.EMERGENCY not in ctx.rules.entrances(ctx.params):
             return
         inside = frozenset[Cell]().union(
             *(p.frame.rect(0, p.frame.length, 0, p.frame.depth) for p in skeleton.parts)
         )
         options: list[tuple[Cell, Side]] = []
-        for part in skeleton.parts:
-            for band in part.bands:
-                if band.kind is not BandKind.CORRIDOR:
-                    continue
-                for end in (LocalSide.U0, LocalSide.U1):
-                    u = 0 if end is LocalSide.U0 else part.frame.length - 1
-                    cell = part.frame.cell(u, (band.v0 + band.v1) // 2)
-                    side = part.frame.side(end)
-                    if cell.neighbour(side) not in inside:
-                        options.append((cell, side))
+        for kind in (BandKind.CORRIDOR, BandKind.HALL):
+            for part in skeleton.parts:
+                for band in part.bands:
+                    if band.kind is not kind:
+                        continue
+                    for end in (LocalSide.U0, LocalSide.U1):
+                        u = 0 if end is LocalSide.U0 else part.frame.length - 1
+                        cell = part.frame.cell(u, (band.v0 + band.v1) // 2)
+                        side = part.frame.side(end)
+                        if cell.neighbour(side) not in inside:
+                            options.append((cell, side))
+            if options:
+                break
         if not options and skeleton.core_rooms:
             for cell in sorted(skeleton.core_rooms[0].cells):
                 options += [(cell, s) for s in Side if cell.neighbour(s) not in inside]

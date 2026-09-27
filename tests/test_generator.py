@@ -328,6 +328,40 @@ def test_core_rooms_are_as_big_as_their_stairs_and_car(building_type: BuildingTy
                 assert door and not door & obj.cells  # the landing
 
 
+@pytest.mark.parametrize(
+    ("building_type", "width", "depth", "wealth"),
+    [
+        (BuildingType.STUFFER_SHACK, 24, 16, Wealth.MIDDLE),
+        (BuildingType.STUFFER_SHACK, 24, 16, Wealth.LUXURY),
+        (BuildingType.DIVE_BAR, 22, 16, Wealth.MIDDLE),
+        (BuildingType.CHURCH, 40, 44, Wealth.HIGH),
+    ],
+)
+def test_small_hall_buildings_have_no_service_corridor(
+    building_type: BuildingType, width: int, depth: int, wealth: Wealth
+) -> None:
+    """The back rooms open onto the hall, on every floor; there is still an emergency exit."""
+    for seed in range(3):
+        params = make_params(
+            building_type=building_type,
+            width=width,
+            depth=depth,
+            wealth=wealth,
+            floors_above=2 + seed % 2,
+            floors_below=seed % 2,
+            seed=seed,
+        )
+        building = generate(params)
+        ground = building.floor(0)
+        for room in ground.rooms:
+            if room.type == "corridor":  # side hallways of clusters only, no service corridor
+                xs, ys = {c.x for c in room.cells}, {c.y for c in room.cells}
+                assert len(xs) < building.width and len(ys) < building.height
+        kinds = {o.entrance for o in ground.openings if o.entrance is not None}
+        assert EntranceKind.EMERGENCY.value in kinds, seed
+        assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []
+
+
 def test_police_station_has_holding_cells_behind_the_lockup() -> None:
     building = generate(
         make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)

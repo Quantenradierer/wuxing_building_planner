@@ -9,6 +9,8 @@ it borders. Core, unit, annex and stall rooms keep their shape.
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from roomplanner.geometry import Cell
 from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.pipeline.layout.allocation import ABSORB_TOLERANCE
@@ -42,9 +44,7 @@ def absorb_leftovers(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom
         if not options:
             continue
         _, _, other = min(options, key=lambda o: (o[0], o[1]))
-        merged = PlannedRoom(
-            other.type, other.cells | room.cells, other.unit, other.entry, other.host
-        )
+        merged = replace(other, cells=other.cells | room.cells)
         result[result.index(other)] = merged
         result.remove(room)
     return result

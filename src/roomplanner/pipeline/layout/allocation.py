@@ -397,9 +397,11 @@ class Allocator:
                     if self._member_depth(request, slot) <= slot.free_depth(column, segment.depth):
                         return slot, column
         cluster = self._new_cluster(request, segment)
+        rest = segment.depth - self._member_depth(request, cluster)
+        # No room could stack behind it: no hallway needed, it opens onto the corridor.
         if (
             cluster.units <= state.free_units
-            and self._member_depth(request, cluster) <= segment.depth
+            and rest >= self.rules.spec(self.rules.program.cluster_filler).min_side
         ):
             return cluster
         return full if full.units <= state.free_units else None
