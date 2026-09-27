@@ -420,6 +420,8 @@ class RoomFurnisher:
                 candidates = self._on_axis(spec)
             case Placement.PERIMETER:
                 candidates = self._along_walls(spec)
+                if rule.sideways:
+                    candidates += self._along_walls(spec, sideways=True)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -489,9 +491,15 @@ class RoomFurnisher:
         fx, fy = facing.delta
         return fx * dx + fy * dy
 
-    def _along_walls(self, spec: ObjectSpec) -> list[Rect]:
+    def _along_walls(self, spec: ObjectSpec, sideways: bool = False) -> list[Rect]:
         """Wall spots wall by wall, in order along each: placed one after another they
-        stand side by side, lining the room."""
+        stand side by side, lining the room. `sideways`: lengthwise along the wall instead,
+        pointing along it."""
+        if sideways:
+            along, deep = spec.size
+            turned = spec.model_copy(update={"size": (deep, along)})
+            rects = self._along_walls(turned)
+            return [(x, y, w, h, _SIDEWAYS[facing]) for x, y, w, h, facing in rects]
 
         def order(rect: Rect) -> tuple[int, int, int, int]:
             x, y, w, h, facing = rect
@@ -846,6 +854,7 @@ def _back_row(rect: Rect) -> list[Cell]:
 
 
 _CLOCKWISE = [Side.N, Side.E, Side.S, Side.W]
+_SIDEWAYS = {Side.S: Side.E, Side.N: Side.W, Side.E: Side.N, Side.W: Side.S}  # a quarter turn
 
 
 def _turn(side: Side, facing: Side) -> Side:

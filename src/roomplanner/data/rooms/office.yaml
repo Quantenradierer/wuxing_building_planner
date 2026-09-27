@@ -70,6 +70,14 @@ rooms:
       - {object: wall_screen, placement: end}
       - {object: chair, placement: rows, aisle: 1, margin: 2, block: 10, toward: wall_screen}
       - {object: plant, placement: corner, count: [0, 2]}
+  nap_room:                 # sleep pods, so nobody has to go home
+    area: [12, 80]
+    min_side: 3
+    cluster: true
+    windows: forbidden
+    furniture:
+      - {object: capsule, placement: perimeter, count: 20, sideways: true}   # side by side
+      - {object: locker, placement: wall, count: [0, 3]}
   copy_room:                # printers, paper, mail
     area: [20, 48]
     min_side: 4

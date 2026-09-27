@@ -122,6 +122,11 @@ class FurnitureRule(_Strict):
         default=False,
         description="wall: side by side along one wall, as many of `count` as fit (urinals)",
     )
+    sideways: bool = Field(
+        default=False,
+        description="perimeter: then also lengthwise along the walls, head to foot (sleep "
+        "pods in thin rooms)",
+    )
     alternate: bool = Field(
         default=False,
         description="Only in every other room of this type on a floor, the first, third, … "

@@ -10,7 +10,7 @@ strip_depth: [10, 14]      # depth of a row of rooms between corridor and facade
 facade:
   module: 3                # partitions along facades snap to this grid (1.5 m)
   window: 2                # one window per module; partitions may touch its ends
-cluster_filler: storage    # fills leftover space next to toilet/storage clusters
+cluster_filler: nap_room   # leftover space: sleep pods, so nobody has to go home
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}

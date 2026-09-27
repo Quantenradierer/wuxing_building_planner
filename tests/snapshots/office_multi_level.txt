@@ -116,29 +116,29 @@ office 48x28 cells, wealth=middle, seed=7
 "                                                                                               |
 "                                                                                               |
 +DDD--+--DDD------------------+                 +--DDD------------------+--DDD------------------+
-|    s|F           ddd ddd    |                 |F           ddd ddd    |F           ddd ddd    |
-|    s|F           ddd ddd    |                 |F           ddd ddd    |F           ddd ddd    |
-"    s|F         c ddd ddd c  |                 |F         c ddd ddd c  |F         c ddd ddd c  "
-"     |            ddd ddd    |                 |            ddd ddd    |            ddd ddd    "
-"     |            ddd ddd    |                 |            ddd ddd    |            ddd ddd    "
-|     |                       |                 |                       |                       |
-|     |F                      |                 |  c         ddddd     F|F                      |
-|     |F                      |                 |            ddddd     F|F                      |
-"s   k|F                   c  |      AAA        |ddddd       ddddd     F|F                   c  "
-"s    |                       |      AAA        |ddddd                  |                       "
-"s 14s|F       c 15      ddddd|      AAA        |ddddd     16  c        |F       c 17      ddddd"
-|    s|F                 ddddd|                 |                       |F                 ddddd|
-|s   s|F     ddddd       ddddd|        4       q|ddddd                  |F     ddddd       ddddd|
-|s    |      ddddd            |                q|ddddd                  |      ddddd            |
-"s   s|      ddddd       ddddd|<               q|ddddd                  |      ddddd       ddddd"
-"    s|                  ddddd|<               q|                       |                  ddddd"
-"s   s|    ddd ddd       ddddd|<               q|  c         ddd ddd    |    ddd ddd       ddddd"
-|s    |    ddd ddd            |<               q|            ddd ddd    |    ddd ddd            |
-|s    |  c ddd ddd c       c  |<               q|          c ddd ddd c  |  c ddd ddd c       c  |
-|     |    ddd ddd            |                 |            ddd ddd    |    ddd ddd            |
-|sss  |    ddd ddd            |*               *|FFF         ddd ddd    |    ddd ddd            |
-+===--+===---===---===---===--+----DDDDDDD------+===---===---===---===--+===---===---===---===--+
-  objects: A armchair, q bench, k cabinet, c chair, e elevator_car, F filing_cabinet, d office_desk, * plant, s shelf, i sink, # stairs, U trash_bin, w urinal, < wall_screen, W wc
+|    l|          ddd ddd      |                 |k       FFF FFF        |          ddd ddd      |
+|     |          ddd ddd      |                 |                       |          ddd ddd      |
+|     |        c ddd ddd c    |                 |                    c  |        c ddd ddd c    "
+|     |          ddd ddd      |                 |                       |          ddd ddd      "
+|QQQ  |  c       ddd ddd      |                 |  c               ddddd|  c       ddd ddd      "
+|QQQ  |                       |                 |                  ddddd|                       |
+|QQQ  |ddddd                  |                 |ddddd             ddddd|ddddd                  |
+|QQQ  |ddddd                  |                 |ddddd                  |ddddd                  |
+|QQQ  |ddddd                 F|      AAA        |ddddd ddd         ddddd|ddddd                 F"
+|QQQ  |                      F|      AAA        |      ddd         ddddd|                      F"
+|QQQ  |ddddd     15    c     F|      AAA        |ddddd ddd c 16    ddddd|ddddd     17    c     F"
+|     |ddddd                  |                 |ddddd ddd              |ddddd                  |
+|  14 |ddddd         ddddd   F|        4       q|ddddd ddd           c  |ddddd         ddddd   F|
+|     |              ddddd   F|                q|                       |              ddddd   F|
+|QQQ  |  c           ddddd   F|<               q|  c                    |  c           ddddd   F"
+|QQQ  |                       |<               q|                       |                       "
+|QQQ  |            ddd ddd    |<               q|            ddd ddd    |            ddd ddd    "
+|QQQ  |            ddd ddd    |<               q|            ddd ddd    |            ddd ddd    |
+|QQQ  |          c ddd ddd c  |<               q|          c ddd ddd c  |          c ddd ddd c  |
+|QQQ  |            ddd ddd    |                 |            ddd ddd    |            ddd ddd    |
+|QQQ  |FFF         ddd ddd    |*               *|k FFF       ddd ddd    |FFF         ddd ddd    |
++-----+===---===---===---===--+----DDDDDDD------+===---===---===---===--+===---===---===---===--+
+  objects: A armchair, q bench, k cabinet, Q capsule, c chair, e elevator_car, F filing_cabinet, l locker, d office_desk, * plant, i sink, # stairs, U trash_bin, w urinal, < wall_screen, W wc
     1  corridor            231 cells
     2  stairwell           101 cells
     3  elevator             16 cells
@@ -152,7 +152,7 @@ office 48x28 cells, wealth=middle, seed=7
    11  stall                 6 cells
    12  office              117 cells
    13  office              156 cells
-   14  storage              33 cells
+   14  nap_room             33 cells
    15  office              132 cells
    16  office              132 cells
    17  office              132 cells

@@ -527,3 +527,15 @@ def test_some_office_towers_end_in_a_flat_roof_the_stairs_open_onto() -> None:
         and any(c in roof.cells for e in o.edges for c in e.cells())
         for o in top.openings
     )
+
+
+def test_office_leftovers_become_nap_rooms_full_of_sleep_pods() -> None:
+    params = make_params(
+        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=3, seed=2
+    )
+    floor = generate(params).floor(2)
+    naps = [r for r in floor.rooms if r.type == "nap_room"]
+    assert naps
+    for room in naps:
+        pods = [o for o in floor.objects if o.room == room.id and o.kind == "capsule"]
+        assert len(pods) >= 2
