@@ -54,6 +54,12 @@ class DefaultOpenings:
                 for i, r in enumerate(rooms)
                 if ctx.rules.spec(r.type).circulation or planned.rooms[i].hub
             }
+            # Some rooms are open to the corridor now and then (open kitchens).
+            circulation |= {
+                i
+                for i, r in enumerate(rooms)
+                if (chance := ctx.rules.spec(r.type).open) > 0 and rng.random() < chance
+            }
             index = {id(r): i for i, r in enumerate(planned.rooms)}
             hosts = {
                 i: index[id(r.host)]

@@ -176,6 +176,12 @@ class RoomSpec(_Strict):
     min_side: int = Field(gt=0)
     windows: WindowRule = WindowRule.OPTIONAL
     circulation: bool = Field(default=False, description="Corridor-like; no walls to others")
+    open: float = Field(
+        default=0.0,
+        ge=0,
+        le=1,
+        description="Chance a room of this type is open to the corridor (no walls to it)",
+    )
     cluster: bool = Field(
         default=False, description="Small back room: goes into clusters, not facade slots"
     )

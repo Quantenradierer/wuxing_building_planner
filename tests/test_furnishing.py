@@ -382,3 +382,20 @@ def test_meeting_room_screens_sit_on_the_axis_of_the_table() -> None:
                         off = screen.x + screen.w / 2 - (table.x + table.w / 2)
                     assert abs(off) <= 1
     assert found
+
+
+def test_office_kitchens_are_sometimes_open_to_the_corridor() -> None:
+    kinds: set[bool] = set()
+    for seed in range(6):
+        for floor in generate(make_params(width=60, depth=40, floors_above=3, seed=seed)).floors:
+            owner = {c: r for r in floor.rooms for c in r.cells}
+            for room in (r for r in floor.rooms if r.type == "kitchenette"):
+                shared = [
+                    Edge.of(c, s)
+                    for c in room.cells
+                    for s in Side
+                    if (o := owner.get(c.neighbour(s))) is not None and o.type == "corridor"
+                ]
+                if shared:
+                    kinds.add(any(e in floor.walls for e in shared))
+    assert kinds == {True, False}

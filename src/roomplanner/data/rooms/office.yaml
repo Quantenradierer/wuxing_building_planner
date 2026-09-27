@@ -69,6 +69,7 @@ rooms:
   kitchenette:
     area: [24, 60]
     min_side: 4
+    open: 0.5                 # half the time an open kitchen: no wall to the corridor
     furniture:
       - {object: counter, placement: wall, count: 1}
       - {object: fridge, placement: wall, count: 1}
