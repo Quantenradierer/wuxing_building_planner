@@ -278,9 +278,15 @@ class Applies(StrEnum):
 
 class BalconyRule(_Strict):
     room: str = "balcony"
-    depth: int = Field(default=5, gt=0, description="Cells deep, from the facade in")
+    depth: int = Field(default=5, gt=0, description="strip, corner: cells deep, from the facade")
     share: float = Field(
-        default=0.5, gt=0, le=1, description="Of the longest free facade stretch it takes"
+        default=0.5, gt=0, le=1, description="strip: of the longest free facade stretch"
+    )
+    modules: int = Field(default=3, gt=0, description="room, corner: facade modules wide")
+    kinds: list[Literal["strip", "room", "corner"]] = Field(
+        default=["strip"],
+        description="Picked per building: a strip along the facade, a room-sized loggia the "
+        "whole row deep, or a corner open on two sides",
     )
 
 

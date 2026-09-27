@@ -78,7 +78,7 @@ floor_roles:
       floors_above >= 3 and ((level == floors_above - 1 and (roll >= 80 or (roll < 50 and floors_above < 4)))
       or (level == floors_above - 2 and ((roll < 50 and floors_above >= 4) or (roll >= 50 and roll < 80))))
     core_back: meeting_room   # no training room on the executive floor
-    balcony: {depth: 5, share: 0.5}   # a terrace along the street; the rooms move back
+    balcony: {depth: 5, share: 0.5, kinds: [strip, room, corner]}   # the rooms move back
     rooms:
       - {room: toilet, count: 2, near: core, priority: required}
       - {room: board_room, count: 1, priority: required}

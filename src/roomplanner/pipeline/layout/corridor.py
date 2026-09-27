@@ -47,6 +47,7 @@ from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.layout.stalls import carve_stalls
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import (
+    BalconyRule,
     CoreEntry,
     FloorRole,
     Priority,
@@ -575,9 +576,10 @@ class CorridorLayout:
                         else:  # open to the sky: not part of this floor
                             cut = cells
                         blocked = [*blocked, span]
-                        segments.append(
-                            Segment(part.frame, back, span, True, part.grid.module, part.grid)
-                        )
+                        if back.depth > 0:  # a loggia takes the whole row
+                            segments.append(
+                                Segment(part.frame, back, span, True, part.grid.module, part.grid)
+                            )
                 segments += self._segments(part, band, blocked)
 
         core_box = None
@@ -645,27 +647,57 @@ class CorridorLayout:
     def _balcony(
         ctx: Context, part: Part, band: Band, blocked: list[Interval], role: FloorRole
     ) -> tuple[frozenset[Cell], Interval, Band] | None:
-        """Balcony cells along the facade of the longest free stretch of the strip, the
-        stretch it takes and the shallower strip behind it, if the rooms there still fit."""
+        """Balcony cells at the facade of the strip, the stretch it takes and the shallower
+        strip behind it, if the rooms there still fit. The kind is picked per building (the
+        same on every floor); if it doesn't fit, the others are tried in turn."""
         rule = role.balcony
         spans = free_intervals(part.frame.length, blocked)
         if rule is None or not spans:
             return None
-        longest = max(spans, key=lambda s: s.width)
-        grid = part.grid
-        width = grid.round_up(round(longest.width * rule.share))
-        start = grid.ceil(longest.u0 + (longest.width - width) // 2)
-        end = min(grid.floor(longest.u1), start + width)
+        first = ctx.rng("balcony").choice(rule.kinds)
         fill = min(ctx.rules.spec(e.room).min_side for e in role.rooms if e.fill)
-        if end - start < 2 * grid.module or band.depth - rule.depth < fill:
+        for kind in [first, *(k for k in rule.kinds if k != first)]:
+            found = CorridorLayout._balcony_kind(part, band, spans, rule, kind, fill)
+            if found is not None:
+                return found
+        return None
+
+    @staticmethod
+    def _balcony_kind(
+        part: Part, band: Band, spans: list[Interval], rule: BalconyRule, kind: str, fill: int
+    ) -> tuple[frozenset[Cell], Interval, Band] | None:
+        grid = part.grid
+        longest = max(spans, key=lambda s: s.width)
+        depth = rule.depth
+        width = grid.module * rule.modules
+        if kind == "corner":
+            corners = [s for s in spans if s.u0 == 0 or s.u1 == part.frame.length]
+            if not corners:
+                return None
+            corner = max(corners, key=lambda s: s.width)
+            if corner.u0 == 0:
+                start, end = 0, min(grid.floor(corner.u1), grid.round_up(width))
+            else:
+                start, end = max(grid.ceil(corner.u0), part.frame.length - width), corner.u1
+            depth = rule.depth + grid.module  # a corner terrace is deeper
+        else:
+            if kind == "strip":
+                width = grid.round_up(round(longest.width * rule.share))
+            start = grid.ceil(longest.u0 + (longest.width - width) // 2)
+            end = min(grid.floor(longest.u1), start + width)
+            if kind == "room":
+                depth = band.depth  # a loggia the whole row deep, off the corridor
+        depth = min(depth, band.depth)
+        rest = band.depth - depth
+        if end - start < 2 * grid.module or 0 < rest < fill:
             return None
         span = Interval(start, end)
         if band.v0 == 0:  # facade at v0: the balcony there, the rooms behind it
-            cells = part.frame.rect(start, end, band.v0, band.v0 + rule.depth)
-            back = replace(band, v0=band.v0 + rule.depth)
+            cells = part.frame.rect(start, end, band.v0, band.v0 + depth)
+            back = replace(band, v0=band.v0 + depth)
         else:
-            cells = part.frame.rect(start, end, band.v1 - rule.depth, band.v1)
-            back = replace(band, v1=band.v1 - rule.depth)
+            cells = part.frame.rect(start, end, band.v1 - depth, band.v1)
+            back = replace(band, v1=band.v1 - depth)
         return cells, span, back
 
     @staticmethod
