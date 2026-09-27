@@ -274,8 +274,6 @@ Known weaknesses:
 - Church: no narthex; the portal opens straight into the nave.
 - Stuffer shack 24 × 16: 3–4 gondolas in two rows; the checkout stands in the middle of
   the floor in front of the door rather than beside it.
-- Meeting rooms in 6-cell (3 m) strips are long and thin (up to 16 × 6); only the
-  standard table fits them. Round, long and U tables appear in rooms deep enough.
 - Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
   have one thin back-of-house strip; it is full before the optional Sixth World rooms
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they

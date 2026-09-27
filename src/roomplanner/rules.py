@@ -76,6 +76,7 @@ class Placement(StrEnum):
     END = "end"  # middle of the short wall farthest from the doors (altar), else like back
     FIXED = "fixed"  # the same wall spot on every floor, whatever the doors (ramps)
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
+    GRID = "grid"  # on one lattice, all alike, from the walls inwards (cafe tables)
 
 
 class FurnitureRule(_Strict):
@@ -85,8 +86,8 @@ class FurnitureRule(_Strict):
         default=None, description="How many (default 1); with `per`: lower and upper bound"
     )
     per: int | None = Field(default=None, gt=0, description="One object per this many cells")
-    aisle: int = Field(default=3, gt=0, description="rows: free cells between rows")
-    margin: int = Field(default=2, ge=0, description="rows: free cells along the walls")
+    aisle: int = Field(default=3, gt=0, description="rows, grid: free cells between rows")
+    margin: int = Field(default=2, ge=0, description="rows, grid: free cells along the walls")
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
     block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
     toward: str | None = Field(

@@ -327,6 +327,8 @@ class RoomFurnisher:
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - cx) + abs(r[1] + r[3] / 2 - cy))
             case Placement.SCATTER:
                 candidates = self._sample(spec, SCATTER_TRIES)
+            case Placement.GRID:
+                candidates = self._grid(spec, rule.aisle, rule.margin)
             case Placement.NEAR_EXIT:
                 exit_ = self._exterior_door()
                 if exit_ is None:
@@ -405,6 +407,30 @@ class RoomFurnisher:
                 for y in range(y0, y1 - h + 1):
                     rects.append((x, y, w, h, facing))
         return rects
+
+    def _grid(self, spec: ObjectSpec, aisle: int, margin: int) -> list[Rect]:
+        """Spots on one lattice centred in the room, all facing alike along its long axis;
+        the outer ring first, so tables line the walls and the middle stays free longest."""
+        along, deep = spec.size
+        x0, y0, x1, y1 = self.box
+        w, h = (along, deep) if x1 - x0 >= y1 - y0 else (deep, along)
+        facing = Side.S if w == along else Side.E
+
+        def line(start: int, end: int, size: int) -> list[int]:
+            length = end - start - 2 * margin
+            count = (length + aisle) // (size + aisle)
+            if count <= 0:
+                return []
+            offset = start + margin + (length - count * (size + aisle) + aisle) // 2
+            return [offset + k * (size + aisle) for k in range(count)]
+
+        xs, ys = line(x0, x1, w), line(y0, y1, h)
+        spots = [
+            (min(i, len(xs) - 1 - i, j, len(ys) - 1 - j), j, i)
+            for i in range(len(xs))
+            for j in range(len(ys))
+        ]
+        return [(xs[i], ys[j], w, h, facing) for _, j, i in sorted(spots)]
 
     def _sample(self, spec: ObjectSpec, tries: int) -> list[Rect]:
         """Random positions (cheaper than shuffling every position of a big room)."""

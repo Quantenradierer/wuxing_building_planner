@@ -214,7 +214,9 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      skipped if the rest would lose its door to circulation, narrow gaps join a stall.
      What's left can become another type (`rest`: a cell block's `lockup`); if no stall
      fits the room becomes the `single` type (a one-person WC). Bathrooms have no stalls.
-     Stalls have 1-cell doors so the 2 × 2 wc fits in front of the door clearance.
+     Stalls have 1-cell doors so the 2 × 2 wc fits in front of the door clearance; their
+    `front` (the side towards the passage) is where the openings stage puts the door, so a
+    stall at the end of the row doesn't open into its flank.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside; `fill` rooms with
@@ -288,11 +290,13 @@ stairwell (or a circulation room).
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, `walkable`, ASCII glyph).
-Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, facing
-them on ties, without randomness: stairs stand in the same spot on every floor), `end` (the
+Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, on ties
+facing the door's wall, then the door, without randomness: stairs stand in the same spot on
+every floor, the wcs of a row of stalls all face their doors), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
-(checkouts) and `rows`
+(checkouts), `grid` (one lattice centred in the room, `aisle` apart and `margin` from the
+walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two

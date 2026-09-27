@@ -258,3 +258,15 @@ def test_meeting_rooms_are_roomy_and_every_table_has_chairs() -> None:
                 assert long <= 2 * short
                 kinds = [o.kind for o in floor.objects if o.room == room.id]
                 assert "chair" in kinds
+
+
+@pytest.mark.parametrize("building_type", [BuildingType.DIVE_BAR, BuildingType.NIGHTCLUB])
+def test_cafe_tables_stand_on_one_lattice_facing_the_same_way(building_type: BuildingType) -> None:
+    floor = generate(make_params(building_type=building_type, width=48, depth=36, seed=3)).floor(0)
+    tables = [o for o in floor.objects if o.kind == "bar_table"]
+    assert len(tables) >= 2
+    assert len({o.facing for o in tables}) == 1
+    for values in ({o.x for o in tables}, {o.y for o in tables}):
+        steps = {b - a for a, b in zip(sorted(values), sorted(values)[1:], strict=False)}
+        if steps:  # one pitch: every gap is a multiple of the smallest
+            assert all(step % min(steps) == 0 for step in steps)

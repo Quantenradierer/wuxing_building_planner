@@ -10,35 +10,35 @@ D                                                               |
 |                                                               |
 |                      1                                        |
 |       +---+---+---+                 +--DDD------------+--DDD--+
-|       |WWW|WWW|WWW|q                |F     FFF       *|s      |
-|       |WWW|WWW|WWW|q                |F                |s      |
-|       |WWW|WWW|WWW|q   }           U|F               F|s     k|
-|       |   |   |   |q                |                F|       |
-"       |4  |5  |6  |q   AAA         q|                F|s      "
-"       +D--+D--+D--+q   AAA         q|                 |s      "
-"       |  w   w    |q   AAA         q|ddd           ddd|s     s"
-|       |           |                q|ddd           ddd|      s|
-|       D           |                q|ddd c       c ddd|s     s|
-|       D           |                q|ddd           ddd|s      |
-"       D        iii|                q|ddd           ddd|s     s"
-"       |        iii|                 |                 |      s"
-"       |    3   iii|        2        |ddd     10       |k 12  s"
-|       |           |                 |ddd              |       |
-|       |w          |  }              |ddd c         ddd|s     s|
-|       |           |                 |ddd           ddd|s     s|
-"       |iii iii    |  AAA            |ddd         c ddd|s     s"
-"       |iii iii    |  AAA            +-------+      ddd|       "
-"       |iii iii    |  AAA           q|KKK sss|U     ddd|s      "
-|       +-----+-----+                q|KKK    |         |s      |
-|       |     D8 WWW|                q|KKK    D      ddd|s     s|
-|       |     |  WWW|                q|       D      ddd|      s|
-"       D  7  |  WWW|                q|  11   D    c ddd|KKK   s"
-"       D     +-----+                q|       |      ddd|KKK    "
-"^^^    D     D9 WWW|                q|s     s|      ddd|KKK    "
-|^^^    |     |  WWW|                 |s     s|         |       |
-|^^^    |U    |  WWW|U $             *|s sss s|         |sss sss|
+|       |WWW|WWW|WWW|q                |*             FFF|      k|
+|       |WWW|WWW|WWW|q                |                 |       |
+|       |WWW|WWW|WWW|q                |                 |s     s|
+|       |   |   |   |q                |                 |s     s|
+"       |4  |5  |6  |q               q|ddd              |s     s"
+"       +D--+D--+D--+q               q|ddd              |       "
+"       |          w|q     AAA }     q|ddd c         ddd|s     s"
+|       |           |      AAA       q|ddd           ddd|s     s|
+|       D        iii|      AAA       q|ddd         c ddd|s     s|
+|       D        iii|                q|              ddd|       |
+"       D        iii|                q|              ddd|s      "
+"       |           |                 |                 |s      "
+"       |w   3      |        2        |    c   10    ddd|s 12KKK"
+|       |           |                 |              ddd|    KKK|
+|       |w       iii|                 |  ddddd     c ddd|s   KKK|
+|       |        iii|                 |  ddddd       ddd|s      |
+"       |iii     iii|                 |k ddddd       ddd|s     s"
+"       |iii        |                 +-------+         |      s"
+"       |iii       U|                q|sss sss|        F|KKK   s"
+|       +-----+-----+                q|       |        F|KKK    |
+|       |     D8 WWW|<               q|KKK    D        F|KKK   s|
+|       |     |  WWW|<               q|KKK    D         |      s|
+"       D  7  |  WWW|<               q|KKK 11 D      ddd|s     s"
+"       D     +-----+<               q|       |      ddd|s      "
+"^^^    D     D9 WWW|<               q|      s|F   c ddd|s     k"
+|^^^    |     |  WWW|                 |      s|F     ddd|       |
+|^^^    |     |  WWW|                *|k sss s|F     ddd|sss sss|
 +--===--+===--+-----+----DDDDDDD------+===----+----===--+===----+
-  objects: A armchair, $ atm, q bench, k cabinet, c chair, K crate, F filing_cabinet, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, W wc
+  objects: A armchair, q bench, k cabinet, c chair, K crate, F filing_cabinet, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, < wall_screen, W wc
     1  corridor            184 cells
     2  lobby               126 cells
     3  toilet               42 cells

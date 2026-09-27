@@ -14,7 +14,7 @@ rooms:
     furniture:
       - {object: plant, placement: corner, count: [1, 4]}
       - {object: bench, placement: wall, count: [1, 3]}
-      - {object: armchair, placement: scatter, per: 60, count: [0, 4]}
+      - {object: armchair, placement: grid, per: 60, count: [0, 4], aisle: 4}
       - {object: trash_bin, placement: wall, count: [0, 2]}
       - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}

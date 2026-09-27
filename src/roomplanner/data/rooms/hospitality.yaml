@@ -79,7 +79,7 @@ rooms:
     door_width: 3
     furniture:
       - {object: bar_set, placement: wall}
-      - {object: cafe_table, placement: scatter, per: 24, count: [2, 8]}
+      - {object: cafe_table, placement: grid, per: 24, count: [2, 8]}
       - {object: sofa, placement: wall, count: [0, 2]}
       - {object: arcade_machine, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
@@ -92,7 +92,7 @@ rooms:
       - {object: bar_set, placement: wall, count: [1, 2]}
       - {object: guard_post, placement: near_exit}                      # bouncer at the door
       - {object: security_gate, placement: near_exit, count: [0, 2]}   # MAD scanner
-      - {object: cafe_table, placement: scatter, per: 60, count: [1, 6]}
+      - {object: cafe_table, placement: grid, per: 60, count: [1, 6]}
       - {object: dj_booth, placement: wall}
       - {object: speaker, placement: corner, count: [2, 4]}
       - {object: sofa, placement: wall, count: [1, 4]}
@@ -104,7 +104,7 @@ rooms:
     furniture:
       - {object: bar_set, placement: wall}
       - {object: sofa_set, placement: wall, per: 60, count: [1, 6]}
-      - {object: cafe_table, placement: scatter, per: 60, count: [0, 4]}
+      - {object: cafe_table, placement: grid, per: 60, count: [0, 4]}
       - {object: pool_table, placement: center, count: [0, 2]}
       - {object: arcade_machine, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
@@ -159,7 +159,7 @@ rooms:
       - {object: bar_set, placement: back}   # away from the street door
       - {object: guard_post, placement: near_exit, count: [0, 1]}   # the bouncer
       - {object: sofa_set, placement: wall, per: 80, count: [0, 3]}
-      - {object: cafe_table, placement: scatter, per: 30, count: [2, 10]}
+      - {object: cafe_table, placement: grid, per: 30, count: [2, 10]}
       - {object: pool_table, placement: center, count: [0, 1]}
       - {object: arcade_machine, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 2]}
