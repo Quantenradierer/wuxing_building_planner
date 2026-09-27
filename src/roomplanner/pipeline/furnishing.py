@@ -539,6 +539,12 @@ class RoomFurnisher:
                 rows.append((across, Side.S))
                 across += deep + rule.aisle
         positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle)]
+        if toward is None and rows and positions:
+            # The block of rows centred in the room: equal margins on opposite walls.
+            spare = width - m - (rows[-1][0] + deep)
+            rows = [(across + spare // 2, facing) for across, facing in rows]
+            spare = length - m - (positions[-1] + along)
+            positions = [p + spare // 2 for p in positions]
         if toward is not None and positions:  # centred, the side aisles equally wide
             half = _line((length - 2 * m - rule.aisle) // 2, along, per_block, rule.aisle)
             if half:  # two mirrored halves with a central aisle

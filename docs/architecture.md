@@ -306,7 +306,8 @@ walls, every object facing alike, the outer ring first: cafe tables, lobby armch
 `facing_exit` (on the axis of the room's exterior door, `margin` cells past its clearance,
 facing it: the reception desk), `fill` (the room's box less `margin` rows at its doors, the
 object stretched to it: the elevator car fills its shaft) and `rows`
-(shelves, desks, racks with aisles and a cross aisle every `block` cells; `paired: true` puts rows back to back
+(shelves, desks, racks with aisles and a cross aisle every `block` cells, the block centred in
+the room; offices get a small island of desks back to back; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two
 halves fit: pews facing the altar), and `at`
