@@ -139,6 +139,9 @@ class StallRule(_Strict):
     passage: int | None = Field(
         default=None, gt=0, description="Free cells in front of the stalls (default: min_side)"
     )
+    rest_area: int = Field(
+        default=0, ge=0, description="Cells the room keeps besides its stalls (sinks, urinals)"
+    )
     single: str = Field(description="Room type if not even one stall fits")
     rest: str | None = Field(
         default=None, description="Room type of what's left in front of the stalls (default: same)"

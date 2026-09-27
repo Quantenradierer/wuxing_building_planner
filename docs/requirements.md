@@ -250,8 +250,9 @@ every type ≤ 5 % except apartments (9 %, a third of it flat closets).
 `tests/test_storage.py` keeps the share below 5 %.
 
 Known weaknesses:
-- Toilets: a public toilet whose stalls leave only a passage between two doors has no
-  room for its 2 × 2 sink (about 5 % of toilets).
+- Toilets: about 0.5 % of public toilets still have no sink (a 4 × 4 rest between the
+  entrance and two stall doors). The others give up stalls until 16 cells are left for
+  sinks (`rest_area`), or become a single WC; before, ~10 % had no sink.
 - Small buildings get a full-width corridor: stuffer shack and dive bar spend ~85 cells on
   it, and a 22 × 16 dive bar is rejected ("needs at least 19 for its corridor").
   Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade

@@ -10,27 +10,27 @@ office 64x48 cells, wealth=middle, seed=3
 |                                                                                                     +-------+DDD--+F          |
 |                                                                                                     |EEE SSS|    k|F          "
 +--DDD------+--DDD------------+--DDD------+DDD--+-----+     +--DDD------+--DDD----------------+       |       |     |           "
-|k       FFF|k       ddddd   k|k       FFF|     D28WWW|     |k       FFF|                     |       D      b|    k|    7      "
+|k       FFF|*       ddddd    |k       FFF|     D28WWW|     |k       FFF|                     |       D      b|    k|    7      "
 |           |        ddddd    |           |     |  WWW|     |           |                     |       D      b|     |           |
-|          F|        ddddd    |          F|    w|  WWW|     |          F|      sss sss sss    |       D  8   b|s 9 s|           |
+|          F|        ddddd    |          F|     |  WWW|     |          F|      sss sss sss    |       D  8   b|s 9 s|           |
 |          F|                 |          F|     +-----+     |          F|                     |       |      b|s   s|           |
-"ddd       F|ddd       c      |ddd       F|  27 D     |     |ddd       F|                     |       |      b|s   s|ddd        "
-"ddd        |ddd              |ddd        |     |     |     |ddd        |                     |       |       |     |ddd        "
-"ddd c     U|ddd c           F|ddd c     U|iii  |29WWW|     |ddd c     U|                     |       |E     E|s   s|ddd c   U  "
-|ddd        |ddd             F|ddd        |iii  |  WWW|     |ddd        |                     |       |E     E|s   s|ddd        |
-|ddd     ddd|ddd             F|ddd     ddd|iii w|  WWW|    1|ddd     ddd|  sss sss sss sss    |       |E     E|s   s|ddd       *|
-|        ddd|                 |        ddd+-----+-----+DDD--+        ddd|                     |       +-------+-----+-----------+
-"    32c ddd|        31       |    30c ddd|F                |    25c ddd|          3          |       |*                        "
-"        ddd|                 |        ddd|F                |        ddd|                     |       |                         "
-"        ddd|                 |        ddd|F                |        ddd|                     |       D                         "
+"ddd       F|          c      |ddd       F|    27  w w|     |ddd       F|                     |       |      b|s   s|ddd        "
+"ddd        |                 |ddd        |           |     |ddd        |                     |       |       |     |ddd        "
+"ddd c     U|              ddd|ddd c     U|iii        |     |ddd c     U|                     |       |E     E|s   s|ddd c   U  "
+|ddd        |              ddd|ddd        |iii        |     |ddd        |                     |       |E     E|s   s|ddd        |
+|ddd     ddd|ddd         c ddd|ddd     ddd|iii       U|    1|ddd     ddd|  sss sss sss sss    |       |E     E|s   s|ddd       *|
+|        ddd|ddd           ddd|        ddd+-----------+DDD--+        ddd|                     |       +-------+-----+-----------+
+"    31c ddd|ddd c   30    ddd|    29c ddd|F                |    25c ddd|          3          |       |*                        "
+"        ddd|ddd              |        ddd|F                |        ddd|                     |       |                         "
+"        ddd|ddd              |        ddd|F                |        ddd|                     |       D                         "
 |           |                 |           |                 |           |                     |       D                         |
-|           |  U              |           |        26       |           |  sss sss sss sss    |       D        c c c c 10       |
-|           |                 |           |                 |           |                     |       |                         |
-"      c    |      c     c    |      c    |    c       c    |      c    |                     |       |      TTTTTTTTTTT        "
-"           |                 |           |                 |           |                     |       |      TTTTTTTTTTT        "
-"    ddddd  |F   ddddd ddddd  |    ddddd  |  ddddd   ddddd  |    ddddd  |                     |       |      TTTTTTTTTTT        "
-|    ddddd  |F   ddddd ddddd  |    ddddd  |  ddddd   ddddd  |    ddddd  |                     |       |      TTTTTTTTTTT        |
-|k   ddddd *|F   ddddd ddddd  |k   ddddd *|k ddddd   ddddd *|k   ddddd *|                     |       |      TTTTTTTTTTT        |
+|           |ddd           U F|           |        26       |           |  sss sss sss sss    |       D        c c c c 10       |
+|           |ddd             F|           |                 |           |                     |       |                         |
+"      c    |ddd c           F|      c    |    c       c    |      c    |                     |       |      TTTTTTTTTTT        "
+"           |ddd              |           |                 |           |                     |       |      TTTTTTTTTTT        "
+"    ddddd  |ddd              |    ddddd  |  ddddd   ddddd  |    ddddd  |                     |       |      TTTTTTTTTTT        "
+|    ddddd  |                 |    ddddd  |  ddddd   ddddd  |    ddddd  |                     |       |      TTTTTTTTTTT        |
+|k   ddddd *|            FFF  |k   ddddd *|k ddddd   ddddd *|k   ddddd *|                     |       |      TTTTTTTTTTT        |
 +===---===--+===---===---===--+===---===--+===---===---===--+===---===--+---------------------+       |                         |
                                                                         "F ddddd ddddd       k|       |        c c c c          "
                                                                         "F ddddd ddddd        |       |                         "
@@ -125,9 +125,8 @@ D                                                                               
    24  stall                 6 cells
    25  office               66 cells
    26  office               54 cells
-   27  toilet               15 cells
+   27  toilet               24 cells
    28  stall                 6 cells
-   29  stall                 9 cells
-   30  office               66 cells
-   31  office               99 cells
-   32  office               66 cells
+   29  office               66 cells
+   30  office               99 cells
+   31  office               66 cells

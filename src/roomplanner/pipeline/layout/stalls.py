@@ -3,8 +3,9 @@
 A room whose catalog entry has `stalls:` is split after allocation: along its longest wall
 that doesn't touch circulation (the entrance side stays free) a row of stall rooms is cut
 off, each entered only from the rest of the room (an annex of it), which keeps the sinks.
-If not even one stall and a passage in front of it fit, the room becomes the single-toilet
-type instead. Stalls have real walls and doors, so they block sight in the VTT exports.
+Stalls are given up while the rest is smaller than `rest_area` (room for the sinks). If not
+even one stall and a passage in front of it fit, the room becomes the single-toilet type
+instead. Stalls have real walls and doors, so they block sight in the VTT exports.
 """
 
 from __future__ import annotations
@@ -42,17 +43,24 @@ def _split(
     box = (x0, y0, x1, y1)
     best: list[frozenset[Cell]] = []
     wall = Side.N
-    for side in Side:
-        across = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
-        if across < rule.depth + passage:
-            continue
-        for strict in (False, True):
-            found = _row(room, rule, passage, circulation if strict else set(), side, box)
-            # The room must still reach circulation through a door.
-            if found and _door_run(room.cells.difference(*found), circulation) >= door:
-                if len(found) > len(best):
-                    best, wall = found, side
-                break
+    # Fewer stalls rather than no space for the sinks.
+    for limit in range(rule.max, 0, -1):
+        for side in Side:
+            across = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
+            if across < rule.depth + passage:
+                continue
+            for strict in (False, True):
+                found = _row(
+                    room, rule, passage, circulation if strict else set(), side, box, limit
+                )
+                rest = room.cells.difference(*found)
+                # The room must still reach circulation through a door.
+                if found and _door_run(rest, circulation) >= door:
+                    if len(found) > len(best) and len(rest) >= rule.rest_area:
+                        best, wall = found, side
+                    break
+        if best:
+            break
     if not best:
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
     rest = room.cells.difference(*best)
@@ -73,8 +81,9 @@ def _row(
     circulation: set[Cell],
     side: Side,
     box: tuple[int, int, int, int],
+    limit: int,
 ) -> list[frozenset[Cell]]:
-    """Stalls along the wall on `side`, skipping places that touch circulation (doors).
+    """Up to `limit` stalls along the wall on `side`, skipping places that touch circulation.
 
     Gaps between stalls too narrow to walk into are added to the stall beside them.
     """
@@ -94,7 +103,7 @@ def _row(
 
     spans: list[tuple[int, int]] = []  # (start, width)
     start = 0
-    while start + rule.width <= along and len(spans) < rule.max:
+    while start + rule.width <= along and len(spans) < limit:
         if free(cells(start, rule.width)):
             spans.append((start, rule.width))
             start += rule.width

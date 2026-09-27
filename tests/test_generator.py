@@ -188,7 +188,7 @@ def test_kitchen_opens_straight_into_the_restaurant() -> None:
 def test_bigger_office_floors_get_more_toilets() -> None:
     def toilets(width: int, depth: int) -> int:
         building = generate(make_params(width=width, depth=depth, floors_above=2))
-        return sum(r.type == "toilet" for r in building.floor(1).rooms)
+        return sum(r.type in ("toilet", "wc") for r in building.floor(1).rooms)
 
     assert toilets(80, 56) > toilets(40, 24) >= 2
 

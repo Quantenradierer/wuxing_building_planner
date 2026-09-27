@@ -10,11 +10,11 @@ D                                                               |
 |                                                               |
 |                      1                                        |
 |       +---+---+---+                 +--DDD------------+--DDD--+
-|       |WWW|WWW|WWW|q                |*             FFF|      k|
-|       |WWW|WWW|WWW|q                |                 |       |
-|       |WWW|WWW|WWW|q                |                 |s     s|
-|       |   |   |   |q                |                 |s     s|
-"       |4  |5  |6  |q               q|ddd              |s     s"
+|       |WWW|WWW|WWW|q                |*     ddddd     *|s     s|
+|       |WWW|WWW|WWW|q                |      ddddd      |s     s|
+|       |WWW|WWW|WWW|q                |      ddddd      |s     s|
+|       |   |   |   |q                |                 |       |
+"       |4  |5  |6  |q               q|ddd     c        |       "
 "       +D--+D--+D--+q               q|ddd              |       "
 "       |          w|q     AAA }     q|ddd c         ddd|s     s"
 |       |           |      AAA       q|ddd           ddd|s     s|
@@ -22,22 +22,22 @@ D                                                               |
 |       D        iii|                q|              ddd|       |
 "       D        iii|                q|              ddd|s      "
 "       |           |                 |                 |s      "
-"       |w   3      |        2        |    c   10    ddd|s 12KKK"
-|       |           |                 |              ddd|    KKK|
-|       |w       iii|                 |  ddddd     c ddd|s   KKK|
-|       |        iii|                 |  ddddd       ddd|s      |
-"       |iii     iii|                 |k ddddd       ddd|s     s"
-"       |iii        |                 +-------+         |      s"
-"       |iii       U|                q|sss sss|        F|KKK   s"
-|       +-----+-----+                q|       |        F|KKK    |
-|       |     D8 WWW|<               q|KKK    D        F|KKK   s|
-|       |     |  WWW|<               q|KKK    D         |      s|
-"       D  7  |  WWW|<               q|KKK 11 D      ddd|s     s"
-"       D     +-----+<               q|       |      ddd|s      "
-"^^^    D     D9 WWW|<               q|      s|F   c ddd|s     k"
-|^^^    |     |  WWW|                 |      s|F     ddd|       |
-|^^^    |     |  WWW|                *|k sss s|F     ddd|sss sss|
-+--===--+===--+-----+----DDDDDDD------+===----+----===--+===----+
+"       |w   3      |        2        |    c   8        |s 10   "
+|       |           |                 |                 |       |
+|       |w       iii|                 |F ddddd         F|s     s|
+|       |        iii|                 |F ddddd         F|s     s|
+"       |iii     iii|                 |F ddddd         F|s     s"
+"       |iii        |                 +-------+         |       "
+"       |iii       U|                q|s sss  |         |       "
+|       +-----------+                q|s      |         |       |
+|       |    WWW iii|<               q|s      D         |      s|
+|       |    WWW iii|<               q|       D         |      s|
+"       D    WWW iii|<               q|KKK 9  D      ddd|  KKK s"
+"       D           |<               q|KKK    |      ddd|  KKK  "
+"^^^    D    7      |<               q|KKK   s|F   c ddd|s KKK s"
+|^^^    |           |                 |      s|F     ddd|s     s|
+|^^^    |U          |                *|sss k s|F     ddd|s sss s|
++--===--+===---===--+----DDDDDDD------+===----+----===--+===----+
   objects: A armchair, q bench, k cabinet, c chair, K crate, F filing_cabinet, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, < wall_screen, W wc
     1  corridor            184 cells
     2  lobby               126 cells
@@ -45,9 +45,7 @@ D                                                               |
     4  stall                 6 cells
     5  stall                 6 cells
     6  stall                 6 cells
-    7  toilet               12 cells
-    8  stall                 6 cells
-    9  stall                 6 cells
-   10  office              106 cells
-   11  storage              20 cells
-   12  storage              56 cells
+    7  wc                   24 cells
+    8  office              106 cells
+    9  storage              20 cells
+   10  storage              56 cells
