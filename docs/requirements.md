@@ -227,8 +227,8 @@ To verify:
   Universal VTT viewer; so far only checked against the format descriptions.
 - Re-render examples once the sprite set for the newer objects exists (desk/table kinds,
   church, garage and factory objects; Midjourney run from 2026-09-28).
-- 42 object kinds have a prompt in `tools/sprite_prompts.yaml` but no pick yet and are drawn
-  with stand-ins: the desk/table kinds (huddle_table included), church and factory objects, `round_table`, and the
+- 44 object kinds have a prompt in `tools/sprite_prompts.yaml` but no pick yet and are drawn
+  with stand-ins: the desk/table kinds (huddle_table included), condenser, satellite_dish, church and factory objects, `round_table`, and the
   Sixth World objects (electrical_panel, battery_bank, hvac_unit, generator, fuel_tank,
   suppression_tanks, fire_extinguisher, rigger_cocoon, drone_dock, drone_rack,
   deposit_boxes, sim_rig, autokitchen, mattress, fire_barrel, cyberware_rack, cryo_pod,

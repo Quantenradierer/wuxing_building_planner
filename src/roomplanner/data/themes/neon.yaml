@@ -15,7 +15,7 @@ walls:
   exterior: 0.45
   interior: 0.22
   railing: 0.3
-  open_air: [balcony]
+  open_air: [balcony, roof]
 
 doors:
   leaf: "#ffb347"
@@ -69,6 +69,7 @@ materials:
   pods:       {floor: "#1c2230", pattern: tiles, tile: 2, lines: "#00e5ff18", accent: "#00e5ff"}
   lab:        {floor: "#dfe6ee", pattern: tiles, tile: 2, lines: "#00000018", accent: "#6dffb0"}
   terrace:    {floor: "#2f3432", pattern: planks, tile: 1, lines: "#00000060", accent: "#6dffb0"}
+  rooftop:    {floor: "#2a2d31", pattern: tiles, tile: 4, lines: "#00000040"}
 
 rooms:
   corridor: corridor
@@ -94,6 +95,7 @@ rooms:
   huddle_room: carpet
   training_room: carpet
   balcony: terrace
+  roof: rooftop
   copy_room: carpet
   doctor_office: carpet
   manager_office: carpet
@@ -332,6 +334,8 @@ objects:
   electrical_panel: {shape: shelf, fill: "#4b505c", stroke: "#15171d", detail: "#ffb300"}
   battery_bank:    {shape: shelf, fill: "#2e3138", stroke: "#0f1117", detail: "#6dffb0", glow: "#6dffb0"}
   hvac_unit:       {shape: machine, fill: "#6a707c", stroke: "#15171d", detail: "#9aa6b5"}
+  condenser:       {shape: circle, fill: "#7a808c", stroke: "#15171d", detail: "#3a3f48"}
+  satellite_dish:  {shape: circle, fill: "#c9d1db", stroke: "#3a3f48", detail: "#8a93a0"}
   generator:       {shape: machine, fill: "#3d4a3a", stroke: "#0f1117", detail: "#d9a21b", glow: "#ffb300"}
   fuel_tank:       {shape: rounded, fill: "#8a3a2c", stroke: "#1f0d0a", detail: "#d9a21b"}
   suppression_tanks: {shape: shelf, fill: "#c0392b", stroke: "#2a0d0a", detail: "#e6ebf1"}

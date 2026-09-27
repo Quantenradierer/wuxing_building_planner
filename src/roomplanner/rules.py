@@ -290,13 +290,18 @@ class FloorRole(_Strict):
     balcony: BalconyRule | None = Field(
         default=None, description="A balcony cut from a facade strip; the rooms move in"
     )
-    rooms: list[RoomEntry]
+    roof: str | None = Field(
+        default=None,
+        description="A flat roof: the whole floor is this open-air room around the core "
+        "(stair housing, lift shafts); `rooms` may stay empty",
+    )
+    rooms: list[RoomEntry] = []
 
     @model_validator(mode="after")
     def _has_fill(self) -> Self:
         _check_expression(self.when)
-        if not any(entry.fill for entry in self.rooms):
-            raise ValueError("every floor role needs a fill room")
+        if self.roof is None and not any(entry.fill for entry in self.rooms):
+            raise ValueError("every floor role needs a fill room (or a `roof`)")
         return self
 
 
@@ -563,7 +568,7 @@ def apply_wealth(rules: Rules, wealth: Wealth, security: Security = Security.LOW
             if (e.wealth is None or wealth in e.wealth)
             and (e.security is None or security in e.security)
         ]
-        if not any(e.fill for e in entries):
+        if role.roof is None and not any(e.fill for e in entries):
             raise RulesError(f"{rules.program.building}: role {name} has no fill room for {wealth}")
         roles[name] = role.model_copy(update={"rooms": entries})
 
@@ -602,6 +607,7 @@ def _check_references(rules: Rules) -> None:
     names += [program.core_back] if program.core_back else []
     names += [r.core_back for r in program.floor_roles.values() if r.core_back]
     names += [r.balcony.room for r in program.floor_roles.values() if r.balcony]
+    names += [r.roof for r in program.floor_roles.values() if r.roof]
     names += [e.room for role in program.floor_roles.values() for e in role.rooms]
     for unit, spec in program.units.items():
         names += [unit, spec.hall, *spec.front, *spec.back]

@@ -51,6 +51,10 @@ floor_roles:
       - {room: copy_room, fill: true, limit: 1}
       - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
       - {room: training_room, fill: true, priority: optional, limit: 1}   # big leftovers
+  roof:                     # a third of the rest: a flat roof on top, climate plant around
+    applies: [top]
+    when: "floors_above >= 3 and roll >= 50 and roll < 80"
+    roof: roof
   penthouse:                # half the towers: the CEO lives on top, above the executive floor
     applies: [top]
     when: "floors_above >= 4 and roll < 50"
@@ -68,11 +72,11 @@ floor_roles:
       - {room: bedroom, fill: true, weight: 0.5, area: [100, 300]}
       - {room: closet, fill: true, weight: 0.2, area: [20, 140]}   # walk-in wardrobes behind
       - {room: laundry, fill: true, limit: 1}
-  executive:                # on top, or under the penthouse
+  executive:                # on top, or under the penthouse or the roof
     applies: [top, below_top]
     when: >-
-      floors_above >= 3 and ((level == floors_above - 1 and (floors_above < 4 or roll >= 50))
-      or (level == floors_above - 2 and floors_above >= 4 and roll < 50))
+      floors_above >= 3 and ((level == floors_above - 1 and (roll >= 80 or (roll < 50 and floors_above < 4)))
+      or (level == floors_above - 2 and ((roll < 50 and floors_above >= 4) or (roll >= 50 and roll < 80))))
     core_back: meeting_room   # no training room on the executive floor
     balcony: {depth: 5, share: 0.5}   # a terrace along the street; the rooms move back
     rooms:

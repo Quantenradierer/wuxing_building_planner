@@ -508,3 +508,22 @@ def test_a_penthouse_sits_above_the_executive_floor_set_back_from_its_balcony() 
     balcony = next(r for r in executive.rooms if r.type == "balcony")
     assert not balcony.cells & penthouse.footprint  # open to the sky
     assert penthouse.footprint | balcony.cells == executive.footprint
+
+
+def test_some_office_towers_end_in_a_flat_roof_the_stairs_open_onto() -> None:
+    params = make_params(
+        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=5, seed=4
+    )
+    top = generate(params).floors[-1]
+    assert top.role == "roof"
+    assert {r.type for r in top.rooms} == {"roof", "stairwell", "elevator"}
+    roof = next(r for r in top.rooms if r.type == "roof")
+    kinds = [o.kind for o in top.objects if o.room == roof.id]
+    assert "condenser" in kinds or "hvac_unit" in kinds
+    stairs = next(r for r in top.rooms if r.type == "stairwell")
+    assert any(
+        o.kind is OpeningKind.DOOR
+        and any(c in stairs.cells for e in o.edges for c in e.cells())
+        and any(c in roof.cells for e in o.edges for c in e.cells())
+        for o in top.openings
+    )

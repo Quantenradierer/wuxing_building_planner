@@ -101,6 +101,16 @@ rooms:
       - {object: locker, placement: wall, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [1, 2]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
+  roof:                 # a flat roof: the core rises through it, climate plant around
+    area: [20, 100000]
+    min_side: 3
+    circulation: true         # the stair housing opens onto it
+    outdoor: true
+    furniture:
+      - {object: hvac_unit, placement: scatter, per: 250, count: [1, 6]}
+      - {object: condenser, placement: scatter, per: 120, count: [2, 12]}
+      - {object: electrical_panel, placement: wall, count: [1, 2]}   # against the stair housing
+      - {object: satellite_dish, placement: scatter, count: [0, 2]}
   guard_room:           # the security staff's break room between patrols
     area: [30, 80]
     min_side: 5

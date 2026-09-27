@@ -70,6 +70,8 @@ class RulesFurnishing:
             return None
         if floor.level != ctx.params.floors_above - 1:
             return None
+        if ctx.rules.program.floor_roles[floor.role].roof is not None:
+            return None  # the stairs come out onto the roof
         order = [r for r in floor.rooms if r.type == "stairwell"]
         order += [r for r in floor.rooms if ctx.rules.spec(r.type).circulation]
         return order[0] if order else None

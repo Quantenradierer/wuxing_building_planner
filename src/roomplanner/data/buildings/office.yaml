@@ -47,6 +47,10 @@ floor_roles:
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
       - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
+  roof:                     # often the last level is just the flat roof
+    applies: [top]
+    when: "floors_above >= 2 and roll >= 60"
+    roof: roof
   executive:
     applies: [top]
     when: "floors_above >= 3"

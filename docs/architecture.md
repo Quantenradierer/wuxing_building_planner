@@ -235,6 +235,9 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    Floors above a balcony floor leave its cells out of their footprint (`FloorPlan.cut`): it
    stays open to the sky and their rows are shallower there (corp towers: a penthouse on top
    of half of them, by the building's `roll`, with the executive floor moved one down).
+9. **Roof** (`roof:` of a floor role): the floor is the core (stair housing, lift shafts) and
+   one open-air, circulation room around it (the climate plant), less a balcony's sky below.
+   Corp towers end in one a third of the time without a penthouse; plain offices in 40 %.
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
 (T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),

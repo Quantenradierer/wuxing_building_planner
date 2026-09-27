@@ -125,6 +125,8 @@ objects:
   electrical_panel: {size: [2, 1], glyph: E}    # switchboard / breaker cabinet
   battery_bank:    {size: [3, 1], glyph: b}    # UPS batteries
   hvac_unit:       {size: [4, 3], glyph: H}      # air handler
+  condenser:       {size: [2, 2], glyph: C}      # rooftop air-conditioning condenser, one fan
+  satellite_dish:  {size: [3, 3], glyph: Q}      # uplink dish on a stand
   generator:       {size: [5, 3], glyph: G}      # backup diesel generator
   fuel_tank:       {size: [3, 2], glyph: f}
   suppression_tanks: {size: [3, 1], glyph: "<"}  # inert gas bottles of a fire suppression system

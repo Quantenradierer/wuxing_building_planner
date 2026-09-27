@@ -89,6 +89,7 @@ class Skeleton:
     core_slot: Interval | None = None
     core_rooms: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
     lobby_slice: Interval | None = None  # ground-floor lobby across the main part's short end
+    footprint: frozenset[Cell] = frozenset()
 
     @property
     def parts(self) -> list[Part]:
@@ -138,6 +139,7 @@ class CorridorLayout:
     def layout(self, ctx: Context, footprint: frozenset[Cell]) -> BuildingPlan:
         rng = ctx.rng("layout")
         skeleton = self._skeleton(ctx, footprint, rng)
+        skeleton.footprint = footprint
         plan = BuildingPlan(floors=[])
         for part in skeleton.parts:
             axis = Axis.H if part.frame.u_is_x else Axis.V
@@ -501,6 +503,8 @@ class CorridorLayout:
 
         if skeleton.core_band is not None and skeleton.core_slot is not None:
             extra.setdefault(skeleton.core_band.index, []).append(skeleton.core_slot)
+        if role.roof is not None:
+            return self._roof(ctx, skeleton, level, role_name, role.roof, rooms, extra)
         slice_cells = (
             main.frame.rect(slice_.u0, slice_.u1, 0, main.frame.depth)
             if slice_
@@ -594,6 +598,33 @@ class CorridorLayout:
             for kind, side, hint in hints
         ]
         return FloorPlan(level, role_name, rooms, entrances, cut)
+
+    def _roof(
+        self,
+        ctx: Context,
+        skeleton: Skeleton,
+        level: int,
+        role_name: str,
+        roof: str,
+        core: list[PlannedRoom],
+        extra: dict[int, list[Interval]],
+    ) -> FloorPlan:
+        """A flat roof: the stair housing and lift shafts rise through it, the rest is one
+        open-air room, less the sky over a balcony below."""
+        cores = {c.room for c in ctx.rules.program.core}
+        rooms = [r for r in core if r.type in cores]
+        cut: frozenset[Cell] = frozenset()
+        main = skeleton.main
+        for lower in range(1, level):
+            below = ctx.rules.role_for(lower, ctx.params)[1]
+            band = self._balcony_band(ctx, main) if below.balcony is not None else None
+            if band is not None:
+                blocked = main.blocked(band, None, *extra.get(band.index, []))
+                if (found := self._balcony(ctx, main, band, blocked, below)) is not None:
+                    cut = found[0]
+        taken = {c for r in rooms for c in r.cells}
+        rooms.append(PlannedRoom(roof, skeleton.footprint - taken - cut))
+        return FloorPlan(level, role_name, rooms, [], cut)
 
     @staticmethod
     def _balcony_band(ctx: Context, main: Part) -> Band | None:
