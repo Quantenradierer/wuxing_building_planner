@@ -38,15 +38,20 @@ class RulesFurnishing:
             clearances = floor.door_clearances()
             solid = solid_walls(floor)
             hatch = self._roof_hatch_room(ctx, floor)
+            seen: dict[str, int] = {}  # rooms of each type so far on this floor
             for room in floor.rooms:
                 rules = ctx.rules.spec(room.type).furniture
+                odd = seen.get(room.type, 0) % 2 == 1
+                seen[room.type] = seen.get(room.type, 0) + 1
+                if odd:
+                    rules = [r for r in rules if not r.alternate]
                 if room is hatch:
                     # After the stairs, so they stand where they do on the other floors.
                     rules = [*rules, FurnitureRule(object="roof_hatch", placement=Placement.CORNER)]
                 if rules:
                     clearance = clearances.get(room.id, frozenset())
                     wealth = object_wealth(ctx, room)
-                    frame = _RoomFrame(room, clearance, solid, room is hatch)
+                    frame = _RoomFrame(room, clearance, solid, (room is hatch, odd))
                     reused = frame.reuse(layouts, kinds)
                     if reused is None:
                         furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
@@ -70,7 +75,9 @@ class RulesFurnishing:
         return order[0] if order else None
 
 
-type _Signature = tuple[str, bool, frozenset[Cell], frozenset[Cell], frozenset[tuple[Cell, Side]]]
+type _Variant = tuple[bool, bool]  # has the roof hatch, skips the `alternate` rules
+type _Walls = frozenset[tuple[Cell, Side]]
+type _Signature = tuple[str, _Variant, frozenset[Cell], frozenset[Cell], _Walls]
 _MIRROR_X = {Side.E: Side.W, Side.W: Side.E, Side.N: Side.N, Side.S: Side.S}
 _MIRROR_Y = {Side.N: Side.S, Side.S: Side.N, Side.E: Side.E, Side.W: Side.W}
 
@@ -79,7 +86,7 @@ class _RoomFrame:
     """A room relative to its bounding box, for reusing the layout of an identical room."""
 
     def __init__(
-        self, room: Room, clearance: frozenset[Cell], solid: frozenset[Edge], hatch: bool
+        self, room: Room, clearance: frozenset[Cell], solid: frozenset[Edge], variant: _Variant
     ) -> None:
         self.room = room
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
@@ -93,7 +100,7 @@ class _RoomFrame:
             for side in Side
             if Edge.of(c, side) in solid
         )
-        self.hatch = hatch
+        self.variant = variant
 
     def _signature(self, mx: bool, my: bool) -> _Signature:
         def cell(c: Cell) -> Cell:
@@ -104,7 +111,7 @@ class _RoomFrame:
 
         return (
             self.room.type,
-            self.hatch,
+            self.variant,
             frozenset(cell(c) for c in self.cells),
             frozenset(cell(c) for c in self.clearance),
             frozenset((cell(c), side(s)) for c, s in self.walls),
@@ -245,6 +252,9 @@ class RoomFurnisher:
             if rule.head is not None:
                 self._pairs(rule, spec, rule.head, count)
                 continue
+            if rule.line:
+                self._side_by_side(rule, spec, count)
+                continue
             for _ in range(count):
                 if self._place_one(rule, spec):
                     continue
@@ -274,6 +284,29 @@ class RoomFurnisher:
                 break
             if self._extend(rect, parts, head):
                 left -= 1
+
+    def _side_by_side(self, rule: FurnitureRule, spec: ObjectSpec, count: int) -> None:
+        """Up to `count` objects touching in a row along one wall: the longest row that
+        fits, from a random start among those."""
+        walls = self._against_walls(spec, corners_only=False)
+        self.rng.shuffle(walls)
+        for n in range(count, 0, -1):
+            for start in walls:
+                row = [_step(start, k) for k in range(n)]
+                if not all(self._free(rect) for rect in row):
+                    continue
+                before = list(self.placed), set(self.taken), set(self.blocking)
+                if all(self._try(rule.object, rect, spec.walkable) for rect in row):
+                    return
+                self.placed, self.taken, self.blocking = before  # one of them cut the room
+
+    def _free(self, rect: Rect) -> bool:
+        """Inside the room against a solid wall, on free floor, off the door clearances."""
+        x, y, w, h, facing = rect
+        cells = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+        if not cells <= self.cells or cells & (self.taken | self.clearance):
+            return False
+        return all(Edge.of(c, facing.opposite) in self.solid for c in _back_row(rect))
 
     def _extend(self, rect: Rect, parts: list[PlacedObject], kind: str) -> bool:
         """Replace the group at `rect` by the bigger group `kind` with the same back wall."""
@@ -728,6 +761,14 @@ def _backed(cell: Cell, side: Side, along: int, deep: int) -> Rect:
             return (cell.x, cell.y, deep, along, Side.E)
         case Side.E:
             return (cell.x - deep + 1, cell.y, deep, along, Side.W)
+
+
+def _step(rect: Rect, k: int) -> Rect:
+    """`rect` moved `k` times its own width along the wall behind it."""
+    x, y, w, h, facing = rect
+    if facing in (Side.N, Side.S):
+        return (x + k * w, y, w, h, facing)
+    return (x, y + k * h, w, h, facing)
 
 
 def _back_row(rect: Rect) -> list[Cell]:

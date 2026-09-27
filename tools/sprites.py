@@ -196,10 +196,11 @@ def cut_out(image: Image.Image, tolerance: int = 70) -> Image.Image:
     return sprite.crop(box) if box else sprite
 
 
-def _pick(entry: int | dict[str, int]) -> tuple[int, int, int]:
+def _pick(entry: int | dict[str, int]) -> tuple[int, int, int, bool]:
     if isinstance(entry, int):
-        return entry, 3, 0
-    return entry["quadrant"], entry.get("attempt", 3), entry.get("rotate", 0)
+        return entry, 3, 0, False
+    fit = bool(entry.get("fit", False))
+    return entry["quadrant"], entry.get("attempt", 3), entry.get("rotate", 0), fit
 
 
 def cut(kinds: list[str]) -> None:
@@ -209,7 +210,7 @@ def cut(kinds: list[str]) -> None:
     for kind in kinds:
         if kind not in picks:
             continue
-        quadrant, attempt, rotate = _pick(picks[kind])
+        quadrant, attempt, rotate, fit = _pick(picks[kind])
         grid = Image.open(_raw_path(kind, attempt))
         sprite = cut_out(quadrants(grid)[quadrant])
         if rotate:
@@ -217,7 +218,14 @@ def cut(kinds: list[str]) -> None:
         along, deep = sizes[kind.split(".")[0]]
         w, h = along * PX_PER_CELL, deep * PX_PER_CELL
         scale = min(1.0, MAX_SIDE / max(w, h))
-        sprite = sprite.resize((round(w * scale), round(h * scale)), Image.Resampling.LANCZOS)
+        size = (round(w * scale), round(h * scale))
+        if fit:  # keep the picture's shape, centred on a transparent canvas
+            canvas = Image.new("RGBA", size, (0, 0, 0, 0))
+            sprite.thumbnail(size, Image.Resampling.LANCZOS)
+            canvas.paste(sprite, ((size[0] - sprite.width) // 2, (size[1] - sprite.height) // 2))
+            sprite = canvas
+        else:
+            sprite = sprite.resize(size, Image.Resampling.LANCZOS)
         sprite.save(OUT / f"{kind}.png", optimize=True)
         print(f"cut {kind}")
 

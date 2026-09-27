@@ -330,6 +330,10 @@ With `head:` the rule places desk pairs (`count` counts desks): two desks joined
 long side, the pair's short side against a wall; an odd desk, or one left over when no wall
 takes another pair, turns a pair into the `head` group (a third desk across its end, facing
 the wall). Offices have 3-7 desks this way.
+`line: true` (wall only) puts the objects side by side along one wall, as many of `count` as
+fit. `alternate: true` keeps a rule to every other room of its type on a floor (the first,
+third, …); such rooms don't share a layout with the others. Toilets use both: urinals,
+2 cells of wall each, in a row in the men's toilet and none in the women's.
 On a `grid` a group that doesn't fit is left out rather than placed as its main part
 alone, so the grid's objects all look alike (desks in offices and focus rooms).
 Rooms of one type with the same shape, door clearances and walls get the same layout,

@@ -1,6 +1,7 @@
 # Chosen Midjourney quadrant per kind (0..3 in reading order), from `tools/sprites.py sheet`.
 # Either a number (attempt 3) or {quadrant, attempt, rotate}; rotate is degrees
 # counter-clockwise to bring the object's back to the top.
+# fit: 1 keeps the picture's shape and pads it to the object's size (urinal: a bowl in 1 m of wall).
 rug: {quadrant: 0, attempt: 3}
 roof_hatch: {quadrant: 2, attempt: 12}
 guard_desk: {quadrant: 3, attempt: 12}
@@ -65,7 +66,7 @@ workbench: {quadrant: 1, attempt: 12}
 display_case: {quadrant: 1, attempt: 12}
 atm: {quadrant: 2, attempt: 11}
 safe: {quadrant: 1, attempt: 11}
-urinal: {quadrant: 1, attempt: 12}
+urinal: {quadrant: 1, attempt: 12, fit: 1}
 crate: {quadrant: 2, attempt: 10}
 trash_bin: {quadrant: 2, attempt: 12}
 meeting_table: {quadrant: 1, attempt: 12}

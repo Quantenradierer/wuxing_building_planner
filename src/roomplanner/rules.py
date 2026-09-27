@@ -115,6 +115,15 @@ class FurnitureRule(_Strict):
         "that fits at all) is used",
     )
     clearance: int = Field(default=2, ge=0, description="choose: free cells around it")
+    line: bool = Field(
+        default=False,
+        description="wall: side by side along one wall, as many of `count` as fit (urinals)",
+    )
+    alternate: bool = Field(
+        default=False,
+        description="Only in every other room of this type on a floor, the first, third, … "
+        "(urinals in the men's toilet, none in the women's)",
+    )
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 
@@ -124,6 +133,8 @@ class FurnitureRule(_Strict):
             raise ValueError(f"'{self.object}': `at` goes with placement 'at' and only with it")
         if self.toward is not None and self.placement is not Placement.ROWS:
             raise ValueError(f"'{self.object}': `toward` goes with placement 'rows' only")
+        if self.line and self.placement is not Placement.WALL:
+            raise ValueError(f"'{self.object}': `line` goes with placement 'wall' only")
         return self
 
     @property
