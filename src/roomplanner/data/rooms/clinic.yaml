@@ -212,6 +212,7 @@ rooms:
     min_side: 10
     windows: forbidden
     door_width: 4
+    facade_door: 6         # the ambulance drives in
     furniture:
       - {object: ambulance, placement: wall}
       - {object: gurney, placement: wall, count: [1, 2]}

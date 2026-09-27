@@ -280,7 +280,13 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
   door faces the warehouse floor's across the service corridor.
 - `connect: [types]` adds a direct door to an adjacent room of such a type (kitchen into
   the restaurant, loading bay into the stockroom).
-- Exterior doors open outwards, at the positions the layout requested.
+- Exterior doors open outwards, at the positions the layout requested. The service door
+  prefers a vehicle bay's facade (rooms with `facade_door`), then `service_rooms`, then the
+  corridor's end; on a floor with a bay it is a plain door everywhere else.
+- A ground-floor room with `facade_door: w` (loading bay, sally port, DocWagon bay, chop
+  shop workshop, warehouse hall) that has neither the service door nor a door at least `w`
+  wide gets its own exterior door of width `w` (entrance `service`), on the service side
+  if it has a facade there, else another side, the street last.
 - Windows follow one facade grid for all floors (so they line up); each floor omits the
   windows its own walls, doors or windowless rooms collide with.
 

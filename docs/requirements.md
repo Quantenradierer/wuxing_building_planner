@@ -96,7 +96,8 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 - Rules are data: YAML files validated with Pydantic.
   - A shared **room catalog** (toilet, storage, stairwell, corridor, …) with area ranges,
     minimum side, window requirement, door width, which rooms it is entered from
-    (`access`), whether it may be walked through (`transit`), wealth overrides, furniture.
+    (`access`), whether it may be walked through (`transit`), its own vehicle door
+    (`facade_door`), wealth overrides, furniture.
   - One **program** per building type: layout strategy, corridor and strip sizes, facade
     grid, vertical core, entrances, units, floor roles (matched by ground / upper / top /
     basement plus `when:` and `wealth:`) and room entries with `count`, `share`, `fill` or
@@ -121,6 +122,8 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
   not modelled). The `entrances` parameter overrides the type's list. Fire escapes wait for
   surroundings.
 - The main entrance faces `street_side`; the service entrance faces `service_side`.
+- Vehicle and delivery bays (`facade_door`) have their own wide exterior door; the
+  service door goes into such a bay if it faces the service side.
 
 ## Openings
 
@@ -263,11 +266,8 @@ Known weaknesses:
   interview room (`next_to` only orders rooms within one strip segment); a supermarket
   stockroom borders the sales floor in about half the cases (the others sit behind a
   cluster hallway).
-- Vehicle and delivery access: loading bays can lack an exterior door (warehouse NE bay,
-  supermarket loading bay, whose delivery door opens into the stockroom next to it); the
-  service-side double door can open into a storeroom (chop shop, police station) or the
-  pharmacy (clinic); the chop shop workshop (with car lifts) and the warehouse hall have
-  no vehicle door, only a pedestrian door; stuffer shack has no door on its service side.
+- Without a corridor or back room on the service facade the plain service door opens into
+  whatever room is there (an exam room or storeroom in small clinics).
 - Church: no narthex; the portal opens straight into the nave.
 - Stuffer shack 24 × 16: 3–4 gondolas in two rows; the checkout stands in the middle of
   the floor in front of the door rather than beside it.

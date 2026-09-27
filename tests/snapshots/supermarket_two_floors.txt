@@ -2,17 +2,17 @@ supermarket 64x40 cells, wealth=middle, seed=6
 
 == Floor 1 ==
 +-----------------------------------------------------------------------+===---===----+----===--+===--+---+---+---+-------------+
-|            ppp                                                        |#############|sss   sss|     |WWW|WWW|WWW|             |
-|            ppp                                                        |#############|         |     |WWW|WWW|WWW|             |
+|            ppp                                                        |#############|s   sss k|     |WWW|WWW|WWW|             |
+|            ppp                                                        |#############|s        |     |WWW|WWW|WWW|             |
 |            ppp                                                        |#############|s        D     |WWW|WWW|WWW|             |
-|                                                                       |#############|s        D     |   |   |   |             |
+|                                                                       |#############|         D     |   |   |   |             |
 |    rrrrrrrrrrr rrrrrrrrrrr       rrrrrrrrrrr rrrrrrrrrrr              |#############|s   11   D     |7  |8  |9  |    rrr      |
-|    rrrrrrrrrrr rrrrrrrrrrr       rrrrrrrrrrr rrrrrrrrrrr              |#############|         |     +D--+D--+D--+    rrr      |
-|    rrrrrrrrrrr rrrrrrrrrrr       rrrrrrrrrrr rrrrrrrrrrr           ppp|#############|    KKK  |     |          w|    rrr   KKK|
-|                                                                    ppp|#############|    KKK  |     |           |    rrr   KKK|
-|                                                                    ppp|#############|s   KKK s|     D           |    rrr   KKK|
+|    rrrrrrrrrrr rrrrrrrrrrr       rrrrrrrrrrr rrrrrrrrrrr              |#############|s        |     +D--+D--+D--+    rrr      |
+|    rrrrrrrrrrr rrrrrrrrrrr       rrrrrrrrrrr rrrrrrrrrrr           ppp|#############|s KKK    |     |          w|    rrr   KKK|
+|                                                                    ppp|#############|  KKK    |     |           |    rrr   KKK|
+|                                                                    ppp|#############|s KKK   s|     D           |    rrr   KKK|
 |                                                                       |#############|s       s|     D           |    rrr      |
-|                                  5                 ppp                |#############|s   sss s|  1  D           |KKK rrr 10   |
+|                                  5                 ppp                |#############|s sss k s|  1  D           |KKK rrr 10   |
 |                                                    ppp                |#############+---------+     |           |KKK rrr      |
 |                                                    ppp                |#############|eeeeeeeee|     |           |KKK rrr      |
 |                                                                       |#############|eeeeeeeee|     |           |    rrr      |
@@ -82,7 +82,7 @@ supermarket 64x40 cells, wealth=middle, seed=6
 |                                                                                                                               |
 |                                                                                  ddddd     $                                  |
 +===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===----+
-  objects: K crate, d display_case, e elevator_car, ' fire_extinguisher, z freezer, g gondola, p pallet, $ pay_station, r rack, ^ roof_hatch, s shelf, i sink, # stairs, w urinal, W wc
+  objects: k cabinet, K crate, d display_case, e elevator_car, ' fire_extinguisher, z freezer, g gondola, p pallet, $ pay_station, r rack, ^ roof_hatch, s shelf, i sink, # stairs, w urinal, W wc
     1  corridor             36 cells
     2  stairwell            84 cells
     3  elevator             30 cells
@@ -96,30 +96,30 @@ supermarket 64x40 cells, wealth=middle, seed=6
    11  storage              30 cells
 
 == Ground floor ==
-+-----------+===---===--+===---===--+-----------------+----DDDDDDDDDDD--+===---===----+----===--+-----------------+---+---+-----+
-|s          |k         j|          l|                 |                 |#############|sss   sss|                 |www|www|  www|
-|s          |           |           |                 |                 |#############|         |                 |www|www|  www|
-|s          |           |           |  ppp           '|                 |#############|s        D        ppp   ZZZ|www|www|15www|
-|           |           |           |  ppp            |                 |#############|s        D        ppp   ZZZ|   |   |     |
-|           |    c ooo  |f          |  ppp            |                 |#############|s   16   D        ppp   ZZZ|13 |14 |     |
-|           |      ooo  |           |                 |                 |#############|         |              ZZZ+D--+D--+D----+
-|           |      ooo c|          l|    ppp 8        |                 |#############|    KKK  |              ZZZ|             "
-|           |      ooo  |           |    ppp          |                 |#############|    KKK  |              ZZZ|             "
-|           |    c ooo  |  c c      |    ppp     ppp  |                 |#############|s   KKK s|              ZZZ|iii          "
-|           |           |           |            ppp  |                 |#############|s       s|                 |iii          |
-|    5     s|    6      |  ttt 7    |            ppp  |        10       |#############|s   sss s|      11ppp      |iii          |
-|          s|           |  ttt      |                 |                 |#############+---------+        ppp      |             |
-|s         s|           |l ttt      |              ppp|                 |#############|eeeeeeeee|        ppp      |             "
-|s          |           |           |              ppp|                 |#############|eeeeeeeee|                 |             "
-|s          |           |  c c      |              ppp|'     ppp        |#############|eeeeeeeee|          ppp    |      12     "
-|           |           |           +DDDDD+-----------+      ppp        |             |eeeeeeeee|          ppp    |             |
-|           |           |           |     |s sss sss  |      ppp        |      2      |eeeeeeeee|          ppp    |             |
-|           |           |           |     |s          |                 |             |eeeeeeeee|                 |             |
-|           |           |l          |  1  |s   9      |ppp              |             |eeeeeeeee|                 |             "
-|           |           |           |     |           |ppp              |             |eeeeeeeee|                 |             "
-|           |           |           |     |s          |ppp             '|             |eeeeeeeee|                 |             "
-|           |           |           |     |s          |                 |             |eeeeeeeee|                 |             |
-|           |           |           |     |s       sss|                 |             |eeeeeeeee|                 |             |
++-----------+===---===--+===---===--+-----------------+-----------------+===---===----+----===--+--DDDDDDDDDDD----+---+---+-----+
+|s          |k         j|          l|                 |                 |#############|s   sss k|              ppp|www|www|  www|
+|s          |           |           |                 |                 |#############|s        |              ppp|www|www|  www|
+|s          |           |           |  ppp           '|                 |#############|s        D              ppp|www|www|15www|
+|           |           |           |  ppp            |                 |#############|         D                 |   |   |     |
+|           |    c ooo  |f          |  ppp            |    rrr          |#############|s   16   D                 |13 |14 |     |
+|           |      ooo  |           |                 |    rrr          |#############|s        |                 +D--+D--+D----+
+|           |      ooo c|          l|    ppp 8        |    rrr ppp      |#############|s KKK    |              KKK|             "
+|           |      ooo  |           |    ppp          |    rrr ppp      |#############|  KKK    |              KKK|             "
+|           |    c ooo  |  c c      |    ppp     ppp  |    rrr ppp      |#############|s KKK   s|              KKK|             "
+|           |           |           |            ppp  |    rrr          |#############|s       s|                 |             |
+|    5     s|    6      |  ttt 7    |            ppp  |    rrr 10      '|#############|s sss k s|        11       |iii          |
+|          s|           |  ttt      |                 |    rrr          |#############+---------+                 |iii          |
+|s         s|           |l ttt      |              ppp|    rrr         '|#############|eeeeeeeee|  ppp KKK        |iii          "
+|s          |           |           |              ppp|    rrr          |#############|eeeeeeeee|  ppp KKK        |             "
+|s          |           |  c c      |              ppp|    rrr       ppp|#############|eeeeeeeee|  ppp KKK   ppp  |      12  iii"
+|           |           |           +DDDDD+-----------+              ppp|             |eeeeeeeee|            ppp  |          iii|
+|           |           |           |     |s sss sss  |              ppp|      2      |eeeeeeeee|            ppp  |iii       iii|
+|           |           |           |     |s          |                 |             |eeeeeeeee|                 |iii          |
+|           |           |l          |  1  |s   9      |                 |             |eeeeeeeee|                 |iii          "
+|           |           |           |     |           |                 |             |eeeeeeeee|                 |             "
+|           |           |           |     |s          |                 |             |eeeeeeeee|              ppp|             "
+|           |           |           |     |s          |                 |             |eeeeeeeee|              ppp|             |
+|           |           |           |     |s       sss|                 |             |eeeeeeeee|              ppp|            U|
 +--DDD------+--DDD------+--DDD------+     +--DDD------+----------DDDDD--+----DDD------+--DDD----+--DDDDDDD--------+--DDD--------+
 "                                                                                                                              d"
 "                                                                                                                              d"
@@ -177,7 +177,7 @@ D                                                                               
 |                          zzzzzzz                 CCC CCC             CCC GGGGGGG                                              |
 |                          zzzzzzz                 CCC CCC             CCC GGGGGGG                           $                  |
 +===---===---===---===---===---===---===---===---===-------DDDDDDDDDDD---===---===---===---===---===---===---===---===---===----+
-  objects: $ atm, k cabinet, t canteen_table, c chair, C checkout, K crate, d display_case, e elevator_car, ' fire_extinguisher, Z forklift, z freezer, f fridge, g gondola, G guard_desk, l locker, o office_desk, p pallet, s shelf, i sink, # stairs, j terminal, w wc
+  objects: $ atm, k cabinet, t canteen_table, c chair, C checkout, K crate, d display_case, e elevator_car, ' fire_extinguisher, z freezer, f fridge, g gondola, G guard_desk, l locker, o office_desk, p pallet, r rack, s shelf, i sink, # stairs, j terminal, U trash_bin, w wc
     1  corridor             12 cells
     2  stairwell            84 cells
     3  elevator             30 cells

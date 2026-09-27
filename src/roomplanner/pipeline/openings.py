@@ -76,6 +76,12 @@ class DefaultOpenings:
                     continue
                 doors.append(door)
                 used |= set(door.edges)
+            if planned.level == 0:
+                for room in rooms:
+                    door = _vehicle_door(ctx, footprint, room, doors, used, grid, rng)
+                    if door is not None:
+                        doors.append(door)
+                        used |= set(door.edges)
             drafts.append(_Draft(planned.level, planned.role, rooms, walls, doors))
 
         candidates = _window_grid(ctx, footprint, plan.facade_grid)
@@ -347,13 +353,14 @@ def _exterior_door(
     width = ctx.rules.entrances(ctx.params)[request.kind].width
     target = Edge.of(request.hint, request.side)
     hinted = rooms[request.room]
+    back = request.kind is EntranceKind.SERVICE
+    # The service door is the vehicle door of a bay if there is one, else a back room's
+    # door or the corridor's end.
+    vehicle = [r for r in rooms if back and ctx.rules.spec(r.type).facade_door]
     service = [
-        r
-        for r in rooms
-        if request.kind is EntranceKind.SERVICE
-        and r.unit is None
-        and r.type in ctx.rules.program.service_rooms
+        r for r in rooms if back and r.unit is None and r.type in ctx.rules.program.service_rooms
     ]
+    corridor = [r for r in rooms if back and ctx.rules.spec(r.type).circulation]
     others = [
         r
         for r in rooms
@@ -366,11 +373,12 @@ def _exterior_door(
 
     # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them.
     roomy = [r for r in first if r.area >= ROOMY], [r for r in others if r.area >= ROOMY]
-    tiers = (service, *roomy, first, others)
+    tiers = (vehicle, service, corridor, *roomy, first, others)
     # A wide door (loading dock) that would blind a room needing windows: a plain door.
     widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
     for candidates_from in tiers:
-        for size in widths:
+        # A bay gets its own wide door anyway; elsewhere the back door is a plain one.
+        for size in widths if candidates_from is vehicle or not vehicle else [DOOR_WIDTH]:
             found = _facade_spots(
                 candidates_from, size, request.side, footprint, used, windows, target, needs_window
             )
@@ -381,6 +389,40 @@ def _exterior_door(
                 continue
             door = _door(run, size, None, request.side, rng, start)
             return replace(door, entrance=request.kind.value)
+    return None
+
+
+def _vehicle_door(
+    ctx: Context,
+    footprint: frozenset[Cell],
+    room: Room,
+    doors: list[Opening],
+    used: set[Edge],
+    windows: list[Opening],
+    rng: random.Random,
+) -> Opening | None:
+    """A bay's own exterior door (`facade_door`) if it has none yet: service side first."""
+    width = ctx.rules.spec(room.type).facade_door
+    if width is None:
+        return None
+    outside = {e for e in boundary_edges(room.cells) if not footprint.issuperset(e.cells())}
+    if any(
+        (d.entrance == EntranceKind.SERVICE.value or len(d.edges) >= width)
+        and outside.issuperset(d.edges)
+        for d in doors
+    ):
+        return None
+    service, street = ctx.params.service_side, ctx.params.street_side
+    sides = [service, *(s for s in Side if s not in (service, street)), street]
+    centre = sorted(room.cells)[len(room.cells) // 2]
+    for side in sides:
+        found = _facade_spots(
+            [room], width, side, footprint, used, windows, Edge.of(centre, side), lambda _: False
+        )
+        if found:
+            _, _, _, run, start = min(found, key=lambda c: (c[1], c[2], c[3][0], c[4]))
+            door = _door(run, width, None, side, rng, start)
+            return replace(door, entrance=EntranceKind.SERVICE.value)
     return None
 
 

@@ -438,6 +438,34 @@ def test_loading_bays_open_onto_the_warehouse_floor() -> None:
         assert _door_between(ground, "loading_bay", "warehouse_floor"), seed
 
 
+@pytest.mark.parametrize(
+    "building_type",
+    [
+        BuildingType.WAREHOUSE,
+        BuildingType.SUPERMARKET,
+        BuildingType.POLICE_STATION,
+        BuildingType.HOSPITAL,
+        BuildingType.CHOP_SHOP,
+    ],
+)
+def test_vehicle_bays_have_their_own_exterior_door(building_type: BuildingType) -> None:
+    for seed in range(3):
+        params = make_params(building_type=building_type, width=60, depth=44, seed=seed)
+        ground = generate(params).floor(0)
+        rules = rules_for(building_type, params.wealth)
+        bays = [r for r in ground.rooms if rules.spec(r.type).facade_door]
+        assert bays, seed
+        for bay in bays:
+            width = rules.spec(bay.type).facade_door
+            assert width is not None
+            assert any(
+                o.entrance is not None
+                and (o.entrance == EntranceKind.SERVICE.value or len(o.edges) >= width)
+                and all(c in bay.cells or c not in ground.footprint for c in o.edges[0].cells())
+                for o in ground.openings
+            ), (seed, bay.type)
+
+
 def test_observation_rooms_sit_beside_an_interview_room() -> None:
     beside = 0
     for seed in range(4):

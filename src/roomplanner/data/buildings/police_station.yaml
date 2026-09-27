@@ -13,7 +13,7 @@ facade:
   module: 3
   window: 2
 cluster_filler: storage
-service_rooms: [sally_port, evidence_room, locker_room, storage, utility]
+service_rooms: [sally_port, locker_room, storage, utility]
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}

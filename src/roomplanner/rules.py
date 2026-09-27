@@ -183,6 +183,11 @@ class RoomSpec(_Strict):
         description="Cluster rooms: chance to become a closet of a host from `access`",
     )
     transit: bool = Field(default=True, description="Other rooms may be entered through it")
+    facade_door: int | None = Field(
+        default=None,
+        gt=0,
+        description="Ground floor: its own exterior door this wide (vehicles, deliveries)",
+    )
     furniture: list[FurnitureRule] = []
     wealth: dict[Wealth, RoomTier] = {}
 

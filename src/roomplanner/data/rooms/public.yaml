@@ -149,6 +149,7 @@ rooms:
     min_side: 10
     windows: forbidden
     door_width: 4
+    facade_door: 6         # the patrol car drives in
     furniture:
       - {object: car, placement: wall}
       - {object: weapon_locker, placement: wall, count: [1, 2]}   # guns stay out of the cells
