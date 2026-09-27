@@ -208,3 +208,36 @@ def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
                 tables = [o.kind for o in floor.objects if o.room == room.id and "table" in o.kind]
                 kinds.add("long" if len(tables) == 2 else tables[0])
     assert {"round_table", "meeting_table", "long"} <= kinds
+
+
+@pytest.mark.parametrize(
+    ("building_type", "width", "depth", "wealth", "seed"),
+    [
+        (BuildingType.CLINIC, 52, 49, Wealth.LUXURY, 945989),  # toilet wraps round the row
+        (BuildingType.HOSPITAL, 55, 35, Wealth.SQUATTER, 942500),  # a widened stall
+        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 876507),
+    ],
+)
+def test_the_stalls_of_a_toilet_all_face_the_same_way(
+    building_type: BuildingType, width: int, depth: int, wealth: Wealth, seed: int
+) -> None:
+    params = make_params(
+        building_type=building_type,
+        width=width,
+        depth=depth,
+        floors_above=3,
+        wealth=wealth,
+        seed=seed,
+    )
+    for floor in generate(params).floors:
+        owner = {c: r for r in floor.rooms for c in r.cells}
+        rows: dict[str, set[Side]] = {}
+        for door in floor.openings:
+            a, b = (owner.get(c) for c in door.edges[0].cells())
+            for stall, toilet in ((a, b), (b, a)):
+                if stall is None or toilet is None or stall.type != "stall":
+                    continue
+                wc = next(o for o in floor.objects if o.room == stall.id and o.kind == "wc")
+                rows.setdefault(toilet.id, set()).add(wc.facing)
+        assert rows
+        assert all(len(facings) == 1 for facings in rows.values())

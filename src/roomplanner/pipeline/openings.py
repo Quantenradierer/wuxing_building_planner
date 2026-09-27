@@ -23,6 +23,8 @@ from roomplanner.pipeline.registry import register
 from roomplanner.rules import WindowRule
 
 type Run = list[Edge]
+# (rank, off the front, -length, room, first edge) and the wall run of a door candidate
+type _Choice = tuple[tuple[int, bool, int, int, Edge], Run]
 
 
 @dataclass
@@ -60,8 +62,13 @@ class DefaultOpenings:
                 for i, r in enumerate(rooms)
                 if (key := (r.type, min(r.cells))) in core_walls
             }
+            fronts = {
+                i: {Edge.of(c, r.front) for c in r.cells}
+                for i, r in enumerate(planned.rooms)
+                if r.front is not None
+            }
             doors = _interior_doors(
-                ctx, rooms, owner, walls, circulation, entries, hosts, rng, fixed
+                ctx, rooms, owner, walls, circulation, entries, hosts, rng, fixed, fronts
             )
             used: set[Edge] = set()
             grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
@@ -166,11 +173,13 @@ def _interior_doors(
     hosts: dict[int, int],
     rng: random.Random,
     fixed: dict[int, set[Edge]] | None = None,
+    fronts: dict[int, set[Edge]] | None = None,
 ) -> list[Opening]:
     """One door per room, committed greedily: the best-ranked door of all pending rooms first.
 
     `fixed`: walls a room's door into circulation should use if it can (core rooms: the
-    walls they share with circulation on every floor).
+    walls they share with circulation on every floor). `fronts`: the walls a room's door
+    goes in if it can (stalls: towards the passage, never into a flank).
 
     Rank: into circulation, then into a type from the room's `access` list (in order), then
     anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
@@ -211,16 +220,17 @@ def _interior_doors(
     stranded = False
 
     fixed = fixed or {}
+    fronts = fronts or {}
 
-    def best(i: int) -> tuple[tuple[int, int, int, Edge], Run] | None:
+    def best(i: int) -> _Choice | None:
         if i in fixed and (found := best_among(i, fixed[i])) is not None:
             return found
         return best_among(i, None)
 
-    def best_among(i: int, only: set[Edge] | None) -> tuple[tuple[int, int, int, Edge], Run] | None:
+    def best_among(i: int, only: set[Edge] | None) -> _Choice | None:
         spec = ctx.rules.spec(rooms[i].type)
         width = spec.door_width
-        found: tuple[tuple[int, int, int, Edge], Run] | None = None
+        found: _Choice | None = None
         for j in neighbours[i]:
             if j not in connected or not allowed(i, j):
                 continue
@@ -235,9 +245,10 @@ def _interior_doors(
             runs = shared[(i, j)]
             if only is not None:
                 runs = _runs({e for run in runs for e in run} & only)
+            front = fronts.get(i, set())
             for run in runs:
                 if len(run) >= width:
-                    key = (rank, -len(run), i, run[0])
+                    key = (rank, bool(front) and run[0] not in front, -len(run), i, run[0])
                     if found is None or key < found[0]:
                         found = (key, run)
         return found

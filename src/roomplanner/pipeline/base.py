@@ -38,6 +38,7 @@ class PlannedRoom:
     # Annex (closet, pantry): carved out of this room and entered only through it.
     host: PlannedRoom | None = field(default=None, compare=False)
     leftover: bool = False  # a storeroom filling space no room fits; neighbours may absorb it
+    front: Side | None = None  # the wall its door goes in if it can (stalls: towards the passage)
 
 
 @dataclass(frozen=True)

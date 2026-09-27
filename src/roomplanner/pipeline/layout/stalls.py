@@ -41,6 +41,7 @@ def _split(
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
     box = (x0, y0, x1, y1)
     best: list[frozenset[Cell]] = []
+    wall = Side.N
     for side in Side:
         across = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
         if across < rule.depth + passage:
@@ -50,14 +51,19 @@ def _split(
             # The room must still reach circulation through a door.
             if found and _door_run(room.cells.difference(*found), circulation) >= door:
                 if len(found) > len(best):
-                    best = found
+                    best, wall = found, side
                 break
     if not best:
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
     rest = room.cells.difference(*best)
-    stalls = best
     host = PlannedRoom(rule.rest or room.type, rest, room.unit, room.entry, room.host)
-    return [host, *(PlannedRoom(rule.room, cells, room.unit, host=host) for cells in stalls)]
+    # Every door faces the passage, so the stalls all look alike (not into a flank where
+    # the room wraps round the end of the row).
+    front = wall.opposite
+    return [
+        host,
+        *(PlannedRoom(rule.room, cells, room.unit, host=host, front=front) for cells in best),
+    ]
 
 
 def _row(

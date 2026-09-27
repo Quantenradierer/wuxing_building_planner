@@ -289,8 +289,17 @@ class RoomFurnisher:
                 self.rng.shuffle(candidates)
             case Placement.BACK:
                 candidates = self._against_walls(spec, corners_only=False)
-                # Equally far (a square wc filling a stall): face the door.
-                candidates.sort(key=lambda r: (-self._door_distance(r), -self._faces_door(r), r))
+                # Equally far (a square wc in a stall): face the door's wall, then the door,
+                # so the wcs of a row of stalls all face their doors.
+                sides = self._door_sides()
+                candidates.sort(
+                    key=lambda r: (
+                        -self._door_distance(r),
+                        r[4] not in sides,
+                        -self._faces_door(r),
+                        r,
+                    )
+                )
             case Placement.END:
                 candidates = self._against_walls(spec, corners_only=False)
                 x0, y0, x1, y1 = self.box
@@ -364,6 +373,18 @@ class RoomFurnisher:
         x, y, w, h, _ = rect
         cx, cy = x + w / 2, y + h / 2
         return min(abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in self.clearance)
+
+    def _door_sides(self) -> set[Side]:
+        """The walls of the room that have a door, as sides seen from inside."""
+        sides: set[Side] = set()
+        for door in self.floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            for edge in door.edges:
+                for cell in edge.cells():
+                    if cell in self.cells:
+                        sides |= {s for s in Side if Edge.of(cell, s) == edge}
+        return sides
 
     def _faces_door(self, rect: Rect) -> float:
         """How much a rectangle's front points towards the door clearances (deterministic)."""
