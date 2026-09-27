@@ -244,7 +244,7 @@ full-depth room and then subdivided: entry hall on the corridor side with `front
 beside it, `back` rooms along the facade, and — if the strip is deep enough — a hall running
 along the unit so every room opens onto it. Rooms carry the unit id. The front zone is
 no deeper than the front rooms' maximum area allows at their minimum width; front rooms
-wider than their maximum leave the spare width to `front_fill` rooms (closets), and spare
+wider than their maximum leave the spare width to `front_fill` rooms (closets, placed beside the hall), and spare
 back width goes to the back rooms furthest below their maximum. With `hall_in_back`
 (hotel rooms) the hall is part of the first back room, which then reaches the corridor
 and is the entry; the bathroom opens into it. Units too narrow for an entry leg of the

@@ -85,7 +85,8 @@ def subdivide(
     else:
         rest = list(zip(fronts, widths, strict=True))
     order.append((spec.hall, hall_width))
-    order += rest
+    # Closets right beside the hall, so they open onto it, not through the kitchen.
+    order += sorted(rest, key=lambda r: r[0] != spec.front_fill)
     position = 0
     hall_end = 0
     for kind, size in order:

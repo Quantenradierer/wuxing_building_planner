@@ -76,3 +76,19 @@ def test_hotel_bathrooms_open_into_the_guest_room_where_the_unit_is_wide_enough(
     floors = generate(params).floors
     pairs = {(a.type, b.type) for floor in floors for a, b in door_pairs(floor)}
     assert ("bathroom", "guest_room") in pairs or ("guest_room", "bathroom") in pairs
+
+
+def test_closets_open_onto_the_hallway() -> None:
+    closets = 0
+    for width, depth in ((48, 28), (56, 30), (44, 26)):
+        for seed in range(4):
+            params = make_params(
+                building_type=BuildingType.APARTMENT, width=width, depth=depth, seed=seed
+            )
+            for floor in generate(params).floors:
+                for a, b in door_pairs(floor):
+                    for closet, other in ((a, b), (b, a)):
+                        if closet.type == "closet":
+                            assert other.type == "hallway", (width, depth, seed)
+                            closets += 1
+    assert closets
