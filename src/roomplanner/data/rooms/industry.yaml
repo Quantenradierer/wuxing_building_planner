@@ -82,6 +82,7 @@ rooms:
     area: [160, 1200]
     min_side: 10
     windows: required
+    circulation: true         # no wall to the corridor: the traffic passes the cubicles
     door_width: 3
     furniture:
       - {object: cubicle, placement: rows, aisle: 2, margin: 2}

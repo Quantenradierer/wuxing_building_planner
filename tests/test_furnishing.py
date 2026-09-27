@@ -3,7 +3,7 @@ from itertools import pairwise
 import pytest
 
 from roomplanner.generator import generate
-from roomplanner.geometry import Cell, Side, connected
+from roomplanner.geometry import Cell, Edge, Side, connected
 from roomplanner.model import Building, OpeningKind
 from roomplanner.params import BuildingType, Wealth
 from roomplanner.pipeline.furnishing import group_parts, ring_is_one_run
@@ -344,3 +344,24 @@ def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:
             for kind in ("huddle_room", "focus_room"):
                 counts[kind] = counts.get(kind, 0) + types.count(kind)
     assert counts["focus_room"] < counts["huddle_room"]
+
+
+@pytest.mark.parametrize(
+    ("building_type", "open_plan"),
+    [(BuildingType.OFFICE, "open_office"), (BuildingType.CORP_OFFICE, "cubicle_farm")],
+)
+def test_open_plan_offices_have_no_wall_to_the_corridor(
+    building_type: BuildingType, open_plan: str
+) -> None:
+    params = make_params(building_type=building_type, width=60, depth=40, floors_above=3, seed=1)
+    shared = 0
+    for floor in generate(params).floors:
+        owner = {c: r for r in floor.rooms for c in r.cells}
+        for room in (r for r in floor.rooms if r.type == open_plan):
+            for cell in room.cells:
+                for side in Side:
+                    other = owner.get(cell.neighbour(side))
+                    if other is not None and other.type == "corridor":
+                        shared += 1
+                        assert Edge.of(cell, side) not in floor.walls
+    assert shared
