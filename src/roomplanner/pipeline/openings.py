@@ -49,7 +49,11 @@ class DefaultOpenings:
             )
             entries = {i for i, r in enumerate(planned.rooms) if r.entry}
             owner = {cell: i for i, room in enumerate(rooms) for cell in room.cells}
-            circulation = {i for i, r in enumerate(rooms) if ctx.rules.spec(r.type).circulation}
+            circulation = {
+                i
+                for i, r in enumerate(rooms)
+                if ctx.rules.spec(r.type).circulation or planned.rooms[i].hub
+            }
             index = {id(r): i for i, r in enumerate(planned.rooms)}
             hosts = {
                 i: index[id(r.host)]

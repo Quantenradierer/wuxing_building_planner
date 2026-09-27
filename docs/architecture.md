@@ -238,6 +238,9 @@ A connector that must cross a hall band splits it: each piece becomes its own ha
 L's junction). Each floor role names the hall's room type with `place: hall` (sales floor;
 stockroom in the basement). Without a lobby the main entrance opens into the hall.
 Connectors that must cross a hall band become a short corridor across its end.
+Small halls (`hall: {corridor: false}`: stuffer shack, dive bar) drop the service corridor:
+the hall room is a *hub* (`PlannedRoom.hub`), which the openings stage treats as
+circulation, so the back rooms, cluster hallways and the stairwell open straight onto it.
 
 ### Units
 

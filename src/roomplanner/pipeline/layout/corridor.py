@@ -522,10 +522,12 @@ class CorridorLayout:
                     # Connectors crossing the hall split it: one hall room per piece,
                     # slivers too thin for a room join the connector corridor.
                     minimum = ctx.rules.spec(hall).min_side
+                    rules = ctx.rules.program.hall
+                    hub = rules is not None and not rules.corridor  # back rooms open onto it
                     for span in free_intervals(part.frame.length, part.blocked(band)):
                         cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
                         kind = hall if span.width >= minimum else "corridor"
-                        rooms.append(PlannedRoom(kind, cells))
+                        rooms.append(PlannedRoom(kind, cells, hub=hub))
                     continue
                 if band.kind is BandKind.CORRIDOR:
                     blocked = [part_slice] if part_slice else []
@@ -631,7 +633,10 @@ class CorridorLayout:
 
         if EntranceKind.SERVICE not in ctx.rules.entrances(ctx.params):
             return anchor
-        corridors = [b for b in main.bands if b.kind is BandKind.CORRIDOR]
+        # Without a service corridor (small halls) the back door opens into the hall.
+        corridors = [b for b in main.bands if b.kind is BandKind.CORRIDOR] or [
+            b for b in main.bands if b.kind is BandKind.HALL
+        ]
         if service is street and anchor is not None:
             hint = hints[0][2]
         elif service.is_end:

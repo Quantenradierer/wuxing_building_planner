@@ -39,6 +39,7 @@ class PlannedRoom:
     host: PlannedRoom | None = field(default=None, compare=False)
     leftover: bool = False  # a storeroom filling space no room fits; neighbours may absorb it
     front: Side | None = None  # the wall its door goes in if it can (stalls: towards the passage)
+    hub: bool = False  # doors and walls treat it as circulation (a hall without a corridor)
 
 
 @dataclass(frozen=True)

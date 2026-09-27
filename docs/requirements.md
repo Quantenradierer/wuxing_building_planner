@@ -253,9 +253,9 @@ Known weaknesses:
 - Toilets: about 0.5 % of public toilets still have no sink (a 4 × 4 rest between the
   entrance and two stall doors). The others give up stalls until 16 cells are left for
   sinks (`rest_area`), or become a single WC; before, ~10 % had no sink.
-- Small buildings get a full-width corridor: stuffer shack and dive bar spend ~85 cells on
-  it, and a 22 × 16 dive bar is rejected ("needs at least 19 for its corridor").
-  Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade
+- Stuffer shacks and dive bars have no service corridor any more (back rooms open onto the
+  sales floor / taproom); small back rooms still sit along a short side hallway open to
+  the hall. Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade
   (one in the clinic only holds a roof hatch).
 - Public sequence is broken: entrance, reception and waiting aren't chained. Clinic: the
   entrance opens into an empty lobby; reception is a closed room across the corridor and
@@ -271,10 +271,9 @@ Known weaknesses:
   supermarket loading bay, whose delivery door opens into the stockroom next to it); the
   service-side double door can open into a storeroom (chop shop, police station) or the
   pharmacy (clinic); the chop shop workshop (with car lifts) and the warehouse hall have
-  no vehicle door, only a pedestrian door; stuffer shack has no door on its service side.
+  no vehicle door, only a pedestrian door; the stuffer shack's back door can open into
+  the cold storage.
 - Church: no narthex; the portal opens straight into the nave.
-- Stuffer shack 24 × 16: 3–4 gondolas in two rows; the checkout stands in the middle of
-  the floor in front of the door rather than beside it.
 - Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
   have one thin back-of-house strip; it is full before the optional Sixth World rooms
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they
@@ -282,8 +281,6 @@ Known weaknesses:
   are furniture instead (rigger cocoon in the security room, drone docks in the hall).
 - Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
   105), 1 of 12 seeds.
-- Stuffer shack 24 × 16 is infeasible at luxury wealth (the wider corridor leaves 16 of 17
-  cells needed).
 - Reception should be next to the lobby (or part of it), not a separate room elsewhere.
 - Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
   between corridor, bathroom and guest room.

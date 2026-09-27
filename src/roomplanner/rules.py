@@ -268,6 +268,10 @@ class FacadeRule(_Strict):
 
 class HallRule(_Strict):
     min_depth: int = Field(gt=0, description="Minimum depth of the hall band")
+    corridor: bool = Field(
+        default=True,
+        description="Service corridor between hall and back rooms (else they open onto the hall)",
+    )
 
 
 class UnitSpec(_Strict):

@@ -8,6 +8,7 @@ the back-of-house rooms — works as in the corridor layout.
 from __future__ import annotations
 
 import random
+from dataclasses import replace
 
 from roomplanner.errors import RulesError
 from roomplanner.pipeline.base import Context
@@ -22,7 +23,7 @@ BACK_OF_HOUSE_SHARE = 0.3  # of the depth, within the program's strip_depth
 class HallLayout(CorridorLayout):
     def main_min_depth(self, ctx: Context) -> int:
         program = ctx.rules.program
-        return program.strip_depth[0] + program.corridor.width + _hall_min(ctx)
+        return program.strip_depth[0] + _corridor(ctx) + _hall_min(ctx)
 
     def _part(
         self,
@@ -47,7 +48,7 @@ class HallLayout(CorridorLayout):
     ) -> Part:
         program = ctx.rules.program
         low, high = program.strip_depth
-        corridor = program.corridor.width
+        corridor = _corridor(ctx)
         depth = frame.depth
         back = min(high, max(low, round(depth * BACK_OF_HOUSE_SHARE)))
         back = min(back, depth - corridor - _hall_min(ctx))
@@ -71,7 +72,18 @@ class HallLayout(CorridorLayout):
                 Band(1, BandKind.CORRIDOR, back, back + corridor),
                 Band(2, BandKind.HALL, back + corridor, depth),
             ]
+        if not corridor:  # small buildings: the back rooms open onto the hall
+            bands = [
+                replace(b, index=i)
+                for i, b in enumerate(b for b in bands if b.kind is not BandKind.CORRIDOR)
+            ]
         return Part(frame, Grid.centred(program.facade.module, frame.length), bands)
+
+
+def _corridor(ctx: Context) -> int:
+    """Width of the service corridor, 0 if the back rooms open onto the hall."""
+    hall = ctx.rules.program.hall
+    return ctx.rules.program.corridor.width if hall is None or hall.corridor else 0
 
 
 def _hall_min(ctx: Context) -> int:
