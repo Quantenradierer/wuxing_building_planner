@@ -332,3 +332,15 @@ def test_urinals_stand_side_by_side_in_every_other_toilet() -> None:
                     assert (a.w, a.h) == ((2, 1) if wide else (1, 2))
                     assert (b.x, b.y) == ((a.x + a.w, a.y) if wide else (a.x, a.y + a.h))
     assert found
+
+
+def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:
+    counts: dict[str, int] = {}
+    for seed in range(4):
+        for floor in generate(make_params(width=60, depth=40, floors_above=3, seed=seed)).floors:
+            types = [r.type for r in floor.rooms]
+            assert types.count("copy_room") <= 1
+            assert types.count("staff_room") <= 1
+            for kind in ("huddle_room", "focus_room"):
+                counts[kind] = counts.get(kind, 0) + types.count(kind)
+    assert counts["focus_room"] < counts["huddle_room"]

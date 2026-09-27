@@ -221,7 +221,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside; `fill` rooms with
-   `priority: optional` only take leftovers the others don't fit. `near: core | entrance | service`
+   `priority: optional` only take leftovers the others don't fit. Among the fill rooms that
+   fit, `weight` sets how often each is picked, and `limit` caps how many a floor gets
+   (new annex hosts included). For example, an office's 3 m interior rows get mostly
+   huddle rooms, some focus rooms, one copy room and one break room. `near: core | entrance | service`
    pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 

@@ -43,6 +43,13 @@ rooms:
       - {object: workstation, placement: back}   # one desk, away from the door
       - {object: armchair, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
+  huddle_room:              # windowless small meeting room for two to four
+    area: [24, 48]
+    min_side: 5
+    furniture:
+      - {object: huddle_set, placement: center}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: plant, placement: corner, count: [0, 1]}
   copy_room:                # printers, paper, mail
     area: [20, 48]
     min_side: 4

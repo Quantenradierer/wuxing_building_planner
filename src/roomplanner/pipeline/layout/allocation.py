@@ -150,6 +150,7 @@ class Allocator:
         self.main_fills: list[RoomEntry] = []
         self.pending: deque[Request] = deque()  # requests not placed yet
         self.fill_widths: dict[tuple[str, int, int], int] = {}
+        self.fill_counts: dict[str, int] = {}  # fill rooms picked on this floor, by type
 
     # --- public -----------------------------------------------------------------------
 
@@ -158,6 +159,7 @@ class Allocator:
         requests, fills = self._requests(role, level)
         self.fill_types = {e.room for e in fills}
         self.fills = fills
+        self.fill_counts = {}
         # Optional fill rooms only take leftovers the others don't fit (studios beside flats).
         self.main_fills = [e for e in fills if e.priority is not Priority.OPTIONAL] or fills
         queue = deque(requests)
@@ -323,7 +325,9 @@ class Allocator:
                         (self._score(request, segment), self.rng.random(), state, slot, False)
                     )
             for host in hosts:
-                if host not in self.fill_types:
+                if host not in self.fill_types or any(
+                    self._at_limit(e) for e in self.fills if e.room == host
+                ):
                     continue
                 spec = self.rules.spec(host)
                 if spec.windows is WindowRule.REQUIRED and not segment.facade:
@@ -352,6 +356,7 @@ class Allocator:
         slot.annex = request
         if new:
             state.slots.append(slot)
+            self.fill_counts[slot.request.type] = self.fill_counts.get(slot.request.type, 0) + 1
         return True
 
     def _option(self, request: Request, state: SegmentState) -> Option | None:
@@ -498,7 +503,10 @@ class Allocator:
                     # Plain storerooms, no hallway: neighbours may absorb them later.
                     state.slots += self._filler_slots(state.free_units, segment)
                     return
-            entry = self.rng.choice(fitting or fills)
+            pool = fitting or fills
+            pool = [e for e in pool if not self._at_limit(e)] or pool
+            entry = self.rng.choices(pool, weights=[e.weight for e in pool])[0]
+            self.fill_counts[entry.room] = self.fill_counts.get(entry.room, 0) + 1
             spec = self.rules.spec(entry.room)
             stackable = spec.cluster or spec.windows is not WindowRule.REQUIRED
             if stackable and (cluster := self._fill_cluster(entry, state)) is not None:
@@ -531,6 +539,9 @@ class Allocator:
                     self._spread(state, remaining - units, fills)
                 return
             state.slots.append(self._fill_slot(entry, units, segment))
+
+    def _at_limit(self, entry: RoomEntry) -> bool:
+        return entry.limit is not None and self.fill_counts.get(entry.room, 0) >= entry.limit
 
     def _uniform_units(self, entry: RoomEntry, segment: Segment, min_units: int) -> int:
         """One width per fill room type and strip depth on a floor: rooms line up in a grid."""

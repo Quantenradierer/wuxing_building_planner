@@ -220,6 +220,12 @@ class RoomEntry(_Strict):
     count: int | tuple[int, int] | None = None
     share: float | None = Field(default=None, gt=0, le=1)
     fill: bool = False
+    weight: float = Field(
+        default=1.0, gt=0, description="fill: how often it is picked among the floor's fill rooms"
+    )
+    limit: int | None = Field(
+        default=None, gt=0, description="fill: at most this many picked per floor (copy rooms)"
+    )
     place: Literal["entrance", "hall"] | None = None
     near: Literal["core", "entrance", "service"] | None = None
     priority: Priority = Priority.NORMAL

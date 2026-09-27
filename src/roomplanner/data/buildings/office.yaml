@@ -41,8 +41,10 @@ floor_roles:
       - {room: archive, count: [0, 1], area: [60, 120], when: "floors_below == 0"}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
-      - {room: focus_room, fill: true}        # thin interior rows
-      - {room: copy_room, fill: true, priority: optional}
+      - {room: huddle_room, fill: true}      # thin interior rows: huddle and focus rooms,
+      - {room: focus_room, fill: true, weight: 0.5}   # a copy room and a break room
+      - {room: staff_room, fill: true, limit: 1}
+      - {room: copy_room, fill: true, limit: 1}
   executive:
     applies: [top]
     when: "floors_above >= 3"
@@ -57,8 +59,10 @@ floor_roles:
       - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional}
       - {room: executive_office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
-      - {room: focus_room, fill: true}        # thin interior rows
-      - {room: copy_room, fill: true, priority: optional}
+      - {room: huddle_room, fill: true}      # thin interior rows: huddle and focus rooms,
+      - {room: focus_room, fill: true, weight: 0.5}   # a copy room and a break room
+      - {room: staff_room, fill: true, limit: 1}
+      - {room: copy_room, fill: true, limit: 1}
   standard:
     applies: [upper, top]
     rooms:
@@ -73,8 +77,10 @@ floor_roles:
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: office, fill: true}
       - {room: meeting_room, fill: true}      # interior rows without facade
-      - {room: focus_room, fill: true}        # thin interior rows
-      - {room: copy_room, fill: true, priority: optional}
+      - {room: huddle_room, fill: true}      # thin interior rows: huddle and focus rooms,
+      - {room: focus_room, fill: true, weight: 0.5}   # a copy room and a break room
+      - {room: staff_room, fill: true, limit: 1}
+      - {room: copy_room, fill: true, limit: 1}
   basement:
     applies: [basement]
     rooms:
