@@ -16,7 +16,10 @@ from roomplanner.rules import Rules, StallRule
 
 def carve_stalls(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
     circulation = {
-        cell for room in rooms if rules.spec(room.type).circulation for cell in room.cells
+        cell
+        for room in rooms
+        if rules.spec(room.type).circulation or room.hub
+        for cell in room.cells
     }
     result: list[PlannedRoom] = []
     for room in rooms:

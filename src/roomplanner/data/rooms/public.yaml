@@ -32,7 +32,7 @@ rooms:
     area: [12, 36]
     min_side: 3
     windows: forbidden
-    cluster: true
+    next_to: [interview_room]
     furniture:
       - {object: terminal, placement: wall, count: [1, 2]}
       - {object: chair, placement: wall, count: [1, 2]}

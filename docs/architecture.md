@@ -244,7 +244,8 @@ A connector that must cross a hall band splits it: each piece becomes its own ha
 L's junction). Each floor role names the hall's room type with `place: hall` (sales floor;
 stockroom in the basement). Without a lobby the main entrance opens into the hall.
 Connectors that must cross a hall band become a short corridor across its end. Parts shorter
-than `hall.corridor_from` (small shops, bars, churches) have no service corridor: the back
+than `hall.corridor_from` (small shops, bars, churches; warehouses, supermarkets and clubs
+always) have no service corridor: the back
 rooms open onto the hall (`PlannedRoom.hub`: doors treat it as circulation, on every
 floor, so the stairwell opens into it too), the emergency exit goes to a hall end and an
 end-side service door into a back-of-house room.
@@ -309,7 +310,8 @@ cells stay free at the door, at most `reach` deep; the size comes from the room,
 catalog: stairs span the stairwell, the elevator car is the shaft), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
-(checkouts) and `rows`
+(checkouts), `wall` with `near_room: <type>` (as close to such a room as possible: the stage
+by the backstage) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells, shifted across
 the spare width to where most fit, e.g. clear of doors along one wall; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the

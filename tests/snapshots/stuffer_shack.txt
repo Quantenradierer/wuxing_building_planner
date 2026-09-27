@@ -2,61 +2,61 @@ supermarket 30x26 cells, wealth=middle, seed=7
 
 == Ground floor ==
 +===--+---+---+---+----DDDDDDDDDDD--+-----------------------+
-|^^^  |WWW|WWW|WWW|                 |  ppp   ppp KKK        |
-|^^^  |WWW|WWW|WWW|                 |  ppp   ppp KKK        |
-"^^^  |WWW|WWW|WWW|s                |  ppp   ppp KKK        |
-"     |   |   |   |s                |                       |
-"     |4  |5  |6  |s                |  KKK     KKK ppp   ppp|
-|     +D--+D--+D--+                 |  KKK     KKK ppp   ppp|
-|     |           |        7        |  KKK     KKK ppp   ppp|
+|  ^^^|WWW|WWW|WWW|                 |        ppp KKK        |
+|  ^^^|WWW|WWW|WWW|                 |        ppp KKK        |
+"  ^^^|WWW|WWW|WWW|                s|ppp     ppp KKK   ppp  |
+"     |   |   |   |                s|ppp               ppp  |
+"     |4  |5  |6  |                s|ppp   ppp         ppp  |
+|     +D--+D--+D--+                 |      ppp              |
+|  1  |          w|        7        |      ppp ppp       ZZZ|
+|     |           |                 |          ppp       ZZZ|
+"     |iii        |                 |        8 ppp ppp   ZZZ|
+"     |iii        |                 |              ppp   ZZZ|
+"     |iii 3      |                 |          o   ppp   ZZZ|
+|     |           |                 |                    ZZZ|
+|     |           |                 |                    ZZZ|
 |     |           |                 |                       |
-"     |w          |                 |          8            |
-"     |           |                 |                       |
-"     |    3      |                 |                  ppp  |
-|     |           |                 |                  ppp  |
-|     |      iii  |                 |              ppp ppp  |
-|     |      iii  |                 |              ppp      |
-|     |      iii  |        sss      |              ppp      |
-|     +--DDD------+--DDD------------+--DDDDDDD--------------+
-D                        1                                  |
-D                                                           |
-D                                                           |
-D                                                           |
-D                                                           "
-|                                                           "
-|                                                           "
-+--DDDDD----------------------------------------------------+
-|P                                                          |
-|                                                           |
+"     |           |      sss        |                       |
+"     +--DDD------+--DDD------------+--DDDDDDD--------------+
+"              P                                           d|
+|                                                          d|
+|                                                          d|
+|                                                          d|
+"                                                          d"
 "                                                           "
-"                                                           "
-"                                                           "
-|                                                           |
-|      ggggggggggggggg       ggggggggggggggg                |
-|      ggggggggggggggg       ggggggggggggggg                |
-"      ggggggggggggggg       ggggggggggggggg                "
-"                                                           "
-"                                                           "
-|                                                           |
-|                            2                              |
-|                                                           |
-"                                                           "
-"                                                           "
-"      ggggggggggggggg                                      "
+"      ggggggggggggggg                                     $"
 |      ggggggggggggggg                                      |
 |      ggggggggggggggg                                      |
 |                                                           |
-"                    CCC                                    "
-"                    CCC                                    "
-"                    CCC                                    "
-|                    CCC                                    |
-|                    CCC                                    |
-|                    CCC                                    |
-|              $     CCC               P                    |
+"                                                           "
+"                                                           "
+"                                                           "
+|                                                           |
+|                                                          P|
+|                                                           |
+D      ggggggggggggggg     2 ggggggggggggggg                "
+D      ggggggggggggggg       ggggggggggggggg                "
+D      ggggggggggggggg       ggggggggggggggg             zzz"
+D                                                        zzz|
+D                                                        zzz|
+|                                                        zzz|
+|                                                        zzz"
+|                                                        zzz"
+|                                                        zzz"
+|                                                           |
+|                                                           |
+|                                                           |
+"                CCC CCC             CCC                    "
+"                CCC CCC             CCC                    "
+"                CCC CCC             CCC                    "
+|                CCC CCC             CCC                    |
+|zzzzzzz         CCC CCC             CCC           zzzzzzz  |
+|zzzzzzz         CCC CCC             CCC           zzzzzzz  |
+|zzzzzzz         CCC CCC             CCC           zzzzzzz  |
 +===---===---===---===---DDDDDDDDDDD-------===---===---===--+
-  objects: $ atm, C checkout, K crate, g gondola, p pallet, P pay_station, ^ roof_hatch, s shelf, i sink, w urinal, W wc
-    1  corridor            144 cells
-    2  sales_floor         420 cells
+  objects: $ atm, o barrel, C checkout, K crate, d display_case, Z forklift, z freezer, g gondola, p pallet, P pay_station, ^ roof_hatch, s shelf, i sink, w urinal, W wc
+    1  corridor             24 cells
+    2  sales_floor         540 cells
     3  toilet               30 cells
     4  stall                 6 cells
     5  stall                 6 cells

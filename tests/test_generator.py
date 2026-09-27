@@ -3,7 +3,7 @@ import pytest
 from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side
-from roomplanner.model import OpeningKind
+from roomplanner.model import Floor, OpeningKind
 from roomplanner.params import BuildingType, EntranceKind, Shape, Wealth
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
@@ -419,6 +419,33 @@ def test_the_club_checks_coats_at_the_door() -> None:
     kinds = {o.kind for o in ground.objects if o.room == hall.id}
     assert {"coat_rack", "counter"} <= kinds
     assert "cloakroom" not in {r.type for r in ground.rooms}
+
+
+def _door_between(floor: Floor, a: str, b: str) -> bool:
+    for opening in floor.openings:
+        if opening.kind is OpeningKind.DOOR:
+            rooms = [floor.room_at(c) for c in opening.edges[0].cells()]
+            if {r.type for r in rooms if r is not None} == {a, b}:
+                return True
+    return False
+
+
+def test_loading_bays_open_onto_the_warehouse_floor() -> None:
+    for seed in range(3):
+        ground = generate(
+            make_params(building_type=BuildingType.WAREHOUSE, width=60, depth=44, seed=seed)
+        ).floor(0)
+        assert _door_between(ground, "loading_bay", "warehouse_floor"), seed
+
+
+def test_observation_rooms_sit_beside_an_interview_room() -> None:
+    beside = 0
+    for seed in range(4):
+        ground = generate(
+            make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=seed)
+        ).floor(0)
+        beside += _door_between(ground, "interview_room", "observation_room")
+    assert beside >= 2
 
 
 def test_police_station_has_holding_cells_behind_the_lockup() -> None:

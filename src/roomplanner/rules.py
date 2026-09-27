@@ -106,6 +106,10 @@ class FurnitureRule(_Strict):
     clearance: int = Field(default=2, ge=0, description="choose: free cells around it")
     landing: int = Field(default=0, ge=0, description="fill: free cells kept on the door side")
     reach: int | None = Field(default=None, gt=0, description="fill: at most this many deep")
+    near_room: str | None = Field(
+        default=None,
+        description="wall: as close as possible to a room of this type (the stage by backstage)",
+    )
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 

@@ -287,6 +287,8 @@ class RoomFurnisher:
             case Placement.WALL:
                 candidates = self._against_walls(spec, corners_only=False)
                 self.rng.shuffle(candidates)
+                if rule.near_room is not None:
+                    candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
             case Placement.BACK:
                 candidates = self._against_walls(spec, corners_only=False)
                 # Equally far (a square wc filling a stall): face the door.
@@ -419,6 +421,13 @@ class RoomFurnisher:
         first, last = back[0], back[-1]
         ends = (Side.W, Side.E) if side in (Side.N, Side.S) else (Side.N, Side.S)
         return Edge.of(first, ends[0]) in self.solid or Edge.of(last, ends[1]) in self.solid
+
+    def _room_distance(self, rect: Rect, room_type: str) -> float:
+        """How far a rectangle's centre is from the nearest room of that type on the floor."""
+        x, y, w, h, _ = rect
+        cx, cy = x + w / 2, y + h / 2
+        cells = [c for r in self.floor.rooms if r.type == room_type for c in r.cells]
+        return min((abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in cells), default=0.0)
 
     def _door_distance(self, rect: Rect) -> float:
         """How far a rectangle's centre is from the room's door clearances (deterministic)."""

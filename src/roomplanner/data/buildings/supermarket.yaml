@@ -10,6 +10,7 @@ corridor:
 strip_depth: [8, 14]       # back-of-house row behind the service corridor
 hall:
   min_depth: 12
+  corridor_from: 1000      # never: the back rooms open straight onto the floor
 facade:
   module: 3
   window: 2

@@ -97,7 +97,7 @@ rooms:
       - {object: dj_booth, placement: wall}
       - {object: speaker, placement: corner, count: [2, 4]}
       - {object: sofa, placement: wall, count: [1, 4]}
-      - {object: stage, placement: wall, count: [0, 1]}
+      - {object: stage, placement: wall, count: [0, 1], near_room: backstage}
   lounge:               # upper club floors
     area: [80, 100000]
     min_side: 10

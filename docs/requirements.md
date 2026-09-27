@@ -259,10 +259,10 @@ Known weaknesses:
   public area is just the front office: public toilets are behind its locked door.
 - A storeroom behind the elevator, walled in by the stairwell and toilet stalls, can open
   into the elevator (3 of ~1000 rooms beside cores, supermarket upper floors).
-- Rooms that belong together aren't adjacent: police observation room isn't next to an
-  interview room; nightclub backstage isn't next to the stage; warehouse loading bays are
-  separated from the hall by a corridor; supermarket stockroom/loading bay only reach the
-  sales floor via the corridor.
+- Rooms that belong together: about 60 % of police observation rooms sit beside an
+  interview room (`next_to` only orders rooms within one strip segment); a supermarket
+  stockroom borders the sales floor in about half the cases (the others sit behind a
+  cluster hallway).
 - Vehicle and delivery access: loading bays can lack an exterior door (warehouse NE bay,
   supermarket loading bay, whose delivery door opens into the stockroom next to it); the
   service-side double door can open into a storeroom (chop shop, police station) or the
