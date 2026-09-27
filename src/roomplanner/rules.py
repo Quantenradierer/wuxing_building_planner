@@ -96,6 +96,11 @@ class FurnitureRule(_Strict):
     )
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
     block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
+    head: str | None = Field(
+        default=None,
+        description="`object` is a pair of desks, `count` counts desks; an odd one (or one "
+        "left over when no wall takes another pair) turns a pair into this group",
+    )
     toward: str | None = Field(
         default=None, description="rows: face the object of this kind placed before (the altar)"
     )

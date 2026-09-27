@@ -211,6 +211,7 @@ class RoomFurnisher:
             if obj.blocking:
                 self.blocking |= obj.cells
         self.placed: list[PlacedObject] = []
+        self.last_group: Rect | None = None  # where the last group went
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
@@ -241,6 +242,9 @@ class RoomFurnisher:
                 count = round(self.rng.randint(low, high) * factor)
             if low > 0:
                 count = max(1, count)
+            if rule.head is not None:
+                self._pairs(rule, spec, rule.head, count)
+                continue
             for _ in range(count):
                 if self._place_one(rule, spec):
                     continue
@@ -254,6 +258,47 @@ class RoomFurnisher:
                 if not self._place_one(alone, self._spec(main)):
                     break
         return self.placed
+
+    def _pairs(self, rule: FurnitureRule, spec: ObjectSpec, head: str, desks: int) -> None:
+        """`desks` desks as pairs (`rule.object`) against the walls; a desk left over (odd
+        count, or no wall for another pair) goes across the end of a pair (`head`)."""
+        pairs: list[tuple[Rect, list[PlacedObject]]] = []
+        for _ in range(desks // 2):
+            before = len(self.placed)
+            if not self._place_one(rule, spec) or self.last_group is None:
+                break
+            pairs.append((self.last_group, self.placed[before:]))
+        left = desks - 2 * len(pairs)
+        for rect, parts in pairs:
+            if left <= 0:
+                break
+            if self._extend(rect, parts, head):
+                left -= 1
+
+    def _extend(self, rect: Rect, parts: list[PlacedObject], kind: str) -> bool:
+        """Replace the group at `rect` by the bigger group `kind` with the same back wall."""
+        x, y, w, h, facing = rect
+        along, deep = self.ctx.rules.groups[kind].size
+        match facing:
+            case Side.S:
+                bigger = (x, y, along, deep, facing)
+            case Side.N:
+                bigger = (x, y + h - deep, along, deep, facing)
+            case Side.E:
+                bigger = (x, y, deep, along, facing)
+            case Side.W:
+                bigger = (x + w - deep, y, deep, along, facing)
+        box = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+        solid = {c for o in parts if o.blocking for c in o.cells}
+        self.placed = [o for o in self.placed if o not in parts]
+        self.taken -= box
+        self.blocking -= solid
+        if self._try(kind, bigger):
+            return True
+        self.placed += parts
+        self.taken |= box
+        self.blocking |= solid
+        return False
 
     def _choices(self, rule: FurnitureRule) -> list[str]:
         """`object` and `choose` in the order to try: largest first among those that fit the
@@ -629,6 +674,7 @@ class RoomFurnisher:
             return False
         self.taken |= box
         self.blocking |= solid
+        self.last_group = rect
         for part, (px, py, pw, ph, facing) in zip(group.parts, parts, strict=True):
             blocking = not objects[part.object].walkable
             self.placed.append(

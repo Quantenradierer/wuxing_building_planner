@@ -49,7 +49,7 @@ def test_detects_unreachable_room() -> None:
         ground, room, replace(room, cells=room.cells - closet), Room("0.99", "closet", closet)
     )
     walls = ground.walls | {Edge.of(Cell(0, 0), Side.E), Edge.of(Cell(0, 0), Side.S)}
-    objects = tuple(o for o in ground.objects if closet.isdisjoint(o.cells))
+    objects = tuple(o for o in ground.objects if o.room != room.id)  # the room changed shape
     broken = replace(ground, rooms=rooms, walls=walls, objects=objects)
     assert messages(with_ground_floor(building, broken)) == [
         "1 cells unreachable, e.g. Cell(x=0, y=0)"

@@ -297,3 +297,14 @@ def test_bigger_buildings_get_more_elevators_whose_cars_fill_the_shaft() -> None
     small, large = elevators(40, 24), elevators(60, 44)
     assert len(small) == 1 < len(large)
     assert all(car >= shaft * 0.7 for shaft, car in small + large)
+
+
+def test_offices_have_three_to_seven_desks_in_pairs_each_with_a_chair() -> None:
+    floor = generate(make_params(width=60, depth=40, floors_above=3, seed=1)).floor(2)
+    offices = [r for r in floor.rooms if r.type == "office"]
+    assert offices
+    for room in offices:
+        kinds = [o.kind for o in floor.objects if o.room == room.id]
+        desks = kinds.count("office_desk")
+        assert 2 <= desks <= 7
+        assert kinds.count("chair") == desks

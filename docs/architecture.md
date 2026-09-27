@@ -307,7 +307,7 @@ walls, every object facing alike, the outer ring first: cafe tables, lobby armch
 facing it: the reception desk), `fill` (the room's box less `margin` rows at its doors, the
 object stretched to it: the elevator car fills its shaft) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells, the block centred in
-the room; offices get a small island of desks back to back; `paired: true` puts rows back to back
+the room; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two
 halves fit: pews facing the altar), and `at`
@@ -319,6 +319,10 @@ object per N cells of room, bounded by `count`), scaled by the tier's `furniture
 an exact count (`count: 1`, the default) is never scaled. A rule with `wealth:` or `security:`
 lists applies only to those tiers of the building (squatter mattresses, a guard post at the
 checkout from low security up); `rules_for` drops the others.
+With `head:` the rule places desk pairs (`count` counts desks): two desks joined on their
+long side, the pair's short side against a wall; an odd desk, or one left over when no wall
+takes another pair, turns a pair into the `head` group (a third desk across its end, facing
+the wall). Offices have 3-7 desks this way.
 On a `grid` a group that doesn't fit is left out rather than placed as its main part
 alone, so the grid's objects all look alike (desks in offices and focus rooms).
 Rooms of one type with the same shape, door clearances and walls get the same layout,
