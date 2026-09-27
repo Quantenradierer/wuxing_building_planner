@@ -433,7 +433,32 @@ class RoomFurnisher:
                 candidates = self._filling(rule)
             case Placement.ROWS | Placement.AT:
                 return False
-        return any(self._try(rule.object, rect, spec.walkable) for rect in candidates)
+        for rect in candidates:
+            if self._try(rule.object, rect, spec.walkable):
+                if rule.placement is Placement.FACING_EXIT:
+                    self.clearance = self.clearance | self._approach(rect)
+                return True
+        return False
+
+    def _approach(self, rect: Rect) -> frozenset[Cell]:
+        """The room's cells in front of an object, its width wide, up to the wall it faces:
+        the way from the door to the reception desk stays free."""
+        x, y, w, h, facing = rect
+        dx, dy = facing.delta
+        found: set[Cell] = set()
+        if dx == 0:
+            for cx in range(x, x + w):
+                cy = y + h if dy > 0 else y - 1
+                while Cell(cx, cy) in self.cells:
+                    found.add(Cell(cx, cy))
+                    cy += dy
+        else:
+            for cy in range(y, y + h):
+                cx = x + w if dx > 0 else x - 1
+                while Cell(cx, cy) in self.cells:
+                    found.add(Cell(cx, cy))
+                    cx += dx
+        return frozenset(found)
 
     def _filling(self, rule: FurnitureRule) -> list[Rect]:
         """The room's rectangle at its door (to circulation first), all across, backed against

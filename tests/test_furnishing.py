@@ -539,3 +539,19 @@ def test_office_leftovers_become_nap_rooms_full_of_sleep_pods() -> None:
     for room in naps:
         pods = [o for o in floor.objects if o.room == room.id and o.kind == "capsule"]
         assert len(pods) >= 2
+
+
+def test_office_lobbies_have_a_reception_desk_with_a_free_way_from_the_door() -> None:
+    for seed in range(4):
+        ground = generate(make_params(width=60, depth=40, floors_above=3, seed=seed)).floor(0)
+        lobby = next(r for r in ground.rooms if r.type == "reception_lobby")
+        objects = [o for o in ground.objects if o.room == lobby.id]
+        desk = next(o for o in objects if o.kind == "reception_desk")
+        dx, dy = desk.facing.delta
+        front = {
+            Cell(c.x + dx * k, c.y + dy * k)
+            for c in desk.cells
+            for k in range(1, 40)
+            if Cell(c.x + dx * k, c.y + dy * k) in lobby.cells
+        }
+        assert not any(o.blocking and o.cells & front for o in objects if o is not desk)

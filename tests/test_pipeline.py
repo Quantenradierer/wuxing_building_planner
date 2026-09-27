@@ -36,7 +36,7 @@ class BrokenLayout(CorridorLayout):
     def layout(self, ctx: Context, footprint: frozenset[Cell]) -> BuildingPlan:
         plan = super().layout(ctx, footprint)
         for floor in plan.floors:
-            victim = next(r for r in floor.rooms if r.type == "office")
+            victim = next(r for r in floor.rooms if r.type not in ("corridor", "stairwell"))
             floor.rooms.remove(victim)
         return plan
 
