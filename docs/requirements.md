@@ -235,8 +235,82 @@ Decided by the author (2026-09-27):
 - Tactical layer: the unused `cover` field was removed from objects.
 
 Known weaknesses:
+- Leftover space becomes storerooms full of crates. Apartment building 40 × 24: one flat
+  and four storerooms per floor (seeds 1–5). Hotel 56 × 36: eight guest rooms and six
+  storerooms per upper floor. Coffin block: every coffin row gets a storeroom behind it
+  (19 in 2 floors). Police station: storerooms fill the whole basement (about 20; the
+  ground floor has records rooms and a booking room instead). Office 48 × 32 × 2
+  and corp office 48 × 36 × 3 have 9 each; clinic, church, street doc and chop shop 2–5.
+  Filler should repeat the building's main room (flats, guest rooms, offices) before it
+  falls back to storage.
+- Toilets don't scale with the building: dive bar 11 × 8 m gets two toilets with three
+  stalls each (about the taproom's area); stuffer shack, street doc and chop shop get 2–4
+  stalls where one staff WC would do. Corp office 48 × 36 × 3: 18 stalls, office
+  48 × 32 × 2: 14.
+- Small buildings get a full-width corridor: stuffer shack and dive bar spend ~85 cells on
+  it, and a 22 × 16 dive bar is rejected ("needs at least 19 for its corridor").
+  Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade
+  (one in the clinic only holds a roof hatch).
+- Public sequence is broken: entrance, reception and waiting aren't chained. Clinic: the
+  entrance opens into an empty lobby; reception is a closed room across the corridor and
+  the waiting room is elsewhere. Police station: the reception desk is in a closed room
+  behind the lobby; the lobby opens onto the main corridor, so the public reaches lockup,
+  armory and evidence room; no secure zone. Nightclub: the cloakroom is off the corridor,
+  not at the entrance, and the security room is dropped for lack of space (40 × 32).
+- Rooms that belong together aren't adjacent: police observation room isn't next to an
+  interview room; nightclub backstage isn't next to the stage; warehouse loading bays are
+  separated from the hall by a corridor; supermarket stockroom/loading bay only reach the
+  sales floor via the corridor.
+- Vehicle and delivery access: loading bays can lack an exterior door (warehouse NE bay,
+  supermarket loading bay, whose delivery door opens into the stockroom next to it); the
+  service-side double door can open into a storeroom (chop shop, police station) or the
+  pharmacy (clinic); the chop shop workshop (with car lifts) and the warehouse hall have
+  no vehicle door, only a pedestrian door; stuffer shack has no door on its service side.
+- Parking garage 48 × 36: one row of eight bays, the rest of the deck is empty.
+- Dive bar: the counter stands against the street facade next to the entrance, with no
+  back bar or storage behind it.
+- Church: the altar can sit on a long side wall (48-deep nave: altar on the east wall, pews
+  north–south facing it); no narthex.
+- Stuffer shack 24 × 16: only two gondolas on a mostly empty shop floor.
+- ASCII legend reuses letters (`w` urinal/wc, `c` chair/stool, `t` bar/coffee table) and
+  object digits clash with room numbers.
+- Meeting rooms are often too wide; they should be sized to their table plus clearance
+  around it. Different table shapes and sizes (round, long, U) would add variety.
+- Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
+  have one thin back-of-house strip; it is full before the optional Sixth World rooms
+  (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they
+  mostly appear only in bigger footprints or basements. Spider stations and drones there
+  are furniture instead (rigger cocoon in the security room, drone docks in the hall).
+- Optional rooms that don't fit still add a "dropped … (no space)" warning; at minimum
+  footprints that is several warnings per floor.
+- The vault can be entered through another room of its cluster (corp office basement:
+  through the electrical room).
+- Apartment 26 × 26, 2 floors, squatter (all street sides, seeds 0–3): back bedrooms and
+  a closet have no door; the `front_fill` closets cut them off from the entry hall
+  (hard violation "cells unreachable"; found by the property test).
+- Hospital 70 × 44 × 3: the top floor's doctor's office reaches 171–190 cells (limit
+  105) in about half the seeds.
+- Reception should be next to the lobby (or part of it), not a separate room elsewhere.
+- Hotel guest rooms: the bathroom may open directly into the guest room; it doesn't need
+  the small hallway in between.
+- Toilets (wc) and washbasins should be 1 × 1 m (2 × 2 cells): a bit larger than real, but
+  bathrooms look empty otherwise.
+- Rooms with more than one wc should put each wc in a stall; several loose wcs in one room
+  look wrong.
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their
   catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
+- The storeroom behind the stairwell (deep core slots) can be walled in by apartments; it
+  then opens into the stairwell as a last resort, on some floors only (apartment
+  53 × 41 irregular, seed 123: floor 1 only). It should reach the corridor, or be a
+  stairwell closet on every floor.
+- Leftover storerooms can open into the lobby or lounge instead of a corridor (hotel
+  56 × 36: storeroom beside the lounge).
+- Apartment halls run the whole unit width in deep strips (up to ~90 cells, 22 m²);
+  the catalog maximum was raised to fit instead of making the hall shorter.
+- Closets (`front_fill`) sit wherever the front zone has spare width; they can end up
+  entered through the kitchen (pantry) rather than the hall.
+- Church: a row holds only whole 8-cell pews with a cross aisle every three; in naves up
+  to ~27 cells wide two pews meet in the middle without a central aisle.
 
 Possible extensions: surroundings (street, yard, parking, fire escapes, roof), more themes
 (corporate white, Barrens, print), a web UI with preview, more building types and variants
