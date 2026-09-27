@@ -77,7 +77,8 @@ def subdivide(
         fronts.pop()
         widths = _share(width - hall_width, [side(k) for k in fronts], fronts, rules)
     widths = widths or []
-    fronts, widths = _front_fill(fronts, widths, front_depth, spec, rules)
+    if spine:  # without one only the hall's neighbours can open onto it: no closets
+        fronts, widths = _front_fill(fronts, widths, front_depth, spec, rules)
     order: list[tuple[str, int]] = []
     if fronts and fronts[0] == first_front:
         order.append((fronts[0], widths[0]))
@@ -107,6 +108,8 @@ def subdivide(
     sizes = [max(hall_end, side(spec.back[0]))]
     remaining = width - sizes[0]
     for kind in [*spec.back[1:], *([spec.back_fill] * width if spec.back_fill else [])]:
+        if not spine and len(backs) == 2:
+            break  # entered through back[0]: only its one neighbour can be
         if side(kind) > back_depth:
             continue
         low, high = rules.spec(kind).area

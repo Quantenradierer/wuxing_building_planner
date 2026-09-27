@@ -1,8 +1,12 @@
 from collections import defaultdict
 
+import pytest
+
 from roomplanner.generator import generate
+from roomplanner.geometry import Side
 from roomplanner.model import Floor, OpeningKind, Room
-from roomplanner.params import BuildingType
+from roomplanner.params import BuildingType, Wealth
+from roomplanner.validation import hard_violations
 
 from .conftest import make_params
 
@@ -76,6 +80,22 @@ def test_hotel_bathrooms_open_into_the_guest_room_where_the_unit_is_wide_enough(
     floors = generate(params).floors
     pairs = {(a.type, b.type) for floor in floors for a, b in door_pairs(floor)}
     assert ("bathroom", "guest_room") in pairs or ("guest_room", "bathroom") in pairs
+
+
+@pytest.mark.parametrize("street", list(Side))
+def test_shallow_wide_flats_keep_every_room_reachable(street: Side) -> None:
+    """No spine: only the hall's neighbours and back[0]'s neighbour can have doors."""
+    for seed in range(2):
+        params = make_params(
+            building_type=BuildingType.APARTMENT,
+            width=26,
+            depth=26,
+            floors_above=2,
+            wealth=Wealth.SQUATTER,
+            street_side=street,
+            seed=seed,
+        )
+        assert not hard_violations(generate(params))
 
 
 def test_closets_open_onto_the_hallway() -> None:
