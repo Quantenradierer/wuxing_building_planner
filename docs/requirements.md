@@ -244,10 +244,8 @@ every type ≤ 5 % except apartments (9 %, a third of it flat closets).
 `tests/test_storage.py` keeps the share below 5 %.
 
 Known weaknesses:
-- Toilets don't scale with the building: dive bar 11 × 8 m gets two toilets with three
-  stalls each (about the taproom's area); stuffer shack, street doc and chop shop get 2–4
-  stalls where one staff WC would do. Corp office 48 × 36 × 3: 18 stalls, office
-  48 × 32 × 2: 14.
+- Toilets: a public toilet whose stalls leave only a passage between two doors has no
+  room for its 2 × 2 sink (about 5 % of toilets).
 - Small buildings get a full-width corridor: stuffer shack and dive bar spend ~85 cells on
   it, and a 22 × 16 dive bar is rejected ("needs at least 19 for its corridor").
   Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade
@@ -267,16 +265,11 @@ Known weaknesses:
   service-side double door can open into a storeroom (chop shop, police station) or the
   pharmacy (clinic); the chop shop workshop (with car lifts) and the warehouse hall have
   no vehicle door, only a pedestrian door; stuffer shack has no door on its service side.
-- Parking garage 48 × 36: one row of eight bays, the rest of the deck is empty.
-- Dive bar: the counter stands against the street facade next to the entrance, with no
-  back bar or storage behind it.
-- Church: the altar can sit on a long side wall (48-deep nave: altar on the east wall, pews
-  north–south facing it); no narthex.
-- Stuffer shack 24 × 16: only two gondolas on a mostly empty shop floor.
-- ASCII legend reuses letters (`w` urinal/wc, `c` chair/stool, `t` bar/coffee table) and
-  object digits clash with room numbers.
-- Meeting rooms are often too wide; they should be sized to their table plus clearance
-  around it. Different table shapes and sizes (round, long, U) would add variety.
+- Church: no narthex; the portal opens straight into the nave.
+- Stuffer shack 24 × 16: 3–4 gondolas in two rows; the checkout stands in the middle of
+  the floor in front of the door rather than beside it.
+- Meeting rooms in 6-cell (3 m) strips are long and thin (up to 16 × 6); only the
+  standard table fits them. Round, long and U tables appear in rooms deep enough.
 - Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
   have one thin back-of-house strip; it is full before the optional Sixth World rooms
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they
@@ -286,18 +279,11 @@ Known weaknesses:
   footprints that is several warnings per floor.
 - The vault can be entered through another room of its cluster (corp office basement:
   through the electrical room).
-- Apartment 26 × 26, 2 floors, squatter (all street sides, seeds 0–3): back bedrooms and
-  a closet have no door; the `front_fill` closets cut them off from the entry hall
-  (hard violation "cells unreachable"; found by the property test).
 - Hospital 70 × 44 × 3: the top floor's doctor's office reaches 171–190 cells (limit
   105) in about half the seeds.
 - Reception should be next to the lobby (or part of it), not a separate room elsewhere.
-- Hotel guest rooms: the bathroom may open directly into the guest room; it doesn't need
-  the small hallway in between.
-- Toilets (wc) and washbasins should be 1 × 1 m (2 × 2 cells): a bit larger than real, but
-  bathrooms look empty otherwise.
-- Rooms with more than one wc should put each wc in a stall; several loose wcs in one room
-  look wrong.
+- Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
+  between corridor, bathroom and guest room.
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their
   catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
   Absorbing leftovers raised this by ~15 % (2 000 buildings: 621 → 719 rooms), mostly
@@ -308,12 +294,9 @@ Known weaknesses:
   closet on every floor.
 - Leftover storerooms can open into the lobby or lounge instead of a corridor (hotel
   56 × 36: storeroom beside the lounge).
-- Apartment halls run the whole unit width in deep strips (up to ~90 cells, 22 m²);
-  the catalog maximum was raised to fit instead of making the hall shorter.
-- Closets (`front_fill`) sit wherever the front zone has spare width; they can end up
-  entered through the kitchen (pantry) rather than the hall.
-- Church: a row holds only whole 8-cell pews with a cross aisle every three; in naves up
-  to ~27 cells wide two pews meet in the middle without a central aisle.
+- Apartment halls run the whole unit width in deep strips (up to ~100 cells); every back
+  room must touch them, so a unit with four back rooms needs the whole spine. Shortening
+  it to the doors saved only ~5 % and cut closets off; smaller units would help more.
 - Small apartment buildings (one or two segments per floor) still keep leftover
   storerooms behind small service rooms; flat closets (`front_fill`) are ~3 % of the area.
 - Basements are mostly mechanical rooms side by side (one laundry, staff room and
