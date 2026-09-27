@@ -79,7 +79,7 @@ class Placement(StrEnum):
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
     GRID = "grid"  # on one lattice, all alike, from the walls inwards (cafe tables)
     FACING_EXIT = "facing_exit"  # on the entrance's axis, facing it (reception desk)
-    FILL = "fill"  # the whole room but `margin` rows in front of its doors (elevator car)
+    FILL = "fill"  # the room's width at the far wall, facing the door (stairs, elevator car)
     PERIMETER = "perimeter"  # side by side along every wall, as many as fit (vending machines)
     AXIS = "axis"  # on a wall at an end of the biggest object's long axis, facing it (screen)
 
@@ -95,7 +95,7 @@ class FurnitureRule(_Strict):
     margin: int = Field(
         default=2,
         ge=0,
-        description="rows, grid: cells along walls; facing_exit: past the door; fill: at doors",
+        description="rows, grid: cells along walls; facing_exit: past the door",
     )
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
     block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
@@ -131,6 +131,12 @@ class FurnitureRule(_Strict):
         default=False,
         description="Only in every other room of this type on a floor, the first, third, … "
         "(urinals in the men's toilet, none in the women's)",
+    )
+    landing: int = Field(default=0, ge=0, description="fill: free cells kept on the door side")
+    reach: int | None = Field(default=None, gt=0, description="fill: at most this many deep")
+    near_room: str | None = Field(
+        default=None,
+        description="wall: as close as possible to a room of this type (the stage by backstage)",
     )
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
@@ -199,11 +205,6 @@ class RoomSpec(_Strict):
     )
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
-    exterior_door: int | None = Field(
-        default=None,
-        gt=0,
-        description="On the ground floor its own exterior door this wide (a roller door)",
-    )
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
     vestibule: str | None = Field(
         default=None, description="Entered only through this room type, placed beside it"
@@ -226,6 +227,11 @@ class RoomSpec(_Strict):
         description="Cluster rooms: chance to become a closet of a host from `access`",
     )
     transit: bool = Field(default=True, description="Other rooms may be entered through it")
+    facade_door: int | None = Field(
+        default=None,
+        gt=0,
+        description="Ground floor: its own exterior door this wide (vehicles, deliveries)",
+    )
     furniture: list[FurnitureRule] = []
     wealth: dict[Wealth, RoomTier] = {}
 
@@ -354,9 +360,11 @@ class HallRule(_Strict):
     foyer: FoyerRule | None = Field(
         default=None, description="Ground floor: a foyer cut off the hall at the street side"
     )
-    corridor: bool = Field(
-        default=True,
-        description="Service corridor between hall and back rooms (else they open onto the hall)",
+    corridor_from: int = Field(
+        default=0,
+        ge=0,
+        description="Building length from which a service corridor runs between hall and back "
+        "of house; in shorter buildings the back rooms open onto the hall",
     )
 
 

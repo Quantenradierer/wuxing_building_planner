@@ -102,6 +102,7 @@ rooms:
   server_room:
     area: [40, 160]
     min_side: 6
+    transit: false
     windows: forbidden
     furniture:
       - {object: suppression_tanks, placement: wall, count: [0, 1]}

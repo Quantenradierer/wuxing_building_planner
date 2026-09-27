@@ -1,14 +1,14 @@
 """Hall layout: one big room per floor (sales floor) plus back-of-house rooms.
 
 The main part's depth becomes [hall | service corridor | back-of-house strip], the hall on
-the street side. Everything else — core, service entrance, L-shaped wings, allocation of
+the street side; parts shorter than `hall.corridor_from` have no corridor, their back rooms
+open onto the hall. Everything else — core, service entrance, L-shaped wings, allocation of
 the back-of-house rooms — works as in the corridor layout.
 """
 
 from __future__ import annotations
 
 import random
-from dataclasses import replace
 
 from roomplanner.errors import RulesError
 from roomplanner.pipeline.base import Context
@@ -23,7 +23,11 @@ BACK_OF_HOUSE_SHARE = 0.3  # of the depth, within the program's strip_depth
 class HallLayout(CorridorLayout):
     def main_min_depth(self, ctx: Context) -> int:
         program = ctx.rules.program
-        return program.strip_depth[0] + _corridor(ctx) + _hall_min(ctx)
+        corridor = program.corridor.width if _has_corridor(ctx) else 0
+        return program.strip_depth[0] + corridor + _hall_min(ctx)
+
+    def main_corridor(self, ctx: Context, frame: Frame) -> int:
+        return ctx.rules.program.corridor.width if _has_corridor(ctx, frame.length) else 0
 
     def _part(
         self,
@@ -48,7 +52,7 @@ class HallLayout(CorridorLayout):
     ) -> Part:
         program = ctx.rules.program
         low, high = program.strip_depth
-        corridor = _corridor(ctx)
+        corridor = program.corridor.width if _has_corridor(ctx, frame.length) else 0
         depth = frame.depth
         back = min(high, max(low, round(depth * BACK_OF_HOUSE_SHARE)))
         back = min(back, depth - corridor - _hall_min(ctx))
@@ -59,31 +63,32 @@ class HallLayout(CorridorLayout):
             hall_first = street is LocalSide.V0
         else:
             hall_first = rng.random() < 0.5
+        # Without a corridor the back rooms' "corridor side" is the hall they open onto.
+        hall = depth - back - corridor
         if hall_first:
-            hall = depth - back - corridor
-            bands = [
-                Band(0, BandKind.HALL, 0, hall),
-                Band(1, BandKind.CORRIDOR, hall, hall + corridor),
-                Band(2, BandKind.STRIP, hall + corridor, depth, LocalSide.V0, facade=True),
-            ]
+            kinds = [(BandKind.HALL, hall), (BandKind.CORRIDOR, corridor), (BandKind.STRIP, back)]
         else:
-            bands = [
-                Band(0, BandKind.STRIP, 0, back, LocalSide.V1, facade=True),
-                Band(1, BandKind.CORRIDOR, back, back + corridor),
-                Band(2, BandKind.HALL, back + corridor, depth),
-            ]
-        if not corridor:  # small buildings: the back rooms open onto the hall
-            bands = [
-                replace(b, index=i)
-                for i, b in enumerate(b for b in bands if b.kind is not BandKind.CORRIDOR)
-            ]
+            kinds = [(BandKind.STRIP, back), (BandKind.CORRIDOR, corridor), (BandKind.HALL, hall)]
+        bands: list[Band] = []
+        v = 0
+        for kind, size in kinds:
+            if size == 0:
+                continue
+            if kind is BandKind.STRIP:
+                side = LocalSide.V0 if hall_first else LocalSide.V1
+                bands.append(Band(len(bands), kind, v, v + size, side, facade=True))
+            else:
+                bands.append(Band(len(bands), kind, v, v + size))
+            v += size
         return Part(frame, Grid.centred(program.facade.module, frame.length), bands)
 
 
-def _corridor(ctx: Context) -> int:
-    """Width of the service corridor, 0 if the back rooms open onto the hall."""
+def _has_corridor(ctx: Context, length: int | None = None) -> bool:
+    """A service corridor at this main part length (unknown: the building's longer side)."""
+    if length is None:
+        length = max(ctx.params.width, ctx.params.depth)
     hall = ctx.rules.program.hall
-    return ctx.rules.program.corridor.width if hall is None or hall.corridor else 0
+    return hall is None or length >= hall.corridor_from
 
 
 def _hall_min(ctx: Context) -> int:

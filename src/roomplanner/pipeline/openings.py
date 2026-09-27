@@ -68,7 +68,14 @@ class DefaultOpenings:
                 for i, r in enumerate(planned.rooms)
                 if r.host is not None and id(r.host) in index
             }
-            walls = _walls(footprint, owner, circulation, opened)
+            # Circulation rooms that `connect` keep a wall with a door (narthex and nave).
+            paired = {
+                (i, j)
+                for i, a in enumerate(rooms)
+                for j, b in enumerate(rooms)
+                if b.type in ctx.rules.spec(a.type).connect
+            }
+            walls = _walls(footprint, owner, circulation, opened, paired)
             circulation |= {i for i, sides in opened.items() if sides}
             fixed = {
                 i: core_walls[key]
@@ -104,8 +111,6 @@ class DefaultOpenings:
                 used |= set(door.edges)
             if planned.level == 0:
                 for room in rooms:
-                    if ctx.rules.spec(room.type).exterior_door is None:
-                        continue
                     door = _vehicle_door(ctx, footprint, room, doors, used, grid, rng)
                     if door is not None:
                         doors.append(door)
@@ -135,7 +140,9 @@ def _core_walls(ctx: Context, plan: BuildingPlan) -> dict[tuple[str, Cell], set[
     core_types = {c.room for c in ctx.rules.program.core}
     common: dict[tuple[str, Cell], set[Edge]] = {}
     for planned in plan.floors:
-        flow = {c for r in planned.rooms if ctx.rules.spec(r.type).circulation for c in r.cells}
+        flow = {
+            c for r in planned.rooms if ctx.rules.spec(r.type).circulation or r.hub for c in r.cells
+        }
         for room in planned.rooms:
             if room.type not in core_types:
                 continue
@@ -164,10 +171,12 @@ def _walls(
     owner: dict[Cell, int],
     circulation: set[int],
     opened: dict[int, set[Side]] | None = None,
+    paired: set[tuple[int, int]] | None = None,
 ) -> frozenset[Edge]:
-    """Walls between different rooms, except between circulation rooms and on the open
-    sides of `opened` rooms towards circulation."""
+    """Walls between different rooms, except between circulation rooms (unless `paired`:
+    they connect by a door) and on the open sides of `opened` rooms towards circulation."""
     opened = opened or {}
+    paired = paired or set()
     walls = set(boundary_edges(footprint))
     for cell in footprint:
         for side in (Side.E, Side.S):
@@ -177,7 +186,10 @@ def _walls(
             # Cells a (faulty) layout left without a room are walled off; the validator
             # reports them instead of this stage crashing.
             a, b = owner.get(cell), owner.get(neighbour)
-            if a == b or (a in circulation and b in circulation):
+            if a == b:
+                continue
+            both = a in circulation and b in circulation
+            if both and (a, b) not in paired and (b, a) not in paired:
                 continue
             if a in opened and b in circulation and side in opened[a]:
                 continue
@@ -241,13 +253,15 @@ def _interior_doors(
     walls they share with circulation on every floor). `fronts`: the walls a room's door
     goes in if it can (stalls: towards the passage, never into a flank).
 
-    Rank: into circulation, then into a type from the room's `access` list (in order), then
+    Rank: into circulation (one in the room's `access` list first), then into a type from
+    the `access` list (in order), then
     anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
     only connect within their unit, except its entry room, which opens to circulation.
     An annex (closet) opens only into its host and is never passed through.
-    A room left without any allowed door (a storeroom behind the stairwell, walled in by
-    apartments) finally opens into a core room. Open rooms (`opened`: an open kitchen) need
-    no door and take other rooms' doors only as that last resort.
+    A room left without any allowed door (a storeroom behind the core between rooms that
+    are no thoroughfares, walled in by apartments) finally opens into any neighbour, a core
+    room last. Open rooms (`opened`: an open kitchen) need no door and take other rooms'
+    doors only as that last resort.
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
@@ -276,8 +290,8 @@ def _interior_doors(
             return False
         if rooms[i].type in core_types and rooms[j].type in core_types:
             return True  # the elevator may open into the stairwell wrapped around it
-        if stranded and rooms[j].type in core_types:
-            return True
+        if stranded:
+            return True  # through a room that is not meant for it, a core room last
         return ctx.rules.spec(rooms[j].type).transit
 
     stranded = False
@@ -301,7 +315,9 @@ def _interior_doors(
             if only is not None and j not in circulation:
                 continue
             if j in circulation:
-                rank = -1
+                rank = -2 if rooms[j].type in spec.access else -1
+            elif rooms[j].type in core_types:
+                rank = len(spec.access) + 1
             elif rooms[j].type in spec.access:
                 rank = spec.access.index(rooms[j].type)
             else:
@@ -412,12 +428,17 @@ def _exterior_door(
     width = ctx.rules.entrances(ctx.params)[request.kind].width
     target = Edge.of(request.hint, request.side)
     hinted = rooms[request.room]
-    # The program's service rooms in order of preference (loading bay before cold storage).
+    back = request.kind is EntranceKind.SERVICE
+    # The service door is the vehicle door of a bay if there is one, else a back room's
+    # door (the program's service rooms in order: loading bay before cold storage) or the
+    # corridor's end.
+    vehicle = [r for r in rooms if back and ctx.rules.spec(r.type).facade_door]
     service = [
         [r for r in rooms if r.unit is None and r.type == kind]
         for kind in ctx.rules.program.service_rooms
-        if request.kind is EntranceKind.SERVICE
+        if back
     ]
+    corridor = [r for r in rooms if back and ctx.rules.spec(r.type).circulation]
     others = [
         r
         for r in rooms
@@ -437,11 +458,12 @@ def _exterior_door(
 
     # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them.
     roomy = [r for r in first if r.area >= ROOMY], [r for r in others if r.area >= ROOMY]
-    tiers = (*service, *roomy, first, others, last)
+    tiers = (vehicle, *service, corridor, *roomy, first, others, last)
     # A wide door (loading dock) that would blind a room needing windows: a plain door.
     widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
     for candidates_from in tiers:
-        for size in widths:
+        # A bay gets its own wide door anyway; elsewhere the back door is a plain one.
+        for size in widths if candidates_from is vehicle or not vehicle else [DOOR_WIDTH]:
             found = _facade_spots(
                 candidates_from, size, request.side, footprint, used, windows, target, needs_window
             )
@@ -464,27 +486,22 @@ def _vehicle_door(
     windows: list[Opening],
     rng: random.Random,
 ) -> Opening | None:
-    """A room's own exterior door (`exterior_door`: loading bay, workshop), if it has none yet.
-
-    On the service side if it can, the street side last; in the middle of the longest wall.
-    None if the room has no facade that fits it.
-    """
-    width = ctx.rules.spec(room.type).exterior_door
-    assert width is not None
-    facade = {Edge.of(c, s) for c in room.cells for s in Side if c.neighbour(s) not in footprint}
-    if not facade or any(len(d.edges) >= width and facade.issuperset(d.edges) for d in doors):
-        return None  # the service entrance (a truck dock) already opens into it
-    street, service = ctx.params.street_side, ctx.params.service_side
-    anywhere = next(iter(facade))  # spots are ranked by their wall, not by a target
-    for side in [service, *(s for s in Side if s not in (service, street)), street]:
-        spots = _facade_spots(
-            [room], width, side, footprint, used, windows, anywhere, lambda _: False
+    """A bay's own exterior door (`facade_door`) if it has none yet: service side first."""
+    width = ctx.rules.spec(room.type).facade_door
+    if width is None:
+        return None
+    outside = {e for e in boundary_edges(room.cells) if not footprint.issuperset(e.cells())}
+    if any(len(d.edges) >= width and outside.issuperset(d.edges) for d in doors):
+        return None  # a door this wide (a truck dock) already opens into it
+    service, street = ctx.params.service_side, ctx.params.street_side
+    sides = [service, *(s for s in Side if s not in (service, street)), street]
+    centre = sorted(room.cells)[len(room.cells) // 2]
+    for side in sides:
+        found = _facade_spots(
+            [room], width, side, footprint, used, windows, Edge.of(centre, side), lambda _: False
         )
-        if spots:
-            # The widest wall, then the middle of it.
-            _, _, _, run, start = min(
-                spots, key=lambda c: (-len(c[3]), abs(2 * c[4] + width - len(c[3])), c[4])
-            )
+        if found:
+            _, _, _, run, start = min(found, key=lambda c: (c[1], c[2], c[3][0], c[4]))
             door = _door(run, width, None, side, rng, start)
             return replace(door, entrance=EntranceKind.SERVICE.value)
     return None

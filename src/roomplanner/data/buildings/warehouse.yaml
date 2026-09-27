@@ -10,6 +10,7 @@ corridor:
 strip_depth: [8, 12]
 hall:
   min_depth: 14
+  corridor_from: 1000      # never: the back rooms open straight onto the floor
 facade:
   module: 3
   window: 2

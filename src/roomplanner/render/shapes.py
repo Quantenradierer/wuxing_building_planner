@@ -126,23 +126,27 @@ def bed_shape(pen: Pen, box: Box, facing: Side) -> None:
 
 
 def stairs_shape(pen: Pen, box: Box, facing: Side) -> None:
-    """Two flights side by side with a landing; steps run across each flight."""
+    """Two flights side by side; the landing between them lies at the wall behind (away
+    from `facing`) when they run towards it, else at the far end."""
     x0, y0, x1, y1 = box
     pen.base.rectangle(box, fill=pen.fill, outline=pen.stroke, width=pen.line)
     along_x = (x1 - x0) >= (y1 - y0)
     step = pen.cell * 0.5
+    landing = step * 2
     if along_x:
+        start, end = (x0 + landing, x1) if facing is Side.E else (x0, x1 - landing)
         mid = (y0 + y1) / 2
-        pen.base.line((x0, mid, x1 - step * 2, mid), fill=pen.stroke, width=pen.line * 2)
-        x = x0 + step
-        while x < x1 - step * 2:
+        pen.base.line((start, mid, end, mid), fill=pen.stroke, width=pen.line * 2)
+        x = start + step
+        while x < end:
             pen.base.line((x, y0, x, y1), fill=pen.detail, width=pen.line)
             x += step
     else:
+        start, end = (y0 + landing, y1) if facing is Side.S else (y0, y1 - landing)
         mid = (x0 + x1) / 2
-        pen.base.line((mid, y0, mid, y1 - step * 2), fill=pen.stroke, width=pen.line * 2)
-        y = y0 + step
-        while y < y1 - step * 2:
+        pen.base.line((mid, start, mid, end), fill=pen.stroke, width=pen.line * 2)
+        y = start + step
+        while y < end:
             pen.base.line((x0, y, x1, y), fill=pen.detail, width=pen.line)
             y += step
 

@@ -36,13 +36,14 @@ rooms:
     min_side: 5
     transit: false        # no rooms open into it (but the core's elevator may)
     furniture:
-      - {object: stairs, placement: back}   # same spot on every floor
+      - {object: stairs, placement: fill, landing: 2, reach: 8}   # at the door: same spot on every floor
   elevator:
     area: [12, 80]
     min_side: 3
     windows: forbidden
+    transit: false        # rooms open onto a landing, not into the car
     furniture:
-      - {object: elevator_car, placement: fill, margin: 1}   # the car fills the shaft
+      - {object: elevator_car, placement: fill}   # the car is the shaft
   toilet:               # public toilet: stalls along one wall, sinks and urinals outside
     area: [24, 56]
     min_side: 3
@@ -147,6 +148,7 @@ rooms:
     wealth_shift: -1
     area: [16, 48]
     min_side: 4
+    transit: false        # technical rooms are no thoroughfares
     windows: forbidden
     cluster: true
     # Also a closet inside a back-of-house room, `annex` of the time.
@@ -160,6 +162,7 @@ rooms:
   network_closet:       # a floor's switches and Matrix access points
     area: [9, 24]
     min_side: 3
+    transit: false
     windows: forbidden
     cluster: true
     furniture:
@@ -169,6 +172,7 @@ rooms:
     wealth_shift: -1
     area: [30, 160]
     min_side: 4
+    transit: false
     windows: forbidden
     furniture:
       - {object: hvac_unit, placement: wall, per: 30, count: [1, 4]}
@@ -179,6 +183,7 @@ rooms:
     wealth_shift: -1
     area: [32, 90]
     min_side: 6
+    transit: false
     windows: forbidden
     furniture:
       - {object: generator, placement: center}
@@ -256,7 +261,7 @@ rooms:
     min_side: 10
     windows: optional
     door_width: 4
-    exterior_door: 6     # a roller door
+    facade_door: 6         # a roller door
     furniture:
       - {object: car, placement: rows, aisle: 8, margin: 0, block: 40}
       - {object: tool_rack, placement: wall, count: [0, 2]}

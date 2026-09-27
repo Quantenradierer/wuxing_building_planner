@@ -3,6 +3,7 @@ rooms:
   waiting_room:
     area: [60, 200]
     min_side: 6
+    access: [reception_lobby]   # opens onto the lobby with the reception where it can
     furniture:
       - {object: bench, placement: wall, count: [2, 6]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
@@ -211,6 +212,7 @@ rooms:
     min_side: 10
     windows: forbidden
     door_width: 4
+    facade_door: 6         # the ambulance drives in
     furniture:
       - {object: ambulance, placement: wall}
       - {object: gurney, placement: wall, count: [1, 2]}

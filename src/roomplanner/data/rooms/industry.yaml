@@ -5,7 +5,7 @@ rooms:
     min_side: 10
     windows: optional
     door_width: 4
-    exterior_door: 6     # a roller door
+    facade_door: 6         # forklifts and vans straight into the hall
     furniture:
       - {object: rack, placement: rows, aisle: 4, margin: 3}
       - {object: pallet, placement: scatter, per: 120, count: [1, 10]}
@@ -180,7 +180,7 @@ rooms:
     min_side: 10
     windows: optional
     door_width: 4
-    exterior_door: 6     # a roller door
+    facade_door: 6         # a roller door
     furniture:
       - {object: conveyor, placement: rows, aisle: 4, margin: 3}
       - {object: machinery, placement: wall, per: 60, count: [2, 10]}
@@ -232,7 +232,7 @@ rooms:
     min_side: 10
     windows: optional
     door_width: 4
-    exterior_door: 6     # a roller door
+    facade_door: 6         # the roller door the cars come in through
     furniture:
       - {object: car_lift, placement: wall, per: 120, count: [1, 4]}
       - {object: car, placement: scatter, per: 150, count: [0, 3]}

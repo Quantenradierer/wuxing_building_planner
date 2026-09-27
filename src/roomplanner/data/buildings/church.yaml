@@ -12,6 +12,7 @@ strip_depth: [8, 12]
 hall:
   min_depth: 14
   foyer: {room: narthex, depth: 5}   # the portal opens into the narthex, not the nave
+  corridor_from: 56        # smaller churches: sacristy etc. open onto the nave
 facade:
   module: 3
   window: 2

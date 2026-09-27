@@ -2,33 +2,33 @@ clinic 60x32 cells, wealth=middle, seed=5
 
 == Floor 2 ==
 +===---===--+===---===--+===---===--+===---===--+===---===---===--+===---===---===---===--+===--+---+---+---+===---===--+
-|           |i HHH v   k|           |i HHH v   k|            k    |            ###########|     |WWW|WWW|WWW|k          |
-|           |  HHH      |           |  HHH      |                 |            ###########|     |WWW|WWW|WWW|           |
-"  c        |  HHH     <|  c        |  HHH     <|                 |            ###########|     |WWW|WWW|WWW|           "
-"           |  HHH     <|           |  HHH     <|                 |            ###########|     |   |   |   |           "
-"v          |  HHH     <|v          |  HHH     <|                i|            ###########|     |13 |14 |15 |           "
-|           |  HHH     <|           |  HHH     <|                 |            ###########|     +D--+D--+D--+           |
-|HHHHHHH    |  HHH     <|HHHHHHH    |  HHH     <|        c HHHHHHH|            ###########|     |           |           |
-|HHHHHHH    |           |HHHHHHH    |           |          HHHHHHH|                       |     |           |           |
-"HHHHHHH    |           |HHHHHHH    |           |        8 HHHHHHH|                       |     D    12     |           "
-"           |           |           |           |                 |                       |     D           |           "
-"i          |v   5      |i          |v   7      |  c             v|                       |     D    sss sss|           "
-|           |           |           |           |                 |                       |     |    sss sss|           |
-|    4      |HHHHHHH    |    6      |HHHHHHH    |                 |          2         ^^^|     |    sss sss|    16     |
-|           |HHHHHHH    |           |HHHHHHH    |                 |                    ^^^|     +-----------+           |
-"           |HHHHHHH    |           |HHHHHHH    |                 |                    ^^^|     |      j    |           "
-"           |           |           |           |                 |             +---------+     |           |           "
-"           |i         k|           |i         k|                 |             |eeeeeeeee|     D           |           "
-|           |           |           |           +DDDDD+-----+-----+             |eeeeeeeee|     D           |           |
-|           |           |           |           |     |www  D10WWW|             |eeeeeeeee|     D           |    c ddd  |
-|           |           |           |           |     |     |  WWW|             |eeeeeeeee|     |           |      ddd  |
-"           |        HHH|           |        HHH|     |sss  |  WWW|             |eeeeeeeee|     |m   11    n|      ddd c"
-"           |        HHH|           |        HHH|     |sss  +-----+             |eeeeeeeee|     |m         n|      ddd  "
-"           |        HHH|           |        HHH|     |sss 9      |             |eeeeeeeee|     |m       c n|    c ddd  "
-|           |        HHH|           |        HHH|     |           |             |eeeeeeeee|     |          n|           |
-|          k|c       HHH|          k|c       HHH|     |        sss|             |eeeeeeeee|     |j         n|           |
-|           |        HHH|           |        HHH|     |        sss|             |         |     |          n|           |
-|           |        HHH|           |        HHH|     |U       sss|             |    3    |     |          n|           |
+|          i|      c    |          i|      c    |  i HHH v k      |s sss sss sss   sss    |     |WWW|WWW|WWW|sss       k|
+|           |           |           |           |    HHH          |s                      |     |WWW|WWW|WWW|           |
+"    HHHHHHH|           |    HHHHHHH|           |    HHH         i|s         28           D     |WWW|WWW|WWW|           "
+"    HHHHHHH|           |    HHHHHHH|           |    HHH          |                       D     |   |   |   |           "
+"    HHHHHHH|           |    HHHHHHH|           |    HHH   HHHHHHH|s                      D     |13 |14 |15 |           "
+|           |           |           |           |    HHH   HHHHHHH|s                      |     +D--+D--+D--+           |
+|          v|           |          v|           |    HHH   HHHHHHH|s   sss   sss sss   sss|     |          U|           |
+|           |           |           |           |                 +-------------+---------+     |           |           |
+"          i|           |          i|           |        8       v|#############|sss sss  |     D    12     |           "
+"           |           |           |           |                 |#############|         |     D           |           "
+"  c HHHHHHH|           |  c HHHHHHH|           |                 |#############|    27   D     D        SSS|    c ddd  "
+|    HHHHHHH|           |    HHHHHHH|           |                 |#############|         D     |        SSS|      ddd  |
+|    HHHHHHH|v   5      |    HHHHHHH|v   7      |                 |#############|         D     |        SSS|    16ddd c|
+|           |           |           |           |                 |#############|         |     +-----------+      ddd  |
+"k   4     v|HHHHHHH    |k   6     v|HHHHHHH    |                 |#############|  sss sss|     |           |    c ddd  "
+"           |HHHHHHH    |           |HHHHHHH    |                 |#############+---------+     |           |           "
+"<         c|HHHHHHH    |<         c|HHHHHHH    |              c  |#############|eeeeeeeee|     D          c|           "
+|<          |           |<          |           +DDDDD+-----+-----+#############|eeeeeeeee|     D           |           |
+|<          |i          |<          |i          |     |SSS  D10WWW|#############|eeeeeeeee|     D          n|           |
+|<          |           |<          |           |     |SSS  |  WWW|#############|eeeeeeeee|     |          n|           |
+"<          |           |<          |           |     |SSS  |  WWW|#############|eeeeeeeee|     |    11  c n|    EEEEEEE"
+"           |           |           |           |     |     +-----+#############|eeeeeeeee|     |          n|    EEEEEEE"
+"           |           |           |           |     |    9      |#############|eeeeeeeee|     |          n|    EEEEEEE"
+|           |           |           |           |     |           |             |eeeeeeeee|     |          n|           |
+|           |           |           |           |     |w     SSS  |^^^   2      |eeeeeeeee|     |          n|           |
+|           |           |           |           |     |w     SSS  |^^^          |eeeeeeeee|     |           |           |
+|           |k          |           |k          |     |w     SSS U|^^^          |eeeeeeeee|     |  j mmm    |           |
 +--DDDDD----+--DDDDD----+--DDDDD----+--DDDDD----+     +--DDD------+----DDD------+--DDD----+     +-----------+--DDD------+
 |                                                                                                                       |
 |                                                                                                                       |
@@ -40,35 +40,35 @@ clinic 60x32 cells, wealth=middle, seed=5
 |                                                                                                                       |
 |                                                                                                                       |
 +--DDDDD----+--DDD------+--DDDDD----+--DDDDD----+--DDDDD----+--DDD------+--DDDDD----+--DDDDD----+--DDDDD----+--DDDDD----+
-"           |           |c       HHH|           |c       HHH|           |           |c       HHH|           |c       HHH"
-"           |           |        HHH|           |        HHH|           |           |        HHH|           |        HHH"
-"<          |           |<       HHH|<          |<       HHH|           |<          |<       HHH|<          |<       HHH"
-|<          |           |<       HHH|<          |<       HHH|           |<          |<       HHH|<          |<       HHH|
-|<         i|           |<       HHH|<         i|<       HHH|           |<         i|<       HHH|<         i|<       HHH|
-|<          |           |<       HHH|<          |<       HHH|           |<          |<       HHH|<          |<       HHH|
-"<   HHHHHHH|           |<       HHH|<   HHHHHHH|<       HHH|           |<   HHHHHHH|<       HHH|<   HHHHHHH|<       HHH"
-"    HHHHHHH|           |           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|           "
-"c   HHHHHHH|           |v          |c   HHHHHHH|v          |l          |c   HHHHHHH|v          |c   HHHHHHH|v          "
+"           |k          |           |           |           |           |           |           |           |           "
+"           |           |           |           |           |           |           |           |           |           "
+"           |           |           |           |           |           |           |           |           |           "
 |           |           |           |           |           |           |           |           |           |           |
-|          v|    18     |HHHHHHH    |          v|HHHHHHH    |    22     |          v|HHHHHHH    |          v|HHHHHHH    |
-|           |           |HHHHHHH    |           |HHHHHHH    |           |           |HHHHHHH    |           |HHHHHHH    |
-"k   17     |  ddd c    |HHHHHHH    |k   20     |HHHHHHH    |l c ttt c  |k   23     |HHHHHHH    |k   25     |HHHHHHH    "
-"           |  ddd      |           |           |           |    ttt    |           |           |           |           "
-"HHHHHHH   k|c ddd      |i   19     |HHHHHHH   k|i   21     |  c ttt c  |HHHHHHH   k|i   24     |HHHHHHH   k|i   26     "
-|HHHHHHH    |  ddd      |           |HHHHHHH    |           |           |HHHHHHH    |           |HHHHHHH    |           |
-|HHHHHHH    |  ddd c    |v          |HHHHHHH    |v          |           |HHHHHHH    |v          |HHHHHHH    |v          |
+|v         k|           |v          |v         k|v          |           |v         k|v          |v         k|v          |
 |           |           |           |           |           |           |           |           |           |           |
-"          i|           |HHHHHHH   k|          i|HHHHHHH   k|           |          i|HHHHHHH   k|          i|HHHHHHH   k"
-"           |           |HHHHHHH    |           |HHHHHHH    |           |           |HHHHHHH    |           |HHHHHHH    "
-"    HHHHHHH|    EEEEEEE|HHHHHHH    |    HHHHHHH|HHHHHHH    |           |    HHHHHHH|HHHHHHH    |    HHHHHHH|HHHHHHH    "
-|    HHHHHHH|    EEEEEEE|           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|           |
-|    HHHHHHH|    EEEEEEE|i          |    HHHHHHH|i          |  ooooooo  |    HHHHHHH|i          |    HHHHHHH|i          |
-|           |           |           |           |           |  ooooooo  |           |           |           |           |
-|          v|           |k         c|          v|k         c|  ooooooo  |          v|k         c|          v|k         c|
+"HHHHHHH    |           |HHHHHHH    |HHHHHHH    |HHHHHHH    |l          |HHHHHHH    |HHHHHHH    |HHHHHHH    |HHHHHHH    "
+"HHHHHHH    |           |HHHHHHH    |HHHHHHH    |HHHHHHH    |           |HHHHHHH    |HHHHHHH    |HHHHHHH    |HHHHHHH    "
+"HHHHHHH   k|           |HHHHHHH    |HHHHHHH   k|HHHHHHH    |           |HHHHHHH   k|HHHHHHH    |HHHHHHH   k|HHHHHHH    "
+|           |           |           |           |           |           |           |           |           |           |
+|i          |           |i   19     |i          |i   21     |    22     |i          |i   24     |i          |i   26     |
+|           |           |           |           |           |           |           |           |           |           |
+"    17     |    18     |HHHHHHH    |    20     |HHHHHHH    |  c ttt c  |    23     |HHHHHHH    |    25     |HHHHHHH    "
+"           |           |HHHHHHH    |           |HHHHHHH    |    ttt    |           |HHHHHHH    |           |HHHHHHH    "
+"           |           |HHHHHHH    |           |HHHHHHH    |  c ttt c  |           |HHHHHHH    |           |HHHHHHH    "
+|           |           |           |           |           |           |           |           |           |           |
+|v          |    c ddd  |           |v          |           |           |v          |           |v          |           |
+|           |      ddd  |           |           |           |           |           |           |           |           |
+"HHHHHHH    |      ddd c|k   HHH    |HHHHHHH    |k   HHH    |           |HHHHHHH    |k   HHH    |HHHHHHH    |k   HHH    "
+"HHHHHHH    |      ddd  |    HHH    |HHHHHHH    |    HHH    |           |HHHHHHH    |    HHH    |HHHHHHH    |    HHH    "
+"HHHHHHH    |s   c ddd  |    HHH    |HHHHHHH    |    HHH    |l          |HHHHHHH    |    HHH    |HHHHHHH    |    HHH    "
+|           |s          |    HHH    |           |    HHH    |           |           |    HHH    |           |    HHH    |
+|i          |s          |    HHH    |i          |    HHH    |ooooooo    |i          |    HHH    |i          |    HHH    |
+|           |           |    HHH    |           |    HHH    |ooooooo    |           |    HHH    |           |    HHH    |
+|           |           |  v HHH i  |           |  v HHH i  |ooooooo    |           |  v HHH i  |           |  v HHH i  |
 +===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+
-  objects: k cabinet, t canteen_table, c chair, n counter, e elevator_car, E exam_table, H hospital_bed, i iv_stand, l locker, m medical_cabinet, d office_desk, ^ roof_hatch, s sink, o sofa, # stairs, j terminal, U trash_bin, w urinal, v vital_monitor, < wall_screen, W wc
+  objects: k cabinet, t canteen_table, c chair, n counter, e elevator_car, E exam_table, H hospital_bed, i iv_stand, l locker, m medical_cabinet, d office_desk, ^ roof_hatch, s shelf, S sink, o sofa, # stairs, j terminal, U trash_bin, w urinal, v vital_monitor, < wall_screen, W wc
     1  corridor            357 cells
-    2  stairwell           138 cells
+    2  stairwell            70 cells
     3  elevator             30 cells
     4  ward                 84 cells
     5  ward                 84 cells
@@ -93,36 +93,38 @@ clinic 60x32 cells, wealth=middle, seed=5
    24  ward                 78 cells
    25  ward                 78 cells
    26  ward                 78 cells
+   27  storage              20 cells
+   28  storage              48 cells
 
 == Floor 1 ==
 +-------+---------------------+===---===---===--+===---===---===--+===---===---===---===--+---+---+---+===---===---===--+
-|SSS    |M   MMM              |    i HHH v   MMM|HHH MMM          |            ###########|WWW|WWW|WWW|    i HHH v   MMM|
-|SSS    |M                    |      HHH        |HHH              |            ###########|WWW|WWW|WWW|      HHH        |
-|SSS   l|M                    |      HHH        |HHH           SSS|            ###########|WWW|WWW|WWW|      HHH        "
-|       |                     |      HHH        |HHH           SSS|            ###########|   |   |   |      HHH        "
-|       |                     |M     HHH 6   HHH|HHH   8 HHH   SSS|            ###########|11 |12 |13 |M     HHH 14  HHH"
-|       |                     |M     HHH     HHH|HHH     HHH      |            ###########+D--+D--+D--+M     HHH     HHH|
-|SSS   l|                     |M     HHH     HHH|HHH     HHH      |            ###########|          U|M     HHH     HHH|
-|SSS    |                     |              HHH|        HHH      |                       |           |              HHH|
-|SSS    |                     |              HHH|        HHH     M|                       |        SSS|              HHH"
-|       |                     |              HHH|        HHH     M|                       |        SSS|              HHH"
-|       D        ooo i        |              HHH|      v HHH i   M|                       |        SSS|              HHH"
-|       D        ooo          +DDD--+-----------+DDD--+-----------+                       |           +DDD--+---+---+---+
-|  4    D      5 ooo v        |     |  sss mmmmm|     |  nnnnnnn n|          2            |           |     |WWW|WWW|WWW|
-|       D        ooo          |     |      mmmmm|     |          n|                       |           |     |WWW|WWW|WWW|
-|       D        ooo a        |     D      mmmmm|     D    c   c n|                       |           D     |WWW|WWW|WWW|
-|       D        ooo a        |     D           |     D          n|             +---------+           D     |   |   |   |
-|       D        ooo a        |     D           |     D          n|             |eeeeeeeee|    10     D     |16 |17 |18 |
-|       |                     |     |           |     |          n|             |eeeeeeeee|           |     +D--+D--+D--+
-|       |                     |     |SSS 7     n|     |j   9     n|             |eeeeeeeee|SSS        |     |          U|
-|       |                     |     |SSS       n|     |           |             |eeeeeeeee|SSS        |     |           |
-|       |                     |     |SSS       n|     |          c|             |eeeeeeeee|SSS        |     |SSS        "
-|       |                     |     |          n|     |           |             |eeeeeeeee|           |     |SSS        "
-|      l|                     |     |          n|     |M          |             |eeeeeeeee|           |     |SSS 15     "
-|       |                     |     |          n|     |M          |             |eeeeeeeee|           |     |           |
-|       |                     |     |          n|     |M          |             |eeeeeeeee|           |     |      SSS  |
-|       |                     |     |           |     |           |             |         |           |     |      SSS  |
-|       |                     |     |nnnnnnn sss|     |           |             |    3    |www        |     |      SSS  |
+|SSS    |M   MMM              |    i HHH v   MMM|M i HHH v        |sss sss KKK sss sss sss|WWW|WWW|WWW|    i HHH v   MMM|
+|SSS    |M                    |      HHH        |M   HHH          |        KKK            |WWW|WWW|WWW|      HHH        |
+|SSS   l|M                    |      HHH        |M   HHH          D        KKK           s|WWW|WWW|WWW|      HHH        "
+|       |                     |      HHH        |    HHH          D                      s|   |   |   |      HHH        "
+|       |                     |M     HHH 6   HHH|    HHH 8        D          30          s|11 |12 |13 |M     HHH 14  HHH"
+|       |                     |M     HHH     HHH|    HHH          |                       +D--+D--+D--+M     HHH     HHH|
+|SSS   l|                     |M     HHH     HHH|    HHH          |  sss sss   sss     sss|           |M     HHH     HHH|
+|SSS    |                     |              HHH|                 +-------------+--DDD----+           |              HHH|
+|SSS    |                     |              HHH|          HHHHHHH|#############|s       s|           |              HHH"
+|       |                     |              HHH|          HHHHHHH|#############|s       s|           |              HHH"
+|       D        ooo i        |              HHH|      MMM HHHHHHH|#############|s   29  s|           |              HHH"
+|       D        ooo          +DDD--+-----------+DDD--+-----------+#############|         |           +DDD--+---+---+---+
+|  4    D      5 ooo v        |     |  sss mmmmm|     |nnnnnnn c  |#############|s     KKK|           |     |WWW|WWW|WWW|
+|       D        ooo          |     |      mmmmm|     |           |#############|s     KKK|           |     |WWW|WWW|WWW|
+|       D        ooo a        |     D      mmmmm|     D    c      |#############|s sss KKK|           D     |WWW|WWW|WWW|
+|       D        ooo a        |     D           |     D           |#############+---------+           D     |   |   |   |
+|       D        ooo a        |     D           |     D           |#############|eeeeeeeee|    10     D     |16 |17 |18 |
+|       |                     |     |           |     |           |#############|eeeeeeeee|           |     +D--+D--+D--+
+|       |                     |     |SSS 7     n|     |    9      |#############|eeeeeeeee|        SSS|     |          U|
+|       |                     |     |SSS       n|     |           |#############|eeeeeeeee|        SSS|     |           |
+|       |                     |     |SSS       n|     |    a      |#############|eeeeeeeee|        SSS|     |SSS        "
+|       |                     |     |          n|     |    a      |#############|eeeeeeeee|           |     |SSS        "
+|      l|                     |     |          n|     |j   a      |#############|eeeeeeeee|          w|     |SSS 15     "
+|       |                     |     |          n|     |           |             |eeeeeeeee|          w|     |           |
+|       |                     |     |          n|     |      c    |      2      |eeeeeeeee|SSS       w|     |      SSS  |
+|       |                     |     |           |     |           |             |eeeeeeeee|SSS        |     |      SSS  |
+|       |                     |     |nnnnnnn sss|     |  c nnnnnnn|             |eeeeeeeee|SSS       U|     |      SSS  |
 +DDDDD--+---------------------+     +-----------+     +-----------+----DDD------+--DDD----+-----------+     +--DDD------+
 |                                                                                                                       |
 |                                                                                                                       |
@@ -134,35 +136,35 @@ clinic 60x32 cells, wealth=middle, seed=5
 |                                                                                                                       |
 |                                                                                                                       |
 +--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+
-"M          |           |M          |           |M          |           |           |M          |           |M          "
-"M          |           |M          |           |M          |           |           |M          |           |M          "
-"M         i|           |M         i|           |M         i|           |           |M         i|           |M         i"
-|           |           |           |           |           |           |           |           |           |           |
-|    HHHHHHH|           |    HHHHHHH|           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|
-|    HHHHHHH|           |    HHHHHHH|           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|
-"    HHHHHHH|          i|    HHHHHHH|          i|    HHHHHHH|           |          i|    HHHHHHH|          i|    HHHHHHH"
 "           |           |           |           |           |           |           |           |           |           "
-"          v|    HHHHHHH|          v|    HHHHHHH|          v|l          |    HHHHHHH|          v|    HHHHHHH|          v"
-|           |    HHHHHHH|           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|           |
-|v   19     |    HHHHHHH|v   21     |    HHHHHHH|v   23     |    24     |    HHHHHHH|v   26     |    HHHHHHH|v   28     |
+"           |           |           |           |           |           |           |           |           |           "
+"           |           |           |           |           |           |           |           |           |           "
 |           |           |           |           |           |           |           |           |           |           |
-"HHHHHHH    |    20    v|HHHHHHH    |    22    v|HHHHHHH    |l c ttt c  |    25    v|HHHHHHH    |    27    v|HHHHHHH    "
-"HHHHHHH    |           |HHHHHHH    |           |HHHHHHH    |    ttt    |           |HHHHHHH    |           |HHHHHHH    "
-"HHHHHHH    |           |HHHHHHH    |           |HHHHHHH    |  c ttt c  |           |HHHHHHH    |           |HHHHHHH    "
+|          M|          M|          M|          M|          M|           |          M|          M|          M|          M|
+|          M|          M|          M|          M|          M|           |          M|          M|          M|          M|
+"          M|          M|          M|          M|          M|l          |          M|          M|          M|          M"
+"           |           |           |           |           |           |           |           |           |           "
+"           |v          |           |v          |           |           |v          |           |v          |           "
 |           |           |           |           |           |           |           |           |           |           |
-|i         M|M         i|i         M|M         i|i         M|           |M         i|i         M|M         i|i         M|
-|          M|M          |          M|M          |          M|           |M          |          M|M          |          M|
-"          M|M   HHHHHHH|          M|M   HHHHHHH|          M|           |M   HHHHHHH|          M|M   HHHHHHH|          M"
-"           |    HHHHHHH|           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|           "
-"           |    HHHHHHH|           |    HHHHHHH|           |           |    HHHHHHH|           |    HHHHHHH|           "
+|           |HHHHHHH    |           |HHHHHHH    |           |    24     |HHHHHHH    |           |HHHHHHH    |           |
+|           |HHHHHHH    |           |HHHHHHH    |           |           |HHHHHHH    |           |HHHHHHH    |           |
+"    19     |HHHHHHH    |    21     |HHHHHHH    |    23     |  c ttt c  |HHHHHHH    |    26     |HHHHHHH    |    28     "
+"           |           |           |           |           |    ttt    |           |           |           |           "
+"           |i   20     |           |i   22     |           |  c ttt c  |i   25     |           |i   27     |           "
 |           |           |           |           |           |           |           |           |           |           |
-|           |          v|           |          v|           |  bbbbbbb  |          v|           |          v|           |
-|           |           |           |           |           |  bbbbbbb  |           |           |           |           |
-|           |MMM        |           |MMM        |           |  bbbbbbb  |MMM        |           |MMM        |           |
+|          i|          i|          i|          i|          i|           |          i|          i|          i|          i|
+|           |           |           |           |           |           |           |           |           |           |
+"    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH|           |    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH"
+"    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH|           |    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH"
+"    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH|l          |    HHHHHHH|    HHHHHHH|    HHHHHHH|    HHHHHHH"
+|           |           |           |           |           |           |           |           |           |           |
+|          v|M         v|          v|M         v|          v|bbbbbbb    |M         v|          v|M         v|          v|
+|           |M          |           |M          |           |bbbbbbb    |M          |           |M          |           |
+|           |M          |           |M          |           |bbbbbbb    |M          |           |M          |           |
 +===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+===---===--+
-  objects: t canteen_table, c chair, n counter, e elevator_car, H hospital_bed, i iv_stand, l locker, m machinery, M medical_cabinet, a medical_cart, o operating_table, s shelf, S sink, b sofa, # stairs, j terminal, U trash_bin, w urinal, v vital_monitor, W wc
+  objects: t canteen_table, c chair, n counter, K crate, e elevator_car, H hospital_bed, i iv_stand, l locker, m machinery, M medical_cabinet, a medical_cart, o operating_table, s shelf, S sink, b sofa, # stairs, j terminal, U trash_bin, w urinal, v vital_monitor, W wc
     1  corridor            372 cells
-    2  stairwell           138 cells
+    2  stairwell            70 cells
     3  elevator             30 cells
     4  scrub_room           56 cells
     5  operating_room      154 cells
@@ -189,36 +191,38 @@ clinic 60x32 cells, wealth=middle, seed=5
    26  treatment_room       78 cells
    27  treatment_room       78 cells
    28  treatment_room       78 cells
+   29  storage              20 cells
+   30  storage              48 cells
 
 == Ground floor ==
-+===---===--+===---===---===--+===---===--+--DDDDDDD--+===---===--+===---===---===---===--+===---===--+===---===---===--+
-|SSS        |ggg     mmm      |           |           |SSS        |            ###########|           |        i HHH v m|
-|SSS        |ggg              |           |           |SSS        |            ###########|           |          HHH   m|
-"SSS        |ggg              |           |           |SSS        |            ###########|           |          HHH   m"
-"           |ggg              |           |           |           |            ###########|           |          HHH    "
-"a          |ggg              |           |           |a          |            ###########|           |    M     HHH    "
-|           |ggg              |           |           |           |            ###########|           |    M     HHH    |
-|EEEEEEE    |ggg              |           |           |EEEEEEE    |            ###########|           |    M     HHH    |
-|EEEEEEE    |                 |           |           |EEEEEEE    |                       |           |                 |
-"EEEEEEE    |SSS              |m          |           |EEEEEEE    |                       |m          |                 "
-"           |SSS              |m          |           |           |                       |m          |                 "
-"           |SSS              |m       SSS|  s     s  |           |                       |m       SSS|                 "
-|           |                 |        SSS|  s     s  |           |                       |        SSS|                 |
-|    5     m|m       6       m|    7   SSS|  s 8   s  |    9     m|          2            |    10  SSS|        11       |
-|          m|m               m|           |           |          m|                       |           |                 |
-"          m|m MMM           m|           |  s     s  |          m|                       |           |m                "
-"           |                 |           |  s     s  |           |             +---------+           |m                "
-"           |                 |      a    |  s     s  |           |             |eeeeeeeee|      a    |m             SSS"
-|           |                 |           |           |           |             |eeeeeeeee|           |              SSS|
-|           |    MMM         i|    EEEEEEE|  s     s  |           |             |eeeeeeeee|    EEEEEEE|              SSS|
-|           |                 |    EEEEEEE|  s     s  |           |             |eeeeeeeee|    EEEEEEE|                 |
-"           |          HHHHHHH|    EEEEEEE|  s     s n|           |             |eeeeeeeee|    EEEEEEE|                 "
-"           |          HHHHHHH|           |          n|           |             |eeeeeeeee|           |                 "
-"           |          HHHHHHH|           |        s n|           |             |eeeeeeeee|           |                 "
-|           |                 |           |        s n|           |             |eeeeeeeee|           |                 |
-|           |m               v|          m|        s n|           |             |eeeeeeeee|          m|                 |
-|           |m                |          m|          n|           |             |         |          m|                 |
-|          U|m                |          m|          n|          U|             |    3    |          m|          mmm    |
++===---===--+===---===---===--+===---===--+-----------+===---===--+===-----DDDDDDD---===--+===---===--+===---===---===--+
+|SSS        |ggg     mmm      |           |           |SSS        |sss sss         sss sss|           |  mmm           i|
+|SSS        |ggg              |           |           |SSS        |                       |           |                 |
+"SSS        |ggg              |           |  s     s  |SSS        |s KKK     28          s|           |          HHHHHHH"
+"           |ggg              |           |  s     s  |           |s KKK                 s|           |          HHHHHHH"
+"a          |ggg              |           |  s     s  |a          |s KKK                 s|    EEEEEEE|m         HHHHHHH"
+|           |ggg              |           |           |           |                       |    EEEEEEE|m                |
+|EEEEEEE    |ggg              |           |  s     s n|EEEEEEE    |sss sss             sss|    EEEEEEE|m   M   M       v|
+|EEEEEEE    |                 |           |  s     s n|EEEEEEE    +-------------+--DDD----+           |    M   M        |
+"EEEEEEE    |SSS              |m          |  s     s n|EEEEEEE    |#############|s     sss|          m|SSS M   M        "
+"           |SSS              |m          |          n|           |#############|s        |          m|SSS              "
+"           |SSS              |m       SSS|  s     s n|           |#############|s   27   D          m|SSS             m"
+|           |                 |        SSS|  s     s n|           |#############|         D           |                m|
+|    5     m|m       6       m|    7   SSS|  s 8   s n|    9     m|#############|k        D    10     |        11      m|
+|          m|m               m|           |           |          m|#############|         |           |                 |
+"          m|m MMM           m|           |  s     s  |          m|#############|sss sss  |           |                 "
+"           |                 |           |  s     s  |           |#############+---------+           |                 "
+"           |                 |      a    |  s     s  |           |#############|eeeeeeeee|          m|                i"
+|           |                 |           |           |           |#############|eeeeeeeee|          m|                 |
+|           |    MMM         i|    EEEEEEE|  s     s  |           |#############|eeeeeeeee|          m|          HHHHHHH|
+|           |                 |    EEEEEEE|  s     s  |           |#############|eeeeeeeee|           |          HHHHHHH|
+"           |          HHHHHHH|    EEEEEEE|  s     s  |           |#############|eeeeeeeee|SSS        |          HHHHHHH"
+"           |          HHHHHHH|           |           |           |#############|eeeeeeeee|SSS        |                 "
+"           |          HHHHHHH|           |        s  |           |#############|eeeeeeeee|SSS        |                v"
+|           |                 |           |        s  |           |             |eeeeeeeee|           |                 |
+|           |m               v|          m|        s  |           |      2      |eeeeeeeee|           |                 |
+|           |m                |          m|           |           |             |eeeeeeeee|           |                 |
+|          U|m                |          m|           |          U|             |eeeeeeeee|U          |              mmm|
 +--DDD------+--DDDDDDD--------+--DDD------+--DDD------+--DDD------+----DDD------+--DDD----+--DDD------+--DDDDDDD--------+
 |                                                                                                                       |
 |                                                                                                                       |
@@ -230,35 +234,35 @@ D                                                                               
 |                                                                                                                       |
 |                                                                                                                       |
 +DDD--+-----+--DDD------------+     +---+---+---+                 +-----------+--DDD------+DDD--+--DDD------+--DDD------+
-"     D13bbb|q       qqqqqqq q|     |bbb|bbb|bbb|                 |           |           |     |        SSS|           "
-"     |  bbb|q               q|     |bbb|bbb|bbb|                 |           |           |     |        SSS|           "
-"     |  bbb|q               q|     |bbb|bbb|bbb|q                D           |           |     |        SSS|           "
-|     +-----+q               q|     |   |   |   |q                D           |           |     |           |           |
-|w    D14bbb|q               q|     |19 |20 |21 |q     AAA }      D           |           |s    |           |           |
-|w    |  bbb|q               q|     +D--+D--+D--+q     AAA        |           |           |s    |           |           |
-"w    |  bbb|q               q|     |           |q     AAA       q|           |EEEEEEE    |s   s|           |EEEEEEE    "
-"     +-----+                 |     |           |q               q|           |EEEEEEE    |    s|           |EEEEEEE    "
-"w    D15bbb|y                |     D        SSS|q       c       q|           |EEEEEEE    |s   s|           |EEEEEEE    "
-|w    |  bbb|y                |     D        SSS|                q|           |           |s    |           |           |
-|w    |  bbb|y               q|     D    18  SSS|<   RRRRRRRRR   q|m   EEEEEEE|           |s   s|    25     |           |
-|     +-----+                q|     |           |<   RRRRRRRRR   q|m   EEEEEEE|           |    s|           |           |
-"w          |        16      q|     |        SSS|<   RRRRRRRRR   q|m   EEEEEEE|    23  SSS|  24s|    EEEEEEE|    26  SSS"
-"w          |                q|     |        SSS|<                |           |        SSS|     |    EEEEEEE|        SSS"
-"w   12     |q               q|     |        SSS|<       4        |    22     |        SSS|s    |    EEEEEEE|        SSS"
-|           |q               q+-----+-----------+                 |           |           |s    |           |           |
-|           |q               q|          SSS    |                 |           |           |s   s|           |           |
-|           |q                |          SSS    |                 |           |           |    s|           |           |
-"           |q                |  EEE     SSS    D                q|           |           |k   s|           |           "
-"           |q                |  EEE            D                q|           |           |     |           |           "
-"SSS        |q                |  EEE   17       D                q|           |           |    s|           |           "
-|SSS        |                 |  EEE            |                q|           |           |    s|           |           |
-|SSS        |                 |  EEE            |                q|        SSS|          m|    s|           |          m|
-|           |                 |  EEE            |                q|        SSS|          m|     |           |          m|
-|           |W     qqqqqqq   U|U EEE   mmm   mmm|*               q|        SSS|U         m|  sss|  mmm     U|U         m|
+"     D13bbb|          qqqqqqq|     |bbb|bbb|bbb|                 |  mmm   mmm|      SSS  |     |      mmm  |      SSS  "
+"     |  bbb|                 |     |bbb|bbb|bbb|                 |           |      SSS  |     |           |      SSS  "
+"     |  bbb|                q|     |bbb|bbb|bbb|q                D           |m     SSS  |     |           |m     SSS  "
+|     +-----+                q|     |   |   |   |q                D           |m          |     |           |m          |
+|     D14bbb|                q|     |19 |20 |21 |q     AAA }      D           |m          |    s|           |m          |
+|     |  bbb|                q|     +D--+D--+D--+q     AAA        |           |           |    s|           |           |
+"SSS  |  bbb|                q|     |           |q     AAA       q|           |           |s   s|SSS        |           "
+"SSS  +-----+                q|     |           |q               q|           |           |s    |SSS        |           "
+"SSS  D15bbb|W               q|     D        SSS|q       c       q|           |           |s    |SSS        |           "
+|     |  bbb|                 |     D        SSS|                q|           |           |     |           |           |
+|     |  bbb|                q|     D    18  SSS|<   RRRRRRRRR   q|           |           |    s|    25     |           |
+|     +-----+                q|     |           |<   RRRRRRRRR   q|           |           |    s|           |           |
+"           |        16      q|     |        SSS|<   RRRRRRRRR   q|    22     |    23     |s 24s|    EEEEEEE|    26     "
+"           |                q|     |        SSS|<                |           |           |s    |    EEEEEEE|           "
+"    12  SSS|q               q|     |        SSS|<       4        |SSS        |           |s   s|    EEEEEEE|           "
+|        SSS|q               q+-----+-----------+                 |SSS        |           |    s|           |           |
+|        SSS|q               q|        EEE mmm  |                 |SSS        |           |    s|           |           |
+|           |q                |        EEE      |                 |           |           |     |           |           |
+"           |q               q|        EEE      D                q|           |  EEE      |     |           |  EEE      "
+"           |q               q|        EEE      D                q|           |  EEE      |     |           |  EEE      "
+"           |q               q|      17EEE      D                q|           |  EEE      |    s|           |  EEE      "
+|           |                q|        EEE      |                q|           |  EEE      |    s|           |  EEE      |
+|           |                q|SSS     EEE      |                q|    EEEEEEE|m EEE      |s   s|           |m EEE      |
+|           |                q|SSS              |                q|    EEEEEEE|m EEE      |s    |           |m EEE      |
+|www www www|* qqqqqqq       q|SSS             U|*               q|    EEEEEEE|m EEE      |s sss|           |m EEE      |
 +===---===--+===---===---===--+===---===---===--+----DDDDDDD------+===---===--+===---===--+===--+===---===--+===---===--+
-  objects: A armchair, q bench, k cabinet, c chair, n counter, e elevator_car, E exam_table, g gurney, H hospital_bed, i iv_stand, m medical_cabinet, M medical_cart, * plant, R reception_desk, s shelf, } side_table, S sink, # stairs, a stool, U trash_bin, w urinal, y vending_machine, v vital_monitor, < wall_screen, W water_cooler, b wc
+  objects: A armchair, q bench, k cabinet, c chair, n counter, K crate, e elevator_car, E exam_table, g gurney, H hospital_bed, i iv_stand, m medical_cabinet, M medical_cart, * plant, R reception_desk, s shelf, } side_table, S sink, # stairs, a stool, U trash_bin, w urinal, v vital_monitor, < wall_screen, W water_cooler, b wc
     1  corridor            324 cells
-    2  stairwell           138 cells
+    2  stairwell            70 cells
     3  elevator             30 cells
     4  reception_lobby     117 cells
     5  exam_room            84 cells
@@ -283,36 +287,38 @@ D                                                                               
    24  storage              39 cells
    25  exam_room            78 cells
    26  exam_room            78 cells
+   27  storage              20 cells
+   28  storage              48 cells
 
 == Basement B1 ==
 +-----------+-----------+-----------+-----------+-----+-----------+-----------------------+-----------------+-----------+
-|'   HHHHHHH|    nnnnnnn|n   nnnnnnn|           |     |EEE EEE    |            ###########|              f  |    HHHHHHH|
-|    HHHHHHH|           |n          |           |     |           |            ###########|                 |    HHHHHHH|
-|    HHHHHHH|      c    |n          |           D     D          S|            ###########|                 |    HHHHHHH|
-|    HHHHHHH|           |n          |           D     D          S|            ###########|                 |    HHHHHHH|
-|    HHHHHHH|           |n          |n          D     D          S|            ###########|                 |    HHHHHHH|
-|           |           |n          |n          |     |           |            ###########|                 |           |
-|      HHHHH|          n|n          |n c        |     |    9     E|            ###########|                 |           |
-|      HHHHH|          n|           |n          |     |          E|                       |                 |           |
-|      HHHHH|        c n|           |n          |     |E         E|                       |                 |HHHHH     E|
-|      HHHHH|          n|           |n          |     |E          |                       |                 |HHHHH     E|
-|E     HHHHH|          n|           |n         n|     |E         E|                       |                 |HHHHH     E|
-|E     HHHHH|          n|           |          n|     |          E|                       |                 |HHHHH      |
-|E   4 HHHHH|    5     n|    6      |    7     n|     |          E|          2            |        10      n|HHHHH 11   |
-|           |           |           |          n|     |           |                       |                n|HHHHH      |
-|mmm        |n          |           |n         n|     |'       EEE|                       |              c n|HHHHH      |
-|mmm        |n          |           |n         n|     +-----------+             +---------+                n|           |
-|mmm   HHHHH|n          |           |n         n|     |sss sss   s|             |eeeeeeeee|                n|           |
-|mmm   HHHHH|n          |           |n          |     |          s|             |eeeeeeeee|                n|           |
-|mmm   HHHHH|n          |           |n          |     D          s|             |eeeeeeeee|                n|      HHHHH|
-|      HHHHH|n          |           |n          |     D           |             |eeeeeeeee|                 |      HHHHH|
-|      HHHHH|n          |           |n       iii|     D  8 KKK    |             |eeeeeeeee|iii             f|      HHHHH|
-|      HHHHH|           |           |        iii|     |    KKK    |             |eeeeeeeee|iii              |      HHHHH|
-|E     HHHHH|           |           |        iii|     |    KKK   s|             |eeeeeeeee|iii              |      HHHHH|
+|'   HHHHHHH|    nnnnnnn|n   nnnnnnn|           |     |EEE EEE    |s sss sss sss   sss    |  j       nnnnnnn|E HHHHHHH  |
+|    HHHHHHH|           |n          |           |     |           |s                      |                 |E HHHHHHH  |
+|    HHHHHHH|      c    |n          |           D     D          S|s         22           D              c n|E HHHHHHH  |
+|    HHHHHHH|           |n          |           D     D          S|                       D                n|  HHHHHHH  |
+|    HHHHHHH|           |n          |n          D     D          S|s                      D              c n|  HHHHHHH  |
+|           |           |n          |n          |     |           |s                      |                n|           |
+|      HHHHH|          n|n          |n c        |     |    9     E|s   sss   sss sss   sss|                n|           |
+|      HHHHH|          n|           |n          |     |          E+-------------+---------+                n|           |
+|      HHHHH|        c n|           |n          |     |E         E|#############|HHHHH EEE|                n|           |
+|      HHHHH|          n|           |n          |     |E          |#############|HHHHH    |                 |           |
+|E     HHHHH|          n|           |n         n|     |E         E|#############|HHHHH 21 D                 |mmm   HHHHH|
+|E     HHHHH|          n|           |          n|     |          E|#############|HHHHH    D                 |mmm   HHHHH|
+|E   4 HHHHH|    5     n|    6      |    7     n|     |          E|#############|HHHHH    D        10       |mmm 11HHHHH|
+|           |           |           |          n|     |           |#############|HHHHH    |                 |mmm   HHHHH|
+|mmm        |n          |           |n         n|     |'       EEE|#############|HHHHH EEE|                 |mmm   HHHHH|
+|mmm        |n          |           |n         n|     +-----------+#############+---------+                 |      HHHHH|
+|mmm   HHHHH|n          |           |n         n|     |sss sss   s|#############|eeeeeeeee|                 |E     HHHHH|
+|mmm   HHHHH|n          |           |n          |     |          s|#############|eeeeeeeee|                 |E          |
+|mmm   HHHHH|n          |           |n          |     D          s|#############|eeeeeeeee|f                |E     HHHHH|
+|      HHHHH|n          |           |n          |     D           |#############|eeeeeeeee|                 |      HHHHH|
+|      HHHHH|n          |           |n       iii|     D  8 KKK    |#############|eeeeeeeee|                 |      HHHHH|
+|      HHHHH|           |           |        iii|     |    KKK    |#############|eeeeeeeee|                 |      HHHHH|
+|E     HHHHH|           |           |        iii|     |    KKK   s|#############|eeeeeeeee|                 |      HHHHH|
 |E          |           |           |           |     |          s|             |eeeeeeeee|                 |      HHHHH|
-|E          |        iii|           |           |     |s         s|             |eeeeeeeee|                 |      HHHHH|
-|           |        iii|           |           |     |s          |             |         |                 |           |
-|           |        iii|           |  nnnnnnn  |     |s sss   sss|             |    3    |        nnnnnnn  |'          |
+|E          |        iii|           |           |     |s         s|      2      |eeeeeeeee|                 |      HHHHH|
+|           |        iii|           |           |     |s          |             |eeeeeeeee|                 |           |
+|           |        iii|           |  nnnnnnn  |     |s sss   sss|             |eeeeeeeee|                 |          '|
 +--DDD------+--DDD------+--DDD------+-----------+     +-----------+----DDD------+--DDD----+--DDD------------+--DDD------+
 |                                                                                                                       |
 |                                                                                                                       |
@@ -324,35 +330,35 @@ D                                                                               
 |                                                                                                                       |
 |                                                                                                                       |
 +--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDD------+--DDDDD----------------+--DDD------+--DDD------+
-|'     HHHHH|           |n         f|        mmm|           |'     HHHHH|                       |           |b     FFFFF|
-|      HHHHH|           |n          |        mmm|           |      HHHHH|                       |           |b     FFFFF|
+|           |           |n         f|        mmm|           |           |                       |           |b     FFFFF|
+|           |           |n          |        mmm|           |           |                       |           |b     FFFFF|
 |      HHHHH|           |n          |        mmm|           |      HHHHH|                       |           |b     FFFFF|
 |      HHHHH|           |n          |        mmm|           |      HHHHH|                       |           |b          |
 |      HHHHH|          f|n          |mmm     mmm|           |      HHHHH|                       |          f|b          |
 |      HHHHH|           |n          |mmm        |           |      HHHHH|                       |           |           |
-|      HHHHH|           |n         n|mmm     www|HHHHH      |      HHHHH|                    MMM|           |           |
-|           |           |          n|mmm     www|HHHHH      |           |                    MMM|           |           |
-|           |          n|iii     c n|mmm     www|HHHHH      |           |                    MMM|          n|    20     |
+|E     HHHHH|           |n         n|mmm     www|HHHHH      |E     HHHHH|                    MMM|           |           |
+|E     HHHHH|           |          n|mmm     www|HHHHH      |E     HHHHH|                    MMM|           |           |
+|E     HHHHH|          n|iii     c n|mmm     www|HHHHH      |E     HHHHH|                    MMM|          n|    20     |
 |           |          n|iii       n|        www|HHHHH      |           |                    MMM|          n|           |
-|HHHHH      |        c n|iii       n|        www|HHHHH      |HHHHH      |                    MMM|        c n|GGGGGGGGG  |
-|HHHHH      |          n|          n|        www|HHHHH      |HHHHH      |                    MMM|          n|GGGGGGGGG  |
-|HHHHH 12   |    13    n|    14    n|    15  www|HHHHH 16   |HHHHH 17   |          18        MMM|    19    n|GGGGGGGGG  |
-|HHHHH      |          n|           |           |           |HHHHH      |                       |          n|GGGGGGGGG  |
-|HHHHH     E|          n|           |  KKK      |HHHHH      |HHHHH     E|                       |          n|GGGGGGGGG  |
-|HHHHH     E|           |           |  KKK      |HHHHH      |HHHHH     E|                       |           |           |
-|HHHHH     E|n          |          n|' KKK      |HHHHH      |HHHHH     E|                ggggggg|n          |           |
+|      HHHHH|        c n|iii       n|        www|HHHHH      |      HHHHH|                    MMM|        c n|GGGGGGGGG  |
+|      HHHHH|          n|          n|        www|HHHHH      |      HHHHH|                    MMM|          n|GGGGGGGGG  |
+|    12HHHHH|    13    n|    14    n|    15  www|HHHHH 16   |    17HHHHH|          18        MMM|    19    n|GGGGGGGGG  |
+|      HHHHH|          n|           |           |           |      HHHHH|                       |          n|GGGGGGGGG  |
+|      HHHHH|          n|           |  KKK      |HHHHH      |      HHHHH|                       |          n|GGGGGGGGG  |
+|      HHHHH|           |           |  KKK      |HHHHH      |      HHHHH|                       |           |           |
+|      HHHHH|n          |          n|' KKK      |HHHHH      |      HHHHH|                ggggggg|n          |           |
 |           |n          |          n|           |HHHHH      |           |                ggggggg|n          |           |
-|           |n c        |          n|           |HHHHH      |           |                ggggggg|n c        |E          |
-|           |n          |          n|           |HHHHH      |           |                       |n          |E          |
-|HHHHHHH   E|n          |          n|        mmm|HHHHH      |HHHHHHH   E|                       |n          |E          |
-|HHHHHHH   E|n          |          n|        mmm|           |HHHHHHH   E|                       |n          |           |
-|HHHHHHH   E|n          |          n|        mmm|E          |HHHHHHH   E|        MMMMMMM        |n          |           |
-|HHHHHHH    |           |           |        mmm|E          |HHHHHHH    |        MMMMMMM        |           |           |
-|HHHHHHH    |           |nnnnnnn    |        mmm|E         '|HHHHHHH    |    aaa MMMMMMM        |           |          '|
+|E     HHHHH|n c        |          n|           |HHHHH      |E     HHHHH|                ggggggg|n c        |E          |
+|E     HHHHH|n          |          n|           |HHHHH      |E     HHHHH|                       |n          |E          |
+|E     HHHHH|n          |          n|        mmm|HHHHH      |E     HHHHH|                       |n          |E          |
+|      HHHHH|n          |          n|        mmm|           |      HHHHH|                       |n          |           |
+|      HHHHH|n          |          n|        mmm|E          |      HHHHH|        MMMMMMM        |n          |           |
+|      HHHHH|           |           |        mmm|E          |      HHHHH|        MMMMMMM        |           |           |
+|'     HHHHH|           |nnnnnnn    |        mmm|E         '|'     HHHHH|    aaa MMMMMMM        |           |          '|
 +-----------+-----------+-----------+-----------+-----------+-----------+-----------------------+-----------+-----------+
-  objects: b battery_bank, n counter, K crate, E electrical_panel, e elevator_car, ' fire_extinguisher, f fridge, F fuel_tank, G generator, g gurney, H hvac_unit, m machinery, a medical_cart, M morgue_drawers, S server_rack, s shelf, i sink, # stairs, c stool, w workbench
+  objects: b battery_bank, n counter, K crate, E electrical_panel, e elevator_car, ' fire_extinguisher, f fridge, F fuel_tank, G generator, g gurney, H hvac_unit, m machinery, a medical_cart, M morgue_drawers, S server_rack, s shelf, i sink, # stairs, c stool, j terminal, w workbench
     1  corridor            342 cells
-    2  stairwell           138 cells
+    2  stairwell            70 cells
     3  elevator             30 cells
     4  mechanical_room      84 cells
     5  lab                  84 cells
@@ -371,3 +377,5 @@ D                                                                               
    18  morgue              156 cells
    19  lab                  78 cells
    20  generator_room       78 cells
+   21  mechanical_room      20 cells
+   22  storage              48 cells

@@ -10,6 +10,7 @@ corridor:
 strip_depth: [8, 14]       # back-of-house row
 hall:
   min_depth: 12
+  corridor_from: 1000      # never: the back rooms open straight onto the floor
 facade:
   module: 3
   window: 2
@@ -30,7 +31,6 @@ floor_roles:
     rooms:
       - {room: dance_floor, place: hall}
       - {room: toilet, count: 2, near: core, priority: required}
-      - {room: cloakroom, count: 1, near: entrance, priority: required}
       - {room: backstage, count: 1}
       - {room: vip_room, count: [1, 3]}
       - {room: manager_office, count: 1}

@@ -3,7 +3,7 @@ import pytest
 from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side
-from roomplanner.model import OpeningKind
+from roomplanner.model import Floor, OpeningKind
 from roomplanner.params import BuildingType, EntranceKind, Shape, Wealth
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
@@ -75,7 +75,7 @@ def test_vehicle_rooms_have_their_own_roller_door(building_type: str, seed: int)
     ground = building.floor(0)
     exterior = [o for o in ground.openings if o.entrance]
     for room in ground.rooms:
-        width = rules.spec(room.type).exterior_door
+        width = rules.spec(room.type).facade_door
         if width is None:
             continue
         cells = room.cells
@@ -333,6 +333,178 @@ def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingTyp
             and o.entrance is None
         }
     assert len(doors) == 1
+
+
+@pytest.mark.parametrize(
+    "building_type",
+    [BuildingType.OFFICE, BuildingType.HOSPITAL, BuildingType.APARTMENT, BuildingType.WAREHOUSE],
+)
+def test_core_rooms_are_as_big_as_their_stairs_and_car(building_type: BuildingType) -> None:
+    """The stairs span the stairwell with a landing at the door; the car is the shaft."""
+    for width, depth in ((40, 32), (70, 44)):
+        params = make_params(
+            building_type=building_type, width=width, depth=depth, floors_above=4, seed=1
+        )
+        for floor in generate(params).floors:
+            for room in floor.rooms:
+                if room.type not in ("stairwell", "elevator"):
+                    continue
+                kind = "stairs" if room.type == "stairwell" else "elevator_car"
+                (obj,) = [o for o in floor.objects if o.room == room.id and o.kind == kind]
+                if room.type == "elevator":
+                    assert obj.cells == room.cells
+                    continue
+                assert len(room.cells) <= 1.8 * len(obj.cells), (width, depth, floor.name)
+                door = floor.door_clearance(room)
+                assert door and not door & obj.cells  # the landing
+
+
+@pytest.mark.parametrize(
+    ("building_type", "width", "depth", "wealth"),
+    [
+        (BuildingType.STUFFER_SHACK, 24, 16, Wealth.MIDDLE),
+        (BuildingType.STUFFER_SHACK, 24, 16, Wealth.LUXURY),
+        (BuildingType.DIVE_BAR, 22, 16, Wealth.MIDDLE),
+        (BuildingType.CHURCH, 40, 44, Wealth.HIGH),
+    ],
+)
+def test_small_hall_buildings_have_no_service_corridor(
+    building_type: BuildingType, width: int, depth: int, wealth: Wealth
+) -> None:
+    """The back rooms open onto the hall, on every floor; there is still an emergency exit."""
+    for seed in range(3):
+        params = make_params(
+            building_type=building_type,
+            width=width,
+            depth=depth,
+            wealth=wealth,
+            floors_above=2 + seed % 2,
+            floors_below=seed % 2,
+            seed=seed,
+        )
+        building = generate(params)
+        ground = building.floor(0)
+        for room in ground.rooms:
+            if room.type == "corridor":  # side hallways of clusters only, no service corridor
+                xs, ys = {c.x for c in room.cells}, {c.y for c in room.cells}
+                assert len(xs) < building.width and len(ys) < building.height
+        kinds = {o.entrance for o in ground.openings if o.entrance is not None}
+        assert EntranceKind.EMERGENCY.value in kinds, seed
+        assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []
+
+
+@pytest.mark.parametrize(
+    ("building_type", "lobby"),
+    [
+        (BuildingType.CLINIC, "reception_lobby"),
+        (BuildingType.HOTEL, "reception_lobby"),
+        (BuildingType.POLICE_STATION, "police_lobby"),
+    ],
+)
+def test_the_reception_desk_stands_in_the_lobby(building_type: BuildingType, lobby: str) -> None:
+    ground = generate(make_params(building_type=building_type, width=60, depth=40)).floor(0)
+    lobbies = {r.id for r in ground.rooms if r.type == lobby}
+    assert len(lobbies) == 1 and "reception" not in {r.type for r in ground.rooms}
+    desks = [o for o in ground.objects if o.kind == "reception_desk"]
+    assert desks and all(o.room in lobbies for o in desks)
+
+
+def test_the_police_lobby_has_one_door_into_the_station() -> None:
+    ground = generate(
+        make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)
+    ).floor(0)
+    lobby = next(r for r in ground.rooms if r.type == "police_lobby")
+    inner = [
+        o
+        for o in ground.openings
+        if o.kind is OpeningKind.DOOR
+        and o.entrance is None
+        and any(c in lobby.cells for e in o.edges for c in e.cells())
+    ]
+    assert len(inner) == 1
+    outside = next(c for c in inner[0].edges[0].cells() if c not in lobby.cells)
+    room = ground.room_at(outside)
+    assert room is not None and room.type == "corridor"
+
+
+def test_the_waiting_room_opens_onto_the_reception_lobby() -> None:
+    ground = generate(
+        make_params(building_type=BuildingType.CLINIC, width=60, depth=32, floors_above=2, seed=1)
+    ).floor(0)
+    waiting = next(r for r in ground.rooms if r.type == "waiting_room")
+    door = next(
+        o
+        for o in ground.openings
+        if o.kind is OpeningKind.DOOR and any(c in waiting.cells for c in o.edges[0].cells())
+    )
+    outside = next(c for c in door.edges[0].cells() if c not in waiting.cells)
+    room = ground.room_at(outside)
+    assert room is not None and room.type == "reception_lobby"
+
+
+def test_the_club_checks_coats_at_the_door() -> None:
+    ground = generate(make_params(building_type=BuildingType.NIGHTCLUB, width=40, depth=32)).floor(
+        0
+    )
+    hall = next(r for r in ground.rooms if r.type == "dance_floor")
+    kinds = {o.kind for o in ground.objects if o.room == hall.id}
+    assert {"coat_rack", "counter"} <= kinds
+    assert "cloakroom" not in {r.type for r in ground.rooms}
+
+
+def _door_between(floor: Floor, a: str, b: str) -> bool:
+    for opening in floor.openings:
+        if opening.kind is OpeningKind.DOOR:
+            rooms = [floor.room_at(c) for c in opening.edges[0].cells()]
+            if {r.type for r in rooms if r is not None} == {a, b}:
+                return True
+    return False
+
+
+def test_loading_bays_open_onto_the_warehouse_floor() -> None:
+    for seed in range(3):
+        ground = generate(
+            make_params(building_type=BuildingType.WAREHOUSE, width=60, depth=44, seed=seed)
+        ).floor(0)
+        assert _door_between(ground, "loading_bay", "warehouse_floor"), seed
+
+
+@pytest.mark.parametrize(
+    "building_type",
+    [
+        BuildingType.WAREHOUSE,
+        BuildingType.SUPERMARKET,
+        BuildingType.POLICE_STATION,
+        BuildingType.HOSPITAL,
+        BuildingType.CHOP_SHOP,
+    ],
+)
+def test_vehicle_bays_have_their_own_exterior_door(building_type: BuildingType) -> None:
+    for seed in range(3):
+        params = make_params(building_type=building_type, width=60, depth=44, seed=seed)
+        ground = generate(params).floor(0)
+        rules = rules_for(building_type, params.wealth)
+        bays = [r for r in ground.rooms if rules.spec(r.type).facade_door]
+        assert bays, seed
+        for bay in bays:
+            width = rules.spec(bay.type).facade_door
+            assert width is not None
+            assert any(
+                o.entrance is not None
+                and (o.entrance == EntranceKind.SERVICE.value or len(o.edges) >= width)
+                and all(c in bay.cells or c not in ground.footprint for c in o.edges[0].cells())
+                for o in ground.openings
+            ), (seed, bay.type)
+
+
+def test_observation_rooms_sit_beside_an_interview_room() -> None:
+    beside = 0
+    for seed in range(4):
+        ground = generate(
+            make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=seed)
+        ).floor(0)
+        beside += _door_between(ground, "interview_room", "observation_room")
+    assert beside >= 2
 
 
 def test_police_station_has_holding_cells_behind_the_lockup() -> None:

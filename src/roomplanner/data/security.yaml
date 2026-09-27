@@ -7,11 +7,13 @@ tiers:
     exterior: {lock: mechanical}
     rooms:
       unit: {lock: mechanical}           # front doors of apartments
+      police_lobby: {lock: mechanical}   # into the station from the public front office
   low:
     rating: 2
     exterior: {lock: mechanical}
     rooms:
       unit: {lock: mechanical}
+      police_lobby: {lock: maglock}
       server_room: {lock: mechanical}
       pharmacy: {lock: mechanical}
       security_room: {lock: mechanical}
@@ -27,6 +29,7 @@ tiers:
     interior: {lock: none}
     rooms:
       unit: {lock: maglock, material: security}
+      police_lobby: {lock: cardreader, material: security}
       server_room: {lock: cardreader, material: security, rating: 5}
       security_room: {lock: cardreader, material: security}
       guard_room: {lock: cardreader}
@@ -54,7 +57,7 @@ tiers:
       manager_office: {lock: maglock}
       stockroom: {lock: maglock}
       utility: {lock: mechanical}
-    cameras: {entrances: true, corridor_per: 120, rooms: [lobby, reception_lobby, sales_floor, server_room, waiting_room]}
+    cameras: {entrances: true, corridor_per: 120, rooms: [lobby, reception_lobby, police_lobby, sales_floor, server_room, waiting_room]}
     alarm_panels: true
     motion_sensors: [server_room, archive, host_room, vault]
     floodlights: {kind: flood, radius: 10, colour: "#f4fbff", intensity: 0.9}
@@ -73,6 +76,7 @@ tiers:
     interior: {lock: cardreader}
     rooms:
       unit: {lock: cardreader, material: security}
+      police_lobby: {lock: biometric, material: security}
       server_room: {lock: biometric, material: blast, rating: 8}
       security_room: {lock: biometric, material: security}
       guard_room: {lock: cardreader, material: security}
@@ -101,7 +105,7 @@ tiers:
       stockroom: {lock: cardreader}
       utility: {lock: cardreader, material: security}
       corridor: {lock: cardreader}
-    cameras: {entrances: true, corridor_per: 60, rooms: [lobby, reception_lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office]}
+    cameras: {entrances: true, corridor_per: 60, rooms: [lobby, reception_lobby, police_lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office]}
     alarm_panels: true
     motion_sensors: [server_room, archive, executive_office, board_room, lab, stairwell, storage,
                      host_room, vault, drone_bay]

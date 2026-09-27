@@ -165,8 +165,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    `k` parallel corridors ("racetrack") for deep ones: facade strips keep their
    `strip_depth`, thin back-to-back interior strips between the corridors take the rest.
 3. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
-   the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator; in
-   strips so deep the stairwell would exceed its maximum area, a storage room behind it).
+   the vertical core as one full-depth slot in a strip. Each core room has its `core:` size
+   on the corridor side (the stairwell also takes the slot's partial grid module; a size
+   longer than the strip is shortened while it keeps the room's minimum area, else laid
+   across). Rests behind them too thin for the cluster filler make them deeper; the other
+   rectangles behind the core are rooms of their own on every floor (see Allocation).
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
    slice across the whole part (street on a short end). When no corridor touches the service
    side, the back door opens into a room on that facade, preferring the program's
@@ -175,8 +178,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    (apartments, hotels) carve a corridor stub to the service side instead.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
-   slot) which go into *clusters*: a side hallway from the corridor with rooms stacked along
-   it (small fill rooms such as coffins, and windowless fill rooms too big for the strip).
+   slot, unless no room could stack behind them) which go into *clusters*: a side hallway
+   from the corridor with rooms stacked along it (small fill rooms such as coffins, and windowless fill rooms too big for the strip).
    Rooms that need windows go into a *facade stack* instead when a full-depth slot would
    make them far too big (exam rooms, wards and offices in deep strips): the side hallway
    runs to the facade, the window room sits at its end and the floor's first windowless
@@ -228,7 +231,13 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    huddle rooms, some focus rooms, one copy room and one break room. `near: core | entrance | service`
    pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
-8. **Balcony** (`balcony:` of a floor role: the corp office's executive floor): an open-air
+8. **Behind the core**: each rectangle takes a room that found no space (required ones
+   first; a piece of its size if the rectangle is bigger), else the floor's `core_back` room (a
+   training room, the penthouse's living room), else a fill room that fits,
+   else it is halved while too big for the cluster filler. Between flats only (no room it
+   could open into), it joins the flat room beside it where it lies along that room's whole
+   wall for at least its `min_side`, else it becomes that room's closet (`front_fill`).
+9. **Balcony** (`balcony:` of a floor role: the corp office's executive floor): an open-air
    room at the street-side facade strip, one of `kinds` picked per building (others tried if
    it doesn't fit): `strip` (the outer `depth` cells along `share` of the facade), `room` (a
    loggia `modules` wide, the whole row deep) or `corner` (at the end of the facade, deeper)
@@ -237,7 +246,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    Floors above a balcony floor leave its cells out of their footprint (`FloorPlan.cut`): it
    stays open to the sky and their rows are shallower there (corp towers: a penthouse on top
    of half of them, by the building's `roll`, with the executive floor moved one down).
-9. **Roof** (`roof:` of a floor role): the floor is the core (stair housing, lift shafts) and
+10. **Roof** (`roof:` of a floor role): the floor is the core (stair housing, lift shafts) and
    one open-air, circulation room around it (the climate plant), less a balcony's sky below.
    Corp towers end in one a third of the time without a penthouse; plain offices in 40 %.
 
@@ -254,13 +263,16 @@ A connector that must cross a hall band splits it: each piece becomes its own ha
 `[hall | service corridor | back-of-house strip]`, hall on the street side (and away from an
 L's junction). Each floor role names the hall's room type with `place: hall` (sales floor;
 stockroom in the basement). Without a lobby the main entrance opens into the hall.
-Connectors that must cross a hall band become a short corridor across its end.
-Small halls (`hall: {corridor: false}`: stuffer shack, dive bar) drop the service corridor:
-the hall room is a *hub* (`PlannedRoom.hub`), which the openings stage treats as
-circulation, so the back rooms, cluster hallways and the stairwell open straight onto it.
+Connectors that must cross a hall band become a short corridor across its end. Parts shorter
+than `hall.corridor_from` (small shops, bars, churches; warehouses, supermarkets and clubs
+always) have no service corridor: the back
+rooms open onto the hall (`PlannedRoom.hub`: doors treat it as circulation, on every
+floor, so the stairwell opens into it too), the emergency exit goes to a hall end and an
+end-side service door into a back-of-house room.
 `hall: {foyer: {room, depth}}` cuts a foyer off the ground-floor hall at the street side
 (across the short end if the street is there, else along the facade): the church's
-narthex, which the portal opens into and the nave opens onto (`connect`).
+narthex, which the portal opens into and the nave opens onto (`connect`; circulation rooms
+that connect keep a wall with a door between them).
 
 ### Units
 
@@ -283,18 +295,26 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
   always): no walls on the (at most two) sides bordering the most circulation, no door of
   their own, and other rooms' doors only as a last resort.
 - One door per non-circulation room, committed greedily over all pending rooms: into
-  circulation first, then into a type from the room's `access` list, then into any connected
+  circulation first (one named in the room's `access`, e.g. the waiting room's reception
+  lobby, before the corridor), then into a type from the room's `access` list, then into any connected
   room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect
   only within their unit, except the unit's entry room, which opens to circulation.
 - Core rooms (stairwell, elevator) have the same cells on every floor, and so the same
   door: it uses a wall that borders circulation on all floors, in the middle of that wall.
-  Only other core rooms may open into the stairwell (`transit: false`).
+  Only other core rooms may open into the stairwell (`transit: false`). A room left without
+  any allowed door finally opens into any neighbour, a core room last.
 - A room's door goes as close as possible to the doors of its `next_to` / `connect`
   partners (either direction; to their rooms if they have no door yet): the loading bay's
   door faces the warehouse floor's across the service corridor.
 - `connect: [types]` adds a direct door to an adjacent room of such a type (kitchen into
   the restaurant, loading bay into the stockroom).
-- Exterior doors open outwards, at the positions the layout requested.
+- Exterior doors open outwards, at the positions the layout requested. The service door
+  prefers a vehicle bay's facade (rooms with `facade_door`), then `service_rooms`, then the
+  corridor's end; on a floor with a bay it is a plain door everywhere else.
+- A ground-floor room with `facade_door: w` (loading bay, sally port, DocWagon bay, chop
+  shop workshop, warehouse hall) that has no door at least `w`
+  wide gets its own exterior door of width `w` (entrance `service`), on the service side
+  if it has a facade there, else another side, the street last.
 - Windows follow one facade grid for all floors (so they line up); each floor omits the
   windows its own walls, doors or windowless rooms collide with.
 
@@ -310,33 +330,31 @@ overrides (`wealth:` in the catalog), and room entries / floor roles filtered by
 The program lists its entrance kinds (`main`, `service`, `emergency`, `roof`) with widths;
 the `entrances` parameter replaces that list (main is always built, unknown widths default
 to 2). The emergency exit goes to the corridor end on a facade farthest from the other
-entrances, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
+entrances, else to a hall end, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
 stairwell (or a circulation room).
-
-Rooms with `exterior_door: <width>` in the catalog (loading bays, warehouse, factory and
-workshop halls) get their own roller door on the ground floor, unless an entrance at least
-that wide already opens into them: on the service side if they reach it, the street side
-last, in the middle of their longest facade wall. These doors are exported as `service`
-entrances.
 
 ### Furnishing
 
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, on ties
-facing the door's wall, then the door, without randomness: stairs stand in the same spot on
-every floor, the wcs of a row of stalls all face their doors), `end` (the
+facing the door's wall, then the door, without randomness: the wcs of a row of stalls all
+face their doors), `fill` (the room's rectangle at its door, into
+circulation first, all across and backed against the far wall, facing the door; `landing`
+cells stay free at the door, at most `reach` deep; the size comes from the room, not the
+catalog: stairs span the stairwell, the elevator car is the shaft), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
-(checkouts), `grid` (one lattice centred in the room, `aisle` apart and `margin` from the
-walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs),
+(checkouts), `wall` with `near_room: <type>` (as close to such a room as possible: the stage
+by the backstage), `grid` (one lattice centred in the room, `aisle` apart and `margin` from
+the walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs),
 `facing_exit` (on the axis of the room's exterior door, `margin` cells past its clearance,
-facing it: the reception desk), `fill` (the room's box less `margin` rows at its doors, the
-object stretched to it: the elevator car fills its shaft), `perimeter` (side by side along every wall, as many as fit: vending machines),
-`axis` (on a wall at an end of the biggest object's long axis,
-facing it: the screen and whiteboard at the ends of a meeting table) and `rows`
-(shelves, desks, racks with aisles and a cross aisle every `block` cells, the block centred in
-the room; `paired: true` puts rows back to back
+facing it: the reception desk), `perimeter` (side by side along every wall, as many as fit:
+vending machines), `axis` (on a wall at an end of the biggest object's long axis, facing
+it: the screen and whiteboard at the ends of a meeting table) and `rows`
+(shelves, desks, racks with aisles and a cross aisle every `block` cells, shifted across
+the spare width to where most fit, e.g. clear of doors along one wall, else against an open
+side, else centred; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two
 halves fit: pews facing the altar), and `at`

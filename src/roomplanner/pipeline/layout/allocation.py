@@ -15,7 +15,7 @@ from collections import Counter, deque
 from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
 
-from roomplanner.geometry import Cell
+from roomplanner.geometry import Cell, Side
 from roomplanner.pipeline.base import AllocationError, Context, PlannedRoom
 from roomplanner.pipeline.layout.frame import Band, Box, Frame, Grid, Interval, LocalSide
 from roomplanner.pipeline.layout.units import subdivide
@@ -156,11 +156,21 @@ class Allocator:
     # --- public -----------------------------------------------------------------------
 
     def allocate(
-        self, role: FloorRole, level: int, floor_name: str, existing: Iterable[str] = ()
+        self,
+        role: FloorRole,
+        level: int,
+        floor_name: str,
+        behind: list[tuple[Segment, frozenset[Cell]]] | None = None,
+        existing: Iterable[str] = (),
     ) -> list[PlannedRoom]:
-        """The floor's rooms in its strip segments; `existing`: types already on the floor
-        (core rooms), which count against the fill rooms' `limit`."""
+        """Rooms of the floor's segments; `behind`: rectangles behind the core, which take
+        rooms that don't fit elsewhere (required ones first), else the floor's `core_back`
+        room, else fill rooms. `existing`: types already on the floor, which count against
+        the fill rooms' `limit`."""
         self.level = level
+        self.core_back = role.core_back or self.rules.program.core_back
+        self.floor_name = floor_name
+        self.dropped: list[Request] = []
         requests, fills = self._requests(role, level)
         self.fill_types = {e.room for e in fills}
         self.fills = fills
@@ -179,19 +189,24 @@ class Allocator:
                 queue.appendleft(request)
                 continue
             if not placed:
-                message = f"{floor_name}: no space for {request.priority} room {request.type}"
-                if request.priority is Priority.REQUIRED:
-                    raise AllocationError(message)
-                if request.priority is Priority.OPTIONAL:
-                    continue  # nice to have: only where there is space, no warning
+                self.dropped.append(request)
                 warning = f"{floor_name}: dropped {request.type} (no space)"
-                if warning not in self.warnings:
+                # Optional rooms are nice to have: only where there is space, no warning.
+                if request.priority is Priority.NORMAL and warning not in self.warnings:
                     self.warnings.append(warning)
         for state in self.states:
             self._fill(state, self.main_fills)
         rooms: list[PlannedRoom] = []
         for state in self.states:
             rooms += self._materialise(state)
+        self.dropped.sort(key=lambda r: r.priority is not Priority.REQUIRED)
+        for segment, cells in behind or []:
+            if not self._join_unit(cells, rooms):
+                rooms += self.rooms_behind(segment, cells)
+        for request in self.dropped:
+            if request.priority is Priority.REQUIRED:
+                message = f"{floor_name}: no space for {request.priority} room {request.type}"
+                raise AllocationError(message)
         return rooms
 
     # --- requests ---------------------------------------------------------------------
@@ -373,6 +388,7 @@ class Allocator:
         full = FullSlot(request, self._full_units(request, segment))
         # Cluster members mostly don't touch the facade, so rooms needing windows stay full.
         needs_window = request.spec.windows is WindowRule.REQUIRED
+        needs_window = needs_window or request.spec.facade_door is not None  # a vehicle door
         low, high = request.spec.area
         if (column := self._facade_column(request.spec, low, high, segment)) is not None:
             hall = math.ceil(self.hallway / segment.unit) * segment.unit
@@ -393,9 +409,11 @@ class Allocator:
                     if self._member_depth(request, slot) <= slot.free_depth(column, segment.depth):
                         return slot, column
         cluster = self._new_cluster(request, segment)
+        rest = segment.depth - self._member_depth(request, cluster)
+        # No room could stack behind it: no hallway needed, it opens onto the corridor.
         if (
             cluster.units <= state.free_units
-            and self._member_depth(request, cluster) <= segment.depth
+            and rest >= self.rules.spec(self.rules.program.cluster_filler).min_side
         ):
             return cluster
         return full if full.units <= state.free_units else None
@@ -515,6 +533,7 @@ class Allocator:
             self.fill_counts[entry.room] = self.fill_counts.get(entry.room, 0) + 1
             spec = self.rules.spec(entry.room)
             stackable = spec.cluster or spec.windows is not WindowRule.REQUIRED
+            stackable = stackable and entry.limit is None  # a stack holds several
             if stackable and (cluster := self._fill_cluster(entry, state)) is not None:
                 # Small fill rooms (coffins, …) in deep strips: stacked along a hallway.
                 state.slots.append(cluster)
@@ -618,17 +637,142 @@ class Allocator:
         for i in range(rest):
             wider[i % len(wider)].units += 1
 
+    def _join_unit(self, cells: frozenset[Cell], rooms: list[PlannedRoom]) -> bool:
+        """Space behind the core between flats only (no room it could open into) goes to the
+        flats: each piece (halved while too big for a closet) joins the flat room beside it
+        if it runs along that room's whole wall for at least the room's minimum side, else it
+        is a closet entered only through that room."""
+        touching = [r for r in rooms if r.cells & _around(cells)]
+        if any(r.unit is None and self.rules.spec(r.type).transit for r in touching):
+            return False
+        flats = [r for r in touching if r.unit is not None and r.host is None]
+        closet = next(
+            (u.front_fill for u in self.rules.program.units.values() if u.front_fill), None
+        )
+        if not flats or closet is None:
+            return False
+        spec = self.rules.spec(closet)
+        pieces = [cells]
+        plan: list[tuple[frozenset[Cell], PlannedRoom]] = []
+        while pieces:
+            piece = pieces.pop()
+            xs, ys = [c.x for c in piece], [c.y for c in piece]
+            x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
+            if min(x1 - x0, y1 - y0) < spec.min_side:
+                return False
+            if len(piece) > spec.area[1] * SMALL_ROOM_TOLERANCE:  # one per half
+                if x1 - x0 >= y1 - y0:
+                    half = frozenset(c for c in piece if c.x < (x0 + x1) // 2)
+                else:
+                    half = frozenset(c for c in piece if c.y < (y0 + y1) // 2)
+                pieces += [half, piece - half]
+                continue
+            around = _around(piece)
+            beside = [r for r in flats if r.cells & around]
+            if not beside:
+                return False
+            plan.append((piece, max(beside, key=lambda r: len(r.cells & around))))
+        hosts = {id(r.host) for r in rooms if r.host is not None}
+        grown: dict[int, PlannedRoom] = {}
+        closets: list[tuple[frozenset[Cell], PlannedRoom]] = []
+        for piece, room in plan:
+            current = grown.get(id(room), room)
+            room_spec = self.rules.spec(room.type)
+            if (
+                id(room) not in hosts
+                and _along(piece, room.cells) >= room_spec.min_side
+                and len(current.cells) + len(piece) <= room_spec.area[1] * ABSORB_TOLERANCE
+            ):
+                grown[id(room)] = replace(current, cells=current.cells | piece)
+            else:
+                closets.append((piece, room))
+        for i, room in enumerate(rooms):
+            rooms[i] = grown.get(id(room), room)
+        for piece, room in closets:
+            host = grown.get(id(room), room)
+            rooms.append(PlannedRoom(closet, piece, room.unit, host=host))
+        return True
+
+    def rooms_behind(self, segment: Segment, cells: frozenset[Cell]) -> list[PlannedRoom]:
+        """Rooms for a rectangle behind the core: rooms dropped for lack of space (a piece
+        of their size if it is bigger), else a fill room; too big for any, split in two."""
+        xs, ys = [c.x for c in cells], [c.y for c in cells]
+        x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
+        short, long = sorted((x1 - x0, y1 - y0))
+        filler = self.rules.program.cluster_filler
+        rest_min = self.rules.spec(filler).min_side
+
+        def fits(spec: RoomSpec, a: int, b: int) -> bool:
+            a, b = sorted((a, b))
+            return a >= max(spec.min_side, self._min_width(spec, b))
+
+        def cut(length: int) -> tuple[frozenset[Cell], frozenset[Cell]]:
+            """The first `length` cells along the long side, and the rest."""
+            if x1 - x0 >= y1 - y0:
+                return frozenset(c for c in cells if c.x < x0 + length), frozenset(
+                    c for c in cells if c.x >= x0 + length
+                )
+            return frozenset(c for c in cells if c.y < y0 + length), frozenset(
+                c for c in cells if c.y >= y0 + length
+            )
+
+        for request in self.dropped:
+            spec = request.spec
+            if (
+                request.type in self.rules.program.units
+                or spec.vestibule is not None
+                or (spec.windows is WindowRule.REQUIRED and not segment.facade)
+                or (spec.facade_door is not None and not segment.facade)  # needs its door
+                or len(cells) < max(request.min_area, spec.area[0])
+            ):
+                continue
+            whole = len(cells) <= spec.area[1] * SMALL_ROOM_TOLERANCE and fits(spec, short, long)
+            # Only its own size (else its minimum) while other rooms wait for space, or if
+            # the rest is too big for it.
+            areas = [request.area, max(request.min_area, spec.area[0])]
+            lengths = [max(spec.min_side, math.ceil(area / short)) for area in areas]
+            lengths = [n for n in lengths if long - n >= rest_min and fits(spec, short, n)]
+            others = [r for r in self.dropped if r is not request]
+            if lengths and (not whole or others):
+                length = lengths[0]
+                if others:  # the longest that leaves the next one its minimum
+                    need = max(others[0].min_area, others[0].spec.area[0])
+                    length = next((n for n in lengths if (long - n) * short >= need), length)
+                piece, rest = cut(length)
+            elif whole:
+                piece, rest = cells, frozenset[Cell]()
+            else:
+                continue
+            self.dropped.remove(request)
+            if not any(r.type == request.type for r in self.dropped):
+                warning = f"{self.floor_name}: dropped {request.type} (no space)"
+                if warning in self.warnings:
+                    self.warnings.remove(warning)
+            rooms = [PlannedRoom(request.type, piece)]
+            return rooms + (self.rooms_behind(segment, rest) if rest else [])
+        if (back := self.core_back) is not None:
+            spec = self.rules.spec(back)
+            entries = [e for e in self.fills if e.room == back]
+            if fits(spec, short, long) and not any(self._at_limit(e) for e in entries):
+                self.fill_counts[back] = self.fill_counts.get(back, 0) + 1
+                return [PlannedRoom(back, cells, leftover=back == filler)]
+        if (kind := self._leftover_room(segment, short, long)) is not None:
+            return [PlannedRoom(kind, cells)]
+        if long >= 2 * rest_min and len(cells) > self.rules.spec(filler).area[1] * (
+            SMALL_ROOM_TOLERANCE
+        ):
+            first, second = cut(long // 2)
+            return self.rooms_behind(segment, first) + self.rooms_behind(segment, second)
+        return [PlannedRoom(filler, cells, leftover=True)]
+
     def _leftover_entry(self, units: int, segment: Segment) -> RoomEntry | None:
         """A fill room that takes `units` of full-depth leftover at its size, if there is one."""
         width = units * segment.unit
         room = self._leftover_room(segment, width, segment.depth, units=True)
-        if room is None:
-            return None
-        self.fill_counts[room] = self.fill_counts.get(room, 0) + 1
-        return RoomEntry(room=room, fill=True)
+        return None if room is None else RoomEntry(room=room, fill=True)
 
     def _leftover_room(
-        self, segment: Segment, width: int, depth: int, units: bool = False
+        self, segment: Segment, width: int, depth: int, units: bool = False, probe: bool = False
     ) -> str | None:
         """A fill room type for a `width` x `depth` leftover: windows first on facades.
 
@@ -648,7 +792,12 @@ class Allocator:
                 continue
             fitting[spec.windows is not WindowRule.REQUIRED].append(entry.room)
         choices = fitting[0] or fitting[1]
-        return self.rng.choice(choices) if choices else None
+        if not choices:
+            return None
+        room = self.rng.choice(choices)
+        if not probe:  # `probe`: only asks whether one fits
+            self.fill_counts[room] = self.fill_counts.get(room, 0) + 1  # against its `limit`
+        return room
 
     def _too_deep(self, entry: RoomEntry, segment: Segment) -> bool:
         """A full-depth slot of this fill room would be far above its maximum area."""
@@ -892,7 +1041,8 @@ class Allocator:
         filler = self.rules.program.cluster_filler
         filler_min = self.rules.spec(filler).min_side
         extra = span.width - cluster.hall - cluster.columns * column_width
-        if extra >= filler_min and self._leftover_room(segment, extra, band.depth) is None:
+        wide = extra >= filler_min
+        if wide and self._leftover_room(segment, extra, band.depth, probe=True) is None:
             # No room fits the extra width: wider columns, as far as their rooms may grow
             # (the last one also takes a rest of the depth too small for a storeroom).
             def deepest(stack: list[tuple[Request, int]]) -> list[tuple[Request, int]]:
@@ -974,6 +1124,24 @@ class Allocator:
         if band.corridor_at is LocalSide.V0:
             return segment.frame.rect(span.u0, span.u1, band.v0 + d0, band.v0 + d1)
         return segment.frame.rect(span.u0, span.u1, band.v1 - d1, band.v1 - d0)
+
+
+def _around(cells: frozenset[Cell]) -> set[Cell]:
+    """The cells next to `cells` (sharing a side with one of them)."""
+    return {c.neighbour(side) for c in cells for side in Side} - cells
+
+
+def _along(piece: frozenset[Cell], room: frozenset[Cell]) -> int:
+    """Length of the piece's side that lies wholly against `room`, else 0."""
+    xs, ys = [c.x for c in piece], [c.y for c in piece]
+    x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
+    sides = [
+        [Cell(x0 - 1, y) for y in range(y0, y1)],
+        [Cell(x1, y) for y in range(y0, y1)],
+        [Cell(x, y0 - 1) for x in range(x0, x1)],
+        [Cell(x, y1) for x in range(x0, x1)],
+    ]
+    return max((len(side) for side in sides if all(c in room for c in side)), default=0)
 
 
 def _split(total: int, least: int, most: int) -> list[int]:

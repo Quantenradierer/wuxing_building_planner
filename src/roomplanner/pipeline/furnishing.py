@@ -370,6 +370,8 @@ class RoomFurnisher:
             case Placement.WALL:
                 candidates = self._against_walls(spec, corners_only=False)
                 self.rng.shuffle(candidates)
+                if rule.near_room is not None:
+                    candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
             case Placement.BACK:
                 candidates = self._against_walls(spec, corners_only=False)
                 # Equally far (a square wc in a stall): face the door's wall, then the door,
@@ -414,8 +416,6 @@ class RoomFurnisher:
                 candidates = self._grid(spec, rule.aisle, rule.margin)
             case Placement.FACING_EXIT:
                 candidates = self._facing_exit(spec, rule.margin)
-            case Placement.FILL:
-                candidates = self._filling(rule.margin)
             case Placement.AXIS:
                 candidates = self._on_axis(spec)
             case Placement.PERIMETER:
@@ -429,9 +429,72 @@ class RoomFurnisher:
                 ex, ey = exit_
                 candidates = self._anywhere(spec)
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - ex) + abs(r[1] + r[3] / 2 - ey))
+            case Placement.FILL:
+                candidates = self._filling(rule)
             case Placement.ROWS | Placement.AT:
                 return False
         return any(self._try(rule.object, rect, spec.walkable) for rect in candidates)
+
+    def _filling(self, rule: FurnitureRule) -> list[Rect]:
+        """The room's rectangle at its door (to circulation first), all across, backed against
+        the far wall and facing the door; `landing` cells stay free at the door, and it is at
+        most `reach` deep. Only doors decide, so a core room gets it at the same spot on
+        every floor."""
+        doors = self._doors()
+        if not doors:
+            return []
+        inside, side = doors[0]
+        box = self._largest_rect(inside)
+        x0, y0, x1, y1 = box
+        extent = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
+        deep = extent - rule.landing
+        if rule.reach is not None:
+            deep = min(deep, rule.reach)
+        if deep < 1:
+            return []
+        match side:
+            case Side.N:
+                return [(x0, y1 - deep, x1 - x0, deep, side)]
+            case Side.S:
+                return [(x0, y0, x1 - x0, deep, side)]
+            case Side.W:
+                return [(x1 - deep, y0, deep, y1 - y0, side)]
+            case Side.E:
+                return [(x0, y0, deep, y1 - y0, side)]
+
+    def _doors(self) -> list[tuple[Cell, Side]]:
+        """(cell inside, side of the room) of each door cell, doors into circulation first."""
+        found: list[tuple[bool, Cell, Side]] = []
+        for door in self.floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            for edge in door.edges:
+                a, b = edge.cells()
+                inside, outside = (a, b) if a in self.cells else (b, a)
+                if inside not in self.cells or outside in self.cells:
+                    continue
+                other = self.floor.room_at(outside)
+                circulation = other is not None and self.ctx.rules.spec(other.type).circulation
+                side = next(s for s in Side if inside.neighbour(s) == outside)
+                found.append((not circulation, inside, side))
+        return [(cell, side) for _, cell, side in sorted(found)]
+
+    def _largest_rect(self, cell: Cell) -> tuple[int, int, int, int]:
+        """(x0, y0, x1, y1) of the largest rectangle of room cells containing `cell`."""
+        bx0, by0, bx1, by1 = self.box
+        best = (cell.x, cell.y, cell.x + 1, cell.y + 1)
+        for x0 in range(bx0, cell.x + 1):
+            for x1 in range(cell.x + 1, bx1 + 1):
+                for y0 in range(by0, cell.y + 1):
+                    for y1 in range(cell.y + 1, by1 + 1):
+                        area = (x1 - x0) * (y1 - y0)
+                        if area <= (best[2] - best[0]) * (best[3] - best[1]):
+                            continue
+                        if all(
+                            Cell(x, y) in self.cells for x in range(x0, x1) for y in range(y0, y1)
+                        ):
+                            best = (x0, y0, x1, y1)
+        return best
 
     def _against_walls(self, spec: ObjectSpec, corners_only: bool) -> list[Rect]:
         """Rectangles whose back row lies entirely against a solid wall (cached per size)."""
@@ -460,6 +523,13 @@ class RoomFurnisher:
         first, last = back[0], back[-1]
         ends = (Side.W, Side.E) if side in (Side.N, Side.S) else (Side.N, Side.S)
         return Edge.of(first, ends[0]) in self.solid or Edge.of(last, ends[1]) in self.solid
+
+    def _room_distance(self, rect: Rect, room_type: str) -> float:
+        """How far a rectangle's centre is from the nearest room of that type on the floor."""
+        x, y, w, h, _ = rect
+        cx, cy = x + w / 2, y + h / 2
+        cells = [c for r in self.floor.rooms if r.type == room_type for c in r.cells]
+        return min((abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in cells), default=0.0)
 
     def _door_distance(self, rect: Rect) -> float:
         """How far a rectangle's centre is from the room's door clearances (deterministic)."""
@@ -579,19 +649,6 @@ class RoomFurnisher:
             rects.append((x, y, w, h, facing))
         return rects
 
-    def _filling(self, margin: int) -> list[Rect]:
-        """The room's box less `margin` rows along each wall with a door, facing a door."""
-        x0, y0, x1, y1 = self.box
-        sides = self._door_sides()
-        x0 += margin if Side.W in sides else 0
-        x1 -= margin if Side.E in sides else 0
-        y0 += margin if Side.N in sides else 0
-        y1 -= margin if Side.S in sides else 0
-        if x1 <= x0 or y1 <= y0:
-            return []
-        facing = next((s for s in (Side.S, Side.N, Side.E, Side.W) if s in sides), Side.S)
-        return [(x0, y0, x1 - x0, y1 - y0, facing)]
-
     def _facing_exit(self, spec: ObjectSpec, margin: int) -> list[Rect]:
         """Spots on the axis of each exterior door into the room, facing it, nearest first,
         `margin` cells beyond the door's clearance."""
@@ -668,12 +725,7 @@ class RoomFurnisher:
                 rows.append((across, Side.S))
                 across += deep + rule.aisle
         positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle)]
-        if toward is None and rows and positions:
-            # The block of rows centred in the room: equal margins on opposite walls; against
-            # an open side if there is one.
-            spare = width - m1 - (rows[-1][0] + deep)
-            shift = 0 if m0 < m1 else spare if m1 < m0 else spare // 2
-            rows = [(across + shift, facing) for across, facing in rows]
+        if toward is None and positions:  # centred along the room
             spare = length - m - (positions[-1] + along)
             positions = [p + spare // 2 for p in positions]
         if toward is not None and positions:  # centred, the side aisles equally wide
@@ -686,16 +738,35 @@ class RoomFurnisher:
             else:
                 shift = (length - positions[-1] - along - m) // 2
                 positions = [p + shift for p in positions]
-        for across, facing in rows:
-            for position in positions:
-                if horizontal:
-                    rect = (x0 + position, y0 + across, along, deep, facing)
-                else:
-                    side = Side.W if facing is Side.N else Side.E
-                    rect = (x0 + across, y0 + position, deep, along, side)
-                if toward is not None:
-                    rect = (*rect[:4], toward)
-                self._try(rule.object, rect, spec.walkable)
+
+        def rects(shift: int) -> list[Rect]:
+            found: list[Rect] = []
+            for across, facing in rows:
+                for position in positions:
+                    if horizontal:
+                        rect = (x0 + position, y0 + across + shift, along, deep, facing)
+                    else:
+                        side = Side.W if facing is Side.N else Side.E
+                        rect = (x0 + across + shift, y0 + position, deep, along, side)
+                    found.append(rect if toward is None else (*rect[:4], toward))
+            return found
+
+        def free(rect: Rect) -> bool:
+            x, y, w, h, _ = rect
+            cells = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+            return cells <= self.cells and not cells & (self.taken | self.clearance)
+
+        # Rows shifted across the spare width to where most fit (clear of doors on one side);
+        # of those, against an open side if there is one, else centred.
+        spare = max(0, width - m1 - (rows[-1][0] + deep)) if rows else 0
+        target = 0 if m0 < m1 else spare if m1 < m0 else spare // 2
+        if toward is not None:
+            target = 0
+        shift = max(
+            range(spare + 1), key=lambda s: (sum(map(free, rects(s))), -abs(s - target), -s)
+        )
+        for rect in rects(shift):
+            self._try(rule.object, rect, spec.walkable)
 
     def _open_side(self, side: Side) -> bool:
         """True if most of the room's box edge on `side` has no wall (open to a corridor)."""

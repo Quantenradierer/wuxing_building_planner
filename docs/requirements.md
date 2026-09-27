@@ -95,9 +95,9 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 
 - Rules are data: YAML files validated with Pydantic.
   - A shared **room catalog** (toilet, storage, stairwell, corridor, …) with area ranges,
-    minimum side, window requirement, door width, its own exterior door
-    (`exterior_door`: loading bays, workshops), which rooms it is entered from
-    (`access`), whether it may be walked through (`transit`), wealth overrides, furniture.
+    minimum side, window requirement, door width, which rooms it is entered from
+    (`access`), whether it may be walked through (`transit`), its own vehicle door
+    (`facade_door`), wealth overrides, furniture.
   - One **program** per building type: layout strategy, corridor and strip sizes, facade
     grid, vertical core, entrances, units, floor roles (matched by ground / upper / top /
     basement plus `when:` and `wealth:`) and room entries with `count`, `share`, `fill` or
@@ -123,6 +123,8 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
   not modelled). The `entrances` parameter overrides the type's list. Fire escapes wait for
   surroundings.
 - The main entrance faces `street_side`; the service entrance faces `service_side`.
+- Vehicle and delivery bays (`facade_door`) have their own wide exterior door; the
+  service door goes into such a bay if it faces the service side.
 
 ## Openings
 
@@ -255,26 +257,24 @@ Known weaknesses:
 - Toilets: about 0.5 % of public toilets still have no sink (a 4 × 4 rest between the
   entrance and two stall doors). The others give up stalls until 16 cells are left for
   sinks (`rest_area`), or become a single WC; before, ~10 % had no sink.
-- Stuffer shacks and dive bars have no service corridor any more (back rooms open onto the
-  sales floor / taproom); small back rooms still sit along a short side hallway open to
-  the hall. Clinic, apartment and hotel floors have dead-end corridor stubs running to the facade
-  (one in the clinic only holds a roof hatch).
-- Public sequence is broken: entrance, reception and waiting aren't chained. Clinic: the
-  entrance opens into an empty lobby; reception is a closed room across the corridor and
-  the waiting room is elsewhere. Police station: the reception desk is in a closed room
-  behind the lobby; the lobby opens onto the main corridor, so the public reaches lockup,
-  armory and evidence room; no secure zone. Nightclub: the cloakroom is off the corridor,
-  not at the entrance, and the security room is dropped for lack of space (40 × 32).
-- Rooms that belong together aren't adjacent: police observation room isn't next to an
-  interview room; nightclub backstage isn't next to the stage; warehouse loading bays are
-  separated from the hall by a corridor; supermarket stockroom/loading bay only reach the
-  sales floor via the corridor.
-- Vehicle and delivery access: every loading bay and every warehouse, factory and chop
-  shop hall has its own roller door now (`exterior_door`), and the service door tries the
-  `service_rooms` in order (loading bay first, cold storage last). Still open: a hall's
-  roller door can end up on a side facade (the hall rarely reaches the service side); the
-  clinic's ambulance door can open into the pharmacy or an exam room; the police
-  station's garage exists only in the basement, without a ramp.
+- Cluster hallways run on to the facade past their last door (clinic toilets and storage),
+  and apartment and hotel floors have a corridor stub to the service door.
+- Waiting rooms open onto the reception lobby only when they end up beside it (about 60 %
+  in clinics and hospitals); the others open onto the corridor. The police station's
+  public area is just the front office: public toilets are behind its locked door.
+- A storeroom behind the elevator, walled in by the stairwell and toilet stalls, can open
+  into the elevator (3 of ~1000 rooms beside cores, supermarket upper floors).
+- Rooms that belong together: about 60 % of police observation rooms sit beside an
+  interview room (`next_to` only orders rooms within one strip segment); a supermarket
+  stockroom borders the sales floor in about half the cases (the others sit behind a
+  cluster hallway).
+- Without a corridor or back room on the service facade the plain service door opens into
+  whatever room is there (an exam room or storeroom in small clinics).
+- Vehicle access: every bay with `facade_door` (loading bay, DocWagon bay, sally port,
+  garage, warehouse, factory and chop shop halls) gets its own roller door, and such rooms
+  never go into clusters or behind the core, where they would have no facade. Still open:
+  a hall's roller door can end up on a side facade; the police station's garage exists
+  only in the basement, without a ramp.
 - Hall buildings (supermarket, warehouse, factory, nightclub, dive bar, parking garage)
   have one thin back-of-house strip; it is full before the optional Sixth World rooms
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they
@@ -282,19 +282,14 @@ Known weaknesses:
   are furniture instead (rigger cocoon in the security room, drone docks in the hall).
 - Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
   105), 1 of 12 seeds.
-- Waiting rooms are still separate rooms near the entrance, not always beside the lobby.
-  (The reception is part of the lobby now: `reception_lobby` with the desk facing the
-  entrance in clinics, cosmetic clinics, hospitals, hotels and police stations.)
 - Hotel guest rooms narrower than hall plus guest room (8 cells) keep the small hallway
   between corridor, bathroom and guest room.
 - About 50 of ~33 000 rooms (400 random buildings, all types and tiers) exceed 1.5x their
   catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
   Absorbing leftovers raised this by ~15 % (2 000 buildings: 621 → 719 rooms), mostly
   coffin units and rooms beside thin slivers.
-- The storeroom behind the stairwell, now only where the stairwell would exceed its
-  maximum area, can be walled in by apartments; it then opens into the stairwell as a
-  last resort, on some floors only. It should reach the corridor, or be a stairwell
-  closet on every floor.
+- Elevator doors are drawn and exported as hinged doors swinging into the car; they should
+  slide.
 - Leftover storerooms can open into the lobby or lounge instead of a corridor (hotel
   56 × 36: storeroom beside the lounge).
 - Apartment halls run the whole unit width in deep strips (up to ~100 cells); every back
