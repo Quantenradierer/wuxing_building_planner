@@ -294,10 +294,8 @@ Known weaknesses:
   catalog maximum, spread over single cases (corp lobby, exam room, airlock, office).
   Absorbing leftovers raised this by ~15 % (2 000 buildings: 621 → 719 rooms), mostly
   coffin units and rooms beside thin slivers.
-- The storeroom behind the stairwell, now only where the stairwell would exceed its
-  maximum area, can be walled in by apartments; it then opens into the stairwell as a
-  last resort, on some floors only. It should reach the corridor, or be a stairwell
-  closet on every floor.
+- Elevator doors are drawn and exported as hinged doors swinging into the car; they should
+  slide.
 - Leftover storerooms can open into the lobby or lounge instead of a corridor (hotel
   56 × 36: storeroom beside the lounge).
 - Apartment halls run the whole unit width in deep strips (up to ~100 cells); every back

@@ -325,9 +325,72 @@ class RoomFurnisher:
                 ex, ey = exit_
                 candidates = self._anywhere(spec)
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - ex) + abs(r[1] + r[3] / 2 - ey))
+            case Placement.FILL:
+                candidates = self._filling(rule)
             case Placement.ROWS | Placement.AT:
                 return False
         return any(self._try(rule.object, rect, spec.walkable) for rect in candidates)
+
+    def _filling(self, rule: FurnitureRule) -> list[Rect]:
+        """The room's rectangle at its door (to circulation first), all across, backed against
+        the far wall and facing the door; `landing` cells stay free at the door, and it is at
+        most `reach` deep. Only doors decide, so a core room gets it at the same spot on
+        every floor."""
+        doors = self._doors()
+        if not doors:
+            return []
+        inside, side = doors[0]
+        box = self._largest_rect(inside)
+        x0, y0, x1, y1 = box
+        extent = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
+        deep = extent - rule.landing
+        if rule.reach is not None:
+            deep = min(deep, rule.reach)
+        if deep < 1:
+            return []
+        match side:
+            case Side.N:
+                return [(x0, y1 - deep, x1 - x0, deep, side)]
+            case Side.S:
+                return [(x0, y0, x1 - x0, deep, side)]
+            case Side.W:
+                return [(x1 - deep, y0, deep, y1 - y0, side)]
+            case Side.E:
+                return [(x0, y0, deep, y1 - y0, side)]
+
+    def _doors(self) -> list[tuple[Cell, Side]]:
+        """(cell inside, side of the room) of each door cell, doors into circulation first."""
+        found: list[tuple[bool, Cell, Side]] = []
+        for door in self.floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            for edge in door.edges:
+                a, b = edge.cells()
+                inside, outside = (a, b) if a in self.cells else (b, a)
+                if inside not in self.cells or outside in self.cells:
+                    continue
+                other = self.floor.room_at(outside)
+                circulation = other is not None and self.ctx.rules.spec(other.type).circulation
+                side = next(s for s in Side if inside.neighbour(s) == outside)
+                found.append((not circulation, inside, side))
+        return [(cell, side) for _, cell, side in sorted(found)]
+
+    def _largest_rect(self, cell: Cell) -> tuple[int, int, int, int]:
+        """(x0, y0, x1, y1) of the largest rectangle of room cells containing `cell`."""
+        bx0, by0, bx1, by1 = self.box
+        best = (cell.x, cell.y, cell.x + 1, cell.y + 1)
+        for x0 in range(bx0, cell.x + 1):
+            for x1 in range(cell.x + 1, bx1 + 1):
+                for y0 in range(by0, cell.y + 1):
+                    for y1 in range(cell.y + 1, by1 + 1):
+                        area = (x1 - x0) * (y1 - y0)
+                        if area <= (best[2] - best[0]) * (best[3] - best[1]):
+                            continue
+                        if all(
+                            Cell(x, y) in self.cells for x in range(x0, x1) for y in range(y0, y1)
+                        ):
+                            best = (x0, y0, x1, y1)
+        return best
 
     def _against_walls(self, spec: ObjectSpec, corners_only: bool) -> list[Rect]:
         """Rectangles whose back row lies entirely against a solid wall (cached per size)."""

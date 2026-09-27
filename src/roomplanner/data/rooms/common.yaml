@@ -24,13 +24,13 @@ rooms:
     min_side: 5
     transit: false        # no rooms open into it (but the core's elevator may)
     furniture:
-      - {object: stairs, placement: back}   # same spot on every floor
+      - {object: stairs, placement: fill, landing: 2, reach: 8}   # at the door: same spot on every floor
   elevator:
     area: [12, 80]
     min_side: 3
     windows: forbidden
     furniture:
-      - {object: elevator_car, placement: center}
+      - {object: elevator_car, placement: fill}   # the car is the shaft
   toilet:               # public toilet: stalls along one wall, sinks and urinals outside
     area: [24, 56]
     min_side: 3

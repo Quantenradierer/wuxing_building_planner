@@ -76,6 +76,7 @@ class Placement(StrEnum):
     END = "end"  # middle of the short wall farthest from the doors (altar), else like back
     FIXED = "fixed"  # the same wall spot on every floor, whatever the doors (ramps)
     AT = "at"  # beside each object of kind `at`, front first (chairs at desks and tables)
+    FILL = "fill"  # the room's width at the far wall, facing the door (stairs, elevator car)
 
 
 class FurnitureRule(_Strict):
@@ -103,6 +104,8 @@ class FurnitureRule(_Strict):
         "that fits at all) is used",
     )
     clearance: int = Field(default=2, ge=0, description="choose: free cells around it")
+    landing: int = Field(default=0, ge=0, description="fill: free cells kept on the door side")
+    reach: int | None = Field(default=None, gt=0, description="fill: at most this many deep")
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 

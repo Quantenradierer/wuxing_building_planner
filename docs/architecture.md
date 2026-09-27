@@ -165,8 +165,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    `k` parallel corridors ("racetrack") for deep ones: facade strips keep their
    `strip_depth`, thin back-to-back interior strips between the corridors take the rest.
 3. **Skeleton**, identical on all floors: a cross corridor joining parallel corridors, and
-   the vertical core as one full-depth slot in a strip (stairwell wrapping the elevator; in
-   strips so deep the stairwell would exceed its maximum area, a storage room behind it).
+   the vertical core as one full-depth slot in a strip. Each core room has its `core:` size
+   on the corridor side (the stairwell also takes the slot's partial grid module; a size
+   longer than the strip is shortened while it keeps the room's minimum area, else laid
+   across). Rests behind them too thin for the cluster filler make them deeper; the other
+   rectangles behind the core are rooms of their own on every floor (see Allocation).
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
    slice across the whole part (street on a short end). When no corridor touches the service
    side, the back door opens into a room on that facade, preferring the program's
@@ -221,6 +224,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    `priority: optional` only take leftovers the others don't fit. `near: core | entrance | service`
    pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
+8. **Behind the core**: each rectangle takes a room that found no space (required ones
+   first; a piece of its size if the rectangle is bigger), else a fill room that fits,
+   else it is halved while too big for the cluster filler. Between flats only (no room it
+   could open into), it joins the flat room beside it where it lies along that room's whole
+   wall for at least its `min_side`, else it becomes that room's closet (`front_fill`).
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
 (T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),
@@ -259,7 +267,8 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
   only within their unit, except the unit's entry room, which opens to circulation.
 - Core rooms (stairwell, elevator) have the same cells on every floor, and so the same
   door: it uses a wall that borders circulation on all floors, in the middle of that wall.
-  Only other core rooms may open into the stairwell (`transit: false`).
+  Only other core rooms may open into the stairwell (`transit: false`). A room left without
+  any allowed door finally opens into any neighbour, a core room last.
 - A room's door goes as close as possible to the doors of its `next_to` / `connect`
   partners (either direction; to their rooms if they have no door yet): the loading bay's
   door faces the warehouse floor's across the service corridor.
@@ -289,7 +298,10 @@ stairwell (or a circulation room).
 `furnishing: rules` places the objects listed under a room's `furniture:`. Objects come from
 `data/objects.yaml` (size in cells along the wall × deep, `walkable`, ASCII glyph).
 Placements: `wall`, `corner`, `back` (against the wall farthest from the doors, facing
-them on ties, without randomness: stairs stand in the same spot on every floor), `end` (the
+them on ties, without randomness), `fill` (the room's rectangle at its door, into
+circulation first, all across and backed against the far wall, facing the door; `landing`
+cells stay free at the door, at most `reach` deep; the size comes from the room, not the
+catalog: stairs span the stairwell, the elevator car is the shaft), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts) and `rows`

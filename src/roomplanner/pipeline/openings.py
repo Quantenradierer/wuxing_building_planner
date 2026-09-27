@@ -176,8 +176,9 @@ def _interior_doors(
     anything else that allows transit; ties go to the longest shared wall. Rooms of a unit
     only connect within their unit, except its entry room, which opens to circulation.
     An annex (closet) opens only into its host and is never passed through.
-    A room left without any allowed door (a storeroom behind the stairwell, walled in by
-    apartments) finally opens into a core room.
+    A room left without any allowed door (a storeroom behind the core between rooms that
+    are no thoroughfares, walled in by apartments) finally opens into any neighbour, a core
+    room last.
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
@@ -204,8 +205,8 @@ def _interior_doors(
             return False
         if rooms[i].type in core_types and rooms[j].type in core_types:
             return True  # the elevator may open into the stairwell wrapped around it
-        if stranded and rooms[j].type in core_types:
-            return True
+        if stranded:
+            return True  # through a room that is not meant for it, a core room last
         return ctx.rules.spec(rooms[j].type).transit
 
     stranded = False
@@ -228,6 +229,8 @@ def _interior_doors(
                 continue
             if j in circulation:
                 rank = -1
+            elif rooms[j].type in core_types:
+                rank = len(spec.access) + 1
             elif rooms[j].type in spec.access:
                 rank = spec.access.index(rooms[j].type)
             else:

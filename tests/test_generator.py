@@ -304,6 +304,30 @@ def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingTyp
     assert len(doors) == 1
 
 
+@pytest.mark.parametrize(
+    "building_type",
+    [BuildingType.OFFICE, BuildingType.HOSPITAL, BuildingType.APARTMENT, BuildingType.WAREHOUSE],
+)
+def test_core_rooms_are_as_big_as_their_stairs_and_car(building_type: BuildingType) -> None:
+    """The stairs span the stairwell with a landing at the door; the car is the shaft."""
+    for width, depth in ((40, 32), (70, 44)):
+        params = make_params(
+            building_type=building_type, width=width, depth=depth, floors_above=4, seed=1
+        )
+        for floor in generate(params).floors:
+            for room in floor.rooms:
+                if room.type not in ("stairwell", "elevator"):
+                    continue
+                kind = "stairs" if room.type == "stairwell" else "elevator_car"
+                (obj,) = [o for o in floor.objects if o.room == room.id and o.kind == kind]
+                if room.type == "elevator":
+                    assert obj.cells == room.cells
+                    continue
+                assert len(room.cells) <= 1.8 * len(obj.cells), (width, depth, floor.name)
+                door = floor.door_clearance(room)
+                assert door and not door & obj.cells  # the landing
+
+
 def test_police_station_has_holding_cells_behind_the_lockup() -> None:
     building = generate(
         make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)

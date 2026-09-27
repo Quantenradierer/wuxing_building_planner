@@ -81,6 +81,8 @@ class Skeleton:
     core_band: Band | None = None
     core_slot: Interval | None = None
     core_rooms: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
+    # Rectangles behind the core rooms: rooms of their own on every floor
+    core_back: list[frozenset[Cell]] = field(default_factory=list[frozenset[Cell]])
     lobby_slice: Interval | None = None  # ground-floor lobby across the main part's short end
 
     @property
@@ -200,7 +202,7 @@ class CorridorLayout:
         if core_entries:
             band = self._core_band(main, street, rng)
             skeleton.core_band = band
-            skeleton.core_slot, skeleton.core_rooms = self._core(
+            skeleton.core_slot, skeleton.core_rooms, skeleton.core_back = self._core(
                 ctx,
                 main,
                 band,
@@ -361,14 +363,17 @@ class CorridorLayout:
         blocked: list[Interval],
         rng: random.Random,
         lobby: Interval | None = None,
-    ) -> tuple[Interval, list[PlannedRoom]]:
-        """The core occupies one full-depth slot; the first entry (stairwell) wraps the rest."""
+    ) -> tuple[Interval, list[PlannedRoom], list[frozenset[Cell]]]:
+        """The core occupies one full-depth slot: its rooms and the rectangles behind them."""
         frame, grid = main.frame, main.grid
         sizes: list[tuple[int, int]] = []  # (u, v) per entry
         for entry in entries:
             short, long = sorted(entry.size)
             if short > band.depth:
                 raise AllocationError(f"{entry.room} does not fit a {band.depth}-cell strip")
+            # Too long for the strip: shorter while it keeps its minimum area, else across.
+            if long > band.depth and short * band.depth >= ctx.rules.spec(entry.room).area[0]:
+                long = band.depth
             sizes.append((short, long) if long <= band.depth else (long, short))
         width = sum(u for u, _ in sizes)
         if band.facade:
@@ -385,42 +390,41 @@ class CorridorLayout:
         if slot is None:
             raise AllocationError("no space for the core")
 
-        main_min_side = ctx.rules.spec(entries[0].room).min_side
-        rooms: list[PlannedRoom] = []
-        taken: set[Cell] = set()
-
-        # Deep strips: the stairwell reaches the back of the strip while it stays within its
-        # maximum area; beyond that the core only takes what it needs, a storage room fills
-        # the back.
-        filler = ctx.rules.program.cluster_filler
+        # Each room at its own size on the corridor side (the stairwell also takes the slot's
+        # partial module); the space behind them is rooms of their own on every floor. Rests
+        # too thin for a room make the core rooms deeper instead.
+        thin = ctx.rules.spec(ctx.rules.program.cluster_filler).min_side
         core_depth = max(v for _, v in sizes)
-        others = sum(u * v for u, v in sizes[1:])
-        stairwell_max = ctx.rules.spec(entries[0].room).area[1]
-        if (
-            band.depth - core_depth >= ctx.rules.spec(filler).min_side + 1
-            and slot.width * band.depth - others > stairwell_max
-        ):
-            front = self._from_corridor(band, core_depth)
-            back = (front[1], band.v1) if front[0] == band.v0 else (band.v0, front[0])
-            cells = frame.rect(slot.u0, slot.u1, *back)
-            rooms.append(PlannedRoom(filler, cells, leftover=True))
-            taken |= cells
-            depth = core_depth
-        else:
-            depth = band.depth
+        depth = band.depth if band.depth - core_depth < thin else core_depth
 
-        right_edge = slot.u1
-        for entry, (u_size, v_size) in zip(entries[1:], sizes[1:], strict=True):
-            if depth - v_size < main_min_side:
-                v_size = depth
-            v0, v1 = self._from_corridor(band, v_size)
-            cells = frame.rect(right_edge - u_size, right_edge, v0, v1)
+        def reach(v: int) -> int:
+            return depth if depth - v < thin else v
+
+        rooms: list[PlannedRoom] = []
+        behind: list[frozenset[Cell]] = []
+        u1 = slot.u1
+        u_sizes = [slot.width - sum(u for u, _ in sizes[1:]), *(u for u, _ in sizes[1:])]
+        for entry, u_size, (_, v_size) in zip(entries[1:], u_sizes[1:], sizes[1:], strict=True):
+            cells = frame.rect(u1 - u_size, u1, *self._from_corridor(band, reach(v_size)))
             rooms.append(PlannedRoom(entry.room, cells))
-            taken |= cells
-            right_edge -= u_size
-        slot_cells = frame.rect(slot.u0, slot.u1, band.v0, band.v1)
-        rooms.insert(0, PlannedRoom(entries[0].room, slot_cells - taken))
-        return slot, rooms
+            behind.append(self._depth_rect(frame, band, u1 - u_size, u1, reach(v_size), depth))
+            u1 -= u_size
+        v_stairs = reach(sizes[0][1])
+        stairs = frame.rect(slot.u0, u1, *self._from_corridor(band, v_stairs))
+        rooms.insert(0, PlannedRoom(entries[0].room, stairs))
+        behind.append(self._depth_rect(frame, band, slot.u0, u1, v_stairs, depth))
+        behind.append(self._depth_rect(frame, band, slot.u0, slot.u1, depth, band.depth))
+        return slot, rooms, [cells for cells in behind if cells]
+
+    def _depth_rect(
+        self, frame: Frame, band: Band, u0: int, u1: int, d0: int, d1: int
+    ) -> frozenset[Cell]:
+        """Cells from `d0` to `d1` away from the strip's corridor side."""
+        if d1 <= d0:
+            return frozenset()
+        near, far = self._from_corridor(band, d0), self._from_corridor(band, d1)
+        v0, v1 = (near[1], far[1]) if band.corridor_at is LocalSide.V0 else (far[0], near[0])
+        return frame.rect(u0, u1, v0, v1)
 
     @staticmethod
     def _from_corridor(band: Band, size: int) -> tuple[int, int]:
@@ -545,7 +549,12 @@ class CorridorLayout:
         service_box = Box(service.x, service.y, service.x + 1, service.y + 1) if service else None
         anchors = Anchors(core_box, entrance, service_box)
         allocator = Allocator(ctx, ctx.rules, segments, anchors, ctx.rng(f"allocate:{level}"))
-        rooms += allocator.allocate(role, level, level_name(level))
+        behind: list[tuple[Segment, frozenset[Cell]]] = []
+        if skeleton.core_band is not None and skeleton.core_slot is not None:
+            band, slot = skeleton.core_band, skeleton.core_slot
+            segment = Segment(main.frame, band, slot, band.facade, 1, main.grid)
+            behind = [(segment, cells) for cells in skeleton.core_back]
+        rooms += allocator.allocate(role, level, level_name(level), behind)
         warnings += allocator.warnings
 
         rooms = absorb_leftovers(rooms, ctx.rules)
