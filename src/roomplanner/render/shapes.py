@@ -145,20 +145,11 @@ def wc_shape(pen: Pen, box: Box, facing: Side) -> None:
 
 
 def urinal_shape(pen: Pen, box: Box, facing: Side) -> None:
-    """A narrow wall bowl: backplate on the wall, a small bowl in front (unlike a wc).
-
-    One cell wide in the middle of its spot; the rest is the space to the next urinal.
-    """
-    x0, y0, x1, y1 = box
-    half = pen.cell / 2
-    if facing in (Side.N, Side.S):
-        box = ((x0 + x1) / 2 - half, y0, (x0 + x1) / 2 + half, y1)
-    else:
-        box = (x0, (y0 + y1) / 2 - half, x1, (y0 + y1) / 2 + half)
-    inner = inset(box, pen.cell * 0.15)
+    """A wall bowl across its whole spot: backplate on the wall, the bowl in front."""
+    inner = inset(box, pen.cell * 0.1)
     pen.base.rectangle(strip(inner, facing.opposite, 0.2), fill=pen.stroke)
-    bowl = inset(strip(inner, facing, 0.7), pen.cell * 0.08)
-    pen.base.rounded_rectangle(bowl, radius=pen.cell * 0.12, fill=pen.fill, outline=pen.stroke)
+    bowl = inset(strip(inner, facing, 0.75), pen.cell * 0.06)
+    pen.base.rounded_rectangle(bowl, radius=pen.cell * 0.3, fill=pen.fill, outline=pen.stroke)
 
 
 def sink_shape(pen: Pen, box: Box, facing: Side) -> None:
