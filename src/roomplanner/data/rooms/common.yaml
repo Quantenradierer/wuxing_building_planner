@@ -221,12 +221,13 @@ rooms:
     area: [12, 36]
     min_side: 3
     cluster: true
+    open: 1                   # no walls to the corridor; machines line the other walls
     furniture:
-      - {object: trash_bin, placement: corner}
-      - {object: bench, placement: wall, count: [0, 1]}
-      # Machines line every wall; big rooms get a back-to-back double row in the middle.
+      # Machines line the walls (the open sides stay free); big rooms get a back-to-back
+      # double row in the middle; the bin takes what is left.
       - {object: vending_machine, placement: perimeter, count: 40}
       - {object: vending_machine, placement: rows, paired: true, margin: 3, aisle: 2, block: 10}
+      - {object: trash_bin, placement: scatter}
   garage:               # vehicle bay: patrol cars, vans, the boss's limo
     area: [100, 400]
     min_side: 10

@@ -267,7 +267,9 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
 
 - Walls separate different rooms, except between two circulation rooms (corridor, lobby).
   Open offices and cubicle farms are circulation (no wall to the corridor); a room type's
-  `open` chance makes single rooms circulation now and then (office kitchenettes: 0.5).
+  `open` chance opens single rooms now and then (office kitchenettes: 0.5, vending rooms:
+  always): no walls on the (at most two) sides bordering the most circulation, no door of
+  their own, and other rooms' doors only as a last resort.
 - One door per non-circulation room, committed greedily over all pending rooms: into
   circulation first, then into a type from the room's `access` list, then into any connected
   room that allows `transit`; ties go to the longest shared wall. Rooms of a unit connect

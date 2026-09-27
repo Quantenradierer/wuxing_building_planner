@@ -54,9 +54,9 @@ class DefaultOpenings:
                 for i, r in enumerate(rooms)
                 if ctx.rules.spec(r.type).circulation or planned.rooms[i].hub
             }
-            # Some rooms are open to the corridor now and then (open kitchens).
-            circulation |= {
-                i
+            # Some rooms are open to the corridor now and then (open kitchens, vending rooms).
+            opened = {
+                i: _open_sides(rooms[i], owner, circulation)
                 for i, r in enumerate(rooms)
                 if (chance := ctx.rules.spec(r.type).open) > 0 and rng.random() < chance
             }
@@ -66,7 +66,8 @@ class DefaultOpenings:
                 for i, r in enumerate(planned.rooms)
                 if r.host is not None and id(r.host) in index
             }
-            walls = _walls(footprint, owner, circulation)
+            walls = _walls(footprint, owner, circulation, opened)
+            circulation |= {i for i, sides in opened.items() if sides}
             fixed = {
                 i: core_walls[key]
                 for i, r in enumerate(rooms)
@@ -78,7 +79,17 @@ class DefaultOpenings:
                 if r.front is not None
             }
             doors = _interior_doors(
-                ctx, rooms, owner, walls, circulation, entries, hosts, rng, fixed, fronts
+                ctx,
+                rooms,
+                owner,
+                walls,
+                circulation,
+                entries,
+                hosts,
+                rng,
+                fixed,
+                fronts,
+                {i for i, sides in opened.items() if sides},
             )
             used: set[Edge] = set()
             grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
@@ -129,9 +140,27 @@ def _core_walls(ctx: Context, plan: BuildingPlan) -> dict[tuple[str, Cell], set[
     return common
 
 
+def _open_sides(room: Room, owner: dict[Cell, int], circulation: set[int]) -> set[Side]:
+    """The (at most two) sides an open room drops its walls on: those bordering the most
+    circulation."""
+    shared: dict[Side, int] = {}
+    for cell in room.cells:
+        for side in Side:
+            if owner.get(cell.neighbour(side), -1) in circulation:
+                shared[side] = shared.get(side, 0) + 1
+    ranked = sorted(shared, key=lambda s: (-shared[s], list(Side).index(s)))
+    return set(ranked[:2])
+
+
 def _walls(
-    footprint: frozenset[Cell], owner: dict[Cell, int], circulation: set[int]
+    footprint: frozenset[Cell],
+    owner: dict[Cell, int],
+    circulation: set[int],
+    opened: dict[int, set[Side]] | None = None,
 ) -> frozenset[Edge]:
+    """Walls between different rooms, except between circulation rooms and on the open
+    sides of `opened` rooms towards circulation."""
+    opened = opened or {}
     walls = set(boundary_edges(footprint))
     for cell in footprint:
         for side in (Side.E, Side.S):
@@ -141,8 +170,13 @@ def _walls(
             # Cells a (faulty) layout left without a room are walled off; the validator
             # reports them instead of this stage crashing.
             a, b = owner.get(cell), owner.get(neighbour)
-            if a != b and not (a in circulation and b in circulation):
-                walls.add(Edge.of(cell, side))
+            if a == b or (a in circulation and b in circulation):
+                continue
+            if a in opened and b in circulation and side in opened[a]:
+                continue
+            if b in opened and a in circulation and side.opposite in opened[b]:
+                continue
+            walls.add(Edge.of(cell, side))
     return frozenset(walls)
 
 
@@ -192,6 +226,7 @@ def _interior_doors(
     rng: random.Random,
     fixed: dict[int, set[Edge]] | None = None,
     fronts: dict[int, set[Edge]] | None = None,
+    opened: set[int] | None = None,
 ) -> list[Opening]:
     """One door per room, committed greedily: the best-ranked door of all pending rooms first.
 
@@ -204,7 +239,8 @@ def _interior_doors(
     only connect within their unit, except its entry room, which opens to circulation.
     An annex (closet) opens only into its host and is never passed through.
     A room left without any allowed door (a storeroom behind the stairwell, walled in by
-    apartments) finally opens into a core room.
+    apartments) finally opens into a core room. Open rooms (`opened`: an open kitchen) need
+    no door and take other rooms' doors only as that last resort.
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
@@ -225,6 +261,8 @@ def _interior_doors(
         if j in hosts:
             return False
         unit_i, unit_j = rooms[i].unit, rooms[j].unit
+        if j in opened_rooms:
+            return stranded
         if j in circulation:
             return unit_i is None or i in entries
         if unit_i != unit_j:
@@ -236,6 +274,7 @@ def _interior_doors(
         return ctx.rules.spec(rooms[j].type).transit
 
     stranded = False
+    opened_rooms = opened or set()
 
     fixed = fixed or {}
     fronts = fronts or {}

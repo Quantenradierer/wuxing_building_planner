@@ -430,3 +430,31 @@ def test_vending_machines_line_the_walls_of_an_office_vending_room() -> None:
                 # a machine per metre of wall, roughly: the room's perimeter less doors
                 assert len(machines) * 2 >= len(room.cells) // 6
     assert rooms
+
+
+def test_vending_rooms_are_open_on_one_or_two_sides_and_take_no_other_doors() -> None:
+    rooms = 0
+    for building_type in (BuildingType.OFFICE, BuildingType.COFFIN_BLOCK):
+        for seed in range(3):
+            params = make_params(building_type=building_type, width=60, depth=40, seed=seed)
+            for floor in generate(params).floors:
+                owner = {c: r for r in floor.rooms for c in r.cells}
+                for room in (r for r in floor.rooms if r.type == "vending_room"):
+                    rooms += 1
+                    sides = {
+                        s
+                        for c in room.cells
+                        for s in Side
+                        if c.neighbour(s) in owner
+                        and owner[c.neighbour(s)] is not room
+                        and Edge.of(c, s) not in floor.walls
+                    }
+                    assert 1 <= len(sides) <= 2
+                    doors = [
+                        o
+                        for o in floor.openings
+                        if o.kind is OpeningKind.DOOR
+                        and any(c in room.cells for e in o.edges for c in e.cells())
+                    ]
+                    assert not doors
+    assert rooms
