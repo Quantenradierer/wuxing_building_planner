@@ -279,8 +279,6 @@ Known weaknesses:
   (electrical, generator, fixer's room, cashier booth at low wealth) get a turn, so they
   mostly appear only in bigger footprints or basements. Spider stations and drones there
   are furniture instead (rigger cocoon in the security room, drone docks in the hall).
-- Optional rooms that don't fit still add a "dropped … (no space)" warning; at minimum
-  footprints that is several warnings per floor.
 - Hospital 70 × 44 × 3: the top floor's doctor's office can reach 171–190 cells (limit
   105), 1 of 12 seeds.
 - Stuffer shack 24 × 16 is infeasible at luxury wealth (the wider corridor leaves 16 of 17

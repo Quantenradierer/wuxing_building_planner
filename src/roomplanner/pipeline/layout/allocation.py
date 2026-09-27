@@ -175,6 +175,8 @@ class Allocator:
                 message = f"{floor_name}: no space for {request.priority} room {request.type}"
                 if request.priority is Priority.REQUIRED:
                     raise AllocationError(message)
+                if request.priority is Priority.OPTIONAL:
+                    continue  # nice to have: only where there is space, no warning
                 warning = f"{floor_name}: dropped {request.type} (no space)"
                 if warning not in self.warnings:
                     self.warnings.append(warning)
