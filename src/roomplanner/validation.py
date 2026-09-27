@@ -277,6 +277,36 @@ def _check_objects(floor: Floor) -> list[Violation]:
         room = rooms[room_id]
         if cells & clearances.get(room_id, frozenset()):
             problems.append(f"objects block a door of {room.type} {room_id}")
-        if not connected(room.cells - cells):
+        if not _reachable(floor, room.cells, room.cells - cells):
             problems.append(f"objects cut {room.type} {room_id} into unreachable parts")
     return [Violation(Severity.HARD, floor.level, p) for p in problems]
+
+
+def _reachable(floor: Floor, room: frozenset[Cell], free: frozenset[Cell]) -> bool:
+    """The room's free floor is one piece, or every piece touches a side without a wall (an
+    open office along the corridor): reachable from the neighbouring room."""
+    if connected(free):
+        return True
+    open_cells = {
+        c
+        for c in room
+        for s in Side
+        if (n := c.neighbour(s)) not in room
+        and n in floor.footprint
+        and Edge.of(c, s) not in floor.walls
+    }
+    left = set(free)
+    while left:
+        start = left.pop()
+        piece, stack = {start}, [start]
+        while stack:
+            cell = stack.pop()
+            for side in Side:
+                n = cell.neighbour(side)
+                if n in left:
+                    left.remove(n)
+                    piece.add(n)
+                    stack.append(n)
+        if not piece & open_cells:
+            return False
+    return True

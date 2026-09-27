@@ -555,3 +555,12 @@ def test_office_lobbies_have_a_reception_desk_with_a_free_way_from_the_door() ->
             if Cell(c.x + dx * k, c.y + dy * k) in lobby.cells
         }
         assert not any(o.blocking and o.cells & front for o in objects if o is not desk)
+
+
+def test_open_offices_fill_their_depth_with_desks_up_to_the_corridor() -> None:
+    building = generate(make_params(width=60, depth=40, floors_above=3, wealth=Wealth.LOW, seed=0))
+    floor = building.floor(1)
+    room = next(r for r in floor.rooms if r.type == "open_office")
+    desks = [o for o in floor.objects if o.room == room.id and o.kind == "office_desk"]
+    assert len(desks) * 6 >= len(room.cells) // 4  # a desk per ~4 m² at least
+    assert not any(w.startswith("[hard]") for w in building.warnings)

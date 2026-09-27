@@ -11,6 +11,7 @@ import math
 import random
 from collections.abc import Iterable
 from dataclasses import replace
+from functools import cached_property
 
 from roomplanner.geometry import Cell, Edge, Side, connected
 from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
@@ -868,7 +869,7 @@ class RoomFurnisher:
         if solid & self.clearance:
             return False
         free = self.cells - self.blocking - solid
-        if not free or not connected(free):
+        if not free or not self._reachable(free):
             return False
         self.taken |= box
         self.blocking |= solid
@@ -878,6 +879,41 @@ class RoomFurnisher:
             self.placed.append(
                 PlacedObject(part.object, px, py, pw, ph, facing, self.room.id, blocking)
             )
+        return True
+
+    @cached_property
+    def _open_cells(self) -> frozenset[Cell]:
+        """Cells on a side without a wall to the outside of the room (an open office's side
+        to the corridor): reachable from there, whatever stands in the room."""
+        return frozenset(
+            c
+            for c in self.cells
+            for s in Side
+            if (n := c.neighbour(s)) not in self.cells
+            and n in self.floor.footprint
+            and Edge.of(c, s) not in self.floor.walls
+        )
+
+    def _reachable(self, free: set[Cell] | frozenset[Cell]) -> bool:
+        """The free floor is one piece, or every piece touches an open side."""
+        if connected(free):
+            return True
+        if not self._open_cells:
+            return False
+        left = set(free)
+        while left:
+            start = left.pop()
+            piece, stack = {start}, [start]
+            while stack:
+                cell = stack.pop()
+                for side in Side:
+                    n = cell.neighbour(side)
+                    if n in left:
+                        left.remove(n)
+                        piece.add(n)
+                        stack.append(n)
+            if not piece & self._open_cells:
+                return False
         return True
 
     def _try(self, kind: str, rect: Rect, walkable: bool = False) -> bool:
@@ -893,7 +929,7 @@ class RoomFurnisher:
             free = self.cells - self.blocking - cells
             if not free:  # never fill a room completely
                 return False
-            if not ring_is_one_run(free, x, y, w, h) and not connected(free):
+            if not ring_is_one_run(free, x, y, w, h) and not self._reachable(free):
                 return False
             self.blocking |= cells
         self.taken |= cells
