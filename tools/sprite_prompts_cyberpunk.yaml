@@ -17,7 +17,7 @@ style: >-
 negative: >-
   front view, side view, perspective, isometric, cropped, text, watermark, people, blurry
 lora: "topdown-map-assets-scifi-pony.safetensors"
-denoise: 0.62
+denoise: 0.7
 seeds: 4
 
 subjects:
@@ -426,7 +426,7 @@ subjects:
 
   # --- wardrobe --------------------------------------------------------------------------------
   wardrobe.squatter:
-    denoise: 0.68
+    denoise: 0.75
     prompt: "clothes hanging on a rusty pipe rack, piles of clothes and boxes, one long object, back against the top edge, scavenged scrap, rusted metal, duct tape, dirty torn fabric, one broken flickering neon tube"
     base: [none]
     guide:
@@ -435,28 +435,28 @@ subjects:
       - [rect, 0.32, 0.22, 0.52, 0.72, "#7a6a52", 0.2]
       - [rect, 0.55, 0.18, 0.75, 0.78, "#4a5a78", 0.2]
   wardrobe.low:
-    denoise: 0.68
+    denoise: 0.75
     prompt: "cheap grey plastic wardrobe, two door seams, back against the top edge, cheap mass produced plastic, grimy and scratched, one weak cyan LED strip"
     base: [rect, "#6a6e76", 0.03]
     guide:
       - [rect, 0.0, 0.92, 1.0, 1.0, "#2ec4d6", 0.2]
       - [line, 0.5, 0.0, 0.5, 0.92, "#8a8e94", 0.04]
   wardrobe:
-    denoise: 0.68
+    denoise: 0.75
     prompt: "gunmetal wardrobe, flat closed top, sliding doors, cyan LED strip along the front edge, matte grey polymer and gunmetal, thin cyan LED strips"
     base: [rect, "#3e434b", 0.03]
     guide:
       - [rect, 0.0, 0.92, 1.0, 1.0, "#00d8ff", 0.2]
       - [line, 0.5, 0.0, 0.5, 0.92, "#6a717c", 0.04]
   wardrobe.high:
-    denoise: 0.68
+    denoise: 0.75
     prompt: "black glossy wardrobe, flat closed top, glowing cyan seams, corporate executive, black glass, brushed chrome, glowing cyan light lines"
     base: [rect, "#22262c", 0.03]
     guide:
       - [rect, 0.0, 0.92, 1.0, 1.0, "#00f0ff", 0.2]
       - [line, 0.5, 0.0, 0.5, 0.92, "#b8c4cc", 0.04]
   wardrobe.luxury:
-    denoise: 0.68
+    denoise: 0.75
     prompt: "black lacquered wardrobe with gold trim, flat closed top, magenta neon seams, elite penthouse, black marble, gold trim, lacquer, glowing magenta neon accents"
     base: [rect, "#1e1822", 0.03]
     guide:
@@ -507,7 +507,7 @@ subjects:
 
   # --- rug -------------------------------------------------------------------------------------
   rug.squatter:
-    denoise: 0.55
+    denoise: 0.62
     prompt: "dirty torn rug with frayed edges and stains, flat, scavenged scrap, rusted metal, duct tape, dirty torn fabric, one broken flickering neon tube"
     base: [rect, "#5a4a3a", 0.02]
     guide:
@@ -515,7 +515,7 @@ subjects:
       - [rect, 0.16, 0.2, 0.84, 0.8, "#6f6a58", 0.02]
       - [line, 0.16, 0.5, 0.84, 0.5, "#3aa8a0", 0.02]
   rug.low:
-    denoise: 0.55
+    denoise: 0.62
     prompt: "cheap thin synthetic rug, faded grey, flat, cheap mass produced plastic, grimy and scratched, one weak cyan LED strip"
     base: [rect, "#4a4e56", 0.02]
     guide:
@@ -523,7 +523,7 @@ subjects:
       - [rect, 0.16, 0.2, 0.84, 0.8, "#6a6e76", 0.02]
       - [line, 0.16, 0.5, 0.84, 0.5, "#2ec4d6", 0.02]
   rug:
-    denoise: 0.55
+    denoise: 0.62
     prompt: "dark grey rug with a thin cyan geometric line pattern, flat, matte grey polymer and gunmetal, thin cyan LED strips"
     base: [rect, "#2e3238", 0.02]
     guide:
@@ -531,7 +531,7 @@ subjects:
       - [rect, 0.16, 0.2, 0.84, 0.8, "#3e434b", 0.02]
       - [line, 0.16, 0.5, 0.84, 0.5, "#00d8ff", 0.02]
   rug.high:
-    denoise: 0.55
+    denoise: 0.62
     prompt: "black rug with a glowing cyan circuit pattern, flat, corporate executive, black glass, brushed chrome, glowing cyan light lines"
     base: [rect, "#15171b", 0.02]
     guide:
@@ -539,7 +539,7 @@ subjects:
       - [rect, 0.16, 0.2, 0.84, 0.8, "#22262c", 0.02]
       - [line, 0.16, 0.5, 0.84, 0.5, "#00f0ff", 0.02]
   rug.luxury:
-    denoise: 0.55
+    denoise: 0.62
     prompt: "black and gold rug with an ornate pattern and magenta glowing lines, flat, elite penthouse, black marble, gold trim, lacquer, glowing magenta neon accents"
     base: [rect, "#120e14", 0.02]
     guide:
@@ -807,31 +807,31 @@ subjects:
 
   # --- fridge ----------------------------------------------------------------------------------
   fridge.squatter:
-    denoise: 0.72
+    denoise: 0.75
     prompt: "dented rusty broken fridge with junk on top, door edge at the bottom, scavenged scrap, rusted metal, duct tape, dirty torn fabric, one broken flickering neon tube"
     base: [rect, "#6f6a58", 0.05]
     guide:
       - [rect, 0.1, 0.88, 0.9, 0.96, "#3aa8a0", 0.3]
   fridge.low:
-    denoise: 0.72
+    denoise: 0.75
     prompt: "cheap scratched grey fridge, flat top, door edge at the bottom, cheap mass produced plastic, grimy and scratched, one weak cyan LED strip"
     base: [rect, "#6a6e76", 0.05]
     guide:
       - [rect, 0.1, 0.88, 0.9, 0.96, "#2ec4d6", 0.3]
   fridge:
-    denoise: 0.72
+    denoise: 0.75
     prompt: "gunmetal smart fridge, flat top, cyan status light at the bottom edge, matte grey polymer and gunmetal, thin cyan LED strips"
     base: [rect, "#3e434b", 0.05]
     guide:
       - [rect, 0.1, 0.88, 0.9, 0.96, "#00d8ff", 0.3]
   fridge.high:
-    denoise: 0.72
+    denoise: 0.75
     prompt: "black glass smart fridge, flat top, glowing cyan display strip at the bottom edge, corporate executive, black glass, brushed chrome, glowing cyan light lines"
     base: [rect, "#22262c", 0.05]
     guide:
       - [rect, 0.1, 0.88, 0.9, 0.96, "#00f0ff", 0.3]
   fridge.luxury:
-    denoise: 0.72
+    denoise: 0.75
     prompt: "black lacquered fridge with gold handles and a magenta light strip at the bottom edge, elite penthouse, black marble, gold trim, lacquer, glowing magenta neon accents"
     base: [rect, "#1e1822", 0.05]
     guide:
