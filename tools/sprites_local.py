@@ -14,6 +14,7 @@ shared and parallel jobs can exhaust the machine's memory.
 from __future__ import annotations
 
 import argparse
+import fcntl
 import subprocess
 import sys
 from pathlib import Path
@@ -29,6 +30,8 @@ ROOT = Path(__file__).resolve().parent.parent
 PROMPTS = ROOT / "tools" / "sprite_prompts_modern.yaml"
 RAW = ROOT / ".sprites_raw" / "modern"
 GUIDES = RAW / "guides"
+# One GPU job at a time across processes (several studios may run at once).
+GPU_LOCK = ROOT / ".sprites_raw" / "gpu.lock"
 
 # SDXL resolutions (width, height) by aspect ratio; the guide canvas is one of these.
 BUCKETS = [(1024, 1024), (1152, 896), (1216, 832), (1344, 768), (1536, 640)]
@@ -137,7 +140,10 @@ def _render(
     ]
     if data.get("lora"):
         command += ["--lora", data["lora"]]
-    result = subprocess.run(command, capture_output=True, text=True, check=True)
+    GPU_LOCK.parent.mkdir(parents=True, exist_ok=True)
+    with GPU_LOCK.open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
     paths = [Path(line) for line in result.stdout.split() if line.endswith(".png")]
     rgba = [p for p in paths if "-rgba_" in p.name]
     return Image.open((rgba or paths)[-1]).convert("RGBA")
