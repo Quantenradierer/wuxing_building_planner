@@ -27,6 +27,12 @@
   .badge { font-size: 11px; padding: 1px 7px; border-radius: 99px; margin-left: 6px; color: #fff; }
   .badge.rendering { background: var(--accent); } .badge.queued { background: var(--warn); }
   .badge.failed { background: var(--bad); } .badge.picked { background: var(--ok); }
+  .badge.waiting { background: var(--muted); }
+  .derived { font-size: 11px; color: var(--accent); margin-top: 2px; }
+  .buttons { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+  .describe { border: 1px solid var(--line); background: none; padding: 5px 12px;
+              border-radius: 6px; cursor: pointer; }
+  .describe:disabled { opacity: .5; cursor: default; }
   .current { width: 72px; height: 72px; object-fit: contain; }
   .retry { border: 1px solid var(--accent); color: var(--accent); background: none;
            padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
@@ -51,6 +57,7 @@
     <button data-f="all" class="on">All</button>
     <button data-f="open">Not picked</button>
     <button data-f="busy">In queue</button>
+    <button data-f="waiting">Waiting for pick</button>
   </span>
   <input type="search" id="search" placeholder="Filter objects">
 </header>
@@ -68,21 +75,39 @@ function visible(k) {
   if (search && !k.kind.includes(search)) return false;
   if (filter === "open") return !k.pick;
   if (filter === "busy") return k.status === "queued" || k.status === "rendering";
+  if (filter === "waiting") return k.status === "waiting";
   return true;
 }
 
 function card(k) {
   const el = document.createElement("section");
   el.className = "card";
-  const badge = k.status !== "idle" ? `<span class="badge ${k.status}">${k.status}</span>`
+  const label = k.status === "waiting" ? `waiting for ${k.base} pick` : k.status;
+  const badge = k.status !== "idle" ? `<span class="badge ${k.status}">${label}</span>`
     : k.pick ? `<span class="badge picked">picked</span>` : "";
   const current = k.pick ? `<img class="current" src="/sprite/${k.kind}?v=${k.pick.attempt}-${k.pick.quadrant}" alt="">` : "";
-  const busy = k.status === "queued" || k.status === "rendering";
+  const busy = ["queued", "rendering", "waiting"].includes(k.status);
+  const derived = k.base ? `<div class="derived">worn down from the picked ${k.base}</div>` : "";
+  const describe = k.base ? "" : `<button class="describe">Recreate text description</button>`;
   el.innerHTML = `<div class="top">${current}<div class="info">
-      <div class="kind">${k.kind}${badge}</div><div class="prompt"></div></div>
-      <button class="retry" ${busy ? "disabled" : ""}>${k.attempts.length ? "Retry" : "Generate"}</button></div>`;
+      <div class="kind">${k.kind}${badge}</div>${derived}<div class="prompt"></div></div>
+      <div class="buttons"><button class="retry" ${busy ? "disabled" : ""}>
+      ${k.attempts.length ? "Retry" : "Generate"}</button>${describe}</div></div>`;
   el.querySelector(".prompt").textContent = k.prompt;
   el.querySelector(".retry").onclick = () => post("/api/retry", { kind: k.kind });
+  const button = el.querySelector(".describe");
+  if (button) button.onclick = async () => {
+    button.disabled = true;
+    button.textContent = "Asking GPT…";
+    const response = await fetch("/api/describe", { method: "POST", body: JSON.stringify({ kind: k.kind }) });
+    const result = await response.json();
+    if (result.error) {
+      alert(`Description failed: ${result.error}`);
+      button.disabled = false;
+      button.textContent = "Recreate text description";
+    }
+    refresh();
+  };
   if (!k.attempts.length) el.insertAdjacentHTML("beforeend", `<div class="empty">no images yet</div>`);
   for (const a of [...k.attempts].reverse()) {
     const row = document.createElement("div");

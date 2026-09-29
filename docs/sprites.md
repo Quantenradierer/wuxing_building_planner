@@ -74,4 +74,14 @@ prompt file `tools/sprite_prompts_modern.yaml`). To review and pick, run the stu
 It takes the prompt file as input (whoever wrote it), queues every object without a render,
 and shows four variants per attempt in the browser: click one to pick and cut it, "Retry"
 queues a new attempt. The prompt file is re-read before each job, so edit a description and
-retry. Jobs run one at a time; the GPU is shared.
+retry. Jobs run one at a time, also across several studios (a lock file); the GPU is shared.
+
+Wealth tiers: only middle (`<kind>`), `high` and `luxury` are designed, each from its own guide.
+`low` and `squatter` come from the prompt file's `derived:` section: the picked middle sprite
+worn down by img2img (denoise 0.55 / 0.7), so they stay the same object. They wait for that
+pick and are queued by it. Sets: `modern` (`--prompts tools/sprite_prompts_modern_wealth.yaml`
+for the tiers) and `cyberpunk` (`--set cyberpunk`).
+
+"Recreate text description" asks OpenAI (`--openai-model`, default gpt-5-mini) for a new
+description and writes it into the prompt file; press Retry afterwards. The key comes from
+`OPENAI_API_KEY` or a line `OPENAI_API_KEY=...` in `.env` (gitignored).

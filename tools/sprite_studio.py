@@ -9,6 +9,12 @@ four variants: clicking one writes it to the picks file and cuts the sprite into
 data/sprites/<set>/; "Retry" queues another attempt with new seeds. The prompt file is re-read
 before every job, so a description can be fixed while the studio runs and then retried.
 
+Tiers in the file's `derived:` section (low, squatter) are not drawn from a guide but worn down
+from the picked plain sprite of their kind; they wait for that pick and are queued by it.
+
+"Recreate text description" asks OpenAI for a new description and writes it into the prompt
+file. The key comes from OPENAI_API_KEY or a line `OPENAI_API_KEY=...` in .env (gitignored).
+
 Jobs run strictly one after another (the GPU is shared), through tools/sprites_local.py.
 """
 
@@ -18,10 +24,12 @@ import argparse
 import contextlib
 import io
 import json
+import os
 import queue
 import re
 import sys
 import threading
+import urllib.request
 import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -39,26 +47,56 @@ import sprites_local
 ROOT = sprites_local.ROOT
 TILE = 320  # px, longer side of a variant in the browser
 PAGE = Path(__file__).with_name("sprite_studio.html")
+TIER_ORDER = ["", "high", "luxury", "low", "squatter"]
+
+DESCRIBE = """\
+You write subject descriptions for an image generator that makes sprites for top-down tabletop
+battle maps. The model (Pony Diffusion XL with a top-down map-asset LoRA) renders one object
+seen from straight above on a white background, img2img from a rough plan-view drawing.
+Write ONE subject description: a single line of 12 to 35 words, comma separated phrases, plain
+concrete words for materials, colours and the parts visible from above. The object's back
+stands against a wall at the TOP edge of the picture: say what sits at the top edge. Never
+mention camera, view, style or quality tags, background, perspective, people or text. Answer
+with the description only."""
 
 
 class Studio:
-    def __init__(self, prompts: Path, picks: Path) -> None:
+    def __init__(self, prompts: Path, picks: Path, model: str) -> None:
         self.prompts = prompts
         self.picks = picks
+        self.model = model
         self.jobs: queue.Queue[tuple[str, int]] = queue.Queue()
         self.queued: list[str] = []
         self.rendering: str | None = None
         self.failed: set[str] = set()
         self.lock = threading.Lock()
-        self._subjects: tuple[float, dict[str, Any]] = (0.0, {})
+        self._data: tuple[float, dict[str, Any]] = (0.0, {})
 
     # --- data -------------------------------------------------------------------------------
 
-    def subjects(self) -> dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         mtime = self.prompts.stat().st_mtime
-        if mtime != self._subjects[0]:
-            self._subjects = (mtime, yaml.safe_load(self.prompts.read_text())["subjects"])
-        return self._subjects[1]
+        if mtime != self._data[0]:
+            self._data = (mtime, yaml.safe_load(self.prompts.read_text()))
+        return self._data[1]
+
+    def subjects(self) -> dict[str, Any]:
+        return self.data()["subjects"]
+
+    def derived(self) -> dict[str, tuple[str, str]]:
+        return sprites_local.derived_names(self.data())
+
+    def names(self) -> list[str]:
+        """Designed and derived names, grouped by kind: plain, high, luxury, low, squatter."""
+        names = list(self.subjects()) + list(self.derived())
+        kinds = list(dict.fromkeys(name.split(".")[0] for name in names))
+
+        def order(name: str) -> tuple[int, int]:
+            kind, _, tier = name.partition(".")
+            rank = TIER_ORDER.index(tier) if tier in TIER_ORDER else len(TIER_ORDER)
+            return kinds.index(kind), rank
+
+        return sorted(names, key=order)
 
     def attempts(self, kind: str) -> list[int]:
         pattern = re.compile(rf"{re.escape(kind)}\.(\d+)\.png")
@@ -73,25 +111,35 @@ class Studio:
     def state(self) -> dict[str, Any]:
         picks = self.read_picks()
         subjects = self.subjects()
+        derived = self.derived()
         kinds: list[dict[str, Any]] = []
-        for kind, spec in subjects.items():
-            pick = picks.get(kind)
+        for name in self.names():
+            pick = picks.get(name)
             if isinstance(pick, dict):
                 pick = {"attempt": pick.get("attempt", 3), "quadrant": pick["quadrant"]}
+            base = derived[name][0] if name in derived else None
             status = (
                 "rendering"
-                if kind == self.rendering
+                if name == self.rendering
                 else "queued"
-                if kind in self.queued
+                if name in self.queued
                 else "failed"
-                if kind in self.failed
+                if name in self.failed
+                else "waiting"
+                if base and base not in picks
                 else "idle"
+            )
+            prompt = (
+                sprites_local.derived_prompt(self.data(), name)
+                if base
+                else subjects[name].get("prompt", "")
             )
             kinds.append(
                 {
-                    "kind": kind,
-                    "prompt": spec.get("prompt", ""),
-                    "attempts": self.attempts(kind),
+                    "kind": name,
+                    "prompt": prompt,
+                    "base": base,
+                    "attempts": self.attempts(name),
                     "pick": pick,
                     "status": status,
                 }
@@ -101,12 +149,20 @@ class Studio:
     # --- actions ----------------------------------------------------------------------------
 
     def enqueue(self, kind: str) -> None:
+        derived = self.derived()
+        if kind in derived and derived[kind][0] not in self.read_picks():
+            return  # waits for the pick of its base kind
         with self.lock:
             if kind in self.queued or kind == self.rendering:
                 return
             self.queued.append(kind)
             self.failed.discard(kind)
         self.jobs.put((kind, max(self.attempts(kind), default=0) + 1))
+
+    def enqueue_missing(self) -> None:
+        for name in self.names():
+            if not self.attempts(name):
+                self.enqueue(name)
 
     def pick(self, kind: str, attempt: int, quadrant: int) -> None:
         with self.lock:
@@ -120,6 +176,36 @@ class Studio:
             lines = header + [f"{name}: {_flow(entry)}" for name, entry in picks.items()]
             self.picks.write_text("\n".join(lines) + "\n")
             sprites.cut([kind])
+        # The worn-down tiers of this kind can start now.
+        for name, (base, _) in self.derived().items():
+            if base == kind and not self.attempts(name):
+                self.enqueue(name)
+
+    def describe(self, kind: str) -> str:
+        """Ask OpenAI for a new description of `kind` and write it into the prompt file."""
+        data = self.data()
+        along, deep = sprites._sizes()[kind.split(".")[0]]
+        tier = kind.partition(".")[2] or "middle"
+        siblings = [
+            f"- {name}: {spec.get('prompt', '')}"
+            for name, spec in data["subjects"].items()
+            if name.split(".")[0] == kind.split(".")[0] and name != kind
+        ]
+        request = "\n".join(
+            [
+                f"Object kind: {kind.split('.')[0].replace('_', ' ')}",
+                f"Wealth tier: {tier}",
+                f"Footprint: {along * 0.5:g} m wide x {deep * 0.5:g} m deep",
+                f"Look of the whole set: {data.get('look', 'not specified')}",
+                f"Current description (write a different, better one): "
+                f"{data['subjects'][kind].get('prompt', '')}",
+                *(["Other tiers of the same object, for contrast:", *siblings] if siblings else []),
+            ]
+        )
+        text = _openai(self.model, DESCRIBE, request).strip().strip('"').replace("\n", " ")
+        with self.lock:
+            _set_prompt(self.prompts, kind, text)
+        return text
 
     def work(self) -> None:
         while True:
@@ -128,7 +214,10 @@ class Studio:
                 self.queued.remove(kind)
                 self.rendering = kind
             try:
-                sprites_local.generate([kind], attempt)
+                if kind in self.derived():
+                    sprites_local.generate_derived(kind, attempt)
+                else:
+                    sprites_local.generate([kind], attempt)
             except Exception as error:  # a broken prompt entry must not stop the queue
                 print(f"FAILED {kind}: {error}", flush=True)
             with self.lock:
@@ -154,6 +243,47 @@ def _flow(entry: Any) -> str:
     if isinstance(entry, dict):
         return "{" + ", ".join(f"{k}: {v}" for k, v in entry.items()) + "}"
     return str(entry)
+
+
+def _set_prompt(path: Path, kind: str, text: str) -> None:
+    """Replace the `prompt:` line of one subject in place, keeping the file's layout."""
+    lines = path.read_text().splitlines(keepends=True)
+    start = lines.index(f"  {kind}:\n")
+    for i in range(start + 1, len(lines)):
+        if not lines[i].startswith("    "):
+            break
+        if lines[i].startswith("    prompt:"):
+            lines[i] = f"    prompt: {json.dumps(text)}\n"
+            path.write_text("".join(lines))
+            return
+    raise ValueError(f"{kind}: no prompt line")
+
+
+def _api_key() -> str:
+    key = os.environ.get("OPENAI_API_KEY")
+    env = ROOT / ".env"
+    if not key and env.exists():
+        for line in env.read_text().splitlines():
+            name, _, value = line.partition("=")
+            if name.strip() == "OPENAI_API_KEY":
+                key = value.strip().strip('"').strip("'")
+    if not key:
+        raise RuntimeError("no OpenAI key: set OPENAI_API_KEY or put it into .env")
+    return key
+
+
+def _openai(model: str, system: str, user: str) -> str:
+    body = {
+        "model": model,
+        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+    }
+    request = urllib.request.Request(
+        "https://api.openai.com/v1/chat/completions",
+        data=json.dumps(body).encode(),
+        headers={"Authorization": f"Bearer {_api_key()}", "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(request, timeout=90) as response:
+        return json.load(response)["choices"][0]["message"]["content"]
 
 
 def _png(image: Image.Image) -> bytes:
@@ -201,6 +331,15 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
                     studio.enqueue(data["kind"])
                 case "/api/pick":
                     studio.pick(data["kind"], int(data["attempt"]), int(data["quadrant"]))
+                case "/api/describe":
+                    try:
+                        text = studio.describe(data["kind"])
+                    except Exception as error:  # shown in the browser
+                        body = json.dumps({"error": str(error)}).encode()
+                        self._send(body, "application/json", HTTPStatus.BAD_GATEWAY)
+                        return
+                    self._send(json.dumps({"prompt": text}).encode(), "application/json")
+                    return
                 case _:
                     self._send(b"not found", "text/plain", HTTPStatus.NOT_FOUND)
                     return
@@ -215,6 +354,7 @@ def main() -> None:
     parser.add_argument("--prompts", type=Path, help="default tools/sprite_prompts_<set>.yaml")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument("--openai-model", default=os.environ.get("OPENAI_MODEL", "gpt-5-mini"))
     args = parser.parse_args()
 
     prompts = args.prompts or ROOT / "tools" / f"sprite_prompts_{args.set}.yaml"
@@ -225,10 +365,8 @@ def main() -> None:
     sprites.OUT = ROOT / "src" / "roomplanner" / "data" / "sprites" / args.set
     sprites.RAW.mkdir(parents=True, exist_ok=True)
 
-    studio = Studio(sprites_local.PROMPTS, sprites.PICKS)
-    for kind in studio.subjects():
-        if not studio.attempts(kind):
-            studio.enqueue(kind)
+    studio = Studio(sprites_local.PROMPTS, sprites.PICKS, args.openai_model)
+    studio.enqueue_missing()
     threading.Thread(target=studio.work, daemon=True).start()
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(studio))

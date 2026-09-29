@@ -149,33 +149,100 @@ def _render(
     return Image.open((rgba or paths)[-1]).convert("RGBA")
 
 
+def render_grid(
+    name: str, attempt: int, prompt: str, init: Image.Image, denoise: float, data: dict[str, Any]
+) -> bool:
+    """Render `seeds` img2img variants of `init` into one 2x2 grid; False if a job failed."""
+    out = sprites.RAW / f"{name}.{attempt}.png"
+    if out.exists():
+        return True
+    GUIDES.mkdir(parents=True, exist_ok=True)
+    path = GUIDES / f"{name}.png"
+    init.save(path)
+    tiles: list[Image.Image] = []
+    for n in range(data["seeds"]):
+        seed = sprites._seed(name, attempt * 10 + n)
+        try:
+            tiles.append(_render(prompt, data, path, seed, init.size, denoise))
+        except subprocess.CalledProcessError as error:
+            print(f"FAILED {name} seed {seed}: {error.stderr[-500:]}", flush=True)
+            return False
+    grid = Image.new("RGBA", (init.width * 2, init.height * 2), (0, 0, 0, 0))
+    for i, tile in enumerate(tiles):
+        grid.paste(tile.resize(init.size), ((i % 2) * init.width, (i // 2) * init.height))
+    grid.save(out)
+    print(f"got {name}", flush=True)
+    return True
+
+
+def _style(data: dict[str, Any], subject: str) -> str:
+    return " ".join(data["style"].split()).format(subject=subject)
+
+
 def generate(kinds: list[str], attempt: int) -> None:
     data = _data()
-    style = " ".join(data["style"].split())
-    GUIDES.mkdir(parents=True, exist_ok=True)
     for kind in kinds:
-        out = sprites.RAW / f"{kind}.{attempt}.png"
-        if out.exists():
-            continue
         spec = data["subjects"][kind]
-        guide = GUIDES / f"{kind}.png"
-        image = draw_guide(kind, spec)
-        image.save(guide)
-        prompt = style.format(subject=spec["prompt"])
+        prompt = _style(data, spec["prompt"])
         denoise = spec.get("denoise", data["denoise"])
-        tiles = []
-        for n in range(data["seeds"]):
-            seed = sprites._seed(kind, attempt * 10 + n)
-            try:
-                tiles.append(_render(prompt, data, guide, seed, image.size, denoise))
-            except subprocess.CalledProcessError as error:
-                print(f"FAILED {kind} seed {seed}: {error.stderr[-500:]}", flush=True)
-                return
-        grid = Image.new("RGBA", (image.width * 2, image.height * 2), (0, 0, 0, 0))
-        for i, tile in enumerate(tiles):
-            grid.paste(tile.resize(image.size), ((i % 2) * image.width, (i // 2) * image.height))
-        grid.save(out)
-        print(f"got {kind}", flush=True)
+        if not render_grid(kind, attempt, prompt, draw_guide(kind, spec), denoise, data):
+            return
+
+
+# --- derived tiers ------------------------------------------------------------------------------
+# A prompt file's `derived:` section turns the picked plain sprite of every kind in the file into
+# further tiers (low, squatter: the same object worn down) by img2img from that picture instead
+# of a guide. Names are `<kind>.<tier>`; the base prompt comes from this file's plain entry, else
+# from `derived.source`.
+
+
+def derived_names(data: dict[str, Any]) -> dict[str, tuple[str, str]]:
+    """`<kind>.<tier>` -> (kind, tier) for every derived tier of every kind in the file."""
+    tiers = (data.get("derived") or {}).get("tiers") or {}
+    kinds = dict.fromkeys(name.split(".")[0] for name in data["subjects"])
+    return {f"{kind}.{tier}": (kind, tier) for kind in kinds for tier in tiers}
+
+
+def base_prompt(data: dict[str, Any], kind: str) -> str:
+    if kind in data["subjects"]:
+        return data["subjects"][kind]["prompt"]
+    source = (data.get("derived") or {}).get("source")
+    if source:
+        subjects = yaml.safe_load((ROOT / source).read_text())["subjects"]
+        if kind in subjects:
+            return subjects[kind]["prompt"]
+    return kind.replace("_", " ")
+
+
+def picked_image(kind: str) -> Image.Image | None:
+    """The picked variant of `kind` (uncut, on white), or None while nothing is picked."""
+    picks = yaml.safe_load(sprites.PICKS.read_text()) or {} if sprites.PICKS.exists() else {}
+    if kind not in picks:
+        return None
+    quadrant, attempt, _, _ = sprites._pick(picks[kind])
+    path = sprites.RAW / f"{kind}.{attempt}.png"
+    if not path.exists():
+        return None
+    tile = sprites.quadrants(Image.open(path).convert("RGBA"))[quadrant]
+    image = Image.new("RGB", tile.size, (255, 255, 255))
+    image.paste(tile, mask=tile.getchannel("A"))
+    return image
+
+
+def derived_prompt(data: dict[str, Any], name: str) -> str:
+    kind, tier = derived_names(data)[name]
+    template = data["derived"]["tiers"][tier]["prompt"]
+    return " ".join(template.split()).format(subject=base_prompt(data, kind))
+
+
+def generate_derived(name: str, attempt: int) -> None:
+    data = _data()
+    kind, tier = derived_names(data)[name]
+    init = picked_image(kind)
+    if init is None:
+        raise ValueError(f"{name}: pick a {kind} first")
+    denoise = data["derived"]["tiers"][tier].get("denoise", 0.5)
+    render_grid(name, attempt, _style(data, derived_prompt(data, name)), init, denoise, data)
 
 
 def main() -> None:
