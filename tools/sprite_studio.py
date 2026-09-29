@@ -12,7 +12,8 @@ before every job, so a description can be fixed while the studio runs and then r
 Tiers in the file's `derived:` section (low, squatter) are not drawn from a guide but worn down
 from the picked plain sprite of their kind; they wait for that pick and are queued by it.
 
-"Recreate text description" asks OpenAI for a new description and writes it into the prompt
+"Edit description" changes a designed object's description by hand. "Recreate text
+description" asks OpenAI for a new description and writes it into the prompt
 file. The key comes from OPENAI_API_KEY or a line `OPENAI_API_KEY=...` in .env (gitignored).
 
 Jobs run strictly one after another (the GPU is shared), through tools/sprites_local.py.
@@ -211,6 +212,16 @@ class Studio:
             _set_prompt(self.prompts, kind, text)
         return text
 
+    def set_prompt(self, kind: str, text: str) -> None:
+        """Replace the description of a designed kind with the user's text."""
+        if kind not in self.subjects():
+            raise ValueError(f"{kind}: only designed objects have their own description")
+        text = " ".join(text.split())
+        if not text:
+            raise ValueError("empty description")
+        with self.lock:
+            _set_prompt(self.prompts, kind, text)
+
     def work(self) -> None:
         while True:
             kind, attempt = self.jobs.get()
@@ -343,6 +354,13 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
                     studio.enqueue(data["kind"])
                 case "/api/pick":
                     studio.pick(data["kind"], int(data["attempt"]), int(data["quadrant"]))
+                case "/api/prompt":
+                    try:
+                        studio.set_prompt(data["kind"], data["prompt"])
+                    except ValueError as error:
+                        body = json.dumps({"error": str(error)}).encode()
+                        self._send(body, "application/json", HTTPStatus.BAD_REQUEST)
+                        return
                 case "/api/describe":
                     try:
                         text = studio.describe(data["kind"], data.get("hint", ""))

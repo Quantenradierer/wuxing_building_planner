@@ -33,6 +33,12 @@
   .describe { border: 1px solid var(--line); background: none; padding: 5px 12px;
               border-radius: 6px; cursor: pointer; }
   .describe:disabled { opacity: .5; cursor: default; }
+  .editor textarea { width: 100%; min-height: 70px; margin-top: 6px; font: 13px/1.4 system-ui, sans-serif;
+                     padding: 6px 8px; border: 1px solid var(--accent); border-radius: 6px; resize: vertical; }
+  .editor .row { display: flex; gap: 6px; margin-top: 6px; }
+  .editor button { border: 1px solid var(--line); background: none; padding: 4px 10px; border-radius: 6px;
+                   cursor: pointer; }
+  .editor button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .current { width: 72px; height: 72px; object-fit: contain; }
   .retry { border: 1px solid var(--accent); color: var(--accent); background: none;
            padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
@@ -65,6 +71,7 @@
 <script>
 let state = { kinds: [] }, filter = "all", search = "";
 const cards = new Map();
+const editing = new Set();  // cards with an open editor are not rebuilt by the refresh
 
 async function post(path, body) {
   await fetch(path, { method: "POST", body: JSON.stringify(body) });
@@ -88,14 +95,17 @@ function card(k) {
   const current = k.pick ? `<img class="current" src="/sprite/${k.kind}?v=${k.pick.attempt}-${k.pick.quadrant}" alt="">` : "";
   const busy = ["queued", "rendering", "waiting"].includes(k.status);
   const derived = k.base ? `<div class="derived">worn down from the picked ${k.base}</div>` : "";
-  const describe = k.base ? "" : `<button class="describe">Recreate text description</button>`;
+  const describe = k.base ? "" : `<button class="describe edit">Edit description</button>
+      <button class="describe gpt">Recreate text description</button>`;
   el.innerHTML = `<div class="top">${current}<div class="info">
       <div class="kind">${k.kind}${badge}</div>${derived}<div class="prompt"></div></div>
       <div class="buttons"><button class="retry" ${busy ? "disabled" : ""}>
       ${k.attempts.length ? "Retry" : "Generate"}</button>${describe}</div></div>`;
   el.querySelector(".prompt").textContent = k.prompt;
   el.querySelector(".retry").onclick = () => post("/api/retry", { kind: k.kind });
-  const button = el.querySelector(".describe");
+  const edit = el.querySelector(".edit");
+  if (edit) edit.onclick = () => openEditor(el, k);
+  const button = el.querySelector(".gpt");
   if (button) button.onclick = async () => {
     button.disabled = true;
     button.textContent = "Asking GPT…";
@@ -127,6 +137,37 @@ function card(k) {
   return el;
 }
 
+function openEditor(el, k) {
+  if (editing.has(k.kind)) return;
+  editing.add(k.kind);
+  const prompt = el.querySelector(".prompt");
+  const editor = document.createElement("div");
+  editor.className = "editor";
+  editor.innerHTML = `<textarea></textarea><div class="row">
+    <button class="primary save-retry">Save &amp; retry</button><button class="save">Save</button>
+    <button class="cancel">Cancel</button></div>`;
+  const area = editor.querySelector("textarea");
+  area.value = k.prompt;
+  prompt.replaceWith(editor);
+  area.focus();
+  const close = () => { editing.delete(k.kind); cards.delete(k.kind); refresh(); };
+  const save = async retry => {
+    const response = await fetch("/api/prompt", { method: "POST",
+      body: JSON.stringify({ kind: k.kind, prompt: area.value }) });
+    const result = await response.json();
+    if (result.error) { alert(`Not saved: ${result.error}`); return; }
+    if (retry) await fetch("/api/retry", { method: "POST", body: JSON.stringify({ kind: k.kind }) });
+    close();
+  };
+  editor.querySelector(".save-retry").onclick = () => save(true);
+  editor.querySelector(".save").onclick = () => save(false);
+  editor.querySelector(".cancel").onclick = close;
+  area.onkeydown = e => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) save(true);
+    if (e.key === "Escape") close();
+  };
+}
+
 function render() {
   const list = document.getElementById("list");
   const picked = state.kinds.filter(k => k.pick).length;
@@ -138,7 +179,7 @@ function render() {
     if (!visible(k)) continue;
     const key = JSON.stringify(k);
     let entry = cards.get(k.kind);
-    if (!entry || entry.key !== key) {
+    if (!entry || (entry.key !== key && !editing.has(k.kind))) {
       entry = { key, el: card(k) };
       cards.set(k.kind, entry);
     }
