@@ -62,3 +62,16 @@ picks with `attempt` below 10 (those are from the older model).
 When the fast hours run out, jobs vanish without an answer: `generate` prints
 `STOP: empty batch` and exits. Single `MISSING` lines are usually a filtered prompt;
 rephrase it. The quota resets every few days; rerun the same command then.
+
+## Local sets (ComfyUI)
+
+The `modern` set (`data/sprites/modern/`, theme `modern_sprites`) is rendered with the local
+ComfyUI through `tools/sprites_local.py` (img2img from a drawn top-down guide; recipe in its
+prompt file `tools/sprite_prompts_modern.yaml`). To review and pick, run the studio:
+
+    uv run python tools/sprite_studio.py [--set modern] [--prompts FILE]
+
+It takes the prompt file as input (whoever wrote it), queues every object without a render,
+and shows four variants per attempt in the browser: click one to pick and cut it, "Retry"
+queues a new attempt. The prompt file is re-read before each job, so edit a description and
+retry. Jobs run one at a time; the GPU is shared.

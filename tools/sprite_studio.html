@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprite Studio</title>
+<style>
+  :root { --bg: #f3f4f6; --card: #fff; --ink: #1f2328; --muted: #6b7280; --line: #d9dce1;
+          --accent: #2563eb; --ok: #16a34a; --warn: #d97706; --bad: #dc2626; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  header { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 12px;
+           align-items: center; padding: 10px 16px; background: var(--card);
+           border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  .stat { color: var(--muted); }
+  .filters button { border: 1px solid var(--line); background: var(--card); padding: 4px 10px;
+                    border-radius: 6px; cursor: pointer; }
+  .filters button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  input[type=search] { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; }
+  main { padding: 16px; display: grid; gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .top { display: flex; gap: 12px; align-items: flex-start; }
+  .top .info { flex: 1; min-width: 0; }
+  .kind { font-weight: 600; font-size: 15px; }
+  .prompt { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .badge { font-size: 11px; padding: 1px 7px; border-radius: 99px; margin-left: 6px; color: #fff; }
+  .badge.rendering { background: var(--accent); } .badge.queued { background: var(--warn); }
+  .badge.failed { background: var(--bad); } .badge.picked { background: var(--ok); }
+  .current { width: 72px; height: 72px; object-fit: contain; }
+  .retry { border: 1px solid var(--accent); color: var(--accent); background: none;
+           padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .retry:disabled { opacity: .4; cursor: default; }
+  .attempt { margin-top: 10px; }
+  .attempt .label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 160px)); gap: 8px; }
+  .tiles img { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 6px;
+               border: 3px solid transparent;
+               background: repeating-conic-gradient(#e5e7eb 0 25%, #f9fafb 0 50%) 0 0 / 16px 16px; }
+  .tiles img:hover { border-color: #93c5fd; }
+  .tiles img.picked { border-color: var(--ok); }
+  .empty { color: var(--muted); font-style: italic; margin-top: 8px; }
+  @media (max-width: 600px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sprite Studio</h1>
+  <span class="stat" id="stat"></span>
+  <span class="filters" id="filters">
+    <button data-f="all" class="on">All</button>
+    <button data-f="open">Not picked</button>
+    <button data-f="busy">In queue</button>
+  </span>
+  <input type="search" id="search" placeholder="Filter objects">
+</header>
+<main id="list"></main>
+<script>
+let state = { kinds: [] }, filter = "all", search = "";
+const cards = new Map();
+
+async function post(path, body) {
+  await fetch(path, { method: "POST", body: JSON.stringify(body) });
+  refresh();
+}
+
+function visible(k) {
+  if (search && !k.kind.includes(search)) return false;
+  if (filter === "open") return !k.pick;
+  if (filter === "busy") return k.status === "queued" || k.status === "rendering";
+  return true;
+}
+
+function card(k) {
+  const el = document.createElement("section");
+  el.className = "card";
+  const badge = k.status !== "idle" ? `<span class="badge ${k.status}">${k.status}</span>`
+    : k.pick ? `<span class="badge picked">picked</span>` : "";
+  const current = k.pick ? `<img class="current" src="/sprite/${k.kind}?v=${k.pick.attempt}-${k.pick.quadrant}" alt="">` : "";
+  const busy = k.status === "queued" || k.status === "rendering";
+  el.innerHTML = `<div class="top">${current}<div class="info">
+      <div class="kind">${k.kind}${badge}</div><div class="prompt"></div></div>
+      <button class="retry" ${busy ? "disabled" : ""}>${k.attempts.length ? "Retry" : "Generate"}</button></div>`;
+  el.querySelector(".prompt").textContent = k.prompt;
+  el.querySelector(".retry").onclick = () => post("/api/retry", { kind: k.kind });
+  if (!k.attempts.length) el.insertAdjacentHTML("beforeend", `<div class="empty">no images yet</div>`);
+  for (const a of [...k.attempts].reverse()) {
+    const row = document.createElement("div");
+    row.className = "attempt";
+    row.innerHTML = `<div class="label">attempt ${a}</div><div class="tiles"></div>`;
+    for (let q = 0; q < 4; q++) {
+      const img = document.createElement("img");
+      img.loading = "lazy";
+      img.src = `/tile/${k.kind}/${a}/${q}`;
+      if (k.pick && k.pick.attempt === a && k.pick.quadrant === q) img.className = "picked";
+      img.title = "Use this one";
+      img.onclick = () => post("/api/pick", { kind: k.kind, attempt: a, quadrant: q });
+      row.querySelector(".tiles").append(img);
+    }
+    el.append(row);
+  }
+  return el;
+}
+
+function render() {
+  const list = document.getElementById("list");
+  const picked = state.kinds.filter(k => k.pick).length;
+  document.getElementById("stat").textContent =
+    `${picked}/${state.kinds.length} picked · ${state.queue} queued` +
+    (state.rendering ? ` · rendering ${state.rendering}` : "");
+  const shown = [];
+  for (const k of state.kinds) {
+    if (!visible(k)) continue;
+    const key = JSON.stringify(k);
+    let entry = cards.get(k.kind);
+    if (!entry || entry.key !== key) {
+      entry = { key, el: card(k) };
+      cards.set(k.kind, entry);
+    }
+    shown.push(entry.el);
+  }
+  // Reuse unchanged cards so images don't reload and the scroll position holds.
+  shown.forEach((el, i) => { if (list.children[i] !== el) list.insertBefore(el, list.children[i] || null); });
+  while (list.children.length > shown.length) list.lastChild.remove();
+}
+
+async function refresh() {
+  try { state = await (await fetch("/api/state")).json(); render(); } catch (e) {}
+}
+
+document.getElementById("filters").onclick = e => {
+  if (!e.target.dataset.f) return;
+  filter = e.target.dataset.f;
+  for (const b of e.currentTarget.children) b.classList.toggle("on", b === e.target);
+  render();
+};
+document.getElementById("search").oninput = e => { search = e.target.value.trim(); render(); };
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>
