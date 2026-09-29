@@ -1,0 +1,710 @@
+# Wealth variants of the modern sprite set, for tools/sprite_studio.py:
+#
+#   uv run python tools/sprite_studio.py --prompts tools/sprite_prompts_modern_wealth.yaml
+#
+# Names are `<kind>.<tier>` and are cut to data/sprites/modern/<kind>.<tier>.png. The plain
+# modern sprites (tools/sprite_prompts_modern.yaml) are the middle tier. The renderer falls
+# back towards middle: luxury -> high -> plain, squatter -> low -> plain.
+#   squatter  ruin: makeshift, scavenged, dirty, torn
+#   low       poor: cheap, worn, laminate and plastic, faded
+#   high      rich: walnut, leather, glass, brushed steel, crisp
+#   luxury    marble, brass, velvet, dark walnut, designer pieces
+# Guide format and recipe as in sprite_prompts_modern.yaml; the guide colours drive the look
+# as much as the words, so each tier has its own palette.
+style: >-
+  score_9, score_8_up, score_7_up, m3p4ss3ts, top down, from above, white background,
+  simple background, {subject}
+negative: >-
+  front view, side view, perspective, isometric, cropped, text, watermark, sci-fi, cyberpunk,
+  neon, glowing, people
+lora: "topdown-map-assets-scifi-pony.safetensors"
+denoise: 0.6
+seeds: 4
+
+subjects:
+  # --- bed ------------------------------------------------------------------------------------
+  bed.squatter:
+    prompt: "bare stained mattress lying on the floor, crumpled dirty blanket, flat old pillow at the top edge, no frame"
+    base: [none]
+    guide:
+      - [rect, 0.08, 0.03, 0.92, 0.97, "#b8ab8c", 0.06]
+      - [rect, 0.18, 0.06, 0.78, 0.20, "#d6cfbf", 0.3]
+      - [rect, 0.08, 0.42, 0.88, 0.95, "#6f6a58", 0.15]
+      - [ellipse, 0.55, 0.25, 0.80, 0.40, "#a08c64"]
+  bed.low:
+    prompt: "cheap single bed with a thin metal frame, faded blue blanket, flat pillow at the top edge, worn sheets"
+    base: [rect, "#7c8088", 0.03]
+    guide:
+      - [rect, 0.05, 0.03, 0.95, 0.97, "#e4e0d6", 0.03]
+      - [rect, 0.14, 0.07, 0.86, 0.21, "#efece4", 0.25]
+      - [rect, 0.05, 0.36, 0.95, 0.97, "#6d7f99", 0.04]
+  bed.high:
+    prompt: "upholstered single bed with a padded grey headboard at the top edge, crisp white linen, charcoal throw blanket across the bottom"
+    base: [rect, "#55585e", 0.05]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.08, "#44474d", 0.2]
+      - [rect, 0.06, 0.08, 0.94, 0.97, "#f6f6f4", 0.04]
+      - [rect, 0.14, 0.11, 0.86, 0.25, "#ffffff", 0.3]
+      - [rect, 0.06, 0.70, 0.94, 0.90, "#3a3c42", 0.03]
+  bed.luxury:
+    prompt: "luxury single bed, tall tufted velvet headboard at the top edge, ivory silk sheets, gold embroidered throw across the bottom, dark walnut frame"
+    base: [rect, "#4a3326", 0.05]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.10, "#2f4a4a", 0.2]
+      - [rect, 0.06, 0.10, 0.94, 0.97, "#f4eee2", 0.04]
+      - [rect, 0.12, 0.13, 0.88, 0.27, "#fbf8f0", 0.3]
+      - [rect, 0.06, 0.68, 0.94, 0.88, "#b08d4a", 0.03]
+
+  # --- double_bed -----------------------------------------------------------------------------
+  double_bed.squatter:
+    prompt: "two stained mattresses pushed together on the floor, tangled dirty blankets, old pillows at the top edge, no frame"
+    base: [none]
+    guide:
+      - [rect, 0.04, 0.03, 0.50, 0.97, "#b8ab8c", 0.05]
+      - [rect, 0.50, 0.05, 0.96, 0.96, "#a89c80", 0.05]
+      - [rect, 0.10, 0.06, 0.42, 0.20, "#d6cfbf", 0.3]
+      - [rect, 0.58, 0.07, 0.88, 0.20, "#cfc6b2", 0.3]
+      - [rect, 0.12, 0.45, 0.90, 0.94, "#6f6a58", 0.15]
+  double_bed.low:
+    prompt: "cheap double bed with a pine frame, faded patterned blanket, two flat pillows at the top edge"
+    base: [rect, "#c4a276", 0.03]
+    guide:
+      - [rect, 0.05, 0.03, 0.95, 0.97, "#e4e0d6", 0.03]
+      - [rect, 0.11, 0.07, 0.48, 0.22, "#efece4", 0.25]
+      - [rect, 0.52, 0.07, 0.89, 0.22, "#efece4", 0.25]
+      - [rect, 0.05, 0.38, 0.95, 0.97, "#8f7c6a", 0.04]
+  double_bed.high:
+    prompt: "upholstered king size bed with a padded grey headboard at the top edge, crisp white linen, four pillows, charcoal throw across the bottom"
+    base: [rect, "#55585e", 0.05]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.07, "#44474d", 0.2]
+      - [rect, 0.05, 0.07, 0.95, 0.97, "#f6f6f4", 0.04]
+      - [rect, 0.10, 0.10, 0.48, 0.24, "#ffffff", 0.3]
+      - [rect, 0.52, 0.10, 0.90, 0.24, "#ffffff", 0.3]
+      - [rect, 0.05, 0.72, 0.95, 0.90, "#3a3c42", 0.03]
+  double_bed.luxury:
+    prompt: "luxury king size bed, tall tufted velvet headboard at the top edge, ivory silk sheets, many cushions, gold embroidered throw, dark walnut frame"
+    base: [rect, "#4a3326", 0.05]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.09, "#2f4a4a", 0.2]
+      - [rect, 0.05, 0.09, 0.95, 0.97, "#f4eee2", 0.04]
+      - [rect, 0.09, 0.12, 0.34, 0.26, "#fbf8f0", 0.3]
+      - [rect, 0.37, 0.12, 0.63, 0.26, "#2f4a4a", 0.3]
+      - [rect, 0.66, 0.12, 0.91, 0.26, "#fbf8f0", 0.3]
+      - [rect, 0.05, 0.68, 0.95, 0.88, "#b08d4a", 0.03]
+
+  # --- sofa -----------------------------------------------------------------------------------
+  sofa.squatter:
+    prompt: "torn old sofa with stuffing coming out, stained brown fabric, a blanket thrown over it, backrest along the top edge"
+    base: [rect, "#6b5a44", 0.12]
+    guide:
+      - [rect, 0.10, 0.28, 0.50, 0.92, "#7d6a50", 0.1]
+      - [rect, 0.50, 0.28, 0.90, 0.92, "#86725a", 0.1]
+      - [ellipse, 0.30, 0.45, 0.42, 0.60, "#d8d0c0"]
+      - [rect, 0.55, 0.20, 0.85, 0.70, "#5a6a58", 0.1]
+  sofa.low:
+    prompt: "cheap two seat sofa in worn beige fabric, sagging cushions, backrest along the top edge"
+    base: [rect, "#a8987e", 0.12]
+    guide:
+      - [rect, 0.10, 0.28, 0.50, 0.92, "#b9aa90", 0.1]
+      - [rect, 0.50, 0.28, 0.90, 0.92, "#b9aa90", 0.1]
+  sofa.high:
+    prompt: "cognac leather three seat sofa, slim walnut legs, backrest along the top edge, two cushions"
+    base: [rect, "#8a5530", 0.12]
+    guide:
+      - [rect, 0.10, 0.28, 0.37, 0.92, "#a0653a", 0.1]
+      - [rect, 0.37, 0.28, 0.63, 0.92, "#a0653a", 0.1]
+      - [rect, 0.63, 0.28, 0.90, 0.92, "#a0653a", 0.1]
+      - [rect, 0.14, 0.20, 0.30, 0.40, "#e8e2d6", 0.3]
+  sofa.luxury:
+    prompt: "luxury deep green velvet chesterfield sofa, tufted backrest along the top edge, rolled arms, gold cushions"
+    base: [rect, "#1f4a3a", 0.14]
+    guide:
+      - [rect, 0.10, 0.28, 0.37, 0.92, "#2a5c48", 0.1]
+      - [rect, 0.37, 0.28, 0.63, 0.92, "#2a5c48", 0.1]
+      - [rect, 0.63, 0.28, 0.90, 0.92, "#2a5c48", 0.1]
+      - [rect, 0.14, 0.20, 0.30, 0.40, "#c9a14a", 0.3]
+      - [rect, 0.70, 0.20, 0.86, 0.40, "#c9a14a", 0.3]
+
+  # --- armchair -------------------------------------------------------------------------------
+  armchair.squatter:
+    prompt: "ragged torn armchair, stained brown fabric, stuffing showing, backrest along the top edge"
+    base: [rect, "#6b5a44", 0.2]
+    guide:
+      - [rect, 0.16, 0.10, 0.84, 0.34, "#5a4a38", 0.4]
+      - [rect, 0.06, 0.24, 0.24, 0.90, "#5a4a38", 0.5]
+      - [rect, 0.76, 0.24, 0.94, 0.90, "#5a4a38", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#7d6a50", 0.3]
+      - [ellipse, 0.40, 0.55, 0.55, 0.70, "#d8d0c0"]
+  armchair.low:
+    prompt: "cheap armchair in faded beige fabric, worn armrests, backrest along the top edge"
+    base: [rect, "#a8987e", 0.2]
+    guide:
+      - [rect, 0.16, 0.10, 0.84, 0.34, "#968770", 0.4]
+      - [rect, 0.06, 0.24, 0.24, 0.90, "#968770", 0.5]
+      - [rect, 0.76, 0.24, 0.94, 0.90, "#968770", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#b9aa90", 0.3]
+  armchair.high:
+    prompt: "cognac leather lounge armchair, walnut frame, backrest along the top edge, seat cushion facing the bottom edge"
+    base: [rect, "#5a3a24", 0.2]
+    guide:
+      - [rect, 0.16, 0.10, 0.84, 0.34, "#8a5530", 0.4]
+      - [rect, 0.06, 0.24, 0.24, 0.90, "#6a4428", 0.5]
+      - [rect, 0.76, 0.24, 0.94, 0.90, "#6a4428", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#a0653a", 0.3]
+  armchair.luxury:
+    prompt: "luxury deep green velvet wingback armchair, tufted backrest along the top edge, brass studs, gold cushion"
+    base: [rect, "#1f4a3a", 0.2]
+    guide:
+      - [rect, 0.12, 0.06, 0.88, 0.34, "#1a3e31", 0.4]
+      - [rect, 0.06, 0.20, 0.24, 0.90, "#23523f", 0.5]
+      - [rect, 0.76, 0.20, 0.94, 0.90, "#23523f", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#2a5c48", 0.3]
+      - [rect, 0.38, 0.36, 0.62, 0.52, "#c9a14a", 0.3]
+
+  # --- chair ----------------------------------------------------------------------------------
+  chair.squatter:
+    prompt: "blue plastic milk crate used as a seat, with a folded dirty cushion on top"
+    base: [rect, "#3a5f8a", 0.08]
+    guide:
+      - [rect, 0.08, 0.08, 0.92, 0.92, "#2f4f75", 0.06]
+      - [rect, 0.18, 0.18, 0.82, 0.82, "#8a7a60", 0.2]
+  chair.low:
+    prompt: "cheap white plastic chair, backrest along the top edge, square seat"
+    base: [none]
+    guide:
+      - [rect, 0.14, 0.08, 0.86, 0.26, "#e8e8e6", 0.3]
+      - [rect, 0.14, 0.24, 0.86, 0.92, "#f2f2f0", 0.2]
+  chair.high:
+    prompt: "black leather executive office chair, high backrest along the top edge, chrome five star base"
+    base: [none]
+    guide:
+      - [line, 0.5, 0.55, 0.5, 0.08, "#b8bcc2", 0.07]
+      - [line, 0.5, 0.55, 0.93, 0.40, "#b8bcc2", 0.07]
+      - [line, 0.5, 0.55, 0.77, 0.95, "#b8bcc2", 0.07]
+      - [line, 0.5, 0.55, 0.23, 0.95, "#b8bcc2", 0.07]
+      - [line, 0.5, 0.55, 0.07, 0.40, "#b8bcc2", 0.07]
+      - [rect, 0.20, 0.30, 0.80, 0.85, "#26282c", 0.35]
+      - [rect, 0.16, 0.08, 0.84, 0.32, "#1c1d20", 0.4]
+  chair.luxury:
+    prompt: "luxury dining chair, dark walnut frame, cream velvet seat, curved backrest along the top edge, brass details"
+    base: [none]
+    guide:
+      - [rect, 0.14, 0.06, 0.86, 0.24, "#4a3326", 0.4]
+      - [rect, 0.16, 0.22, 0.84, 0.90, "#4a3326", 0.25]
+      - [rect, 0.22, 0.28, 0.78, 0.84, "#ede4d0", 0.25]
+
+  # --- desk -----------------------------------------------------------------------------------
+  desk.squatter:
+    prompt: "improvised desk made from an old door lying on two crates, cracked old monitor at the top edge, scattered papers and cans, no chair"
+    base: [rect, "#8a7458", 0.02]
+    guide:
+      - [rect, 0.30, 0.08, 0.66, 0.24, "#3a3a3a", 0.1]
+      - [ellipse, 0.72, 0.60, 0.80, 0.72, "#b04030"]
+      - [rect, 0.15, 0.55, 0.40, 0.80, "#e8e2d0", 0.02]
+  desk.low:
+    prompt: "cheap laminate desk in white, old boxy computer monitor at the top edge, keyboard, clutter, no chair"
+    base: [rect, "#e2dfd8", 0.03]
+    guide:
+      - [rect, 0.30, 0.06, 0.66, 0.30, "#cfcbc2", 0.1]
+      - [rect, 0.33, 0.55, 0.67, 0.70, "#d6d6d6", 0.2]
+      - [rect, 0.08, 0.40, 0.24, 0.70, "#f2f2f2", 0.02]
+  desk.high:
+    prompt: "walnut executive desk with a glass inlay, two slim monitors along the top edge, leather desk pad, no chair"
+    base: [rect, "#5e3f2a", 0.04]
+    guide:
+      - [rect, 0.18, 0.08, 0.48, 0.18, "#1e1e22", 0.3]
+      - [rect, 0.52, 0.08, 0.82, 0.18, "#1e1e22", 0.3]
+      - [rect, 0.28, 0.45, 0.72, 0.78, "#2b2b2e", 0.1]
+  desk.luxury:
+    prompt: "luxury executive desk, white marble top with gold edge, one slim monitor at the top edge, leather desk pad, brass lamp, no chair"
+    base: [rect, "#b08d4a", 0.04]
+    guide:
+      - [rect, 0.02, 0.03, 0.98, 0.97, "#eeebe4", 0.04]
+      - [rect, 0.32, 0.08, 0.68, 0.18, "#1e1e22", 0.3]
+      - [rect, 0.30, 0.45, 0.70, 0.78, "#3a2418", 0.1]
+      - [ellipse, 0.82, 0.12, 0.94, 0.30, "#c9a14a"]
+
+  # --- table ----------------------------------------------------------------------------------
+  table.squatter:
+    prompt: "improvised table made from a big wooden cable spool, round top with empty cans and a candle"
+    base: [ellipse, "#8a6a44", 0]
+    guide:
+      - [ellipse, 0.10, 0.10, 0.90, 0.90, "#9c7a50"]
+      - [ellipse, 0.40, 0.40, 0.60, 0.60, "#6a5236"]
+      - [ellipse, 0.20, 0.25, 0.30, 0.35, "#b04030"]
+  table.low:
+    prompt: "cheap small square table with a scratched laminate top, only the flat tabletop visible, no chairs"
+    base: [rect, "#d8cbb2", 0.04]
+    guide:
+      - [ellipse, 0.30, 0.35, 0.45, 0.50, "#c4b69a"]
+  table.high:
+    prompt: "square walnut dining table, smooth oiled top, only the flat tabletop visible, no chairs"
+    base: [rect, "#6a4630", 0.06]
+    guide:
+      - [line, 0.1, 0.3, 0.9, 0.3, "#5e3f2a", 0.02]
+      - [line, 0.1, 0.7, 0.9, 0.7, "#5e3f2a", 0.02]
+  table.luxury:
+    prompt: "square white marble dining table with grey veins and a brass edge, only the tabletop visible, no chairs"
+    base: [rect, "#b08d4a", 0.06]
+    guide:
+      - [rect, 0.03, 0.03, 0.97, 0.97, "#f0eeea", 0.05]
+      - [line, 0.15, 0.25, 0.70, 0.80, "#b8b8b8", 0.02]
+
+  # --- meeting_table --------------------------------------------------------------------------
+  meeting_table.squatter:
+    prompt: "long improvised table made from planks laid on crates, scattered junk, only the top visible"
+    base: [rect, "#8a7458", 0.02]
+    guide:
+      - [line, 0.02, 0.33, 0.98, 0.33, "#6a5236", 0.03]
+      - [line, 0.02, 0.66, 0.98, 0.66, "#6a5236", 0.03]
+  meeting_table.low:
+    prompt: "long cheap folding table with a grey plastic top, only the flat tabletop visible, no chairs"
+    base: [rect, "#c8c8c4", 0.05]
+  meeting_table.high:
+    prompt: "long walnut conference table with a glass centre strip, only the flat tabletop visible, no chairs"
+    base: [rect, "#5e3f2a", 0.08]
+    guide:
+      - [rect, 0.10, 0.42, 0.90, 0.58, "#a9c2c6", 0.2]
+  meeting_table.luxury:
+    prompt: "long glossy black marble boardroom table with gold inlay lines, only the tabletop visible, no chairs"
+    base: [rect, "#1c1c1e", 0.1]
+    guide:
+      - [rect, 0.05, 0.47, 0.95, 0.53, "#c9a14a", 0.2]
+
+  # --- side_table -----------------------------------------------------------------------------
+  side_table.squatter:
+    prompt: "upturned wooden crate used as a side table, candle and an empty bottle on it"
+    base: [rect, "#9c7a50", 0.05]
+    guide:
+      - [line, 0.1, 0.5, 0.9, 0.5, "#6a5236", 0.05]
+      - [ellipse, 0.25, 0.25, 0.40, 0.40, "#ece4c8"]
+  side_table.low:
+    prompt: "small cheap round side table with a white plastic top"
+    base: [ellipse, "#ececea", 0]
+  side_table.high:
+    prompt: "small round walnut side table with a black metal rim, a book on it"
+    base: [ellipse, "#2b2b2e", 0]
+    guide:
+      - [ellipse, 0.06, 0.06, 0.94, 0.94, "#6a4630"]
+      - [rect, 0.30, 0.35, 0.62, 0.60, "#8a3a2a", 0.05]
+  side_table.luxury:
+    prompt: "small round white marble side table with a brass rim and a small brass lamp"
+    base: [ellipse, "#b08d4a", 0]
+    guide:
+      - [ellipse, 0.06, 0.06, 0.94, 0.94, "#f0eeea"]
+      - [ellipse, 0.35, 0.35, 0.65, 0.65, "#c9a14a"]
+
+  # --- nightstand -----------------------------------------------------------------------------
+  nightstand.squatter:
+    prompt: "wooden crate standing on its side used as a nightstand, candle stub on top"
+    base: [rect, "#9c7a50", 0.05]
+    guide:
+      - [ellipse, 0.40, 0.40, 0.60, 0.60, "#ece4c8"]
+  nightstand.low:
+    prompt: "cheap small nightstand with a chipped white laminate top, one drawer at the bottom edge"
+    base: [rect, "#e2dfd8", 0.08]
+    guide:
+      - [rect, 0.15, 0.62, 0.85, 0.84, "#c8c4ba", 0.2]
+  nightstand.high:
+    prompt: "walnut nightstand with a small black lamp and a book, one drawer at the bottom edge"
+    base: [rect, "#6a4630", 0.1]
+    guide:
+      - [ellipse, 0.55, 0.15, 0.85, 0.45, "#2b2b2e"]
+      - [rect, 0.15, 0.62, 0.85, 0.84, "#5e3f2a", 0.2]
+  nightstand.luxury:
+    prompt: "luxury nightstand with a white marble top and brass handles, brass lamp on top"
+    base: [rect, "#f0eeea", 0.1]
+    guide:
+      - [ellipse, 0.55, 0.15, 0.85, 0.45, "#c9a14a"]
+      - [rect, 0.40, 0.70, 0.60, 0.78, "#c9a14a", 0.3]
+
+  # --- wardrobe -------------------------------------------------------------------------------
+  wardrobe.squatter:
+    denoise: 0.65
+    prompt: "clothes hanging on a rusty pipe rack, piles of clothes and cardboard boxes, one long object, back against the top edge"
+    base: [none]
+    guide:
+      - [line, 0.03, 0.45, 0.97, 0.45, "#6a4a36", 0.08]
+      - [rect, 0.08, 0.20, 0.30, 0.75, "#5a6a58", 0.2]
+      - [rect, 0.32, 0.22, 0.52, 0.72, "#7d5a4a", 0.2]
+      - [rect, 0.55, 0.18, 0.75, 0.78, "#4a5a78", 0.2]
+      - [rect, 0.78, 0.25, 0.97, 0.90, "#b08a5a", 0.05]
+  wardrobe.low:
+    denoise: 0.68
+    prompt: "cheap wardrobe with a white chipboard top, two door seams, back against the top edge"
+    base: [rect, "#e2dfd8", 0.03]
+    guide:
+      - [line, 0.5, 0.0, 0.5, 1.0, "#b8b4aa", 0.04]
+  wardrobe.high:
+    denoise: 0.68
+    prompt: "walnut wardrobe seen from straight above, flat closed top, three door seams, back against the top edge"
+    base: [rect, "#5e3f2a", 0.03]
+    guide:
+      - [line, 0.33, 0.0, 0.33, 1.0, "#3e2a1c", 0.04]
+      - [line, 0.66, 0.0, 0.66, 1.0, "#3e2a1c", 0.04]
+  wardrobe.luxury:
+    denoise: 0.68
+    prompt: "luxury built-in wardrobe of dark lacquered wood with brass trim along the edges, flat closed top, back against the top edge"
+    base: [rect, "#b08d4a", 0.03]
+    guide:
+      - [rect, 0.03, 0.05, 0.97, 0.95, "#2a1c14", 0.02]
+      - [line, 0.5, 0.05, 0.5, 0.95, "#b08d4a", 0.04]
+
+  # --- shelf ----------------------------------------------------------------------------------
+  shelf.squatter:
+    prompt: "improvised shelf of planks on bricks, a few old books, bottles and junk, back against the top edge"
+    base: [rect, "#8a7458", 0.02]
+    guide:
+      - [rect, 0.02, 0.1, 0.12, 0.9, "#a0503a", 0.05]
+      - [rect, 0.88, 0.1, 0.98, 0.9, "#a0503a", 0.05]
+      - [rect, 0.20, 0.20, 0.34, 0.60, "#6a5a4a", 0.1]
+      - [ellipse, 0.50, 0.30, 0.60, 0.50, "#5a7a4a"]
+  shelf.low:
+    prompt: "cheap white bookshelf, a few paperbacks and plastic boxes, back against the top edge"
+    base: [rect, "#e2dfd8", 0.03]
+    guide:
+      - [rect, 0.08, 0.15, 0.30, 0.60, "#9a8a6a", 0.1]
+      - [rect, 0.55, 0.12, 0.85, 0.62, "#8aa0b0", 0.1]
+  shelf.high:
+    prompt: "walnut bookshelf with neatly arranged hardcover books and a ceramic vase, back against the top edge"
+    base: [rect, "#5e3f2a", 0.04]
+    guide:
+      - [rect, 0.06, 0.12, 0.32, 0.62, "#2a3a4a", 0.1]
+      - [rect, 0.36, 0.12, 0.60, 0.62, "#6a2a2a", 0.1]
+      - [ellipse, 0.70, 0.20, 0.88, 0.55, "#e8e2d6"]
+  shelf.luxury:
+    prompt: "luxury display shelf of dark lacquered wood with brass edges, leather bound books, a gold sculpture and a crystal vase, back against the top edge"
+    base: [rect, "#2a1c14", 0.04]
+    guide:
+      - [rect, 0.06, 0.12, 0.34, 0.62, "#6a2a2a", 0.1]
+      - [ellipse, 0.42, 0.15, 0.58, 0.55, "#c9a14a"]
+      - [ellipse, 0.68, 0.18, 0.88, 0.58, "#cfe0e4"]
+
+  # --- rug ------------------------------------------------------------------------------------
+  rug.squatter:
+    denoise: 0.55
+    prompt: "dirty torn old rug with frayed edges and stains, flat"
+    base: [rect, "#8a7a60", 0.02]
+    guide:
+      - [rect, 0.10, 0.12, 0.90, 0.88, "#7a6a52", 0.02]
+      - [ellipse, 0.55, 0.40, 0.80, 0.70, "#5e5240"]
+  rug.low:
+    denoise: 0.55
+    prompt: "cheap thin rectangular rug in faded brown and beige stripes, flat"
+    base: [rect, "#b8a888", 0.02]
+    guide:
+      - [rect, 0.0, 0.30, 1.0, 0.40, "#9a8a6a", 0.0]
+      - [rect, 0.0, 0.60, 1.0, 0.70, "#9a8a6a", 0.0]
+  rug.high:
+    denoise: 0.55
+    prompt: "thick wool area rug in charcoal and cream with a simple border, flat"
+    base: [rect, "#3a3c42", 0.02]
+    guide:
+      - [rect, 0.08, 0.10, 0.92, 0.90, "#e6e0d2", 0.02]
+      - [rect, 0.14, 0.18, 0.86, 0.82, "#3a3c42", 0.02]
+  rug.luxury:
+    denoise: 0.55
+    prompt: "luxurious persian rug with an ornate medallion pattern in deep red, navy and gold, fringed ends, flat"
+    base: [rect, "#7a1f24", 0.02]
+    guide:
+      - [rect, 0.06, 0.08, 0.94, 0.92, "#1f2a4a", 0.02]
+      - [rect, 0.12, 0.16, 0.88, 0.84, "#8a2a2a", 0.02]
+      - [ellipse, 0.35, 0.30, 0.65, 0.70, "#c9a14a"]
+
+  # --- plant ----------------------------------------------------------------------------------
+  plant.squatter:
+    prompt: "half dead plant with a few brown leaves in a dented paint bucket"
+    base: [none]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#8a8a8a"]
+      - [ellipse, 0.28, 0.28, 0.72, 0.72, "#5a4a36"]
+      - [ellipse, 0.30, 0.15, 0.60, 0.50, "#8a7a3a"]
+      - [ellipse, 0.45, 0.45, 0.75, 0.75, "#6a6a36"]
+  plant.low:
+    prompt: "small potted plant with a few green leaves in a plastic terracotta coloured pot"
+    base: [none]
+    guide:
+      - [ellipse, 0.22, 0.22, 0.78, 0.78, "#b8683a"]
+      - [ellipse, 0.25, 0.20, 0.65, 0.60, "#4f8a3c"]
+      - [ellipse, 0.40, 0.40, 0.78, 0.78, "#467d35"]
+  plant.high:
+    prompt: "large fiddle leaf fig with big glossy leaves in a round matte black planter"
+    base: [none]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#2b2b2e"]
+      - [ellipse, 0.05, 0.08, 0.60, 0.55, "#3f7a32"]
+      - [ellipse, 0.40, 0.05, 0.95, 0.58, "#4a8a3a"]
+      - [ellipse, 0.12, 0.45, 0.88, 0.95, "#356a2a"]
+  plant.luxury:
+    prompt: "exotic palm with a round crown of long fronds in a large brass planter"
+    base: [none]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#c9a14a"]
+      - [line, 0.5, 0.5, 0.02, 0.2, "#3f7a32", 0.12]
+      - [line, 0.5, 0.5, 0.98, 0.2, "#3f7a32", 0.12]
+      - [line, 0.5, 0.5, 0.1, 0.95, "#4a8a3a", 0.12]
+      - [line, 0.5, 0.5, 0.9, 0.95, "#4a8a3a", 0.12]
+      - [line, 0.5, 0.5, 0.5, 0.0, "#356a2a", 0.12]
+
+  # --- wc -------------------------------------------------------------------------------------
+  wc.squatter:
+    prompt: "filthy cracked toilet bowl with a broken seat, rust stains, cistern at the top edge"
+    base: [none]
+    guide:
+      - [rect, 0.22, 0.05, 0.78, 0.30, "#cfc8b8", 0.25]
+      - [ellipse, 0.28, 0.25, 0.72, 0.92, "#d8d0bc"]
+      - [ellipse, 0.34, 0.32, 0.66, 0.84, "#8a7a5a"]
+  wc.low:
+    prompt: "plain old white toilet with a plastic seat, lid open, cistern at the top edge"
+    base: [none]
+    guide:
+      - [rect, 0.22, 0.05, 0.78, 0.30, "#ecebe6", 0.25]
+      - [ellipse, 0.28, 0.25, 0.72, 0.92, "#f2f1ec"]
+      - [ellipse, 0.36, 0.34, 0.64, 0.82, "#c8ccd0"]
+  wc.high:
+    prompt: "wall hung white designer toilet with a slim soft close lid, closed, flush plate at the top edge"
+    base: [none]
+    guide:
+      - [rect, 0.25, 0.03, 0.75, 0.14, "#2b2b2e", 0.3]
+      - [ellipse, 0.28, 0.12, 0.72, 0.94, "#fafafa"]
+  wc.luxury:
+    prompt: "luxury white porcelain toilet with a gold flush button and gold hinges, lid closed, cistern at the top edge"
+    base: [none]
+    guide:
+      - [rect, 0.22, 0.05, 0.78, 0.30, "#fafafa", 0.25]
+      - [ellipse, 0.44, 0.12, 0.56, 0.22, "#c9a14a"]
+      - [ellipse, 0.28, 0.25, 0.72, 0.92, "#ffffff"]
+      - [rect, 0.36, 0.26, 0.64, 0.32, "#c9a14a", 0.3]
+
+  # --- sink -----------------------------------------------------------------------------------
+  sink.squatter:
+    prompt: "cracked dirty washbasin with rust stains, a rusty tap at the top edge"
+    base: [none]
+    guide:
+      - [rect, 0.1, 0.05, 0.9, 0.95, "#cfc8b8", 0.15]
+      - [ellipse, 0.25, 0.22, 0.75, 0.9, "#8a7a5a"]
+      - [rect, 0.44, 0.02, 0.56, 0.2, "#8a5a3a", 0.4]
+  sink.low:
+    prompt: "small plain white washbasin, chipped enamel, two old taps at the top edge"
+    base: [none]
+    guide:
+      - [rect, 0.1, 0.05, 0.9, 0.95, "#ecebe6", 0.15]
+      - [ellipse, 0.25, 0.25, 0.75, 0.9, "#d4d6d8"]
+      - [ellipse, 0.25, 0.04, 0.38, 0.18, "#b8bcc0"]
+      - [ellipse, 0.62, 0.04, 0.75, 0.18, "#b8bcc0"]
+  sink.high:
+    prompt: "rectangular white vessel basin on a walnut vanity top, matte black faucet at the top edge"
+    base: [rect, "#5e3f2a", 0.05]
+    guide:
+      - [rect, 0.18, 0.20, 0.82, 0.90, "#fafafa", 0.25]
+      - [rect, 0.30, 0.30, 0.70, 0.80, "#e4e6e8", 0.25]
+      - [rect, 0.45, 0.04, 0.55, 0.22, "#1e1e22", 0.4]
+  sink.luxury:
+    prompt: "white marble washbasin with a round bowl, gold faucet at the top edge"
+    base: [rect, "#f0eeea", 0.08]
+    guide:
+      - [ellipse, 0.22, 0.22, 0.78, 0.90, "#e4e2de"]
+      - [rect, 0.44, 0.03, 0.56, 0.24, "#c9a14a", 0.4]
+
+  # --- shower ---------------------------------------------------------------------------------
+  shower.squatter:
+    prompt: "dirty shower tray with cracked mouldy tiles, a rusty drain in the centre, a torn curtain, a bucket"
+    base: [rect, "#b8b0a0", 0.03]
+    guide:
+      - [ellipse, 0.44, 0.44, 0.56, 0.56, "#6a5a40"]
+      - [ellipse, 0.65, 0.65, 0.90, 0.90, "#4a6a8a"]
+      - [line, 0.05, 0.03, 0.05, 0.97, "#8a8a6a", 0.05]
+  shower.low:
+    prompt: "small plain shower tray with a white plastic base, round drain in the centre, plastic curtain along one side"
+    base: [rect, "#ecebe6", 0.05]
+    guide:
+      - [ellipse, 0.44, 0.44, 0.56, 0.56, "#b8bcc0"]
+      - [line, 0.03, 0.97, 0.97, 0.97, "#8aa0b0", 0.04]
+  shower.high:
+    prompt: "walk-in shower with large grey stone tiles, linear drain, glass screen along one side, black rain head at the top edge"
+    base: [rect, "#8a8e94", 0.02]
+    guide:
+      - [rect, 0.1, 0.80, 0.9, 0.84, "#3a3c42", 0.3]
+      - [rect, 0.40, 0.02, 0.60, 0.12, "#1e1e22", 0.4]
+      - [line, 0.97, 0.03, 0.97, 0.97, "#c8dde2", 0.03]
+  shower.luxury:
+    prompt: "luxury walk-in shower with white marble floor, gold rain head at the top edge, gold linear drain, glass wall"
+    base: [rect, "#f0eeea", 0.02]
+    guide:
+      - [line, 0.1, 0.4, 0.8, 0.9, "#c0c0c0", 0.02]
+      - [rect, 0.1, 0.84, 0.9, 0.88, "#c9a14a", 0.3]
+      - [rect, 0.38, 0.02, 0.62, 0.14, "#c9a14a", 0.4]
+
+  # --- stove ----------------------------------------------------------------------------------
+  stove.squatter:
+    prompt: "camping gas stove with one burner and a dented pot, on a wooden crate"
+    base: [rect, "#9c7a50", 0.05]
+    guide:
+      - [rect, 0.15, 0.15, 0.85, 0.85, "#5a5a5a", 0.1]
+      - [ellipse, 0.28, 0.28, 0.72, 0.72, "#8a8a8a"]
+      - [ellipse, 0.36, 0.36, 0.64, 0.64, "#3a3a3a"]
+  stove.low:
+    prompt: "old white enamel electric stove seen from straight above, four coil hot plates, knobs at the bottom edge"
+    base: [rect, "#ecebe6", 0.05]
+    guide:
+      - [ellipse, 0.12, 0.10, 0.46, 0.44, "#3a3a3a"]
+      - [ellipse, 0.54, 0.10, 0.88, 0.44, "#3a3a3a"]
+      - [ellipse, 0.12, 0.50, 0.46, 0.84, "#3a3a3a"]
+      - [ellipse, 0.54, 0.50, 0.88, 0.84, "#3a3a3a"]
+  stove.high:
+    prompt: "stainless steel gas range seen from straight above, five burners with cast iron grates"
+    base: [rect, "#b8bcc2", 0.04]
+    guide:
+      - [rect, 0.06, 0.06, 0.94, 0.94, "#2b2b2e", 0.03]
+      - [ellipse, 0.10, 0.10, 0.40, 0.40, "#4a4d52"]
+      - [ellipse, 0.60, 0.10, 0.90, 0.40, "#4a4d52"]
+      - [ellipse, 0.35, 0.35, 0.65, 0.65, "#4a4d52"]
+      - [ellipse, 0.10, 0.60, 0.40, 0.90, "#4a4d52"]
+      - [ellipse, 0.60, 0.60, 0.90, 0.90, "#4a4d52"]
+  stove.luxury:
+    prompt: "luxury professional range cooker in deep blue enamel with brass trim, six burners with black grates"
+    base: [rect, "#1f2f4a", 0.04]
+    guide:
+      - [rect, 0.05, 0.05, 0.95, 0.80, "#1c1c1e", 0.03]
+      - [ellipse, 0.08, 0.10, 0.34, 0.40, "#3a3a3e"]
+      - [ellipse, 0.37, 0.10, 0.63, 0.40, "#3a3a3e"]
+      - [ellipse, 0.66, 0.10, 0.92, 0.40, "#3a3a3e"]
+      - [ellipse, 0.08, 0.45, 0.34, 0.75, "#3a3a3e"]
+      - [ellipse, 0.37, 0.45, 0.63, 0.75, "#3a3a3e"]
+      - [ellipse, 0.66, 0.45, 0.92, 0.75, "#3a3a3e"]
+      - [rect, 0.05, 0.84, 0.95, 0.90, "#c9a14a", 0.3]
+
+  # --- counter --------------------------------------------------------------------------------
+  counter.squatter:
+    prompt: "improvised kitchen counter of planks on crates, a plastic tub as a sink, dirty dishes and cans"
+    base: [rect, "#8a7458", 0.02]
+    guide:
+      - [rect, 0.60, 0.20, 0.90, 0.80, "#4a6a8a", 0.2]
+      - [ellipse, 0.15, 0.30, 0.30, 0.60, "#b0b0b0"]
+      - [ellipse, 0.35, 0.40, 0.45, 0.60, "#b04030"]
+  counter.low:
+    prompt: "cheap kitchen counter with a worn beige laminate worktop, small steel sink, a kettle"
+    base: [rect, "#d8cbb2", 0.03]
+    guide:
+      - [rect, 0.62, 0.25, 0.9, 0.75, "#b8bcc0", 0.15]
+      - [ellipse, 0.15, 0.30, 0.32, 0.65, "#e8e8e8"]
+  counter.high:
+    prompt: "kitchen counter with a dark grey quartz worktop, undermount steel sink, a chopping board and a fruit bowl"
+    base: [rect, "#4a4c52", 0.03]
+    guide:
+      - [rect, 0.62, 0.25, 0.9, 0.75, "#9aa0a6", 0.2]
+      - [rect, 0.1, 0.3, 0.35, 0.7, "#c9a57a", 0.15]
+      - [ellipse, 0.40, 0.30, 0.55, 0.65, "#d8a040"]
+  counter.luxury:
+    prompt: "luxury kitchen counter with a white marble worktop, brass tap and a deep sink, a bowl of lemons"
+    base: [rect, "#f0eeea", 0.03]
+    guide:
+      - [rect, 0.62, 0.25, 0.9, 0.75, "#dcdad6", 0.2]
+      - [rect, 0.72, 0.08, 0.80, 0.25, "#c9a14a", 0.4]
+      - [ellipse, 0.15, 0.30, 0.35, 0.70, "#e0c040"]
+      - [line, 0.05, 0.15, 0.55, 0.90, "#c0c0c0", 0.015]
+
+  # --- fridge ---------------------------------------------------------------------------------
+  fridge.squatter:
+    denoise: 0.72
+    prompt: "old rusty broken refrigerator seen from straight above, dented flat top with junk on it, door edge at the bottom"
+    base: [rect, "#c8c0a8", 0.06]
+    guide:
+      - [ellipse, 0.55, 0.20, 0.85, 0.55, "#8a5a3a"]
+      - [rect, 0.15, 0.25, 0.45, 0.60, "#8a8a6a", 0.1]
+  fridge.low:
+    denoise: 0.72
+    prompt: "old white refrigerator seen from straight above, flat yellowed top, door edge at the bottom"
+    base: [rect, "#ecead8", 0.08]
+  fridge.high:
+    denoise: 0.72
+    prompt: "black stainless steel refrigerator seen from straight above, flat dark top, door edge at the bottom"
+    base: [rect, "#2e3034", 0.05]
+  fridge.luxury:
+    denoise: 0.72
+    prompt: "luxury double door refrigerator in brushed steel with brass handles, flat metal top, door edge at the bottom"
+    base: [rect, "#c8ccd0", 0.04]
+    guide:
+      - [line, 0.5, 0.0, 0.5, 1.0, "#9aa0a6", 0.03]
+      - [rect, 0.40, 0.86, 0.48, 0.98, "#c9a14a", 0.3]
+      - [rect, 0.52, 0.86, 0.60, 0.98, "#c9a14a", 0.3]
+
+  # --- stool ----------------------------------------------------------------------------------
+  stool.squatter:
+    prompt: "upturned plastic bucket used as a stool"
+    base: [ellipse, "#4a6a8a", 0]
+    guide:
+      - [ellipse, 0.14, 0.14, 0.86, 0.86, "#3a5a7a"]
+  stool.low:
+    prompt: "cheap round stool with a red plastic seat"
+    base: [ellipse, "#a83a2a", 0]
+    guide:
+      - [ellipse, 0.14, 0.14, 0.86, 0.86, "#b8483a"]
+  stool.high:
+    prompt: "round bar stool with a cognac leather seat and a black metal rim"
+    base: [ellipse, "#1e1e22", 0]
+    guide:
+      - [ellipse, 0.10, 0.10, 0.90, 0.90, "#a0653a"]
+  stool.luxury:
+    prompt: "round bar stool with a cream velvet seat and a brass ring"
+    base: [ellipse, "#c9a14a", 0]
+    guide:
+      - [ellipse, 0.10, 0.10, 0.90, 0.90, "#ede4d0"]
+
+  # --- bar_counter ----------------------------------------------------------------------------
+  bar_counter.squatter:
+    prompt: "improvised bar made of planks on oil drums, bottles and cans along the back edge"
+    base: [rect, "#8a7458", 0.02]
+    guide:
+      - [ellipse, 0.05, 0.05, 0.20, 0.45, "#7a4a2a"]
+      - [ellipse, 0.80, 0.05, 0.95, 0.45, "#7a4a2a"]
+      - [rect, 0.25, 0.08, 0.75, 0.30, "#5a7a4a", 0.2]
+  bar_counter.low:
+    prompt: "worn bar counter with a scratched brown laminate top, a few bottles along the back edge"
+    base: [rect, "#8a6a4a", 0.03]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.45, "#7a5a3a", 0.0]
+      - [rect, 0.10, 0.08, 0.60, 0.30, "#5a7a4a", 0.2]
+  bar_counter.high:
+    prompt: "walnut bar counter with a black granite top, rows of bottles and chrome taps along the back edge"
+    base: [rect, "#5e3f2a", 0.03]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.50, "#4a3222", 0.0]
+      - [rect, 0.0, 0.50, 1.0, 1.0, "#1e1e22", 0.0]
+      - [rect, 0.05, 0.08, 0.95, 0.30, "#6a8a6a", 0.2]
+  bar_counter.luxury:
+    prompt: "luxury bar counter with a polished white marble top and a brass rail, crystal bottles and gold taps along the back edge"
+    base: [rect, "#2a1c14", 0.03]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.50, "#3a2418", 0.0]
+      - [rect, 0.0, 0.50, 1.0, 1.0, "#f0eeea", 0.0]
+      - [rect, 0.0, 0.92, 1.0, 1.0, "#c9a14a", 0.0]
+      - [rect, 0.05, 0.08, 0.95, 0.30, "#c8dde2", 0.2]
+
+  # --- reception_desk -------------------------------------------------------------------------
+  reception_desk.squatter:
+    prompt: "improvised reception counter of plywood boards on crates, scattered papers and junk, no chair"
+    base: [rect, "#9c7a50", 0.02]
+    guide:
+      - [rect, 0.0, 0.55, 1.0, 1.0, "#8a6a44", 0.02]
+      - [rect, 0.20, 0.15, 0.40, 0.40, "#e8e2d0", 0.02]
+  reception_desk.low:
+    prompt: "plain reception desk with a grey laminate counter, an old monitor, no chair"
+    base: [rect, "#b8b4aa", 0.05]
+    guide:
+      - [rect, 0.0, 0.55, 1.0, 1.0, "#d8d4ca", 0.05]
+      - [rect, 0.40, 0.10, 0.60, 0.35, "#5a5a5a", 0.1]
+  reception_desk.high:
+    prompt: "walnut reception desk with a white stone counter along the front, slim monitor, no chair"
+    base: [rect, "#5e3f2a", 0.08]
+    guide:
+      - [rect, 0.0, 0.55, 1.0, 1.0, "#eceae4", 0.05]
+      - [rect, 0.40, 0.10, 0.60, 0.20, "#1e1e22", 0.3]
+  reception_desk.luxury:
+    prompt: "curved white marble reception desk with a gold trim along the front, slim monitor, orchid, no chair"
+    base: [rect, "#f0eeea", 0.2]
+    guide:
+      - [rect, 0.0, 0.88, 1.0, 1.0, "#c9a14a", 0.1]
+      - [rect, 0.40, 0.10, 0.60, 0.20, "#1e1e22", 0.3]
+      - [ellipse, 0.80, 0.15, 0.92, 0.40, "#d8a8d8"]

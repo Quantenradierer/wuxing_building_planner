@@ -59,7 +59,7 @@ def _colour(value: str) -> tuple[int, int, int]:
 
 
 def draw_guide(kind: str, spec: dict[str, Any]) -> Image.Image:
-    along, deep = sprites._sizes()[kind]
+    along, deep = sprites._sizes()[kind.split(".")[0]]
     size = _canvas_size(along, deep)
     scale = FILL * min(size[0] / along, size[1] / deep)
     w, h = along * scale, deep * scale
