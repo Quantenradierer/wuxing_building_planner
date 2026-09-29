@@ -169,7 +169,14 @@ def _not_background_hue(image: Image.Image, background: tuple[int, int, int]) ->
 
 
 def cut_out(image: Image.Image, tolerance: int = 70) -> Image.Image:
-    """Key out the background connected to the border, trim to the object."""
+    """Key out the background connected to the border, trim to the object.
+
+    An image that already has transparency (a local render cut out by BiRefNet) keeps it.
+    """
+    if image.mode == "RGBA" and image.getchannel("A").getextrema()[0] < 255:
+        alpha = image.getchannel("A")
+        box = alpha.point(lambda v: 255 if v > 32 else 0).getbbox()
+        return image.crop(box) if box else image
     small = image.convert("RGB")
     scale = 768 / max(small.size)
     if scale < 1:
