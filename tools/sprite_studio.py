@@ -55,9 +55,10 @@ battle maps. The model (Pony Diffusion XL with a top-down map-asset LoRA) render
 seen from straight above on a white background, img2img from a rough plan-view drawing.
 Write ONE subject description: a single line of 12 to 35 words, comma separated phrases, plain
 concrete words for materials, colours and the parts visible from above. The object's back
-stands against a wall at the TOP edge of the picture: say what sits at the top edge. Never
-mention camera, view, style or quality tags, background, perspective, people or text. Answer
-with the description only."""
+faces the TOP edge of the picture: say which part of the object is at the top edge. Describe
+only the object itself: never a wall, floor, room or surroundings. Colours as plain words, no
+hex codes, no measurements or numbers. Never mention camera, view, style or quality tags,
+background, perspective, people or text. Answer with the description only."""
 
 
 class Studio:
@@ -181,9 +182,10 @@ class Studio:
             if base == kind and not self.attempts(name):
                 self.enqueue(name)
 
-    def describe(self, kind: str) -> str:
+    def describe(self, kind: str, hint: str = "") -> str:
         """Ask OpenAI for a new description of `kind` and write it into the prompt file."""
         data = self.data()
+        spec = data["subjects"][kind]
         along, deep = sprites._sizes()[kind.split(".")[0]]
         tier = kind.partition(".")[2] or "middle"
         siblings = [
@@ -200,6 +202,8 @@ class Studio:
                 f"Current description (write a different, better one): "
                 f"{data['subjects'][kind].get('prompt', '')}",
                 *(["Other tiers of the same object, for contrast:", *siblings] if siblings else []),
+                f"Colours of the rough guide drawing the image starts from: {_guide_colours(spec)}",
+                *([f"Guidance: {hint}"] if hint else []),
             ]
         )
         text = _openai(self.model, DESCRIBE, request).strip().strip('"').replace("\n", " ")
@@ -243,6 +247,14 @@ def _flow(entry: Any) -> str:
     if isinstance(entry, dict):
         return "{" + ", ".join(f"{k}: {v}" for k, v in entry.items()) + "}"
     return str(entry)
+
+
+def _guide_colours(spec: dict[str, Any]) -> str:
+    base = spec.get("base", ["rect", "#8a8e94"])
+    shapes = [base] if base[0] != "none" else []
+    shapes += spec.get("guide", [])
+    colours = [v for shape in shapes for v in shape if isinstance(v, str) and v.startswith("#")]
+    return ", ".join(dict.fromkeys(colours)) or "grey"
 
 
 def _set_prompt(path: Path, kind: str, text: str) -> None:
@@ -333,7 +345,7 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
                     studio.pick(data["kind"], int(data["attempt"]), int(data["quadrant"]))
                 case "/api/describe":
                     try:
-                        text = studio.describe(data["kind"])
+                        text = studio.describe(data["kind"], data.get("hint", ""))
                     except Exception as error:  # shown in the browser
                         body = json.dumps({"error": str(error)}).encode()
                         self._send(body, "application/json", HTTPStatus.BAD_GATEWAY)
