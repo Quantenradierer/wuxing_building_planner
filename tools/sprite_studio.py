@@ -137,7 +137,7 @@ class Studio:
                 else subjects[name].get("prompt", "")
             )
             denoise = (
-                self.data()["derived"]["tiers"][derived[name][1]].get("denoise", 0.5)
+                sprites_local.derived_denoise(self.data(), name)
                 if base
                 else subjects[name].get("denoise", self.data()["denoise"])
             )
@@ -232,6 +232,18 @@ class Studio:
             if denoise is not None:
                 _set_denoise(self.prompts, kind, denoise)
 
+    def set_denoise(self, kind: str, denoise: float) -> None:
+        """Denoise of one object: designed in its subject entry, derived as an override."""
+        if not 0.1 <= denoise <= 1.0:
+            raise ValueError("denoise must be between 0.1 and 1.0")
+        with self.lock:
+            if kind in self.subjects():
+                _set_denoise(self.prompts, kind, denoise)
+            elif kind in self.derived():
+                _set_override(self.prompts, kind, denoise)
+            else:
+                raise ValueError(f"unknown object {kind}")
+
     def work(self) -> None:
         while True:
             kind, attempt = self.jobs.get()
@@ -315,6 +327,27 @@ def _set_denoise(path: Path, kind: str, value: float) -> None:
     path.write_text("".join(lines))
 
 
+def _set_override(path: Path, name: str, value: float) -> None:
+    """Set a derived object's denoise in the file's `derived_overrides:` map (made on demand)."""
+    lines = path.read_text().splitlines(keepends=True)
+    line = f"  {name}: {{denoise: {round(value, 2):g}}}\n"
+    if "derived_overrides:\n" not in lines:
+        if lines and not lines[-1].endswith("\n"):
+            lines[-1] += "\n"
+        lines += ["\n", "# Per-object denoise of derived tiers, set in the sprite studio.\n"]
+        lines.append("derived_overrides:\n")
+    start = lines.index("derived_overrides:\n")
+    end = start + 1
+    while end < len(lines) and lines[end].startswith("  "):
+        if lines[end].startswith(f"  {name}:"):
+            lines[end] = line
+            break
+        end += 1
+    else:
+        lines.insert(end, line)
+    path.write_text("".join(lines))
+
+
 def _api_key() -> str:
     key = os.environ.get("OPENAI_API_KEY")
     env = ROOT / ".env"
@@ -394,6 +427,13 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
                         value = data.get("denoise")
                         denoise = None if value is None else float(value)
                         studio.set_prompt(data["kind"], data["prompt"], denoise)
+                    except ValueError as error:
+                        body = json.dumps({"error": str(error)}).encode()
+                        self._send(body, "application/json", HTTPStatus.BAD_REQUEST)
+                        return
+                case "/api/denoise":
+                    try:
+                        studio.set_denoise(data["kind"], float(data["denoise"]))
                     except ValueError as error:
                         body = json.dumps({"error": str(error)}).encode()
                         self._send(body, "application/json", HTTPStatus.BAD_REQUEST)

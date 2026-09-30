@@ -235,13 +235,20 @@ def derived_prompt(data: dict[str, Any], name: str) -> str:
     return " ".join(template.split()).format(subject=base_prompt(data, kind))
 
 
+def derived_denoise(data: dict[str, Any], name: str) -> float:
+    """The per-object override from `derived_overrides:`, else the tier's denoise."""
+    override = (data.get("derived_overrides") or {}).get(name) or {}
+    tier = data["derived"]["tiers"][derived_names(data)[name][1]]
+    return override.get("denoise", tier.get("denoise", 0.5))
+
+
 def generate_derived(name: str, attempt: int) -> None:
     data = _data()
-    kind, tier = derived_names(data)[name]
+    kind, _ = derived_names(data)[name]
     init = picked_image(kind)
     if init is None:
         raise ValueError(f"{name}: pick a {kind} first")
-    denoise = data["derived"]["tiers"][tier].get("denoise", 0.5)
+    denoise = derived_denoise(data, name)
     render_grid(name, attempt, _style(data, derived_prompt(data, name)), init, denoise, data)
 
 

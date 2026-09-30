@@ -36,11 +36,12 @@
   .editor textarea { width: 100%; min-height: 70px; margin-top: 6px; font: 13px/1.4 system-ui, sans-serif;
                      padding: 6px 8px; border: 1px solid var(--accent); border-radius: 6px; resize: vertical; }
   .editor .row { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
-  .editor .strength { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
-  .editor .strength input { width: 180px; }
   .guide { width: 72px; height: 72px; object-fit: contain; border: 1px dashed var(--line); border-radius: 6px;
            background: #f5f5f5; }
-  .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .tune { font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; gap: 6px;
+          align-items: center; flex-wrap: wrap; }
+  .tune input { width: 160px; }
+  .tune .value { color: var(--ink); }
   .editor button { border: 1px solid var(--line); background: none; padding: 4px 10px; border-radius: 6px;
                    cursor: pointer; }
   .editor button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -106,11 +107,14 @@ function card(k) {
       title="Guide drawing: fixes shape and colours; the description adds detail">`;
   el.innerHTML = `<div class="top">${current}${guide}<div class="info">
       <div class="kind">${k.kind}${badge}</div>${derived}<div class="prompt"></div>
-      <div class="meta">denoise ${k.denoise}${k.base ? "" : " (higher = follows the text more, the guide less)"}</div></div>
+      <div class="tune"><span>${k.base ? "Keep picked" : "Guide"}</span>
+        <input type="range" min="0.3" max="0.95" step="0.05" value="${k.denoise}">
+        <span>${k.base ? "More wear" : "Text"}</span><span class="value"></span></div></div>
       <div class="buttons"><button class="retry" ${busy ? "disabled" : ""}>
       ${k.attempts.length ? "Retry" : "Generate"}</button>${describe}</div></div>`;
   el.querySelector(".prompt").textContent = k.prompt;
   el.querySelector(".retry").onclick = () => post("/api/retry", { kind: k.kind });
+  setupTune(el, k);
   const edit = el.querySelector(".edit");
   if (edit) edit.onclick = () => openEditor(el, k);
   const button = el.querySelector(".gpt");
@@ -145,6 +149,32 @@ function card(k) {
   return el;
 }
 
+function tuneLabel(k, v) {
+  if (k.base) return `denoise ${v.toFixed(2)}` + (v < 0.5 ? " · barely worn" : v < 0.65 ? " · worn" :
+    v < 0.8 ? " · wrecked" : " · may stop looking like the picked object");
+  return `denoise ${v.toFixed(2)}` + (v < 0.6 ? " · keeps the guide's shape" : v < 0.75 ? " · balanced" :
+    v < 0.85 ? " · mostly the text" : " · text only, may lose the top-down view");
+}
+
+function setupTune(el, k) {
+  const slider = el.querySelector(".tune input");
+  const shown = el.querySelector(".tune .value");
+  const label = () => { shown.textContent = tuneLabel(k, Number(slider.value)); };
+  label();
+  // Hold the card while dragging, so a refresh doesn't rebuild it under the mouse.
+  slider.onpointerdown = () => editing.add(k.kind);
+  slider.oninput = label;
+  slider.onchange = async () => {
+    const response = await fetch("/api/denoise", { method: "POST",
+      body: JSON.stringify({ kind: k.kind, denoise: Number(slider.value) }) });
+    const result = await response.json();
+    if (result.error) alert(`Not saved: ${result.error}`);
+    editing.delete(k.kind);
+    cards.delete(k.kind);
+    refresh();
+  };
+}
+
 function openEditor(el, k) {
   if (editing.has(k.kind)) return;
   editing.add(k.kind);
@@ -152,30 +182,17 @@ function openEditor(el, k) {
   const editor = document.createElement("div");
   editor.className = "editor";
   editor.innerHTML = `<textarea></textarea>
-    <div class="row strength">Guide <input type="range" min="0.4" max="0.95" step="0.05">
-      Text <span class="value"></span></div>
     <div class="row">
     <button class="primary save-retry">Save &amp; retry</button><button class="save">Save</button>
     <button class="cancel">Cancel</button></div>`;
   const area = editor.querySelector("textarea");
   area.value = k.prompt;
-  const slider = editor.querySelector("input[type=range]");
-  const shown = editor.querySelector(".value");
-  slider.value = k.denoise;
-  const label = () => {
-    const v = Number(slider.value);
-    shown.textContent = `denoise ${v.toFixed(2)}` +
-      (v < 0.6 ? " · keeps the guide's shape" : v < 0.75 ? " · balanced" :
-       v < 0.85 ? " · mostly the text" : " · text only, may lose the top-down view");
-  };
-  slider.oninput = label;
-  label();
   prompt.replaceWith(editor);
   area.focus();
   const close = () => { editing.delete(k.kind); cards.delete(k.kind); refresh(); };
   const save = async retry => {
     const response = await fetch("/api/prompt", { method: "POST",
-      body: JSON.stringify({ kind: k.kind, prompt: area.value, denoise: Number(slider.value) }) });
+      body: JSON.stringify({ kind: k.kind, prompt: area.value }) });
     const result = await response.json();
     if (result.error) { alert(`Not saved: ${result.error}`); return; }
     if (retry) await fetch("/api/retry", { method: "POST", body: JSON.stringify({ kind: k.kind }) });
