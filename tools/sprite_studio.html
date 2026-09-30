@@ -35,7 +35,12 @@
   .describe:disabled { opacity: .5; cursor: default; }
   .editor textarea { width: 100%; min-height: 70px; margin-top: 6px; font: 13px/1.4 system-ui, sans-serif;
                      padding: 6px 8px; border: 1px solid var(--accent); border-radius: 6px; resize: vertical; }
-  .editor .row { display: flex; gap: 6px; margin-top: 6px; }
+  .editor .row { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
+  .editor .strength { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .editor .strength input { width: 180px; }
+  .guide { width: 72px; height: 72px; object-fit: contain; border: 1px dashed var(--line); border-radius: 6px;
+           background: #f5f5f5; }
+  .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .editor button { border: 1px solid var(--line); background: none; padding: 4px 10px; border-radius: 6px;
                    cursor: pointer; }
   .editor button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -97,8 +102,11 @@ function card(k) {
   const derived = k.base ? `<div class="derived">worn down from the picked ${k.base}</div>` : "";
   const describe = k.base ? "" : `<button class="describe edit">Edit description</button>
       <button class="describe gpt">Recreate text description</button>`;
-  el.innerHTML = `<div class="top">${current}<div class="info">
-      <div class="kind">${k.kind}${badge}</div>${derived}<div class="prompt"></div></div>
+  const guide = k.base ? "" : `<img class="guide" src="/guide/${k.kind}" alt=""
+      title="Guide drawing: fixes shape and colours; the description adds detail">`;
+  el.innerHTML = `<div class="top">${current}${guide}<div class="info">
+      <div class="kind">${k.kind}${badge}</div>${derived}<div class="prompt"></div>
+      <div class="meta">denoise ${k.denoise}${k.base ? "" : " (higher = follows the text more, the guide less)"}</div></div>
       <div class="buttons"><button class="retry" ${busy ? "disabled" : ""}>
       ${k.attempts.length ? "Retry" : "Generate"}</button>${describe}</div></div>`;
   el.querySelector(".prompt").textContent = k.prompt;
@@ -143,17 +151,31 @@ function openEditor(el, k) {
   const prompt = el.querySelector(".prompt");
   const editor = document.createElement("div");
   editor.className = "editor";
-  editor.innerHTML = `<textarea></textarea><div class="row">
+  editor.innerHTML = `<textarea></textarea>
+    <div class="row strength">Guide <input type="range" min="0.4" max="0.95" step="0.05">
+      Text <span class="value"></span></div>
+    <div class="row">
     <button class="primary save-retry">Save &amp; retry</button><button class="save">Save</button>
     <button class="cancel">Cancel</button></div>`;
   const area = editor.querySelector("textarea");
   area.value = k.prompt;
+  const slider = editor.querySelector("input[type=range]");
+  const shown = editor.querySelector(".value");
+  slider.value = k.denoise;
+  const label = () => {
+    const v = Number(slider.value);
+    shown.textContent = `denoise ${v.toFixed(2)}` +
+      (v < 0.6 ? " · keeps the guide's shape" : v < 0.75 ? " · balanced" :
+       v < 0.85 ? " · mostly the text" : " · text only, may lose the top-down view");
+  };
+  slider.oninput = label;
+  label();
   prompt.replaceWith(editor);
   area.focus();
   const close = () => { editing.delete(k.kind); cards.delete(k.kind); refresh(); };
   const save = async retry => {
     const response = await fetch("/api/prompt", { method: "POST",
-      body: JSON.stringify({ kind: k.kind, prompt: area.value }) });
+      body: JSON.stringify({ kind: k.kind, prompt: area.value, denoise: Number(slider.value) }) });
     const result = await response.json();
     if (result.error) { alert(`Not saved: ${result.error}`); return; }
     if (retry) await fetch("/api/retry", { method: "POST", body: JSON.stringify({ kind: k.kind }) });

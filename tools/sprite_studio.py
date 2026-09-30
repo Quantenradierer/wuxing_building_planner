@@ -136,10 +136,16 @@ class Studio:
                 if base
                 else subjects[name].get("prompt", "")
             )
+            denoise = (
+                self.data()["derived"]["tiers"][derived[name][1]].get("denoise", 0.5)
+                if base
+                else subjects[name].get("denoise", self.data()["denoise"])
+            )
             kinds.append(
                 {
                     "kind": name,
                     "prompt": prompt,
+                    "denoise": denoise,
                     "base": base,
                     "attempts": self.attempts(name),
                     "pick": pick,
@@ -212,15 +218,19 @@ class Studio:
             _set_prompt(self.prompts, kind, text)
         return text
 
-    def set_prompt(self, kind: str, text: str) -> None:
-        """Replace the description of a designed kind with the user's text."""
+    def set_prompt(self, kind: str, text: str, denoise: float | None = None) -> None:
+        """Replace the description (and optionally the denoise) of a designed kind."""
         if kind not in self.subjects():
             raise ValueError(f"{kind}: only designed objects have their own description")
         text = " ".join(text.split())
         if not text:
             raise ValueError("empty description")
+        if denoise is not None and not 0.1 <= denoise <= 1.0:
+            raise ValueError("denoise must be between 0.1 and 1.0")
         with self.lock:
             _set_prompt(self.prompts, kind, text)
+            if denoise is not None:
+                _set_denoise(self.prompts, kind, denoise)
 
     def work(self) -> None:
         while True:
@@ -245,6 +255,12 @@ class Studio:
     def tile(self, kind: str, attempt: int, quadrant: int) -> bytes:
         grid = Image.open(sprites.RAW / f"{kind}.{attempt}.png")
         image = sprites.quadrants(grid)[quadrant]
+        image.thumbnail((TILE, TILE))
+        return _png(image)
+
+    def guide(self, kind: str) -> bytes:
+        """The drawing a designed kind's img2img starts from."""
+        image = sprites_local.draw_guide(kind, self.subjects()[kind])
         image.thumbnail((TILE, TILE))
         return _png(image)
 
@@ -280,6 +296,23 @@ def _set_prompt(path: Path, kind: str, text: str) -> None:
             path.write_text("".join(lines))
             return
     raise ValueError(f"{kind}: no prompt line")
+
+
+def _set_denoise(path: Path, kind: str, value: float) -> None:
+    """Set one subject's `denoise:` line in place, adding it when the subject has none."""
+    lines = path.read_text().splitlines(keepends=True)
+    start = lines.index(f"  {kind}:\n")
+    end = start + 1
+    while end < len(lines) and lines[end].startswith("    "):
+        end += 1
+    line = f"    denoise: {round(value, 2):g}\n"
+    for i in range(start + 1, end):
+        if lines[i].startswith("    denoise:"):
+            lines[i] = line
+            break
+    else:
+        lines.insert(start + 1, line)
+    path.write_text("".join(lines))
 
 
 def _api_key() -> str:
@@ -339,6 +372,8 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
                     case ["tile", kind, attempt, quadrant]:
                         body = studio.tile(kind, int(attempt), int(quadrant))
                         self._send(body, "image/png")
+                    case ["guide", kind]:
+                        self._send(studio.guide(kind), "image/png")
                     case ["sprite", kind]:
                         self._send(studio.sprite(kind), "image/png")
                     case _:
@@ -356,7 +391,9 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
                     studio.pick(data["kind"], int(data["attempt"]), int(data["quadrant"]))
                 case "/api/prompt":
                     try:
-                        studio.set_prompt(data["kind"], data["prompt"])
+                        value = data.get("denoise")
+                        denoise = None if value is None else float(value)
+                        studio.set_prompt(data["kind"], data["prompt"], denoise)
                     except ValueError as error:
                         body = json.dumps({"error": str(error)}).encode()
                         self._send(body, "application/json", HTTPStatus.BAD_REQUEST)
