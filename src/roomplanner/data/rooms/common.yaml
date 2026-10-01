@@ -44,14 +44,13 @@ rooms:
     transit: false        # rooms open onto a landing, not into the car
     furniture:
       - {object: elevator_car, placement: fill}   # the car is the shaft
-  toilet:               # public toilet: stalls along one wall, sinks and urinals outside
+  toilet:               # public toilet: stalls along one wall, sinks outside
     area: [24, 56]
     min_side: 3
     cluster: true
     stalls: {room: stall, max: 3, rest_area: 16, single: wc}
     furniture:
       - {object: sink, placement: wall, count: [1, 3]}
-      - {object: urinal, placement: wall, count: [1, 3], line: true, alternate: true}  # men's only
       - {object: trash_bin, placement: corner, count: [0, 1]}
   stall:                # a toilet cubicle, 1 x 1.5 m, carved out of a public toilet
     area: [4, 12]

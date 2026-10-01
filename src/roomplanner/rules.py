@@ -126,19 +126,10 @@ class FurnitureRule(_Strict):
         "that fits at all) is used",
     )
     clearance: int = Field(default=2, ge=0, description="choose: free cells around it")
-    line: bool = Field(
-        default=False,
-        description="wall: side by side along one wall, as many of `count` as fit (urinals)",
-    )
     sideways: bool = Field(
         default=False,
         description="perimeter: then also lengthwise along the walls, head to foot (sleep "
         "pods in thin rooms)",
-    )
-    alternate: bool = Field(
-        default=False,
-        description="Only in every other room of this type on a floor, the first, third, … "
-        "(urinals in the men's toilet, none in the women's)",
     )
     landing: int = Field(default=0, ge=0, description="fill: free cells kept on the door side")
     reach: int | None = Field(default=None, gt=0, description="fill: at most this many deep")
@@ -155,8 +146,6 @@ class FurnitureRule(_Strict):
             raise ValueError(f"'{self.object}': `at` goes with placement 'at' and only with it")
         if self.toward is not None and self.placement is not Placement.ROWS:
             raise ValueError(f"'{self.object}': `toward` goes with placement 'rows' only")
-        if self.line and self.placement is not Placement.WALL:
-            raise ValueError(f"'{self.object}': `line` goes with placement 'wall' only")
         return self
 
     @property
@@ -191,7 +180,7 @@ class StallRule(_Strict):
         default=None, gt=0, description="Free cells in front of the stalls (default: min_side)"
     )
     rest_area: int = Field(
-        default=0, ge=0, description="Cells the room keeps besides its stalls (sinks, urinals)"
+        default=0, ge=0, description="Cells the room keeps besides its stalls (sinks)"
     )
     single: str = Field(description="Room type if not even one stall fits")
     rest: str | None = Field(

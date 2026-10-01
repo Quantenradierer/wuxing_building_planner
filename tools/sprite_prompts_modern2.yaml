@@ -309,13 +309,6 @@ subjects:
       - [line, 0.5, 0.5, 0.5, 0.88, "#2a2a2a", 0.05]
       - [line, 0.5, 0.5, 0.12, 0.5, "#2a2a2a", 0.05]
       - [ellipse, 0.42, 0.42, 0.58, 0.58, "#1c1c1c"]
-  urinal:
-    denoise: 0.68
-    prompt: "elongated rounded-rectangle white ceramic urinal, light grey oval inner basin, single large brushed-steel circular drain near bottom, broad chrome mounting plate at top edge"
-    base: [none]
-    guide:
-      - [ellipse, 0.2, 0.12, 0.8, 0.92, "#f2f2f2"]
-      - [ellipse, 0.34, 0.3, 0.66, 0.78, "#e0e3e6"]
   crate:
     prompt: "wooden shipping crate seen from straight above, square lid, only the top surface visible"
     base: [rect, "#b58a52", 0.03]

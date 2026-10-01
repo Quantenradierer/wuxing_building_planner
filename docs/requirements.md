@@ -245,7 +245,6 @@ Decided by the author (2026-09-27):
 - Tactical layer: the unused `cover` field was removed from objects.
 
 Requested by the author (2026-09-27), still open:
-- Urinals: their placement doesn't make sense; remove them.
 - Sinks: make them smaller again (2 × 1) so they fit better in kitchens.
 - Drone rooms need some order (docks and racks placed in a tidy arrangement).
 - Supermarkets rarely have a second floor; when they do, the stairs are public stairs on
@@ -253,6 +252,8 @@ Requested by the author (2026-09-27), still open:
 - Nightclubs need a DJ table.
 
 Done from that list (2026-10-01):
+- Urinals are gone (object kind, sprites and the `line`/`alternate` rule options
+  that only served them); public toilets have stalls and sinks.
 - Focus rooms are booths of 16–30 cells (mostly 4 × 6, 2 × 3 m); they were up to 48.
 - Coffin units are pods of 2 × 5 cells (1 × 2.5 m; a row's last one 3 × 5) along both
   sides of a coffin hall's aisle, hatches opening out; they were 4 × 4 to 4 × 7 rooms.

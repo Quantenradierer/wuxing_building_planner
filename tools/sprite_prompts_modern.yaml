@@ -273,13 +273,6 @@ subjects:
     guide:
       - [ellipse, 0.3, 0.3, 0.7, 0.7, "#8a929e"]
       - [ellipse, 0.44, 0.44, 0.56, 0.56, "#5b616b"]
-  urinal:
-    denoise: 0.68
-    prompt: "white ceramic wall urinal seen from straight above, oval basin, flush pipe at the top edge"
-    base: [none]
-    guide:
-      - [ellipse, 0.2, 0.12, 0.8, 0.92, "#f2f2f2"]
-      - [ellipse, 0.34, 0.3, 0.66, 0.78, "#e0e3e6"]
   crate:
     prompt: "wooden shipping crate seen from straight above, square lid, only the top surface visible"
     base: [rect, "#b58a52", 0.03]

@@ -1,5 +1,3 @@
-from itertools import pairwise
-
 import pytest
 
 from roomplanner.generator import generate
@@ -310,28 +308,6 @@ def test_offices_have_three_to_seven_desks_in_pairs_each_with_a_chair() -> None:
         desks = kinds.count("office_desk")
         assert 2 <= desks <= 7
         assert kinds.count("chair") == desks
-
-
-def test_urinals_stand_side_by_side_in_every_other_toilet() -> None:
-    found = 0
-    for seed in range(4):
-        for floor in generate(make_params(width=60, depth=40, floors_above=3, seed=seed)).floors:
-            toilets = [r for r in floor.rooms if r.type == "toilet"]
-            for index, room in enumerate(toilets):
-                urinals = sorted(
-                    (o for o in floor.objects if o.room == room.id and o.kind == "urinal"),
-                    key=lambda o: (o.x, o.y),
-                )
-                if index % 2:
-                    assert not urinals
-                    continue
-                found += len(urinals)
-                assert len({o.facing for o in urinals}) <= 1
-                for a, b in pairwise(urinals):
-                    wide = a.facing in (Side.N, Side.S)
-                    assert (a.w, a.h) == ((2, 1) if wide else (1, 2))
-                    assert (b.x, b.y) == ((a.x + a.w, a.y) if wide else (a.x, a.y + a.h))
-    assert found
 
 
 def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:
