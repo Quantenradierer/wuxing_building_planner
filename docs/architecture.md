@@ -558,6 +558,11 @@ variants are named `<kind>.<wealth>.png`: the renderer uses the object's tier
 `<kind>.png`, else the theme's `sprite_fallbacks` stand-in kind (same lookup), else the
 shape.
 
+A `floor.<material>.png` in the sprite directory is a seamless floor texture: rooms of that
+material are tiled with it instead of the material's colour and pattern, one texture spanning
+the material's `texture_cells` (default 8), aligned to the image grid so neighbouring rooms of
+the same material continue it. Grain, decals and accents still go on top.
+
 ## VTT export
 
 ADR 0011. `ExportOptions(grid_m, cell_px, lights, baked_lighting)`: the grid square is `grid_m / 0.5`

@@ -8,7 +8,9 @@ fall back to the defaults, so themes never have to list every type.
 `extends: <theme>` starts from another bundled theme: mappings are merged one level deep,
 everything else is replaced. `sprites` names a directory of `<object kind>.png` images
 (a bundled set under `data/sprites/`, or a path relative to the theme file); objects with
-a sprite are drawn as that picture instead of their shape.
+a sprite are drawn as that picture instead of their shape. A `floor.<material>.png` in the
+same directory is a seamless floor texture: rooms of that material are tiled with it (spanning
+the material's `texture_cells`) instead of its colour and pattern.
 """
 
 from __future__ import annotations
@@ -55,6 +57,9 @@ class Material(_Strict):
     tile: int = Field(default=2, gt=0)
     lines: str = Field(default="#00000030", description="Pattern line colour")
     accent: str | None = Field(default=None, description="Neon strip along the walls")
+    texture_cells: int = Field(
+        default=8, gt=0, description="Cells one floor texture (floor.<material>.png) spans"
+    )
 
 
 class WallStyle(_Strict):
@@ -131,8 +136,11 @@ class Theme(_Strict):
         default={}, description="Kind -> kind whose sprite stands in while it has none"
     )
 
+    def material_name(self, room_type: str) -> str:
+        return self.rooms.get(room_type, self.default_material)
+
     def material(self, room_type: str) -> Material:
-        return self.materials[self.rooms.get(room_type, self.default_material)]
+        return self.materials[self.material_name(room_type)]
 
     def object_style(self, kind: str) -> ObjectStyle:
         return self.objects.get(kind, self.default_object)

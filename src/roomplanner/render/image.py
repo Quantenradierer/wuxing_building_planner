@@ -6,6 +6,8 @@ strips, window glass, screens, lights) go to a glow layer that is blurred and ad
 Objects with a sprite in the theme are drawn as that picture, rotated to their facing; their
 shadow follows the sprite's outline. `<kind>.<wealth>.png` variants are preferred for the
 object's wealth tier (or the next tier towards middle) over the plain `<kind>.png`.
+A `floor.<material>.png` in the sprite directory tiles the floors of that material, aligned to
+the building grid so neighbouring rooms of the same material continue the texture.
 The picture is drawn at a higher resolution and scaled down for anti-aliasing.
 """
 
@@ -144,6 +146,9 @@ class _Canvas:
 
     def _room_floor(self, room: Room) -> None:
         material = self.theme.material(room.type)
+        if (texture := self._floor_texture(self.theme.material_name(room.type))) is not None:
+            self._textured_floor(room, texture)
+            return
         fill = colour(material.floor)
         for cell in room.cells:
             self.draw_base.rectangle(self.cell_box(cell), fill=fill)
@@ -167,6 +172,34 @@ class _Canvas:
                         self.draw_base.line((x0, y0, x0, y1), fill=lines, width=width)
                 case _:  # grate
                     self._pattern_lines((x0, y0, x1, y1), Pattern.GRATE, 1, lines, self.draw_base)
+
+    def _floor_texture(self, material: str) -> Image.Image | None:
+        """The material's floor texture scaled to its span, if the theme's sprites have one."""
+        directory = self.theme.sprites
+        if directory is None or f"floor.{material}" not in _sprites(directory):
+            return None
+        side = self.theme.materials[material].texture_cells * self.cell
+        return _scaled_texture(directory, f"floor.{material}", side)
+
+    def _textured_floor(self, room: Room, texture: Image.Image) -> None:
+        x0 = min(c.x for c in room.cells)
+        y0 = min(c.y for c in room.cells)
+        x1 = max(c.x for c in room.cells) + 1
+        y1 = max(c.y for c in room.cells) + 1
+        mask = Image.new("L", ((x1 - x0) * self.cell, (y1 - y0) * self.cell), 0)
+        draw = ImageDraw.Draw(mask)
+        for cell in room.cells:
+            cx, cy = (cell.x - x0) * self.cell, (cell.y - y0) * self.cell
+            draw.rectangle((cx, cy, cx + self.cell - 1, cy + self.cell - 1), fill=255)
+        # Tile from the building grid's texture origin so neighbouring rooms line up.
+        side = texture.width
+        left, top = self.px(x0, y0)
+        ox, oy = round(left) - round(left) % side, round(top) - round(top) % side
+        area = Image.new("RGB", mask.size)
+        for ty in range(oy, round(top) + mask.height, side):
+            for tx in range(ox, round(left) + mask.width, side):
+                area.paste(texture, (tx - round(left), ty - round(top)))
+        self.image.paste(area, (round(left), round(top)), mask)
 
     def _pattern_lines(
         self,
@@ -643,6 +676,11 @@ def sprite_name(sprites: dict[str, Image.Image], kind: str, tier: Wealth) -> str
         if f"{kind}.{tiers[index]}" in sprites:
             return f"{kind}.{tiers[index]}"
     return kind if kind in sprites else None
+
+
+@cache
+def _scaled_texture(directory: str, name: str, side: int) -> Image.Image:
+    return _sprites(directory)[name].convert("RGB").resize((side, side), Image.Resampling.LANCZOS)
 
 
 @cache

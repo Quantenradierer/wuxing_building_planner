@@ -168,3 +168,32 @@ def test_sprite_fallback_stands_in_for_a_kind_without_sprite(tmp_path: Path) -> 
     pixel = image.getpixel(centre)
     assert isinstance(pixel, tuple)
     assert pixel[0] > 150 and pixel[0] > 3 * max(pixel[1], pixel[2])
+
+
+def test_floor_texture_tiles_the_rooms_of_its_material(tmp_path: Path) -> None:
+    building = generate(make_params(width=30, depth=20))
+    floor = building.floor(0)
+    taken = {(c.x, c.y) for o in floor.objects for c in o.cells} | {
+        (d.x, d.y) for d in floor.devices
+    }
+    material = load_theme("neon").material_name("corridor")
+    cell = next(
+        c
+        for r in floor.rooms
+        if r.type == "corridor"
+        for c in sorted(r.cells, key=lambda c: (c.y, c.x))
+        if (c.x, c.y) not in taken
+        and all((c.x + dx, c.y + dy) in r.cells for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+    )
+    sprites = tmp_path / "sprites"
+    sprites.mkdir()
+    Image.new("RGB", (64, 64), (0, 200, 0)).save(sprites / f"floor.{material}.png")
+    theme_path = tmp_path / "textured.yaml"
+    theme_path.write_text(
+        "extends: neon\nname: textured\nsprites: sprites\nambient: 1.0\nglow_radius: 0\nnoise: 0\n"
+    )
+    options = RenderOptions(cell_px=20, padding=2, lighting=False)
+    image = render_floor(building, floor, load_theme(str(theme_path)), options)
+    pixel = image.getpixel((round((cell.x + 2.5) * 20), round((cell.y + 2.5) * 20)))
+    assert isinstance(pixel, tuple)
+    assert pixel[1] > 120 and pixel[1] > 3 * max(pixel[0], pixel[2])
