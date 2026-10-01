@@ -41,13 +41,16 @@ def from_json(text: str) -> Building:
 
 
 def to_dict(building: Building) -> JsonObject:
+    params = building.params.model_dump(mode="json")
+    if params["room"] is None:  # optional, only written for a lone room
+        del params["room"]
     return {
         "schema_version": building.schema_version,
         "cell_size_m": CELL_SIZE_M,
         "width": building.width,
         "height": building.height,
         "seed": building.seed,
-        "params": building.params.model_dump(mode="json"),
+        "params": params,
         "warnings": list(building.warnings),
         "floors": [_floor_to_dict(f) for f in building.floors],
     }

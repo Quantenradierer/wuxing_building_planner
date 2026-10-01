@@ -32,6 +32,7 @@ from roomplanner.params import (
 )
 from roomplanner.render.image import RenderOptions, render_floor
 from roomplanner.render.theme import load_theme
+from roomplanner.rules import load_rules
 from roomplanner.serialization import to_dict
 
 type JsonObject = dict[str, Any]
@@ -56,6 +57,8 @@ def options() -> JsonObject:
         "shape": [s.value for s in Shape],
         "sides": [s.value for s in Side],
         "entrances": [e.value for e in EntranceKind],
+        # Room types per building type, for generating a lone room.
+        "rooms": {t.value: sorted(load_rules(t).rooms) for t in BuildingType},
         "themes": sorted(f.name.removesuffix(".yaml") for f in (_DATA / "themes").iterdir()),
         "defaults": {"theme": "neon", "cell_px": DEFAULT_CELL_PX},
     }

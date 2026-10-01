@@ -34,6 +34,7 @@ src/roomplanner/
     layout/allocation.py     fills strip segments with a floor role's rooms
     layout/units.py          subdivides units (apartments)
     layout/hall.py           hall layout (supermarket), a corridor layout variant
+    layout/room.py           room layout: one room (`params.room`) without a building
     openings.py              walls, doors, windows
     furnishing.py            furniture and fixtures
     lights.py                light sources
@@ -285,6 +286,16 @@ end-side service door into a back-of-house room.
 (across the short end if the street is there, else along the facade): the church's
 narthex, which the portal opens into and the nave opens onto (`connect`; circulation rooms
 that connect keep a wall with a door between them).
+
+### Room layout
+
+`params.room` (CLI `--room`, the UI's Room select) replaces the program's layout with
+`layout/room.py`: the whole width × depth footprint is one room of that type from the
+building type's catalogs, on one ground floor (`room` forces one floor and a rectangle), its
+main entrance in the middle of the street side. A unit type is subdivided as in a strip with
+the street as its corridor; stalls are carved with the cells outside the street wall as the
+circulation they keep free. Openings, furnishing and the layers run unchanged, so a room
+type's furniture, templates and lights can be checked without generating a building.
 
 ### Units
 

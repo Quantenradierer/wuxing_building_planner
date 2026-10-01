@@ -19,6 +19,7 @@ def test_options_list_every_choice() -> None:
     assert "nightclub" in choices["building_types"]
     assert "neon" in choices["themes"]
     assert choices["sides"] == ["N", "E", "S", "W"]
+    assert "coffin_hall" in choices["rooms"]["coffin_block"]
 
 
 def test_response_has_the_building_and_one_image_per_floor() -> None:

@@ -92,6 +92,11 @@ class GenerationParams(BaseModel):
     entrances: tuple[EntranceKind, ...] | None = Field(
         default=None, description="Overrides the building type's entrances (main is implied)"
     )
+    room: str | None = Field(
+        default=None,
+        description="Only this room type of the building type, width x depth, no building "
+        "around it (one floor, rectangle, main entrance on the street side)",
+    )
     seed: int | None = None
 
     @model_validator(mode="before")
@@ -100,6 +105,8 @@ class GenerationParams(BaseModel):
         if not isinstance(data, dict):
             return data
         values = cast(dict[str, Any], data)
+        if values.get("room") is not None:  # a lone room is one plain floor
+            values = {**values, "floors_above": 1, "floors_below": 0, "shape": Shape.RECTANGLE}
         if values.get("service_side") is None:
             street = Side(values.get("street_side", Side.S))
             return {**values, "service_side": street.opposite}

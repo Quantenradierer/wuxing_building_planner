@@ -120,3 +120,10 @@ def test_entrances_option(tmp_path: Path) -> None:
     bad = runner.invoke(app, [*BASE, "--entrances", "garage"])
     assert bad.exit_code == 1
     assert "garage" in bad.output
+
+
+def test_room_option_generates_only_that_room() -> None:
+    result = runner.invoke(app, [*BASE[:4], "12", "-d", "10", "--room", "office"])
+    assert result.exit_code == 0, result.output
+    assert result.output.count("== ") == 1
+    assert "1  office" in result.output

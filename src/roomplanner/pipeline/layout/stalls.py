@@ -17,8 +17,11 @@ from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.rules import Rules, StallRule
 
 
-def carve_stalls(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
-    circulation = {
+def carve_stalls(
+    rooms: list[PlannedRoom], rules: Rules, outside: frozenset[Cell] = frozenset()
+) -> list[PlannedRoom]:
+    """`outside`: cells beyond the footprint that count as circulation (a lone room's street)."""
+    circulation = set(outside) | {
         cell
         for room in rooms
         if rules.spec(room.type).circulation or room.hub

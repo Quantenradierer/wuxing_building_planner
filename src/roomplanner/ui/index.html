@@ -78,6 +78,7 @@
   <form id="form">
     <h2>Building</h2>
     <label class="field">Type <select name="building_type"></select></label>
+    <label class="field">Room <select name="room"></select></label>
     <div class="pair">
       <label class="field">Width (cells) <input name="width" type="number" min="1" value="48"></label>
       <label class="field">Depth (cells) <input name="depth" type="number" min="1" value="30"></label>
@@ -188,7 +189,10 @@ async function init() {
     label.innerHTML = `<input type="checkbox" value="${kind}" ${kind === "main" ? "checked" : ""}> ${kind}`;
     $("entrances").append(label);
   }
+  rooms = options.rooms;
+  fillRooms();
   restoreForm();
+  fillRooms(recall("roomplanner.form")?.room || "");
   syncEntrances();
 
   const saved = recall("roomplanner.layers") || {};
@@ -206,6 +210,23 @@ async function init() {
   }
 }
 
+let rooms = {};
+
+// The building type's room types; one picked generates only that room, width x depth.
+function fillRooms(selected = form.elements.room.value) {
+  const select = form.elements.room;
+  select.length = 0;
+  fillSelect("room", rooms[form.elements.building_type.value] || [], "", "whole building");
+  if ([...select.options].some((o) => o.value === selected)) select.value = selected;
+  syncRoom();
+}
+function syncRoom() {
+  const lone = form.elements.room.value !== "";
+  for (const name of ["floors_above", "floors_below", "shape"]) form.elements[name].disabled = lone;
+}
+form.elements.building_type.addEventListener("change", () => fillRooms());
+form.elements.room.addEventListener("change", syncRoom);
+
 function syncEntrances() {
   const on = $("entrances-override").checked;
   for (const box of $("entrances").querySelectorAll("input")) box.disabled = !on;
@@ -222,6 +243,7 @@ function formValues() {
     shape: f.shape.value, wealth: f.wealth.value, condition: f.condition.value,
     security: f.security.value, street_side: f.street_side.value,
     service_side: f.service_side.value || null,
+    room: f.room.value || null,
     seed: f.seed.value === "" ? null : +f.seed.value,
   };
   if ($("entrances-override").checked) {

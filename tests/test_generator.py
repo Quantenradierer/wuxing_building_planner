@@ -600,3 +600,29 @@ def test_stall_wc_backs_onto_the_wall_opposite_the_door() -> None:
             assert dx * cx + dy * cy > 0, obj
             faced += 1
     assert faced
+
+
+def test_lone_room_is_the_whole_footprint() -> None:
+    building = generate(make_params(room="meeting_room", width=12, depth=10, floors_above=3))
+    assert [f.level for f in building.floors] == [0]
+    (floor,) = building.floors
+    assert [r.type for r in floor.rooms] == ["meeting_room"]
+    assert len(floor.rooms[0].cells) == 12 * 10
+    main = [o for o in floor.openings if o.entrance == "main"]
+    assert len(main) == 1 and all(e.y == 10 for e in main[0].edges)  # on the street side
+    assert floor.objects
+    assert not hard_violations(building, rules_for("office", Wealth.MIDDLE))
+
+
+def test_lone_room_carves_stalls_and_subdivides_units() -> None:
+    coffins = generate(make_params(building_type="coffin_block", room="coffin_hall", width=20))
+    types = {r.type for r in coffins.floors[0].rooms}
+    assert {"coffin_aisle", "coffin_unit"} <= types
+    flat = generate(make_params(building_type="apartment", room="apartment", width=24, depth=16))
+    assert len({r.unit for r in flat.floors[0].rooms}) == 1
+    assert len(flat.floors[0].rooms) > 1
+
+
+def test_unknown_lone_room_lists_the_known_ones() -> None:
+    with pytest.raises(InfeasibleError, match=r"no room type 'pool'.*meeting_room"):
+        generate(make_params(room="pool"))

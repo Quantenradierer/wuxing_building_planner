@@ -78,6 +78,10 @@ def generate(
         str | None,
         typer.Option(help="Comma-separated entrance kinds (main, service, emergency, roof)"),
     ] = None,
+    room: Annotated[
+        str | None,
+        typer.Option(help="Only this room type, width x depth cells, without the building"),
+    ] = None,
     seed: Annotated[int | None, typer.Option(help="Random if omitted")] = None,
     output_format: Annotated[OutputFormat, typer.Option("--format", "-f")] = OutputFormat.ASCII,
     output: Annotated[
@@ -109,6 +113,7 @@ def generate(
             street_side=street_side,
             service_side=service_side,  # pyright: ignore[reportArgumentType]  # None = default
             entrances=_entrances(entrances),
+            room=room,
             seed=seed,
         )
         building = generate_building(params)
