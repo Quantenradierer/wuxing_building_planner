@@ -107,6 +107,13 @@ CASES: dict[str, dict[str, Any]] = {
         "seed": 7,
         "security": Security.CORPORATE,
     },
+    "prison": {
+        "building_type": BuildingType.PRISON,
+        "width": 60,
+        "depth": 40,
+        "floors_above": 2,
+        "seed": 2,
+    },
 }
 
 

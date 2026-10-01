@@ -1,0 +1,108 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Detention centre (Lone Star, Knight Errant): cell blocks of small cells round a dayroom,
+# each behind a sally port with a guard bubble beside it; intake at the vehicle sally port,
+# a visiting room off the public lobby; mess hall, infirmary, gym, solitary, armoury.
+building: prison
+catalogs: [common, office, retail, hospitality, public, clinic, residential, prison]
+layout: corridor
+
+corridor:
+  width: 4
+  hallway_width: 3
+strip_depth: [12, 20]
+facade:
+  module: 3
+  window: 1                # narrow slits
+cluster_filler: storage
+service_rooms: [sally_port, intake_room, prison_kitchen, storage, utility, staff_room, locker_room,
+                office, mechanical_room, block_sallyport]   # never straight into a dayroom
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [4, 5], when: "floors_total >= 3"}
+  - {room: elevator, size: [4, 5], when: "floors_total >= 3 and width + depth >= 120"}   # bigger floors: more cars
+
+entrances:
+  main: {width: 2}         # visitors and staff, one at a time
+  service: {width: 4}      # the prison bus comes in through the sally port
+  emergency: {width: 2}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: prison_lobby, place: entrance, area: [40, 100], priority: required}
+      - {room: visiting_room, count: 1, priority: required}
+      - {room: security_room, count: 1, near: entrance, priority: required}   # central control
+      - {room: armory, count: 1, near: entrance, priority: required}
+      - {room: intake_room, count: 1, near: service, priority: required}
+      - {room: sally_port, count: 1, near: service}
+      - {room: cell_block, count: 1, near: service, area: [60, 120]}   # intake holding cells
+      - {room: property_room, count: 1, near: service}
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: prison_block, count: 1, priority: required, when: "floors_above == 1"}
+      - {room: prison_block, count: 1, when: "floors_above > 1"}
+      - {room: block_control, count: 1}
+      - {room: guard_room, count: [0, 1]}
+      - {room: locker_room, count: 1}
+      - {room: mess_hall, count: 1, when: "floors_above + floors_below == 1"}
+      - {room: prison_kitchen, count: 1, when: "floors_above + floors_below == 1"}
+      - {room: infirmary, count: 1, when: "floors_above == 1"}
+      - {room: warden_office, count: 1, when: "floors_above == 1"}
+      - {room: office, count: [1, 2]}
+      - {room: shower_room, count: 1, when: "floors_above == 1", priority: optional}
+      - {room: segregation_unit, count: [0, 1], when: "floors_above == 1", priority: optional}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: generator_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: staff_room, fill: true, weight: 0.3}   # first: behind offices at the facade
+      - {room: prison_block, fill: true}
+      - {room: office, fill: true}
+  admin:                   # the top floor of a taller prison: offices, the warden, solitary
+    applies: [top]
+    when: "floors_above >= 3"
+    rooms:
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: warden_office, count: 1, priority: required}
+      - {room: meeting_room, count: 1}
+      - {room: kitchenette, count: 1, near: core}
+      - {room: records_room, count: [0, 1]}
+      - {room: segregation_unit, count: 1}
+      - {room: block_control, count: 1}
+      - {room: huddle_room, fill: true, weight: 0.4}   # first: behind offices at the facade
+      - {room: copy_room, fill: true, limit: 1}
+      - {room: office, fill: true}
+      - {room: segregation_unit, fill: true}   # interior rows without facade
+  blocks:
+    applies: [upper, top]
+    rooms:
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: prison_block, count: 1, priority: required}
+      - {room: block_control, count: 1, priority: required}
+      - {room: shower_room, count: [1, 2], near: core}
+      - {room: infirmary, count: 1, when: "level == 1"}
+      - {room: prison_gym, count: [0, 1]}
+      - {room: warden_office, count: 1, when: "level == floors_above - 1 and floors_above == 2"}
+      - {room: segregation_unit, count: [0, 1], when: "floors_above <= 2", priority: optional}
+      - {room: mess_hall, count: 1, when: "level == 1 and floors_below == 0"}
+      - {room: prison_kitchen, count: 1, when: "level == 1 and floors_below == 0"}
+      - {room: staff_room, fill: true, weight: 0.3}   # first: behind window rooms at the facade
+      - {room: prison_block, fill: true}
+      - {room: shower_room, fill: true, weight: 0.3}    # interior rows too thin for a block
+      - {room: prison_laundry, fill: true, weight: 0.3, limit: 1}
+      - {room: block_control, fill: true, weight: 0.3, limit: 2}
+      - {room: locker_room, fill: true, weight: 0.3}
+      - {room: prison_gym, fill: true, limit: 1, priority: optional}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: utility, count: 1, priority: required}
+      - {room: mess_hall, count: 1, when: "level + 1 == 0"}
+      - {room: prison_kitchen, count: 1, when: "level + 1 == 0"}
+      - {room: prison_laundry, count: 1}
+      - {room: segregation_unit, count: [0, 1]}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: storage, count: 1, near: core}
+      - {room: prison_gym, fill: true}
+      - {room: mechanical_room, fill: true}

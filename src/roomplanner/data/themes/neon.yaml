@@ -263,6 +263,24 @@ rooms:
   library: wood
   lodge: ritual
   alchemy_lab: wet
+  prison_lobby: lobby
+  visiting_room: concrete
+  prison_block: concrete
+  dayroom: concrete
+  prison_cell: concrete
+  block_sallyport: industrial
+  block_control: tech
+  segregation_unit: concrete
+  segregation_walk: concrete
+  solitary_cell: concrete
+  intake_room: concrete
+  property_room: concrete
+  infirmary: sterile
+  mess_hall: concrete
+  prison_kitchen: wet
+  prison_laundry: wet
+  prison_gym: concrete
+  warden_office: executive
 
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
@@ -430,3 +448,8 @@ objects:
   bookshelf:       {shape: shelf, fill: "#4a3428", stroke: "#15120f", detail: "#8a3a2c"}
   alchemy_bench:   {shape: counter, fill: "#4a4038", stroke: "#15120f", detail: "#6dffb0", glow: "#6dffb0"}
   ward_sigil:      {shape: circle, fill: "#00000000", stroke: "#7c4dff", detail: "#7c4dff"}
+  bunk:            {shape: bed, fill: "#5d6470", stroke: "#11131a", detail: "#a9b0bc"}
+  cot:             {shape: bed, fill: "#5a5650", stroke: "#1a1814", detail: "#7d786f"}
+  cell_toilet:     {shape: wc, fill: "#aab4c2", stroke: "#3b4350"}
+  visitor_booth:   {shape: counter, fill: "#3b414d", stroke: "#11131a", detail: "#9fe8ffaa", glow: "#4fc3f7"}
+  weight_bench:    {shape: seat, fill: "#2f333b", stroke: "#0b0e14", detail: "#8a93a8"}

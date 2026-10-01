@@ -41,6 +41,8 @@ class BuildingType(StrEnum):
     SAFEHOUSE = "safehouse"
     HACKER_DEN = "hacker_den"
     MAGE_FLAT = "mage_flat"
+    # Added later.
+    PRISON = "prison"
 
 
 class Wealth(StrEnum):

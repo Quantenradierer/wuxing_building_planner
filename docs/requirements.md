@@ -100,6 +100,7 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | safehouse   | corridor        | one flat: bunks, gear room, med room, panic room / stash, back door |
 | hacker_den  | corridor        | one flat, mostly rig room; server closets, a bed    |
 | mage_flat   | corridor        | one flat: hermetic library, ritual room, alchemy lab |
+| prison      | corridor        | cell blocks behind sally ports, intake, visiting    |
 
 ## Building rules
 
@@ -252,7 +253,9 @@ All seven milestones are implemented (2026-09-26).
   fits from 13 cells deep or wide (ramen bar 15). The single flats are smaller: safehouse 22 × 22 or
   24 × 18 cells, hacker den 22 × 22 or 22 × 18, mage's flat 28 × 28 or 30 × 22 (the lodge
   needs 3.5 m round its circle); at these sizes optional rooms (med room, second
-  bedroom, alchemy lab) are often left out.
+  bedroom, alchemy lab) are often left out. Prisons need 34 × 34 with one floor (32 × 32
+  with more); small prisons drop the intake holding cells, the vehicle sally port, mess hall, kitchen
+  and infirmary before their one cell block.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
@@ -454,3 +457,17 @@ Possible extensions: surroundings (street, yard, parking, fire escapes, roof), m
 (corporate white, Barrens, print), a web UI with preview, more building types and variants
 (school, motel, DocWagon station).
 
+Prison (2026-10-01): cell blocks (`prison_block`) are stall rooms like coffin halls: cells
+of 2 × 3 m (bunk, steel toilet-basin) along both long walls of a dayroom with bolted
+tables, entered only through a full-depth `block_sallyport` (vestibule), a guard bubble
+(`block_control`) beside it. The public lobby leads to the visiting room (booths with a
+glass partition; visitors' door from the lobby, inmates' from the corridor); intake (vehicle
+sally port, intake room, holding cells, property room) sits at the service side; mess hall
+and kitchen, infirmary, gym, laundry and solitary (`segregation_unit`) are spread over the
+floors, a taller prison's top floor is admin with the warden. Stall rows of a room entered
+only through its host now keep the door to the host free instead of the corridor wall,
+and a row never cuts a corner off an irregular room (the hotel snapshot changed: an
+earlier attempt became valid). Known weaknesses: a block whose slot is narrower than the
+block plus its sally port (rare) opens onto the corridor directly; mess hall and
+kitchen are not always neighbours (`next_to` works within a strip segment only); the yard
+is not modelled (needs surroundings), the gym stands in for it.

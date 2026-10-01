@@ -179,6 +179,13 @@ objects:
   alchemy_bench:   {size: [4, 2], glyph: V}      # alembics, burners, reagent jars
   ward_sigil:      {size: [2, 2], walkable: true, glyph: "*"}   # a ward's mark by the door
 
+  # Prisons.
+  bunk:            {size: [2, 4], glyph: b}      # two-tier steel bunk bed, bolted to the wall
+  cot:             {size: [2, 4], glyph: b}      # concrete bed slab with a thin mat (solitary)
+  cell_toilet:     {size: [2, 2], glyph: w}      # steel toilet with the basin on top
+  visitor_booth:   {size: [3, 2], glyph: V}      # counter with a glass partition and phones
+  weight_bench:    {size: [2, 4], glyph: W}      # bench press with a barbell rack
+
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).
 groups:
@@ -472,3 +479,9 @@ groups:
       - {object: shelf, at: [5, 0]}
       - {object: fridge, at: [7, 0]}
       - {object: deli_counter, at: [0, 2]}
+  visitor_booth_set:    # a booth: the visitor's stool, the glass, the inmate's stool
+    size: [3, 4]
+    parts:
+      - {object: stool, at: [1, 0]}
+      - {object: visitor_booth, at: [0, 1]}
+      - {object: stool, at: [1, 3], facing: N}

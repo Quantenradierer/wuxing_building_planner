@@ -12,7 +12,7 @@ instead. Stalls have real walls and doors, so they block sight in the VTT export
 
 from __future__ import annotations
 
-from roomplanner.geometry import Cell, Side, largest_rectangle
+from roomplanner.geometry import Cell, Side, connected, largest_rectangle
 from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.rules import Rules, StallRule
 
@@ -33,7 +33,10 @@ def carve_stalls(
     }
     result: list[PlannedRoom] = []
     for room in rooms:
-        result += carve(room, rules, circulation, keep)
+        # A room entered only through its host (a cell block behind its sally port) keeps
+        # its door to the host instead; its walls to the corridor may take stalls.
+        reach = set(room.host.cells) if room.host is not None else circulation
+        result += carve(room, rules, reach, keep, whole=True)
     return result
 
 
@@ -42,8 +45,12 @@ def carve(
     rules: Rules,
     circulation: set[Cell],
     keep: frozenset[Cell] = frozenset(),
+    whole: bool = False,
 ) -> list[PlannedRoom]:
-    """The room split into its rest and stalls (just the room if it has no `stalls:`)."""
+    """The room split into its rest and stalls (just the room if it has no `stalls:`).
+
+    `whole`: the rest must stay one area (no corner of an irregular room cut off by a row).
+    """
     rule = rules.spec(room.type).stalls
     if rule is None:
         return [room]
@@ -52,7 +59,7 @@ def carve(
     # The passage must be as wide as the room left in front of the stalls requires.
     passage = max(rule.passage or 0, minimum)
     size = rules.stall_size(rule)
-    return _split(room, rule, size, (passage, minimum), spec.door_width, circulation, keep)
+    return _split(room, rule, size, (passage, minimum), spec.door_width, circulation, keep, whole)
 
 
 def _split(
@@ -63,6 +70,7 @@ def _split(
     door: int,
     circulation: set[Cell],
     keep: frozenset[Cell],
+    whole: bool,
 ) -> list[PlannedRoom]:
     """`widths`: the passage kept free in front of the stalls and the least width of the rest
     anywhere (the room's own minimum side)."""
@@ -92,7 +100,11 @@ def _split(
                 rest = room.cells.difference(*(cells for _, cells in found))
                 # The room must still reach circulation through a door.
                 if found and door_run(rest, circulation) >= door:
-                    roomy = len(rest) >= rule.rest_area and thinnest(rest, rest) >= minimum
+                    roomy = (
+                        len(rest) >= rule.rest_area
+                        and thinnest(rest, rest) >= minimum
+                        and (not whole or connected(rest))
+                    )
                     if len(found) > len(best) and roomy:
                         best = found
                     break
