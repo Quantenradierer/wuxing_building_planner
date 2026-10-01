@@ -248,8 +248,8 @@ subjects:
     guide:
       - [rect, 0.06, 0.8, 0.94, 0.96, "#2b2f38", 0.1]
   terminal:
-    denoise: 0.95
-    prompt: "large flush glass touchscreen centered, wide brushed aluminum bezel"
+    denoise: 0.7
+    prompt: "self-service kiosk terminal, dark slate housing, large touchscreen showing a blue and green menu, card reader and receipt slot at the bottom edge"
     base: [rect, "#3a3f48", 0.14]
     guide:
       - [rect, 0.1, 0.05, 0.9, 0.14, "#262a31", 0.4]
@@ -295,8 +295,8 @@ subjects:
     guide:
       - [rect, 0.08, 0.08, 0.92, 0.22, "#20242c", 0.2]
   coat_rack:
-    denoise: 0.85
-    prompt: "walnut mounting plate at top edge, thick matte-black steel column, wide circular black base, three chunky beech paddle pegs evenly spaced, two large coat blocks navy and camel"
+    denoise: 0.65
+    prompt: "coat stand with four hooks, coats hanging around it in navy, camel, grey and dark red, black pole top in the center"
     base: [none]
     guide:
       - [ellipse, 0.18, 0.18, 0.82, 0.82, "#3a3c40"]
@@ -323,8 +323,8 @@ subjects:
       - [line, 0.5, 0.02, 0.5, 0.98, "#7a5a30", 0.04]
       - [line, 0.02, 0.5, 0.98, 0.5, "#7a5a30", 0.04]
   safe:
-    denoise: 0.8
-    prompt: "matte steel safe, top side steel handle"
+    denoise: 0.7
+    prompt: "heavy steel safe, grey top with corner bolts, door at the bottom edge with a brass combination dial and a steel handle, a stack of documents on top"
     base: [rect, "#5a5e66", 0.06]
     guide:
       - [rect, 0.06, 0.06, 0.94, 0.8, "#6e737c", 0.04]
@@ -338,8 +338,8 @@ subjects:
       - [ellipse, 0.85, 0.68, 0.9, 0.73, "#3a3d44"]
       - [rect, 0.22, 0.26, 0.62, 0.52, "#c4a46a", 0.04]
   atm:
-    denoise: 0.95
-    prompt: "compact ATM"
+    denoise: 0.7
+    prompt: "cash machine, dark grey body, green bank logo strip at the top edge, blue screen, keypad with silver keys and a card slot at the bottom edge"
     base: [rect, "#4a4f58", 0.08]
     guide:
       - [rect, 0.0, 0.0, 1.0, 0.14, "#2a8a5a", 0.06]
@@ -358,8 +358,8 @@ subjects:
       - [rect, 0.76, 0.68, 0.92, 0.74, "#111111", 0.4]
       - [rect, 0.08, 0.68, 0.24, 0.92, "#8a8f98", 0.1]
   weapon_locker:
-    denoise: 0.9
-    prompt: "matte cool grey rectangular weapon locker, narrow footprint, back flat spine at top edge, single broad front door with wide rectangular recessed handle, dark charcoal trim, black rubber base band"
+    denoise: 0.65
+    prompt: "open gun rack, steel frame, dark interior with rifles lying in a row, wooden stocks on the right, yellow hazard stripe at the bottom edge"
     base: [rect, "#4a4e56", 0.04]
     guide:
       - [rect, 0.04, 0.1, 0.96, 0.82, "#24272c", 0.03]
@@ -414,8 +414,8 @@ subjects:
     guide:
       - [rect, 0.06, 0.12, 0.94, 0.88, "#cdd9e2", 0.03]
   laundry_cart:
-    denoise: 0.95
-    prompt: "low laundry cart, multiple removable fabric liner in soft dove gray, broad brushed steel handle at top edge, two large matte black wheel discs at bottom corners"
+    denoise: 0.65
+    prompt: "laundry cart, dark metal frame, grey-blue canvas bag full of colorful towels in yellow, red, blue and green, handle bar at the top edge"
     base: [rect, "#3a3d42", 0.08]
     guide:
       - [rect, 0.08, 0.1, 0.92, 0.94, "#7d8ca2", 0.08]
@@ -443,8 +443,8 @@ subjects:
     guide:
       - [rect, 0.05, 0.15, 0.2, 0.5, "#3a3d42", 0.15]
   conveyor:
-    denoise: 0.85
-    prompt: "conveyor belt"
+    denoise: 0.6
+    prompt: "roller conveyor, grey metal side rails, dark rollers across, three cardboard boxes on it"
     base: [rect, "#3a3d42", 0.02]
     guide:
       - [rect, 0.0, 0.0, 1.0, 0.12, "#9aa0a8", 0.1]
@@ -496,8 +496,8 @@ subjects:
     prompt: "white medical supply cabinet seen from straight above, flat top with glass doors, back against the top edge"
     base: [rect, "#dfe6ee", 0.05]
   medical_cart:
-    denoise: 0.64
-    prompt: "medical cart, rear push handle at top edge, laminate top pale blue, mid-grey powder-coated steel body, broad white drawer faces, lower open shelf, dark-grey circular caster discs at corners"
+    denoise: 0.65
+    prompt: "medical cart, pale blue top tray, steel kidney dish, blue box of gloves, small bottles, white gauze pad, green container, black handle bar at the top edge"
     base: [rect, "#5f6670", 0.06]
     guide:
       - [rect, 0.0, 0.0, 1.0, 0.1, "#2b2e33", 0.5]
@@ -522,8 +522,8 @@ subjects:
       - [ellipse, 0.3, 0.3, 0.7, 0.7, "#aeb4bc"]
       - [ellipse, 0.42, 0.42, 0.58, 0.58, "#7a8088"]
   vital_monitor:
-    denoise: 0.9
-    prompt: "compact vital monitor"
+    denoise: 0.65
+    prompt: "patient vital signs monitor, dark grey frame, black screen with a green heartbeat line, yellow line, blue and red readouts, two grey knobs at the bottom edge"
     base: [rect, "#3a3e46", 0.18]
     guide:
       - [rect, 0.1, 0.12, 0.9, 0.72, "#0e1216", 0.06]
@@ -565,8 +565,8 @@ subjects:
       - [rect, 0.0, 0.0, 1.0, 0.55, "#4a3d33", 0.0]
       - [rect, 0.0, 0.55, 1.0, 1.0, "#20242c", 0.0]
   dj_booth:
-    denoise: 0.95
-    prompt: "Narrow rectangular DJ booth, rear cable trough at top edge, charcoal matte countertop, thick black front fascia, two large brushed steel jog discs, central dark grey mixer block, rounded outer corners"
+    denoise: 0.65
+    prompt: "DJ booth, black desk with two turntables with black records, mixer in the middle with knobs and faders, purple light strip at the bottom edge"
     base: [rect, "#1c1d21", 0.05]
     guide:
       - [rect, 0.02, 0.06, 0.98, 0.84, "#2a2c31", 0.04]
@@ -607,8 +607,8 @@ subjects:
       - [line, 0.0, 0.33, 1.0, 0.33, "#2a2019", 0.02]
       - [line, 0.0, 0.66, 1.0, 0.66, "#2a2019", 0.02]
   arcade_machine:
-    denoise: 0.9
-    prompt: "Back edge of arcade cabinet at top edge, matte cabinet, inset deep blue glass screen near top, wide brushed steel control plate near bottom, two large red circular buttons, two thick silver joystick discs"
+    denoise: 0.7
+    prompt: "arcade cabinet, black body with red side art, yellow marquee at the top edge, blue screen, control panel at the bottom edge with a red joystick and yellow, blue and green buttons"
     base: [rect, "#1a1b1f", 0.06]
     guide:
       - [rect, 0.0, 0.0, 1.0, 0.12, "#f0c040", 0.2]
@@ -628,8 +628,8 @@ subjects:
       - [rect, 0.2, 0.1, 0.8, 0.28, "#ffffff", 0.3]
       - [rect, 0.2, 0.35, 0.8, 0.9, "#c3ced8", 0.1]
   machinery:
-    denoise: 0.55
-    prompt: "compact rectangular air compressor, matte light grey steel body, central circular tank in darker grey, rear dark grey control plate at top edge, thick copper twin bands along right side, four black rubber feet"
+    denoise: 0.7
+    prompt: "air compressor on a dark steel skid, long grey horizontal tank, blue electric motor, yellow belt guard, round pressure gauge, copper pipe"
     base: [rect, "#4a4d52", 0.04]
     guide:
       - [rect, 0.04, 0.42, 0.96, 0.9, "#8a9099", 0.5]
@@ -641,8 +641,8 @@ subjects:
       - [line, 0.62, 0.2, 0.92, 0.2, "#b87333", 0.04]
       - [line, 0.92, 0.2, 0.92, 0.45, "#b87333", 0.04]
   forklift:
-    denoise: 0.95
-    prompt: "yellow forklift from the top"
+    denoise: 0.7
+    prompt: "yellow forklift, black counterweight at the top edge, black overhead guard over the black seat, steering wheel, mast and two steel forks at the bottom edge, black tires"
     base: [none]
     guide:
       - [rect, 0.0, 0.08, 0.12, 0.26, "#1a1a1a", 0.3]
@@ -668,8 +668,8 @@ subjects:
       - [ellipse, 0.3, 0.3, 0.7, 0.7, "#d97a1b"]
       - [rect, 0.45, 0.1, 0.55, 0.5, "#e08a2a", 0.2]
   electrical_panel:
-    denoise: 0.95
-    prompt: "compact rectangular electrical panel, top edge has a broad rectangular main breaker, smooth matte grey steel cover with rounded corners, recessed dark charcoal inner bay, three wide rounded breaker modules, two chunky silver latches"
+    denoise: 0.7
+    prompt: "open electrical panel, grey steel cabinet, rows of white and black circuit breakers, red main switch, yellow warning label, conduits at the top edge"
     base: [rect, "#8a9099", 0.04]
     guide:
       - [line, 0.2, 0.0, 0.2, 0.12, "#5a5e66", 0.08]
@@ -684,8 +684,8 @@ subjects:
       - [rect, 0.76, 0.84, 0.92, 0.96, "#e8c020", 0.1]
       - [rect, 0.44, 0.84, 0.56, 0.94, "#3a3d44", 0.3]
   battery_bank:
-    denoise: 0.95
-    prompt: "Three chunky rounded-rectangle battery modules, side-by-side, powder-coated matte slate grey tops, pale grey service panels centered on each, rear thick solid black rubber base strip at top edge."
+    denoise: 0.7
+    prompt: "row of three battery cabinets, dark grey steel, vent panels, green and yellow status lights, red terminals, orange cables connecting them"
     base: [none]
     guide:
       - [rect, 0.01, 0.04, 0.32, 0.96, "#4a5058", 0.08]
@@ -702,8 +702,8 @@ subjects:
       - [ellipse, 0.89, 0.78, 0.95, 0.9, "#d83a3a"]
       - [line, 0.25, 0.84, 0.92, 0.84, "#e0802a", 0.05]
   hvac_unit:
-    denoise: 0.85
-    prompt: "rectangular steel air handler, light grey housing, single large central dark charcoal fan grille, wide matte grey intake louver, flush silver service hatch, compact grey electrical box, black rubber feet, rear edge at top"
+    denoise: 0.7
+    prompt: "industrial air handling unit, light grey steel housing, two large round fan grilles, louvres along the bottom edge, copper pipes at the top edge"
     base: [rect, "#a8adb5", 0.04]
     guide:
       - [line, 0.8, 0.0, 0.8, 0.1, "#b87333", 0.04]
@@ -738,8 +738,8 @@ subjects:
       - [ellipse, 0.3, 0.3, 0.7, 0.7, "#cdd9e2"]
       - [ellipse, 0.46, 0.46, 0.54, 0.54, "#8a929e"]
   generator:
-    denoise: 0.85
-    prompt: "rectangular matte charcoal metal generator housing, rear exhaust at top edge with dull steel vent, right-side dark slate fuel tank, front control box with orange switch, large black rubber mounting pads"
+    denoise: 0.7
+    prompt: "diesel generator in a dark green steel enclosure, radiator louvres on the left, black exhaust stack, control panel with green and red lights, yellow warning sign"
     base: [rect, "#3e4a3c", 0.04]
     guide:
       - [rect, 0.04, 0.06, 0.96, 0.94, "#4f5d4c", 0.03]
@@ -760,8 +760,8 @@ subjects:
       - [rect, 0.46, 0.66, 0.52, 0.72, "#d84a3a", 0.2]
       - [rect, 0.66, 0.66, 0.86, 0.84, "#e8c020", 0.05]
   fuel_tank:
-    denoise: 0.95
-    prompt: "Short squat rounded-rectangle painted steel fuel tank, rear flat side at top edge, light grey body, large central circular pale silver access hatch, two broad dark grey rubber mounting pads at bottom edge"
+    denoise: 0.7
+    prompt: "yellow horizontal fuel tank on black steel cradles in a grey drip tray, filler cap on top, small red hazard label"
     base: [rect, "#8a8e94", 0.04]
     guide:
       - [rect, 0.02, 0.04, 0.98, 0.96, "#6a6e74", 0.04]
@@ -774,8 +774,8 @@ subjects:
       - [rect, 0.64, 0.54, 0.74, 0.7, "#d84a3a", 0.1]
       - [line, 0.94, 0.5, 0.99, 0.5, "#2b2d31", 0.05]
   suppression_tanks:
-    denoise: 0.9
-    prompt: "two matte deep red pill-shaped tanks side by side, rear rounded ends at top edge, wide brushed steel rectangular mounting tray beneath, two broad matte charcoal straps crossing widthwise over tanks"
+    denoise: 0.7
+    prompt: "three red fire suppression gas cylinders in a row seen from above, silver valve heads with black handles, steel pipe manifold along the top edge"
     base: [rect, "#5a5e66", 0.06]
     guide:
       - [line, 0.04, 0.12, 0.96, 0.12, "#b8bec6", 0.06]
@@ -798,8 +798,8 @@ subjects:
     guide:
       - [ellipse, 0.38, 0.38, 0.62, 0.62, "#2b2d31"]
   car:
-    denoise: 0.85
-    prompt: "compact modern sedan seen from above, front bumper and hood at top edge, smooth matte charcoal body, pale grey roof panel, broad dark tinted windshield near the top, rear window near the bottom, rounded wheel arches"
+    denoise: 0.65
+    prompt: "blue sedan seen from above, front bumper with headlights at the top edge, dark windshield, blue roof, rear window, red tail lights at the bottom edge, black tires"
     base: [none]
     guide:
       - [rect, 0.0, 0.14, 0.12, 0.26, "#151515", 0.3]
@@ -817,8 +817,8 @@ subjects:
       - [rect, 0.12, 0.95, 0.3, 0.98, "#c42a2a", 0.5]
       - [rect, 0.7, 0.95, 0.88, 0.98, "#c42a2a", 0.5]
   car_lift:
-    denoise: 0.8
-    prompt: "centered four-post lift, chunky brushed-steel corner posts, broad flat ramps, bold yellow safety bands"
+    denoise: 0.65
+    prompt: "two-post car lift with yellow posts and black arms, silver car on the lift, front of the car at the top edge, grey concrete floor with yellow lines"
     base: [rect, "#7a7e84", 0.02]
     guide:
       - [rect, 0.0, 0.4, 0.1, 0.6, "#e0b020", 0.1]
@@ -842,8 +842,8 @@ subjects:
       - [rect, 0.0, 0.0, 0.08, 1.0, "#9aa0a8", 0.0]
       - [rect, 0.92, 0.0, 1.0, 1.0, "#9aa0a8", 0.0]
   ambulance:
-    denoise: 0.85
-    prompt: "boxy white ambulance seen from above, cab and windshield at top edge, broad red center stripe, chunky red-and-clear lightbar behind the cab, dark rectangular roof hatch, rear double doors at bottom edge"
+    denoise: 0.65
+    prompt: "yellow ambulance seen from above, cab and windshield at the top edge, blue light bar, green and yellow checker stripe, roof air conditioner, red cross on the roof"
     base: [none]
     guide:
       - [rect, 0.0, 0.1, 0.1, 0.2, "#151515", 0.3]
@@ -862,8 +862,8 @@ subjects:
       - [rect, 0.42, 0.7, 0.58, 0.86, "#c42a2a", 0.05]
       - [line, 0.5, 0.94, 0.5, 1.0, "#5a5e66", 0.02]
   shipping_container:
-    denoise: 0.7
-    prompt: "Long rectangular steel shipping container, rear closed door at top edge, matte dark teal roof, centered frosted glass skylight, white rectangular HVAC box near bottom edge, muted scuff marks"
+    denoise: 0.6
+    prompt: "orange steel shipping container seen from above, corrugated roof with ridges across, dark corner castings"
     base: [rect, "#c45a2a", 0.01]
     guide:
       - [rect, 0.0, 0.0, 0.1, 0.03, "#3a3a3a", 0.0]
@@ -934,8 +934,8 @@ subjects:
       - [rect, 0.18, 0.08, 0.82, 0.9, "#8a929e", 0.25]
       - [rect, 0.28, 0.2, 0.72, 0.85, "#6b7079", 0.2]
   drone_dock:
-    denoise: 0.9
-    prompt: "Square slate base with rounded corners, thick black rubber bumper ring, recessed circular pale stone charging pad, single broad brushed brass contact bar across center, pale blue LED halo, rear cable recess at top edge"
+    denoise: 0.65
+    prompt: "drone landing pad, dark square base, yellow ring marking, black quadcopter drone with four grey rotors in the center, green corner lights"
     base: [rect, "#2b2e33", 0.08]
     guide:
       - [ellipse, 0.1, 0.1, 0.9, 0.9, "#3a3e44"]
@@ -991,8 +991,8 @@ subjects:
     prompt: "grey steel storage locker seen from straight above, flat top with a small label, back against the top edge"
     base: [rect, "#8f96a0", 0.04]
   autokitchen:
-    denoise: 0.9
-    prompt: "top edge: brushed stainless strip, compact rectangular unit, pale light gray solid countertop, large circular stainless sink left, single dark charcoal induction disc right, bottom oak cabinet door"
+    denoise: 0.65
+    prompt: "compact kitchen unit, grey worktop, steel sink with tap at the top edge, black induction hob with two rings, wooden chopping board, small herb pot"
     base: [rect, "#a4a9b0", 0.04]
     guide:
       - [rect, 0.0, 0.0, 1.0, 0.12, "#6a6e74", 0.0]
@@ -1212,7 +1212,7 @@ subjects:
       - [rect, 0.30, 0.35, 0.62, 0.60, "#8a3a2a", 0.05]
   side_table.luxury:
     denoise: 0.65
-    prompt: "round marble top"
+    prompt: "small round side table, black marble top with grey veins, polished brass rim, a red leather book and a small green vase with a red flower on top"
     base: [ellipse, "#b8924a", 0]
     guide:
       - [ellipse, 0.07, 0.07, 0.93, 0.93, "#2a2a2e"]
@@ -1415,8 +1415,8 @@ subjects:
     guide:
       - [ellipse, 0.10, 0.10, 0.90, 0.90, "#a0653a"]
   stool.luxury:
-    denoise: 0.6
-    prompt: "round padded cream leather seat, wide warm brass outer rim, semicircular dark walnut leather backrest at top edge, broad warm brass pedestal disk beneath, bold simple silhouette, glass stains"
+    denoise: 0.65
+    prompt: "round bar stool, tufted cognac leather seat with buttons, polished brass ring around the seat"
     base: [ellipse, "#c9a14a", 0]
     guide:
       - [ellipse, 0.09, 0.09, 0.91, 0.91, "#8a5434"]
