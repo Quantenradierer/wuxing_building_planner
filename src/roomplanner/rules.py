@@ -304,6 +304,9 @@ class RoomEntry(_Strict):
     when: str | None = None
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
+    requires: list[str] = Field(
+        default=[], description="Only on floors that get one of these counted rooms"
+    )
 
     @model_validator(mode="after")
     def _one_quantity(self) -> Self:

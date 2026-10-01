@@ -80,6 +80,7 @@ class Request:
     near: str | None
     min_area: int = 0  # > 0 for `share` rooms, which shrink towards it if space is short
     leftover: bool = False  # the cluster filler taking space no other room fits
+    requires: tuple[str, ...] = ()  # only if the floor gets one of these rooms
 
 
 @dataclass
@@ -186,6 +187,10 @@ class Allocator:
         while queue:
             request = queue.popleft()
             placed = self._place(request)
+            if placed and (partner := self._partner(request)) is not None:
+                # Its partner goes next, while there is still space beside it.
+                queue.remove(partner)
+                queue.appendleft(partner)
             if not placed and request.area >= 2 * request.min_area > 0:
                 # Flexible (share) rooms split in two rather than being dropped.
                 request.area //= 2
@@ -244,10 +249,18 @@ class Allocator:
                 count = self.rng.randint(*entry.count_range)
                 requests += [
                     Request(
-                        entry.room, spec, self.rng.randint(low, high), entry.priority, entry.near
+                        entry.room,
+                        spec,
+                        self.rng.randint(low, high),
+                        entry.priority,
+                        entry.near,
+                        requires=tuple(entry.requires),
                     )
                     for _ in range(count)
                 ]
+        # An observation room only where there is an interview room.
+        types = {r.type for r in requests}
+        requests = [r for r in requests if not r.requires or types & set(r.requires)]
         # Fixed counts before flexible shares, rooms needing windows first, big before small.
         order = {Priority.REQUIRED: 0, Priority.NORMAL: 1, Priority.OPTIONAL: 2}
         requests.sort(
@@ -451,9 +464,30 @@ class Allocator:
         )
         return 0.0 if taken else -NEXT_TO_BONUS
 
+    def _partner(self, request: Request) -> Request | None:
+        """The first pending room that wants to be `next_to` the placed one and has no such
+        room yet (an interview room's observation room)."""
+        placed = Counter(
+            r.type for s in self.states for slot in s.slots for r in _slot_requests(slot)
+        )
+        for pending in self.pending:
+            if request.type not in pending.spec.next_to or pending.type == request.type:
+                continue
+            # One partner per placed room: the second observation room waits for a second
+            # interview room.
+            partners = sum(placed[t] for t in pending.spec.next_to)
+            if placed[pending.type] < partners:
+                return pending
+        return None
+
     def _partner_room(self, request: Request, state: SegmentState, option: Option) -> float:
-        """Penalty if rooms still to come that want to be `next_to` this one won't fit beside it."""
-        partners = [r for r in self.pending if request.type in r.spec.next_to]
+        """Penalty if rooms still to come that want to be `next_to` this one, or a room already
+        in the segment, won't fit there any more (bigger rooms are placed first and would
+        take the space an observation room needs beside its interview room)."""
+        types = {request.type} | _slot_types(state)
+        partners = [
+            r for r in self.pending if r.type != request.type and types & set(r.spec.next_to)
+        ]
         if not partners:
             return 0.0
         used = option.units if isinstance(option, FullSlot | Cluster) else 0
@@ -486,19 +520,28 @@ class Allocator:
         score = 0.0
         if (anchor := self.anchors.get(request.near)) is not None:
             score += segment.box.gap(anchor)
-        if segment.facade:
+        partners = [s for s in self.states if self._wanted_beside(request, s)]
+        # Beside its partner a windowless room may take the facade (sterilization by the OR).
+        beside = any(s.segment is segment for s in partners)
+        if segment.facade and not beside:
             if request.spec.windows is WindowRule.FORBIDDEN:
                 score += FORBIDDEN_WINDOW_PENALTY
             elif request.spec.windows is WindowRule.OPTIONAL:
                 score += FACADE_PENALTY
-        if request.spec.next_to:
-            gaps = [
-                -NEXT_TO_BONUS if state.segment is segment else state.segment.box.gap(segment.box)
-                for state in self.states
-                if any(t in request.spec.next_to for t in _slot_types(state))
-            ]
-            score += min(gaps, default=0)
+        if partners:
+            score += (
+                -NEXT_TO_BONUS if beside else min(s.segment.box.gap(segment.box) for s in partners)
+            )
         return score
+
+    def _wanted_beside(self, request: Request, state: SegmentState) -> bool:
+        """The segment holds a room the request wants to be `next_to`, or one that wants to
+        be next to the request (an OR placed after the ICU that needs windows)."""
+        return any(
+            r.type in request.spec.next_to or request.type in r.spec.next_to
+            for slot in state.slots
+            for r in _slot_requests(slot)
+        )
 
     # --- fill -------------------------------------------------------------------------
 
@@ -1196,21 +1239,30 @@ def _share_side(a: Box, b: Box) -> bool:
 
 
 def _slot_types(state: SegmentState) -> set[str]:
-    return {t for s in state.slots if (t := _first_type(s)) is not None}
+    return {r.type for s in state.slots for r in _slot_requests(s)}
 
 
 def _neighbours_together(slots: list[Slot]) -> list[Slot]:
-    """Move each slot with `next_to` types right after the first slot of such a type."""
+    """Move each slot with a `next_to` room beside a slot holding such a room: a full slot
+    right after it, a cluster right before a full slot (its column is at its u1 end, so
+    every room stacked in it touches the slot after it)."""
     ordered = list(slots)
+
+    def wants(slot: Slot, other: Slot) -> bool:
+        types = {r.type for r in _slot_requests(other)}
+        return other is not slot and any(types & set(r.spec.next_to) for r in _slot_requests(slot))
+
     for slot in slots:
-        if not isinstance(slot, FullSlot) or not slot.request.spec.next_to:
-            continue
-        target = next(
-            (s for s in ordered if s is not slot and _first_type(s) in slot.request.spec.next_to),
-            None,
-        )
-        if target is None:
-            continue
-        ordered.remove(slot)
-        ordered.insert(ordered.index(target) + 1, slot)
+        if isinstance(slot, FullSlot):
+            target = next((s for s in ordered if wants(slot, s)), None)
+            if target is None:
+                continue
+            ordered.remove(slot)
+            ordered.insert(ordered.index(target) + 1, slot)
+        else:
+            target = next((s for s in ordered if isinstance(s, FullSlot) and wants(slot, s)), None)
+            if target is None:
+                continue
+            ordered.remove(slot)
+            ordered.insert(ordered.index(target), slot)
     return ordered

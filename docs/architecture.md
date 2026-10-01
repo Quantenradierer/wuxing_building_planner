@@ -201,9 +201,19 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      beside it (scrub room before an OR, airlock before a clean room) and is entered only
      through it.
    - *Next to*: `next_to: [types]` pulls a room into the strip segment of such a room and
-     orders the slots so they are neighbours (ICU and recovery beside the OR). A room that
-     rooms still to come want to be next to prefers a segment with space left for them
-     (the restaurant leaves room for its kitchen).
+     orders the slots so they are neighbours (ICU and recovery beside the OR); the relation
+     counts both ways (an OR placed after the ICU, which needs windows, joins its segment),
+     and beside its partner a windowless room pays no facade penalty (sterilization by the
+     OR). Once a room is placed, the first pending room that wants to be next to it and
+     has no partner yet is placed right after it (one observation room per interview room),
+     while there is space beside it. A segment holding a room that rooms still to come want
+     to be next to (or a room that is such a target) keeps space for them: other rooms
+     that would take it pay `NEXT_TO_BONUS` (the restaurant leaves room for its kitchen).
+     Slots are reordered so a full slot follows its partner's slot and a cluster holding
+     a partner precedes it (the cluster's column is at its far end, so every room stacked
+     in it touches the slot after it). A floor role's `requires: [types]` keeps a room off
+     floors without one of those counted rooms (no observation room without an interview
+     room).
    - *Grid*: fill rooms of one type share one width per floor; leftover modules are spread
      over the row (rooms may grow to 1.4x their maximum, slivers of up to 4 cells to 1.45x).
      A row is only widened instead of getting another facade stack if such a stack fits

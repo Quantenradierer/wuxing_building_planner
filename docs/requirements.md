@@ -310,6 +310,19 @@ Requested by the author (2026-09-27), done (2026-10-01):
   of the wall nearest its landing: of 905 random buildings, 7 rooms opened into an
   elevator before, none now.
 
+- Rooms that belong together (2026-10-01): `next_to` partners were placed in the order of
+  their size, so bigger rooms filled the partner's segment first, windowless rooms kept off
+  its facade row and cluster members were never moved beside it. Now a placed room's
+  partner is placed right after it, segments keep space for pending partners, the relation
+  counts both ways and slots holding a partner are ordered beside it. 40 random buildings
+  per type: police observation rooms beside an interview room 53 % → 83 %, sterilization
+  beside the OR 5 % → 88 % (cosmetic clinics) and 20 % → 90 % (clinics), corp lab decon
+  rooms 59 % → 91 %, guard rooms beside the security room 53 % → 69 %. Observation rooms
+  only go on floors with an interview room (`requires:`). Supermarket ground floors have a
+  counted stockroom (60–160 cells), by the loading bay: floors whose only stockroom was
+  behind the core, away from the sales floor, 11 % → 8 % (of those left, some border it
+  behind the public stairs or sit in a wing).
+
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
 and neighbours before it becomes a storeroom; basements and hall back strips got real
@@ -331,10 +344,11 @@ Known weaknesses:
   about 90 cells (squatter tier) have no visitor WC.
 - A room walled in by core rooms and toilet stalls with no stairwell beside it would still
   open into an elevator car (none in 905 random buildings).
-- Rooms that belong together: about 60 % of police observation rooms sit beside an
-  interview room (`next_to` only orders rooms within one strip segment); a supermarket
-  stockroom borders the sales floor in about half the cases (the others sit behind a
-  cluster hallway).
+- Rooms that belong together: about 1 in 6 police observation rooms and 1 in 8 sterilization
+  rooms still end up away from their partner where its segment is full; a hospital OR has
+  the scrub room on one side, so sterilization, ICU and recovery rooms compete for the
+  other (ICU beside an OR in about 1 in 5 surgery floors). Partners across the service
+  corridor of a hall (factory control room, stuffer shack cashier booth) never touch it.
 - Without a corridor or back room on the service facade the plain service door opens into
   whatever room is there (an exam room or storeroom in small clinics).
 - Vehicle access: every bay with `facade_door` (loading bay, DocWagon bay, sally port,
