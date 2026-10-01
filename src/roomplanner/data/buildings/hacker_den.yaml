@@ -1,0 +1,65 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Hacker den: a cramped flat that is mostly rig room (cocoon, consoles, racks, drones), a
+# server closet humming beside it, a kitchen and a bed somewhere.
+building: hacker_den
+catalogs: [common, residential]
+layout: corridor
+
+corridor:
+  width: 3                 # the flat's hall
+  hallway_width: 3
+strip_depth: [8, 14]
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [kitchen, storage, utility, laundry]
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: entry_hall, place: entrance, area: [9, 24], priority: required}
+      - {room: rig_room, count: 1, area: [60, 130], priority: required}   # most of the flat
+      - {room: server_closet, count: 1, priority: required}
+      - {room: kitchen, count: 1, area: [16, 30], priority: required}
+      - {room: bathroom, count: 1, priority: required}
+      - {room: bedroom, count: 1, area: [30, 50], priority: required}     # the sleeping corner
+      - {room: server_closet, count: [0, 1]}
+      - {room: rig_room, fill: true, weight: 2}
+      - {room: bedroom, fill: true, limit: 1}
+      - {room: living_room, fill: true, limit: 1}
+      - {room: server_closet, fill: true}   # interior rows without facade
+      - {room: host_room, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}
+  upstairs:
+    applies: [upper, top]
+    rooms:
+      - {room: bathroom, count: [0, 1]}
+      - {room: server_closet, count: [0, 1]}
+      - {room: rig_room, fill: true}
+      - {room: bedroom, fill: true, limit: 1}
+      - {room: living_room, fill: true, limit: 1}
+      - {room: server_closet, fill: true}
+      - {room: host_room, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: host_room, count: 1, priority: required}   # the den's own Matrix host
+      - {room: utility, count: 1}
+      - {room: storage, count: [0, 1], near: core}
+      - {room: server_closet, fill: true}
+      - {room: rig_room, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}
+
+wealth:
+  squatter: {area: 0.8, corridor: 1.0, furniture: 0.7}
+  luxury: {area: 1.1, corridor: 1.0, furniture: 1.2}   # cramped at any price

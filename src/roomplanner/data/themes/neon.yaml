@@ -71,6 +71,7 @@ materials:
   terrace:    {floor: "#2f3432", pattern: planks, tile: 1, lines: "#00000060", accent: "#6dffb0"}
   rooftop:    {floor: "#2a2d31", pattern: tiles, tile: 4, lines: "#00000040"}
   casino:     {floor: "#2a1222", pattern: tiles, tile: 2, lines: "#ffcc6614", accent: "#ffcc66"}
+  ritual:     {floor: "#1e1826", pattern: planks, tile: 1, lines: "#00000050", accent: "#b14dff"}
 
 rooms:
   corridor: corridor
@@ -252,6 +253,16 @@ rooms:
   butchery: wet
   cold_room: industrial
   flat_loft: wood
+  entry_hall: wood
+  bunk_room: concrete
+  gear_room: industrial
+  med_room: sterile
+  stash: concrete
+  rig_room: tech
+  server_closet: tech
+  library: wood
+  lodge: ritual
+  alchemy_lab: wet
 
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
@@ -412,3 +423,10 @@ objects:
   deli_counter:    {shape: counter, fill: "#26303f", stroke: "#0f1117", detail: "#ff8a8a", glow: "#9fe8ff"}
   butcher_block:   {shape: box, fill: "#8a6a4a", stroke: "#2a1d14", detail: "#c9a57a"}
   meat_rail:       {shape: shelf, fill: "#6d7788", stroke: "#15171d", detail: "#c0392b"}
+  bunk_bed:        {shape: bed, fill: "#3d4a3a", stroke: "#0f1117", detail: "#9aa38a"}
+  gun_rack:        {shape: shelf, fill: "#2e2a26", stroke: "#0f1117", detail: "#8a8f99"}
+  portable_ac:     {shape: machine, fill: "#c9d0da", stroke: "#3b4350", detail: "#4fc3f7"}
+  cable_clutter:   {shape: rubble, fill: "#1f232c", stroke: "#0b0e14", detail: "#4a5160"}
+  bookshelf:       {shape: shelf, fill: "#4a3428", stroke: "#15120f", detail: "#8a3a2c"}
+  alchemy_bench:   {shape: counter, fill: "#4a4038", stroke: "#15120f", detail: "#6dffb0", glow: "#6dffb0"}
+  ward_sigil:      {shape: circle, fill: "#00000000", stroke: "#7c4dff", detail: "#7c4dff"}

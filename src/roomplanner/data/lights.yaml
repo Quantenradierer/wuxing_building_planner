@@ -83,6 +83,16 @@ rooms:
   ritual_room:   {radius: 4, colour: "#ffb347", intensity: 0.3}             # candles
   cold_room:     {radius: 5, colour: "#cfe8ff", intensity: 0.5}
   flat_loft:     {spacing: 10, colour: "#ffd9a8", intensity: 0.6}
+  entry_hall:    {spacing: 8, radius: 5, colour: "#ffd9a8", intensity: 0.5}
+  bunk_room:     {radius: 6, colour: "#ffd9a0", intensity: 0.4}
+  gear_room:     {radius: 6, colour: "#fff1dc", intensity: 0.7}
+  med_room:      {radius: 6, colour: "#f4fbff", intensity: 0.85}
+  stash:         {radius: 3, colour: "#ffd9a0", intensity: 0.3}
+  rig_room:      {colour: "#7fdcff", intensity: 0.3}                # screens, not lamps
+  server_closet: {radius: 3, colour: "#8c7bff", intensity: 0.4}
+  library:       {colour: "#ffc98a", intensity: 0.5}
+  lodge:         {radius: 6, colour: "#ffb347", intensity: 0.3}     # candlelight
+  alchemy_lab:   {colour: "#e8ffe0", intensity: 0.6}
 
 accents:
   stairwell:
@@ -133,6 +143,13 @@ accents:
     - {kind: neon, radius: 6, colour: "#ff6fb5", intensity: 0.5}
   ritual_room:
     - {kind: neon, radius: 5, colour: "#b14dff", intensity: 0.5}           # the warded circle
+  rig_room:
+    - {kind: neon, radius: 5, colour: "#00e5ff", intensity: 0.6}           # monitor wall
+    - {kind: neon, radius: 4, colour: "#7c4dff", intensity: 0.4}
+  lodge:
+    - {kind: neon, radius: 5, colour: "#b14dff", intensity: 0.5}           # the circle's glow
+  alchemy_lab:
+    - {kind: neon, radius: 3, colour: "#6dffb0", intensity: 0.4}           # burners, reagents
 
 entrances:
   main: {kind: sign, radius: 8, colour: "#ff3fa4", intensity: 0.9}

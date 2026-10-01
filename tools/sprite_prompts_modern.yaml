@@ -910,3 +910,50 @@ subjects:
       - [ellipse, 0.05, 0.15, 0.25, 0.85, "#b04a3a"]
       - [ellipse, 0.4, 0.15, 0.6, 0.85, "#b04a3a"]
       - [ellipse, 0.75, 0.15, 0.95, 0.85, "#b04a3a"]
+  # --- safehouse, hacker den, mage's flat ---
+  bunk_bed:
+    prompt: "steel bunk bed seen from straight above, only the upper mattress visible, olive green blanket, white pillow at the top edge"
+    base: [rect, "#5b616b", 0.04]
+    guide:
+      - [rect, 0.08, 0.04, 0.92, 0.96, "#6b7a5a", 0.04]
+      - [rect, 0.16, 0.07, 0.84, 0.2, "#e6e6e6", 0.3]
+  gun_rack:
+    prompt: "wall rack of rifles and shotguns standing side by side seen from straight above, dark metal barrels, back against the top edge"
+    base: [rect, "#5b5650", 0.03]
+    guide:
+      - [rect, 0.08, 0.2, 0.2, 0.8, "#2b2f38", 0.2]
+      - [rect, 0.32, 0.2, 0.44, 0.8, "#2b2f38", 0.2]
+      - [rect, 0.56, 0.2, 0.68, 0.8, "#2b2f38", 0.2]
+      - [rect, 0.8, 0.2, 0.92, 0.8, "#2b2f38", 0.2]
+  portable_ac:
+    prompt: "white portable air conditioner seen from straight above, a square vent grille on the flat top, hose at the top edge"
+    base: [rect, "#e6e9ec", 0.15]
+    guide:
+      - [rect, 0.2, 0.3, 0.8, 0.85, "#b9bec6", 0.1]
+      - [rect, 0.4, 0.0, 0.6, 0.15, "#8a929e", 0.3]
+  cable_clutter:
+    denoise: 0.66
+    prompt: "tangle of black cables and loose computer parts lying on the floor seen from straight above"
+    base: [none]
+    guide:
+      - [line, 0.1, 0.2, 0.9, 0.7, "#2b2f38", 0.05]
+      - [line, 0.2, 0.9, 0.8, 0.1, "#2b2f38", 0.05]
+      - [rect, 0.55, 0.55, 0.8, 0.75, "#5b616b", 0.1]
+  bookshelf:
+    prompt: "tall wooden bookshelf full of old leather-bound books seen from straight above, book spines towards the bottom edge, back against the top edge"
+    base: [rect, "#6b4a32", 0.03]
+    guide:
+      - [rect, 0.05, 0.25, 0.95, 0.85, "#8a3a2c", 0.03]
+  alchemy_bench:
+    prompt: "wooden workbench with glass flasks, a small burner and jars of herbs seen from straight above, back against the top edge"
+    base: [rect, "#9a7a58", 0.04]
+    guide:
+      - [ellipse, 0.1, 0.15, 0.25, 0.45, "#cfe6ef"]
+      - [ellipse, 0.35, 0.1, 0.5, 0.4, "#cfe6ef"]
+      - [rect, 0.65, 0.1, 0.9, 0.35, "#6b7a5a", 0.2]
+  ward_sigil:
+    prompt: "small arcane sigil painted on the floor seen from straight above, a white chalk circle with runes"
+    base: [none]
+    guide:
+      - [ellipse, 0.1, 0.1, 0.9, 0.9, "#e6e6e6"]
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#caac85"]

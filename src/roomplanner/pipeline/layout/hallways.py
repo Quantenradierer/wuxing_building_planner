@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from roomplanner.geometry import Cell, Side
+from roomplanner.geometry import Cell, Side, largest_rectangle
 from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.pipeline.layout.allocation import ABSORB_TOLERANCE
 from roomplanner.pipeline.layout.stalls import beyond, carve, door_run, thinnest
@@ -109,6 +109,9 @@ def _taker(
         grown = replace(room, cells=room.cells | piece)
         if not shared or thinnest(piece, grown.cells) < min(MIN_ALCOVE, spec.min_side):
             continue
+        x0, y0, x1, y1 = largest_rectangle(grown.cells)
+        if min(x1 - x0, y1 - y0) < spec.min_side:
+            continue  # a long thin end would outgrow the room's main rectangle
         area = len(grown.cells)
         if spec.stalls is not None:
             # A public toilet keeps its stalls; its size counts without them (rooms of

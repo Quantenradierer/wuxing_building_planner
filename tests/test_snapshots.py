@@ -65,6 +65,13 @@ CASES: dict[str, dict[str, Any]] = {
         "floors_below": 1,
         "seed": 6,
     },
+    "safehouse": {
+        "building_type": BuildingType.SAFEHOUSE,
+        "width": 32,
+        "depth": 22,
+        "floors_above": 2,
+        "seed": 5,
+    },
     "stuffer_shack": {"building_type": BuildingType.SUPERMARKET, "width": 30, "depth": 26},
     "data_centre": {
         "building_type": BuildingType.DATA_CENTRE,

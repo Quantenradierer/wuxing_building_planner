@@ -1,0 +1,61 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Mage's flat: a flat with a hermetic library, a windowless ritual room (the lodge, a
+# circle on the floor, wards by the door) and an alchemy corner.
+building: mage_flat
+catalogs: [common, residential]
+layout: corridor
+
+corridor:
+  width: 3                 # the flat's hall
+  hallway_width: 3
+strip_depth: [8, 16]       # the ritual room needs 4 m for its circle
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [kitchen, alchemy_lab, storage, utility, laundry]
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: entry_hall, place: entrance, area: [12, 30], priority: required}
+      - {room: lodge, count: 1, priority: required}
+      - {room: library, count: 1, priority: required}
+      - {room: living_room, count: 1, priority: required}
+      - {room: kitchen, count: 1, priority: required}
+      - {room: bathroom, count: 1, priority: required}
+      - {room: bedroom, count: 1, priority: required}
+      - {room: alchemy_lab, count: 1}
+      - {room: bedroom, fill: true, weight: 2}
+      - {room: library, fill: true, limit: 2}
+      - {room: alchemy_lab, fill: true}         # interior rows without facade
+      - {room: lodge, fill: true, limit: 1}
+      - {room: laundry, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}
+  upstairs:
+    applies: [upper, top]
+    rooms:
+      - {room: bathroom, count: 1}
+      - {room: bedroom, count: 1}
+      - {room: bedroom, fill: true, weight: 2}
+      - {room: library, fill: true, limit: 2}
+      - {room: lodge, fill: true, limit: 1}
+      - {room: alchemy_lab, fill: true}
+      - {room: utility, fill: true, weight: 0.5}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: lodge, count: [0, 1]}         # a second circle where nobody looks
+      - {room: utility, count: 1}
+      - {room: storage, count: [0, 1], near: core}
+      - {room: alchemy_lab, fill: true}
+      - {room: laundry, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}

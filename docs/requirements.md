@@ -45,7 +45,7 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 
 | Parameter       | Values                                              | v1 behaviour                          |
 |-----------------|-----------------------------------------------------|---------------------------------------|
-| `building_type` | see "Building types" (14 types)                     | honoured                              |
+| `building_type` | see "Building types"                     | honoured                              |
 | `width`         | cells (east–west)                                   | honoured; bounding box for L shapes   |
 | `depth`         | cells (north–south)                                 | honoured; bounding box for L shapes   |
 | `floors_above`  | ≥ 1, includes the ground floor                      | honoured                              |
@@ -97,6 +97,9 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | ramen_bar   | hall            | counter seats round an open kitchen, cold room      |
 | boutique    | hall            | clothes racks, changing booths, mirrors, tailor     |
 | deli        | hall            | meat and cheese counter, butchery, cold room        |
+| safehouse   | corridor        | one flat: bunks, gear room, med room, panic room / stash, back door |
+| hacker_den  | corridor        | one flat, mostly rig room; server closets, a bed    |
+| mage_flat   | corridor        | one flat: hermetic library, ritual room, alchemy lab |
 
 ## Building rules
 
@@ -204,6 +207,13 @@ stock rooms on middle floors, the owner's flat on the top floor (a loft as the f
 bedrooms and a bathroom behind it), stock and plant in the basement; rich gun shops have a
 firing range there. The programs share their structure (keep them alike); the rooms are
 shared through the catalogs (`common`, `residential`, `retail`, `shops`).
+Variants of the apartment (2026-10-01): `safehouse`, `hacker_den` and `mage_flat`. Each is a
+single dwelling, not a block with one special unit: the corridor layout with the flat's hall
+as corridor and a small `entry_hall` as lobby, so the whole map is the flat and its special
+rooms (gear room, bunk room, med room, panic room or stash; rig room and server closets;
+library, ritual room (`lodge`), alchemy lab) are ordinary program rooms. A unit of the apartment
+block holds only a hall, front rooms and one row of back rooms, too few and too small for
+them. Bigger footprints become a bigger dwelling (more bedrooms, rig rooms, libraries).
 
 ## Roadmap (v2)
 
@@ -239,7 +249,10 @@ All seven milestones are implemented (2026-09-26).
   for the ground floor's NOC, security post, loading dock and a server hall with its mantrap).
   Small street shops fit every tier from 24 × 24 with
   stairs and a basement (boutique 16 × 16, gun shop 21 × 21, middle tier 19–22); one floor
-  fits from 13 cells deep or wide (ramen bar 15).
+  fits from 13 cells deep or wide (ramen bar 15). The single flats are smaller: safehouse 22 × 22 or
+  24 × 18 cells, hacker den 22 × 22 or 22 × 18, mage's flat 28 × 28 or 30 × 22 (the lodge
+  needs 3.5 m round its circle); at these sizes optional rooms (med room, second
+  bedroom, alchemy lab) are often left out.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.

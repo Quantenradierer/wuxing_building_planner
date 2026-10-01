@@ -38,6 +38,9 @@ class BuildingType(StrEnum):
     RAMEN_BAR = "ramen_bar"
     BOUTIQUE = "boutique"
     DELI = "deli"
+    SAFEHOUSE = "safehouse"
+    HACKER_DEN = "hacker_den"
+    MAGE_FLAT = "mage_flat"
 
 
 class Wealth(StrEnum):

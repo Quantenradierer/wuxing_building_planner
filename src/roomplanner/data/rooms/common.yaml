@@ -245,7 +245,8 @@ rooms:
     windows: forbidden
     transit: false
     cluster: true
-    access: [executive_office, manager_office, board_room, vip_room]
+    access: [executive_office, manager_office, board_room, vip_room, bedroom,
+             bunk_room]
     annex: 0.8
     furniture:
       - {object: bench, placement: wall}

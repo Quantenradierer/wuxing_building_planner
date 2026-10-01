@@ -1,0 +1,70 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Safehouse: one anonymous flat for a team of runners. A hall from the front door, bunks,
+# a gear room, a med corner, a panic room or a stash behind the wardrobe, a back door.
+building: safehouse
+catalogs: [common, residential]
+layout: corridor
+
+corridor:
+  width: 3                 # the flat's hall
+  hallway_width: 3
+strip_depth: [8, 14]
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [kitchen, gear_room, storage, utility, laundry]
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}      # the back way out
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: entry_hall, place: entrance, area: [12, 30], priority: required}
+      - {room: living_room, count: 1, priority: required}
+      - {room: kitchen, count: 1, near: service, priority: required}
+      - {room: bathroom, count: 1, priority: required}
+      - {room: gear_room, count: 1, priority: required}
+      - {room: bunk_room, count: 1, priority: required}
+      - {room: med_room, count: 1}
+      - {room: bedroom, count: [0, 1]}
+      - {room: safe_room, count: [0, 1], priority: optional}   # panic room behind a bedroom
+      - {room: stash, count: [0, 1], priority: optional}
+      - {room: bedroom, fill: true, weight: 2}
+      - {room: bunk_room, fill: true, limit: 1}
+      - {room: gear_room, fill: true}            # interior rows without facade
+      - {room: med_room, fill: true, limit: 1}
+      - {room: laundry, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}
+  upstairs:
+    applies: [upper, top]
+    rooms:
+      - {room: bathroom, count: 1, priority: required}
+      - {room: bunk_room, count: 1}
+      - {room: safe_room, count: [0, 1], priority: optional}
+      - {room: stash, count: [0, 1], priority: optional}
+      - {room: bedroom, fill: true, weight: 2}
+      - {room: bunk_room, fill: true, limit: 2}
+      - {room: med_room, fill: true, limit: 1}
+      - {room: gear_room, fill: true}
+      - {room: utility, fill: true, weight: 0.5}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: gear_room, count: 1, priority: required}
+      - {room: utility, count: 1}
+      - {room: stash, count: [0, 1]}
+      - {room: storage, count: [0, 1], near: core}
+      - {room: gear_room, fill: true}
+      - {room: med_room, fill: true, limit: 1}
+      - {room: laundry, fill: true, limit: 1}
+      - {room: utility, fill: true, weight: 0.5}
+
+wealth:
+  luxury: {area: 1.1, corridor: 1.0, furniture: 1.1}   # anonymous, not lavish

@@ -240,7 +240,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      as long a wall on it as before, up to its door width plus a cell either side; cells
      where an exterior door is planned stay hallway. The end joins the neighbour sharing
      the longest wall with it (not core, unit, annex or host rooms) if it is at least
-     3 cells thick and the room stays within 1.4x its maximum (a public toilet counted
+     3 cells thick, the room's largest rectangle keeps its `min_side` and it stays within 1.4x its maximum (a public toilet counted
      without its stalls, and only if it keeps as many); the room becomes irregular,
      wrapped round the hallway's end. A hallway no room needs goes entirely. Ends of
      one or two rows stay hallway.

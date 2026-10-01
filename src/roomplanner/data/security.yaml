@@ -22,6 +22,7 @@ tiers:
       vault: {lock: mechanical, material: security}
       host_room: {lock: mechanical}
       spider_room: {lock: mechanical}
+      gear_room: {lock: mechanical}
       cashier_booth: {lock: mechanical, material: security}
       data_hall: {lock: mechanical, material: security}
       mantrap: {lock: mechanical}
@@ -41,6 +42,7 @@ tiers:
       archive: {lock: cardreader}
       host_room: {lock: cardreader, material: security, rating: 5}
       spider_room: {lock: cardreader, material: security}
+      gear_room: {lock: maglock, material: security}
       vault: {lock: cardreader, material: security, rating: 6}
       safe_room: {lock: maglock, material: security, rating: 6}
       drone_bay: {lock: cardreader}
@@ -98,6 +100,7 @@ tiers:
       archive: {lock: biometric, material: security}
       host_room: {lock: biometric, material: blast, rating: 8}
       spider_room: {lock: biometric, material: security}
+      gear_room: {lock: biometric, material: security}
       vault: {lock: biometric, material: blast, rating: 8}
       safe_room: {lock: biometric, material: blast, rating: 8}
       drone_bay: {lock: cardreader, material: security}

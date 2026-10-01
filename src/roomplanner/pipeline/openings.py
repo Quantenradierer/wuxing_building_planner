@@ -474,8 +474,12 @@ def _exterior_door(
     def needs_window(room: Room) -> bool:
         return ctx.rules.spec(room.type).windows is WindowRule.REQUIRED
 
-    # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them.
-    roomy = [r for r in first if r.area >= ROOMY], [r for r in others if r.area >= ROOMY]
+    # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them. A small
+    # hall is still a hall: the requested lobby keeps the door (a flat's entry hall).
+    def is_roomy(room: Room) -> bool:
+        return room.area >= ROOMY or ctx.rules.spec(room.type).circulation
+
+    roomy = [r for r in first if is_roomy(r)], [r for r in others if r.area >= ROOMY]
     # The layout reserved a back room or corridor stub for it (`service_stub`): that first.
     reserved = [hinted] if back and ctx.rules.program.service_stub else []
     tiers = (vehicle, reserved, *service, corridor, *roomy, first, others, last)

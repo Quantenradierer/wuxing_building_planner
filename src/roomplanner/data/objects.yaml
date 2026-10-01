@@ -170,6 +170,15 @@ objects:
   butcher_block:   {size: [2, 2], glyph: b}
   meat_rail:       {size: [4, 1], glyph: h}      # hooks with hanging meat
 
+  # Safehouse, hacker den, mage's flat.
+  bunk_bed:        {size: [2, 4], glyph: b}      # two beds stacked, a ladder at the foot
+  gun_rack:        {size: [3, 1], glyph: L}      # rifles and shotguns upright on a wall rack
+  portable_ac:     {size: [1, 1], glyph: C}      # mobile air conditioner, hose out the window
+  cable_clutter:   {size: [2, 2], walkable: true, glyph: "&"}   # cables and spare parts on the floor
+  bookshelf:       {size: [3, 1], glyph: s}      # grimoires, scrolls, old books
+  alchemy_bench:   {size: [4, 2], glyph: V}      # alembics, burners, reagent jars
+  ward_sigil:      {size: [2, 2], walkable: true, glyph: "*"}   # a ward's mark by the door
+
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).
 groups:

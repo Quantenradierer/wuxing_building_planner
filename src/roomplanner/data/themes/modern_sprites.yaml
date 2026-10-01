@@ -59,6 +59,7 @@ materials:
   lab:        {floor: "#eef3f7", pattern: tiles, tile: 2, lines: "#00000014"}
   terrace:    {floor: "#c3b8a0", pattern: planks, tile: 1, lines: "#00000030"}
   rooftop:    {floor: "#cbced3", pattern: tiles, tile: 4, lines: "#0000001c"}
+  ritual:     {floor: "#a99a86", pattern: planks, tile: 1, lines: "#00000030"}
 
 # Stand-ins mapping the many desk/table/bed variants onto the sprites we have so far.
 sprite_fallbacks:
@@ -142,3 +143,8 @@ objects:
   deli_counter:    {shape: counter, fill: "#dfe6ee", stroke: "#8a95a5", detail: "#d99a9a"}
   butcher_block:   {shape: box, fill: "#c9a57a", stroke: "#5b4630", detail: "#a7864f"}
   meat_rail:       {shape: shelf, fill: "#bcc0c6", stroke: "#7a8088", detail: "#b04a3a"}
+  bunk_bed:        {shape: bed, fill: "#8a929e", stroke: "#5b616b", detail: "#eef1f5"}
+  portable_ac:     {shape: machine, fill: "#e6e9ec", stroke: "#7a8088", detail: "#9aa0a8"}
+  cable_clutter:   {shape: rubble, fill: "#3a3f4a", stroke: "#15171d", detail: "#6b7079"}
+  alchemy_bench:   {shape: counter, fill: "#9a7a58", stroke: "#5b4630", detail: "#cfe6ef"}
+  ward_sigil:      {shape: circle, fill: "#00000000", stroke: "#f2f2f0", detail: "#f2f2f0"}
