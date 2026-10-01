@@ -565,3 +565,17 @@ def test_open_offices_fill_their_depth_with_desks_up_to_the_corridor() -> None:
     desks = [o for o in floor.objects if o.room == room.id and o.kind == "office_desk"]
     assert len(desks) * 6 >= len(room.cells) // 4  # a desk per ~4 m² at least
     assert not any(w.startswith("[hard]") for w in building.warnings)
+
+
+def test_every_public_toilet_has_a_sink_beside_its_stalls() -> None:
+    """Even a 4 x 4 rest between the entrance and the stall doors fits a 2 x 1 sink."""
+    toilets = 0
+    for building_type in (BuildingType.OFFICE, BuildingType.CLINIC, BuildingType.HOTEL):
+        for seed in range(3):
+            params = make_params(building_type=building_type, width=56, depth=40, seed=seed)
+            for floor in generate(params).floors:
+                for room in floor.rooms:
+                    if room.type == "toilet":
+                        toilets += 1
+                        assert any(o.room == room.id and o.kind == "sink" for o in floor.objects)
+    assert toilets >= 9

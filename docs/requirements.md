@@ -269,6 +269,10 @@ Requested by the author (2026-09-27), done (2026-10-01):
   doors (`end`), facing an open dance floor 5 m deep that tables, sofas and bars keep clear
   of (`front_clear: 10`); before, it stood on any wall, often in a corner between sofas
   and shelves, with tables in front of it.
+- Every public toilet has a sink (about 4 000 toilets in 1 900 random buildings):
+  the 4 × 4 rest between the entrance and two stall doors that left ~0.5 % without one
+  fits a 2 × 1 sink. Toilets give up stalls until 16 cells are left for sinks
+  (`rest_area`), or become a single WC.
 
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
@@ -280,9 +284,6 @@ every type ≤ 5 % except apartments (9 %, a third of it flat closets).
 `tests/test_storage.py` keeps the share below 5 %.
 
 Known weaknesses:
-- Toilets: about 0.5 % of public toilets still have no sink (a 4 × 4 rest between the
-  entrance and two stall doors). The others give up stalls until 16 cells are left for
-  sinks (`rest_area`), or become a single WC; before, ~10 % had no sink.
 - Cluster hallways run on to the facade past their last door (clinic toilets and storage),
   and apartment and hotel floors have a corridor stub to the service door.
 - Waiting rooms open onto the reception lobby only when they end up beside it (about 60 %
