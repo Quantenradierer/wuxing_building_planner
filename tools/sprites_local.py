@@ -21,7 +21,9 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
+
+from roomplanner.render.theme import Material, Pattern, colour, load_theme
 
 sys.path.insert(0, str(Path(__file__).parent))
 import sprites
@@ -115,15 +117,21 @@ def guides(kinds: list[str]) -> None:
 
 
 def _render(
-    prompt: str, data: dict[str, Any], guide: Path, seed: int, size: tuple[int, int], denoise: float
+    prompt: str,
+    data: dict[str, Any],
+    guide: Path,
+    seed: int,
+    size: tuple[int, int],
+    denoise: float,
+    transparent: bool = True,
+    negative: str | None = None,
+    lora: str | None = None,
+    model: str = "pony",
 ) -> Image.Image:
-    command = [
-        "comfy-gen",
-        prompt,
-        "--model",
-        "pony",
-        "--negative",
-        " ".join(data["negative"].split()),
+    command = ["comfy-gen", prompt, "--model", model]
+    if model in ("pony", "illustrious"):  # SDXL; Flux takes no negative prompt
+        command += ["--negative", " ".join((negative or data["negative"]).split())]
+    command += [
         "--init",
         str(guide),
         "--denoise",
@@ -136,21 +144,32 @@ def _render(
         str(size[1]),
         "--prefix",
         "roomplanner",
-        "--transparent",
     ]
-    if data.get("lora"):
-        command += ["--lora", data["lora"]]
+    if transparent:
+        command.append("--transparent")
+    lora = data.get("lora") if lora is None else lora
+    if lora:
+        command += ["--lora", lora]
     GPU_LOCK.parent.mkdir(parents=True, exist_ok=True)
     with GPU_LOCK.open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         result = subprocess.run(command, capture_output=True, text=True, check=True)
     paths = [Path(line) for line in result.stdout.split() if line.endswith(".png")]
     rgba = [p for p in paths if "-rgba_" in p.name]
-    return Image.open((rgba or paths)[-1]).convert("RGBA")
+    return Image.open((rgba if transparent and rgba else paths)[-1]).convert("RGBA")
 
 
 def render_grid(
-    name: str, attempt: int, prompt: str, init: Image.Image, denoise: float, data: dict[str, Any]
+    name: str,
+    attempt: int,
+    prompt: str,
+    init: Image.Image,
+    denoise: float,
+    data: dict[str, Any],
+    transparent: bool = True,
+    negative: str | None = None,
+    lora: str | None = None,
+    model: str = "pony",
 ) -> bool:
     """Render `seeds` img2img variants of `init` into one 2x2 grid; False if a job failed."""
     out = sprites.RAW / f"{name}.{attempt}.png"
@@ -163,7 +182,11 @@ def render_grid(
     for n in range(data["seeds"]):
         seed = sprites._seed(name, attempt * 10 + n)
         try:
-            tiles.append(_render(prompt, data, path, seed, init.size, denoise))
+            tiles.append(
+                _render(
+                    prompt, data, path, seed, init.size, denoise, transparent, negative, lora, model
+                )
+            )
         except subprocess.CalledProcessError as error:
             print(f"FAILED {name} seed {seed}: {error.stderr[-500:]}", flush=True)
             return False
@@ -179,12 +202,13 @@ def _style(data: dict[str, Any], subject: str) -> str:
     return " ".join(data["style"].split()).format(subject=subject)
 
 
-def generate(kinds: list[str], attempt: int) -> None:
+def generate(kinds: list[str], attempt: int, boost: float = 0.0) -> None:
+    """`boost` raises every kind's denoise (capped at 0.95) for more varied attempts."""
     data = _data()
     for kind in kinds:
         spec = data["subjects"][kind]
         prompt = _style(data, spec["prompt"])
-        denoise = spec.get("denoise", data["denoise"])
+        denoise = boosted(spec.get("denoise", data["denoise"]), boost)
         if not render_grid(kind, attempt, prompt, draw_guide(kind, spec), denoise, data):
             return
 
@@ -242,14 +266,125 @@ def derived_denoise(data: dict[str, Any], name: str) -> float:
     return override.get("denoise", tier.get("denoise", 0.5))
 
 
-def generate_derived(name: str, attempt: int) -> None:
+def boosted(denoise: float, boost: float) -> float:
+    return round(min(denoise + boost, 0.95), 2) if boost else denoise
+
+
+def generate_derived(name: str, attempt: int, boost: float = 0.0) -> None:
     data = _data()
     kind, _ = derived_names(data)[name]
     init = picked_image(kind)
     if init is None:
         raise ValueError(f"{name}: pick a {kind} first")
-    denoise = derived_denoise(data, name)
+    denoise = boosted(derived_denoise(data, name), boost)
     render_grid(name, attempt, _style(data, derived_prompt(data, name)), init, denoise, data)
+
+
+# --- floor textures -----------------------------------------------------------------------------
+# A prompt file's `floors:` section makes seamless floor textures `floor.<material>` for the
+# materials of `floor_theme`. The guide is that material drawn as the renderer does (colour and
+# pattern over the material's `texture_cells`), optionally changed by the entry's `guide:`
+# (Material fields); the render is opaque, and the cut blends it into a seamless square tile.
+# `floor_style`, `floor_denoise`, `floor_model` (default Flux dev: Pony without the object LoRA
+# fills floors with people), `floor_lora` (default none) and `floor_negative` (SDXL models only)
+# replace the object settings.
+
+
+FLOOR_SIDE = 1024  # px, guide and render
+
+
+def floor_names(data: dict[str, Any]) -> list[str]:
+    return list(data.get("floors") or {})
+
+
+def floor_material(data: dict[str, Any], name: str) -> Material:
+    theme = load_theme(data["floor_theme"])
+    material = theme.materials[name.removeprefix("floor.")]
+    changes = (data["floors"][name] or {}).get("guide") or {}
+    return material.model_validate({**material.model_dump(), **changes})
+
+
+def draw_floor_guide(data: dict[str, Any], name: str) -> Image.Image:
+    material = floor_material(data, name)
+    fill = colour(material.floor)[:3]
+    image = Image.new("RGB", (FLOOR_SIDE, FLOOR_SIDE), fill)
+    draw = ImageDraw.Draw(image)
+    # Pattern lines several times stronger than in the map, so the model sees the structure.
+    *rgb, alpha = colour(material.lines)
+    strength = min(1.0, 3 * alpha / 255)
+    line = tuple(round(f + (c - f) * strength) for f, c in zip(fill, rgb, strict=True))
+    cell = FLOOR_SIDE / material.texture_cells
+    width = max(2, round(cell * 0.04))
+    n = material.tile
+    cells = range(material.texture_cells)
+    match material.pattern:
+        case Pattern.TILES:
+            for i in range(0, material.texture_cells, n):
+                draw.line((i * cell, 0, i * cell, FLOOR_SIDE), fill=line, width=width)
+                draw.line((0, i * cell, FLOOR_SIDE, i * cell), fill=line, width=width)
+        case Pattern.PLANKS:
+            for y in cells:
+                if y % n == 0:
+                    draw.line((0, y * cell, FLOOR_SIDE, y * cell), fill=line, width=width)
+                for x in cells:
+                    if (x + 3 * (y // n)) % (4 * n) == 0:
+                        top, bottom = y * cell, (y + 1) * cell
+                        draw.line((x * cell, top, x * cell, bottom), fill=line, width=width)
+        case Pattern.GRATE:
+            step = cell / 3
+            for i in range(round(2 * FLOOR_SIDE / step) + 1):
+                offset = i * step
+                draw.line((offset, 0, offset - FLOOR_SIDE, FLOOR_SIDE), fill=line, width=width)
+        case _:
+            pass
+    image = image.filter(ImageFilter.GaussianBlur(2))
+    # Grain gives img2img some surface to work from; a flat fill comes back flat.
+    grain = Image.effect_noise(image.size, 64).convert("RGB")
+    return Image.blend(image, ImageChops.overlay(image, grain), 0.5)
+
+
+def floor_denoise(data: dict[str, Any], name: str) -> float:
+    spec = data["floors"][name] or {}
+    return spec.get("denoise", data.get("floor_denoise", data["denoise"]))
+
+
+def generate_floor(name: str, attempt: int, boost: float = 0.0) -> None:
+    data = _data()
+    spec = data["floors"][name]
+    prompt = " ".join(data["floor_style"].split()).format(subject=spec["prompt"])
+    denoise = boosted(floor_denoise(data, name), boost)
+    guide = draw_floor_guide(data, name)
+    negative = data.get("floor_negative")
+    lora = data.get("floor_lora", "")  # "": none, the object LoRA draws objects on white
+    model = data.get("floor_model", "dev")
+    render_grid(name, attempt, prompt, guide, denoise, data, False, negative, lora, model)
+
+
+def seamless(image: Image.Image) -> Image.Image:
+    """Blend the picture with itself shifted by half: the shifted copy wraps at the borders,
+    the original covers the middle, so the square tiles without a seam."""
+    side = min(image.size)
+    left, top = (image.width - side) // 2, (image.height - side) // 2
+    image = image.convert("RGB").crop((left, top, left + side, top + side))
+    half = side // 2
+    shifted = ImageChops.offset(image, half, half)
+    ramp = Image.linear_gradient("L").resize((side, side))  # 0 at the top, 255 at the bottom
+    tent = ImageChops.darker(ramp, ramp.transpose(Image.Transpose.FLIP_TOP_BOTTOM))
+    tent = tent.point(lambda v: min(255, v * 2))  # 0 at the border, 255 in the middle
+    mask = ImageChops.darker(tent, tent.transpose(Image.Transpose.ROTATE_90))
+    return Image.composite(image, shifted, mask)
+
+
+def cut_floor(name: str) -> None:
+    data = _data()
+    picks = yaml.safe_load(sprites.PICKS.read_text()) or {}
+    quadrant, attempt, _, _ = sprites._pick(picks[name])
+    grid = Image.open(sprites.RAW / f"{name}.{attempt}.png")
+    tile = seamless(sprites.quadrants(grid)[quadrant])
+    side = floor_material(data, name).texture_cells * sprites.PX_PER_CELL
+    sprites.OUT.mkdir(parents=True, exist_ok=True)
+    tile.resize((side, side), Image.Resampling.LANCZOS).save(sprites.OUT / f"{name}.png")
+    print(f"cut {name}")
 
 
 def main() -> None:
@@ -270,7 +405,11 @@ def main() -> None:
         case "sheet":
             sprites.sheet(kinds, args.attempt, args.out)
         case _:
-            sprites.cut(args.kinds or list(yaml.safe_load(sprites.PICKS.read_text()) or {}))
+            names = args.kinds or list(yaml.safe_load(sprites.PICKS.read_text()) or {})
+            floors = set(floor_names(_data()))
+            sprites.cut([name for name in names if name not in floors])
+            for name in floors & set(names):
+                cut_floor(name)
 
 
 if __name__ == "__main__":

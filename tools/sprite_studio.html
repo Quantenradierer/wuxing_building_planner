@@ -17,6 +17,9 @@
   .filters button { border: 1px solid var(--line); background: var(--card); padding: 4px 10px;
                     border-radius: 6px; cursor: pointer; }
   .filters button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .pause { border: 1px solid var(--line); background: var(--card); padding: 4px 10px;
+           border-radius: 6px; cursor: pointer; }
+  .pause.paused { background: var(--warn); color: #fff; border-color: var(--warn); }
   input[type=search] { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; }
   main { padding: 16px; display: grid; gap: 16px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
@@ -46,6 +49,8 @@
                    cursor: pointer; }
   .editor button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .current { width: 72px; height: 72px; object-fit: contain; }
+  .current.floor { width: 144px; height: 144px; background-size: 72px 72px; border-radius: 6px;
+                   flex: none; }
   .retry { border: 1px solid var(--accent); color: var(--accent); background: none;
            padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
   .retry:disabled { opacity: .4; cursor: default; }
@@ -65,6 +70,7 @@
 <header>
   <h1>Sprite Studio</h1>
   <span class="stat" id="stat"></span>
+  <button id="pause" class="pause" title="Stops after the image that is rendering now">Pause queue</button>
   <span class="filters" id="filters">
     <button data-f="all" class="on">All</button>
     <button data-f="open">Not picked</button>
@@ -98,7 +104,11 @@ function card(k) {
   const label = k.status === "waiting" ? `waiting for ${k.base} pick` : k.status;
   const badge = k.status !== "idle" ? `<span class="badge ${k.status}">${label}</span>`
     : k.pick ? `<span class="badge picked">picked</span>` : "";
-  const current = k.pick ? `<img class="current" src="/sprite/${k.kind}?v=${k.pick.attempt}-${k.pick.quadrant}" alt="">` : "";
+  const src = k.pick ? `/sprite/${k.kind}?v=${k.pick.attempt}-${k.pick.quadrant}` : "";
+  // A floor texture is shown repeated 2x2, so a seam would show.
+  const current = !k.pick ? "" : k.floor
+    ? `<div class="current floor" title="seamless tile, repeated" style="background-image:url('${src}')"></div>`
+    : `<img class="current" src="${src}" alt="">`;
   const busy = ["queued", "rendering", "waiting"].includes(k.status);
   const derived = k.base ? `<div class="derived">worn down from the picked ${k.base}</div>` : "";
   const describe = k.base ? "" : `<button class="describe edit">Edit description</button>
@@ -134,7 +144,8 @@ function card(k) {
   for (const a of [...k.attempts].reverse()) {
     const row = document.createElement("div");
     row.className = "attempt";
-    row.innerHTML = `<div class="label">attempt ${a}</div><div class="tiles"></div>`;
+    const idle = k.idle[a] !== undefined ? ` · made while idle, denoise ${k.idle[a]}` : "";
+    row.innerHTML = `<div class="label">attempt ${a}${idle}</div><div class="tiles"></div>`;
     for (let q = 0; q < 4; q++) {
       const img = document.createElement("img");
       img.loading = "lazy";
@@ -212,7 +223,11 @@ function render() {
   const picked = state.kinds.filter(k => k.pick).length;
   document.getElementById("stat").textContent =
     `${picked}/${state.kinds.length} picked · ${state.queue} queued` +
-    (state.rendering ? ` · rendering ${state.rendering}` : "");
+    (state.rendering ? ` · rendering ${state.rendering}${state.rendering_idle ? " (idle variation)" : ""}` : "") +
+    (state.paused ? (state.rendering ? " · pausing after this one" : " · paused") : "");
+  const pause = document.getElementById("pause");
+  pause.textContent = state.paused ? "Resume queue" : "Pause queue";
+  pause.classList.toggle("paused", state.paused);
   const shown = [];
   for (const k of state.kinds) {
     if (!visible(k)) continue;
@@ -232,6 +247,8 @@ function render() {
 async function refresh() {
   try { state = await (await fetch("/api/state")).json(); render(); } catch (e) {}
 }
+
+document.getElementById("pause").onclick = () => post("/api/pause", { paused: !state.paused });
 
 document.getElementById("filters").onclick = e => {
   if (!e.target.dataset.f) return;

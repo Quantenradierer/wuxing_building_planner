@@ -1,0 +1,1636 @@
+# Neon sprite set, second round (tools/sprite_studio.py --set neon2): the modern2 guides (their
+# shapes were good) redrawn cyberpunk, cut to data/sprites/neon2/<name>.png. Made from
+# sprite_prompts_modern2.yaml: guide colours darkened to gunmetal and cool greys (coloured parts
+# keep their hue), a thin neon strip along the back edge of wall-backed tech and furniture (beds,
+# desks, counters, racks, machines; both short ends of a shipping container) to seed the glow, and every
+# description ends in its tier's cyberpunk materials:
+#   middle    dark gunmetal and matte black polymer, thin cyan LED strips
+#   high      corporate: black glass, brushed chrome, glowing cyan lines
+#   luxury    elite: black lacquer, gold trim, magenta neon
+#   low       the middle object worn: grimy, scratched, a dim flickering LED
+#   squatter  the middle object wrecked: rusted, duct tape, dead neon
+# Tiers, guide format and facing as in sprite_prompts_modern2.yaml. Unlike modern2 this keeps
+# the LoRA's sci-fi tag `sc1f1` and allows neon.
+look: "cyberpunk, dark gunmetal, black glass, chrome, cyan and magenta neon accents, grimy"
+style: >-
+  score_9, score_8_up, score_7_up, m3p4ss3ts, sc1f1, top down, from above, white background,
+  simple background, {subject}
+negative: >-
+  front view, side view, perspective, isometric, cropped, text, watermark, people, blurry
+lora: "topdown-map-assets-scifi-pony.safetensors"
+# A little more freedom than modern2 so the neon look can come through; tall objects keep
+# their own `denoise:`.
+denoise: 0.65
+seeds: 4
+
+derived:
+  tiers:
+    low:
+      denoise: 0.55
+      prompt: >-
+        {subject}, old and worn out, grimy, scratched and stained, faded, one dim flickering LED
+    squatter:
+      denoise: 0.7
+      prompt: >-
+        {subject}, wrecked and looted, broken, rusted, torn, patched with duct tape, dirt and
+        debris, dead neon
+
+# Floor textures floor.<material> (see tools/sprites_local.py): seamless square tiles for the
+# materials of `floor_theme`, each spanning the material's texture_cells. The guide is the
+# material as the map draws it (dark fill, joints); `guide:` changes Material fields for it.
+floor_theme: neon2_sprites
+floor_model: dev
+floor_style: >-
+  seamless tileable floor texture, orthographic top-down view straight from above, flat surface
+  filling the whole image, even diffuse lighting, no objects, no people, no furniture, dark
+  cyberpunk game map style, {subject}
+floor_denoise: 0.8
+
+floors:
+  floor.concrete:
+    prompt: "dark grey poured concrete floor in large square slabs, hairline cracks, oil stains, faint scuff marks, scattered grit"
+  floor.corridor:
+    prompt: "dark gunmetal floor tiles with thin seams, worn walking path, scuffed rubber edging, faint cyan guide line reflections"
+  floor.lobby:
+    prompt: "polished black terrazzo floor tiles with grey and chrome flecks, glossy, faint magenta neon reflections"
+  floor.carpet:
+    prompt: "dark slate blue low-pile office carpet tiles, subtle woven texture, faint geometric pattern, slightly worn"
+  floor.executive:
+    prompt: "dark walnut parquet floor, long polished boards, deep glossy finish, thin gold inlay lines between boards"
+  floor.wood:
+    prompt: "dark brown laminate floorboards, worn and scratched, faded varnish, uneven plank lengths"
+  floor.wet:
+    prompt: "small dark teal ceramic tiles, wet sheen, grimy grout lines, water stains"
+  floor.sterile:
+    prompt: "smooth grey-blue vinyl hospital floor, seamless welded sheets, clean, faint reflections, tiny speckles"
+  floor.industrial:
+    prompt: "black steel diamond plate floor grating, rusted edges, oil smears, dirt in the grooves"
+  floor.tech:
+    prompt: "raised access floor panels in dark navy, square panels with thin metal frames, perforated vent panels, faint violet light in the seams"
+  floor.shop:
+    prompt: "light grey vinyl shop floor tiles, scuffed, dirt along the joints, faint pink neon reflections"
+  floor.stairs:
+    prompt: "dark grey anti-slip rubber floor with small round studs, worn, dusty"
+  floor.club:
+    prompt: "black glossy dance floor tiles with thin glowing magenta seams, sticky spills, glitter"
+  floor.pods:
+    prompt: "dark blue-grey polymer floor panels, rounded joints, thin cyan light strips in the seams, scuffed"
+  floor.lab:
+    prompt: "white epoxy laboratory floor, seamless, glossy, faint grey speckles, thin green safety line reflections"
+  floor.terrace:
+    prompt: "weathered dark composite deck boards, gaps between boards, grime and moss in the gaps"
+  floor.rooftop:
+    prompt: "dark grey rooftop pavers, large square concrete tiles, stains, puddle marks, bird droppings, cracked corners"
+
+subjects:
+  desk:
+    prompt: "light oak office desk with a slim computer monitor along the top edge, keyboard and mouse, no chair, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#bf8846", 0.06]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.28, 0.10, 0.72, 0.20, "#30353b", 0.3]
+      - [rect, 0.33, 0.55, 0.67, 0.72, "#959da9", 0.2]
+      - [ellipse, 0.75, 0.58, 0.80, 0.70, "#959da9"]
+  chair:
+    prompt: "office chair, grey fabric seat, backrest along the top edge, five wheels, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [line, 0.5, 0.55, 0.5, 0.08, "#32363d", 0.07]
+      - [line, 0.5, 0.55, 0.93, 0.40, "#32363d", 0.07]
+      - [line, 0.5, 0.55, 0.77, 0.95, "#32363d", 0.07]
+      - [line, 0.5, 0.55, 0.23, 0.95, "#32363d", 0.07]
+      - [line, 0.5, 0.55, 0.07, 0.40, "#32363d", 0.07]
+      - [rect, 0.20, 0.30, 0.80, 0.85, "#5a626e", 0.35]
+      - [rect, 0.18, 0.12, 0.82, 0.32, "#40464f", 0.4]
+  bed:
+    prompt: "single bed with white linen, pillow at the top edge, light grey blanket towards the bottom edge, wooden frame, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#9f7548", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.06, 0.04, 0.94, 0.96, "#9ca3ae", 0.05]
+      - [rect, 0.14, 0.07, 0.86, 0.22, "#a5acb6", 0.3]
+      - [rect, 0.06, 0.35, 0.94, 0.96, "#7b8593", 0.05]
+  sofa:
+    prompt: "three seat sofa in grey fabric, backrest along the top edge, three cushions facing the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#545b67", 0.12]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.10, 0.28, 0.37, 0.92, "#636c7a", 0.1]
+      - [rect, 0.37, 0.28, 0.63, 0.92, "#636c7a", 0.1]
+      - [rect, 0.63, 0.28, 0.90, 0.92, "#636c7a", 0.1]
+  wc:
+    denoise: 0.6
+    prompt: "white vitreous-ceramic floor-standing toilet, closed matte soft-close plastic lid with thin seam, visible oval seat outline and bowl rim, smooth curved porcelain pedestal, compact rectangular cistern against top edge with chrome dual-flush buttons, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.22, 0.05, 0.78, 0.30, "#9ea5b0", 0.25]
+      - [ellipse, 0.28, 0.25, 0.72, 0.92, "#a2a9b3"]
+      - [ellipse, 0.34, 0.32, 0.66, 0.84, "#949ca7"]
+  plant:
+    prompt: "potted plant with large green leaves in a round white pot, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.20, 0.20, 0.80, 0.80, "#9ca3ae"]
+      - [ellipse, 0.05, 0.10, 0.60, 0.55, "#478632"]
+      - [ellipse, 0.40, 0.08, 0.95, 0.60, "#508f38"]
+      - [ellipse, 0.15, 0.45, 0.85, 0.95, "#417e2e"]
+  meeting_table:
+    prompt: "long rectangular conference table with a light wood top, only the flat tabletop visible, no chairs, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#c59351", 0.08]
+  fridge:
+    prompt: "stainless steel refrigerator seen from straight above, flat metal top, door edge at the bottom, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    denoise: 0.72
+    base: [rect, "#858e9b", 0.06]
+  reception_desk:
+    prompt: "reception desk, light wood front counter with a white worktop, no chair, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#bf8846", 0.08]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.0, 0.55, 1.0, 1.0, "#979eaa", 0.05]
+  armchair:
+    denoise: 0.55
+    prompt: "single armchair, grey fabric, backrest along the top edge, two armrests, seat cushion facing the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#5a626e", 0.2]
+    guide:
+      - [rect, 0.16, 0.10, 0.84, 0.34, "#495059", 0.4]
+      - [rect, 0.06, 0.24, 0.24, 0.90, "#495059", 0.5]
+      - [rect, 0.76, 0.24, 0.94, 0.90, "#495059", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#636c7a", 0.3]
+  wardrobe:
+    denoise: 0.65
+    prompt: "wooden wardrobe seen from straight above, flat closed top, two door seams, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#977349", 0.04]
+    guide:
+      - [line, 0.5, 0.0, 0.5, 1.0, "#725533", 0.05]
+  nightstand:
+    prompt: "small nightstand seen from straight above, square wooden top with one drawer at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#a67945", 0.1]
+    guide:
+      - [rect, 0.15, 0.6, 0.85, 0.85, "#82633d", 0.2]
+  sink:
+    prompt: "white ceramic washbasin, oval bowl, faucet at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.1, 0.05, 0.9, 0.95, "#9da4af", 0.15]
+      - [ellipse, 0.25, 0.22, 0.75, 0.9, "#919aa9"]
+      - [rect, 0.44, 0.02, 0.56, 0.2, "#858e9b", 0.4]
+  shower:
+    denoise: 0.75
+    prompt: "square shower tray seen from straight above, white tiles, central round drain, rain head at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#949ca7", 0.03]
+    guide:
+      - [ellipse, 0.44, 0.44, 0.56, 0.56, "#7a8493"]
+      - [rect, 0.4, 0.02, 0.6, 0.12, "#858e9b", 0.4]
+  stove:
+    denoise: 0.5
+    prompt: "kitchen stove seen from straight above, black glass cooktop with four round burners, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#2f3339", 0.06]
+    guide:
+      - [ellipse, 0.12, 0.10, 0.46, 0.44, "#40454e"]
+      - [ellipse, 0.54, 0.10, 0.88, 0.44, "#40454e"]
+      - [ellipse, 0.12, 0.54, 0.46, 0.88, "#40454e"]
+      - [ellipse, 0.54, 0.54, 0.88, 0.88, "#40454e"]
+  counter:
+    prompt: "kitchen counter seen from straight above, white worktop with a sink and a cutting board, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#959da9", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.62, 0.25, 0.9, 0.75, "#828b99", 0.2]
+      - [rect, 0.1, 0.3, 0.4, 0.7, "#bf8846", 0.15]
+  double_bed:
+    prompt: "double bed with white linen, two pillows at the top edge, light grey blanket towards the bottom edge, wooden frame, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#9f7548", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.06, 0.04, 0.94, 0.96, "#9ca3ae", 0.05]
+      - [rect, 0.12, 0.07, 0.48, 0.24, "#a5acb6", 0.3]
+      - [rect, 0.52, 0.07, 0.88, 0.24, "#a5acb6", 0.3]
+      - [rect, 0.06, 0.4, 0.94, 0.96, "#7b8593", 0.05]
+  shelf:
+    prompt: "compact 1m wide light oak shelving unit, slim matte black metal frame, top shelf with stacked paperbacks and gray fabric box, middle shelf with potted succulent and magazine stack, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#a67945", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.06, 0.12, 0.3, 0.6, "#865330", 0.1]
+      - [rect, 0.34, 0.1, 0.5, 0.7, "#48586f", 0.1]
+      - [rect, 0.54, 0.15, 0.74, 0.55, "#48586f", 0.1]
+      - [rect, 0.78, 0.1, 0.94, 0.65, "#82713f", 0.1]
+  filing_cabinet:
+    denoise: 0.66
+    prompt: "grey metal filing cabinet seen from straight above, flat top, drawer seams towards the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#6a7482", 0.06]
+    guide:
+      - [rect, 0.3, 0.7, 0.7, 0.82, "#5a626e", 0.4]
+  server_rack:
+    denoise: 0.95
+    prompt: "Matte charcoal metal server rack, bold rectangular silhouette, recessed rear cable bulkhead at top edge, dark smoked glass front door at bottom edge, broad light gray ventilation panel, gunmetal trim around edges, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#2c3036", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.1, 0.06, 0.9, 0.16, "#373c44", 0.3]
+    guide:
+      - [rect, 0.0, 0.88, 1.0, 1.0, "#6a7482", 0.0]
+  table:
+    prompt: "small square table with a light wood top, only the flat tabletop visible, no chairs, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#bf8846", 0.1]
+  cabinet:
+    denoise: 0.7
+    prompt: "small storage cabinet seen from straight above, flat white top, closed doors, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#949ca8", 0.06]
+  locker:
+    denoise: 0.7
+    prompt: "single metal locker seen from straight above, flat painted steel top, vent slits at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#666f7d", 0.05]
+    guide:
+      - [rect, 0.2, 0.78, 0.8, 0.9, "#525a65", 0.3]
+  washing_machine:
+    denoise: 0.85
+    prompt: "compact mid-range white front-loading washing machine, smooth enamel top with faint door outline, brushed stainless control panel and plastic buttons along top edge, detergent drawer and rubber gasket, back against painted drywall at top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#979eaa", 0.06]
+    guide:
+      - [rect, 0.1, 0.06, 0.9, 0.2, "#828b99", 0.3]
+      - [ellipse, 0.3, 0.35, 0.7, 0.85, "#89929f"]
+  dryer:
+    denoise: 0.55
+    prompt: "white tumble dryer seen from straight above, flat top with a control panel along the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#979eaa", 0.06]
+    guide:
+      - [rect, 0.1, 0.06, 0.9, 0.2, "#828b99", 0.3]
+      - [ellipse, 0.3, 0.35, 0.7, 0.85, "#8d96a4"]
+  bench:
+    prompt: "long bench seen from straight above, light wooden slats, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#b78948", 0.15]
+    guide:
+      - [line, 0.02, 0.35, 0.98, 0.35, "#97763f", 0.14]
+      - [line, 0.02, 0.65, 0.98, 0.65, "#97763f", 0.14]
+  coffee_machine:
+    denoise: 0.85
+    prompt: "black coffee machine seen from straight above, flat top with a water tank and buttons, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#2f3339", 0.12]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [ellipse, 0.55, 0.2, 0.9, 0.6, "#40454e"]
+  water_cooler:
+    denoise: 0.7
+    prompt: "office water cooler seen from straight above, white base with a large round blue water bottle on top, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.15, 0.15, 0.85, 0.85, "#979eaa", 0.3]
+      - [ellipse, 0.28, 0.28, 0.72, 0.72, "#519eca"]
+  copier:
+    prompt: "office photocopier seen from straight above, flat grey top with a scanner lid and paper trays, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#828b99", 0.06]
+    guide:
+      - [rect, 0.15, 0.15, 0.85, 0.6, "#76808f", 0.15]
+      - [rect, 0.2, 0.7, 0.8, 0.9, "#6b7583", 0.2]
+  mailboxes:
+    denoise: 0.75
+    prompt: "block of metal mailboxes seen from straight above, a grid of small square doors, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#6b7583", 0.04]
+    guide:
+      - [line, 0.34, 0.0, 0.34, 1.0, "#4b515b", 0.04]
+      - [line, 0.67, 0.0, 0.67, 1.0, "#4b515b", 0.04]
+      - [line, 0.0, 0.5, 1.0, 0.5, "#4b515b", 0.04]
+  vending_machine:
+    denoise: 0.55
+    prompt: "back flush against painted drywall wall at top edge, 1m x 0.5m stainless steel flat top, matte white steel sides, dark tempered glass product window at front bottom, recessed coin slot, rectangular dispensing chute, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#828b99", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.06, 0.8, 0.94, 0.96, "#2f353d", 0.1]
+  terminal:
+    denoise: 0.7
+    prompt: "self-service kiosk terminal, dark slate housing, large touchscreen showing a blue and green menu, card reader and receipt slot at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#383e46", 0.14]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.1, 0.05, 0.9, 0.14, "#2c3139", 0.4]
+      - [rect, 0.1, 0.22, 0.9, 0.78, "#202630", 0.08]
+      - [rect, 0.15, 0.27, 0.85, 0.5, "#2b7db2", 0.05]
+      - [rect, 0.15, 0.54, 0.48, 0.73, "#8c9bb1", 0.05]
+      - [rect, 0.52, 0.54, 0.85, 0.73, "#45b354", 0.05]
+      - [rect, 0.58, 0.84, 0.86, 0.9, "#7b8695", 0.5]
+      - [rect, 0.14, 0.84, 0.44, 0.92, "#292e35", 0.3]
+  cubicle:
+    prompt: "office cubicle workstation seen from straight above, L-shaped light wood desk with low grey partition walls, a monitor and keyboard, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#7c8695", 0.04]
+    guide:
+      - [rect, 0.05, 0.05, 0.95, 0.35, "#bf8846", 0.05]
+      - [rect, 0.05, 0.35, 0.35, 0.95, "#bf8846", 0.05]
+      - [rect, 0.4, 0.1, 0.7, 0.2, "#30353b", 0.3]
+  rug:
+    denoise: 0.55
+    prompt: "rectangular area rug seen from straight above, soft neutral grey and beige geometric pattern, flat, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8792a2", 0.02]
+    guide:
+      - [rect, 0.08, 0.1, 0.92, 0.9, "#929aa6", 0.02]
+      - [rect, 0.2, 0.24, 0.8, 0.76, "#6d7e98", 0.02]
+  side_table:
+    denoise: 0.62
+    prompt: "small round side table seen from straight above, light wood top, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#bf8846", 0]
+  stool:
+    denoise: 0.66
+    prompt: "round stool seen from straight above, black seat with a metal rim, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#2f3339", 0]
+    guide:
+      - [ellipse, 0.12, 0.12, 0.88, 0.88, "#373c44"]
+  trash_bin:
+    denoise: 0.64
+    prompt: "round trash bin seen from straight above, brushed metal rim, dark opening, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#76808f", 0]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#373c44"]
+  guard_desk:
+    denoise: 0.8
+    prompt: "security desk seen from straight above, dark counter with a row of small monitors along the top edge, no chair, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#383e48", 0.06]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.08, 0.08, 0.92, 0.22, "#282e37", 0.2]
+  coat_rack:
+    denoise: 0.8
+    prompt: "coat stand with four hooks, coats hanging around it in navy, camel, grey and dark red, black pole top in the center, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#373c43"]
+      - [ellipse, 0.04, 0.1, 0.5, 0.56, "#2e3c64"]
+      - [ellipse, 0.5, 0.06, 0.96, 0.52, "#9e763e"]
+      - [ellipse, 0.3, 0.48, 0.84, 0.96, "#515964"]
+      - [ellipse, 0.06, 0.5, 0.38, 0.84, "#7e2828"]
+      - [line, 0.5, 0.5, 0.5, 0.12, "#2d3137", 0.05]
+      - [line, 0.5, 0.5, 0.88, 0.5, "#2d3137", 0.05]
+      - [line, 0.5, 0.5, 0.5, 0.88, "#2d3137", 0.05]
+      - [line, 0.5, 0.5, 0.12, 0.5, "#2d3137", 0.05]
+      - [ellipse, 0.42, 0.42, 0.58, 0.58, "#26292e"]
+  crate:
+    denoise: 0.55
+    prompt: "wooden shipping crate seen from straight above, square lid, only the top surface visible, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#a4773c", 0.03]
+    guide:
+      - [line, 0.5, 0.02, 0.5, 0.98, "#7d592a", 0.04]
+      - [line, 0.02, 0.5, 0.98, 0.5, "#7d592a", 0.04]
+  safe:
+    denoise: 0.6
+    prompt: "heavy steel safe, plain grey top with corner bolts, front panel at the bottom edge with an electronic PIN keypad, small green display and a steel handle, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#495059", 0.06]
+    guide:
+      - [rect, 0.06, 0.06, 0.94, 0.56, "#545b67", 0.04]
+      - [ellipse, 0.1, 0.1, 0.15, 0.15, "#383d44"]
+      - [ellipse, 0.85, 0.1, 0.9, 0.15, "#383d44"]
+      - [ellipse, 0.1, 0.47, 0.15, 0.52, "#383d44"]
+      - [ellipse, 0.85, 0.47, 0.9, 0.52, "#383d44"]
+      - [rect, 0.0, 0.58, 1.0, 1.0, "#34393f", 0.03]
+      - [rect, 0.24, 0.61, 0.62, 0.69, "#249663", 0.1]
+      - [rect, 0.24, 0.72, 0.34, 0.78, "#858e9b", 0.2]
+      - [rect, 0.38, 0.72, 0.48, 0.78, "#858e9b", 0.2]
+      - [rect, 0.52, 0.72, 0.62, 0.78, "#858e9b", 0.2]
+      - [rect, 0.24, 0.8, 0.34, 0.86, "#858e9b", 0.2]
+      - [rect, 0.38, 0.8, 0.48, 0.86, "#858e9b", 0.2]
+      - [rect, 0.52, 0.8, 0.62, 0.86, "#858e9b", 0.2]
+      - [rect, 0.24, 0.88, 0.34, 0.94, "#858e9b", 0.2]
+      - [rect, 0.38, 0.88, 0.48, 0.94, "#858e9b", 0.2]
+      - [rect, 0.52, 0.88, 0.62, 0.94, "#858e9b", 0.2]
+      - [rect, 0.72, 0.64, 0.84, 0.94, "#727c8b", 0.3]
+  atm:
+    denoise: 0.7
+    prompt: "cash machine, dark grey body, green bank logo strip at the top edge, blue screen, keypad with silver keys and a card slot at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#414750", 0.08]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.14, "#218b56", 0.06]
+      - [rect, 0.12, 0.22, 0.88, 0.56, "#262c36", 0.06]
+      - [rect, 0.17, 0.26, 0.83, 0.52, "#2070b2", 0.04]
+      - [rect, 0.0, 0.62, 1.0, 1.0, "#2f333a", 0.06]
+      - [rect, 0.3, 0.66, 0.4, 0.73, "#858e9b", 0.2]
+      - [rect, 0.45, 0.66, 0.55, 0.73, "#858e9b", 0.2]
+      - [rect, 0.6, 0.66, 0.7, 0.73, "#858e9b", 0.2]
+      - [rect, 0.3, 0.76, 0.4, 0.83, "#858e9b", 0.2]
+      - [rect, 0.45, 0.76, 0.55, 0.83, "#858e9b", 0.2]
+      - [rect, 0.6, 0.76, 0.7, 0.83, "#858e9b", 0.2]
+      - [rect, 0.3, 0.86, 0.4, 0.93, "#858e9b", 0.2]
+      - [rect, 0.45, 0.86, 0.55, 0.93, "#858e9b", 0.2]
+      - [rect, 0.6, 0.86, 0.7, 0.93, "#858e9b", 0.2]
+      - [rect, 0.76, 0.68, 0.92, 0.74, "#202327", 0.4]
+      - [rect, 0.08, 0.68, 0.24, 0.92, "#636b79", 0.1]
+  weapon_locker:
+    denoise: 0.7
+    prompt: "open gun rack, steel frame, dark interior with rifles lying in a row, wooden stocks on the right, yellow hazard stripe at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#41464f", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.04, 0.1, 0.96, 0.82, "#2c3036", 0.03]
+      - [line, 0.1, 0.24, 0.72, 0.24, "#212429", 0.07]
+      - [rect, 0.72, 0.19, 0.9, 0.3, "#724b2a", 0.2]
+      - [line, 0.1, 0.4, 0.72, 0.4, "#212429", 0.07]
+      - [rect, 0.72, 0.35, 0.9, 0.46, "#724b2a", 0.2]
+      - [line, 0.1, 0.56, 0.72, 0.56, "#212429", 0.07]
+      - [rect, 0.72, 0.51, 0.9, 0.62, "#373c44", 0.2]
+      - [line, 0.1, 0.7, 0.6, 0.7, "#212429", 0.06]
+      - [rect, 0.6, 0.66, 0.74, 0.75, "#373c44", 0.2]
+      - [rect, 0.0, 0.86, 1.0, 0.94, "#cca21b", 0.2]
+  gondola:
+    prompt: "supermarket shelf gondola seen from straight above, long double-sided shelving full of colourful products, a central spine, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8a929f", 0.02]
+    guide:
+      - [rect, 0.0, 0.4, 1.0, 0.6, "#77818f", 0.0]
+      - [rect, 0.02, 0.05, 0.98, 0.4, "#4b8abe", 0.02]
+      - [rect, 0.02, 0.6, 0.98, 0.95, "#be5c4b", 0.02]
+  checkout:
+    denoise: 0.62
+    prompt: "supermarket checkout counter seen from straight above, conveyor belt and a register terminal, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#848e9c", 0.05]
+    guide:
+      - [rect, 0.2, 0.1, 0.8, 0.6, "#373c44", 0.05]
+      - [rect, 0.55, 0.65, 0.85, 0.9, "#282e37", 0.15]
+  freezer:
+    denoise: 0.68
+    prompt: "supermarket chest freezer seen from straight above, glass sliding lids, frozen food inside, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8bafc8", 0.04]
+    guide:
+      - [rect, 0.08, 0.12, 0.5, 0.88, "#7eabc3", 0.05]
+      - [rect, 0.5, 0.12, 0.92, 0.88, "#7eabc3", 0.05]
+  pallet:
+    denoise: 0.35
+    prompt: "wooden pallet stacked with cardboard boxes seen from straight above, only the tops of the boxes visible, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#83623a", 0.02]
+    guide:
+      - [rect, 0.05, 0.05, 0.5, 0.5, "#c18838", 0.03]
+      - [rect, 0.5, 0.05, 0.95, 0.5, "#b17f3a", 0.03]
+      - [rect, 0.05, 0.5, 0.5, 0.95, "#b17f3a", 0.03]
+      - [rect, 0.5, 0.5, 0.95, 0.95, "#c18838", 0.03]
+  rack:
+    prompt: "heavy duty warehouse pallet rack seen from straight above, steel frame with boxes and crates on the top shelf, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#6b7583", 0.03]
+    guide:
+      - [rect, 0.05, 0.1, 0.45, 0.9, "#c18838", 0.03]
+      - [rect, 0.55, 0.1, 0.95, 0.9, "#83623a", 0.03]
+  display_case:
+    denoise: 0.64
+    prompt: "glass display case seen from straight above, white frame, clear glass top showing items, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#91acca", 0.04]
+    guide:
+      - [rect, 0.06, 0.12, 0.94, 0.88, "#88a8c0", 0.03]
+  laundry_cart:
+    denoise: 0.75
+    prompt: "laundry cart, dark metal frame, grey-blue canvas bag full of colorful towels in yellow, red, blue and green, handle bar at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#373c44", 0.08]
+    guide:
+      - [rect, 0.08, 0.1, 0.92, 0.94, "#5b697f", 0.08]
+      - [ellipse, 0.14, 0.16, 0.62, 0.46, "#e4bb27"]
+      - [ellipse, 0.4, 0.3, 0.88, 0.62, "#c1513a"]
+      - [ellipse, 0.12, 0.5, 0.58, 0.82, "#3a87c1"]
+      - [ellipse, 0.46, 0.62, 0.88, 0.9, "#7cae5b"]
+      - [rect, 0.1, 0.0, 0.9, 0.06, "#626b78", 0.5]
+  barrel:
+    denoise: 0.68
+    prompt: "metal barrel seen from straight above, round steel drum with a rim, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#646d7a", 0]
+    guide:
+      - [ellipse, 0.15, 0.15, 0.85, 0.85, "#6b7686"]
+  tool_rack:
+    denoise: 0.7
+    prompt: "workshop tool rack seen from straight above, a board with hand tools laid out, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#a67945", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.1, 0.2, 0.2, 0.8, "#373c44", 0.2]
+      - [rect, 0.35, 0.2, 0.45, 0.75, "#4b515b", 0.2]
+      - [rect, 0.6, 0.2, 0.7, 0.8, "#373c44", 0.2]
+  workbench:
+    prompt: "2m wide workbench, light oak top, powder-coated steel legs, stainless-steel bench vice left edge, pegboard with hanging tools at top edge, scattered screwdrivers, pliers, tape-measure, plastic parts tray, roll of blue painter's tape, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#a98053", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.05, 0.15, 0.2, 0.5, "#373c44", 0.15]
+  conveyor:
+    denoise: 0.55
+    prompt: "roller conveyor, grey metal side rails, dark rollers across, three cardboard boxes on it, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#373c44", 0.02]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.12, "#6b7583", 0.1]
+      - [rect, 0.0, 0.88, 1.0, 1.0, "#6b7583", 0.1]
+      - [rect, 0.0, 0.12, 1.0, 0.88, "#2e3339", 0.0]
+      - [line, 0.05, 0.14, 0.05, 0.86, "#464c55", 0.03]
+      - [line, 0.15, 0.14, 0.15, 0.86, "#464c55", 0.03]
+      - [line, 0.25, 0.14, 0.25, 0.86, "#464c55", 0.03]
+      - [line, 0.35, 0.14, 0.35, 0.86, "#464c55", 0.03]
+      - [line, 0.45, 0.14, 0.45, 0.86, "#464c55", 0.03]
+      - [line, 0.55, 0.14, 0.55, 0.86, "#464c55", 0.03]
+      - [line, 0.65, 0.14, 0.65, 0.86, "#464c55", 0.03]
+      - [line, 0.75, 0.14, 0.75, 0.86, "#464c55", 0.03]
+      - [line, 0.85, 0.14, 0.85, 0.86, "#464c55", 0.03]
+      - [line, 0.95, 0.14, 0.95, 0.86, "#464c55", 0.03]
+      - [rect, 0.1, 0.22, 0.22, 0.78, "#9f7643", 0.03]
+      - [rect, 0.4, 0.26, 0.5, 0.74, "#b7823e", 0.03]
+      - [rect, 0.68, 0.2, 0.82, 0.8, "#98723f", 0.03]
+  pay_station:
+    denoise: 0.7
+    prompt: "parking pay station kiosk seen from straight above, flat metal top, a dark screen and keypad at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#666f7d", 0.08]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.2, 0.6, 0.8, 0.9, "#282e37", 0.15]
+  hospital_bed:
+    prompt: "hospital bed seen from straight above, white mattress with side rails, pillow at the top edge, thin blanket towards the bottom, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#848e9c", 0.04]
+    guide:
+      - [rect, 0.1, 0.06, 0.9, 0.24, "#a5acb6", 0.2]
+      - [line, 0.04, 0.3, 0.04, 0.9, "#6b7686", 0.05]
+      - [line, 0.96, 0.3, 0.96, 0.9, "#6b7686", 0.05]
+  exam_table:
+    denoise: 0.5
+    prompt: "medical examination table seen from straight above, padded cream top with a paper roll, headrest at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#7e91ad", 0.06]
+    guide:
+      - [rect, 0.15, 0.05, 0.85, 0.2, "#8ea1bd", 0.2]
+  operating_table:
+    denoise: 0.6
+    prompt: "surgical operating table seen from straight above, narrow padded blue-grey top, headrest at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#5d7393", 0.1]
+    guide:
+      - [rect, 0.28, 0.05, 0.72, 0.22, "#6e9cb7", 0.3]
+  gurney:
+    denoise: 0.7
+    prompt: "hospital gurney stretcher seen from straight above, white padded top on a metal frame, pillow at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#848e9c", 0.06]
+    guide:
+      - [rect, 0.12, 0.06, 0.88, 0.24, "#a5acb6", 0.2]
+  medical_cabinet:
+    denoise: 0.66
+    prompt: "white medical supply cabinet seen from straight above, flat top with glass doors, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#91acca", 0.05]
+  medical_cart:
+    denoise: 0.75
+    prompt: "medical cart, pale blue top tray, steel kidney dish, blue box of gloves, small bottles, white gauze pad, green container, black handle bar at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#4d545e", 0.06]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.1, "#2f343a", 0.5]
+      - [rect, 0.04, 0.14, 0.96, 0.94, "#5b90b7", 0.04]
+      - [ellipse, 0.08, 0.22, 0.4, 0.56, "#7b8695"]
+      - [rect, 0.46, 0.22, 0.66, 0.5, "#2665c6", 0.1]
+      - [rect, 0.72, 0.2, 0.8, 0.42, "#d21f1f", 0.3]
+      - [rect, 0.84, 0.2, 0.92, 0.42, "#8f9bac", 0.3]
+      - [rect, 0.1, 0.62, 0.54, 0.86, "#8596b1", 0.04]
+      - [rect, 0.62, 0.6, 0.9, 0.88, "#32967f", 0.06]
+  morgue_drawers:
+    denoise: 0.62
+    prompt: "stainless steel morgue cold chamber seen from straight above, flat brushed metal top over a bank of drawers, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#7a8698", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [line, 0.5, 0.0, 0.5, 1.0, "#646d7a", 0.03]
+  iv_stand:
+    denoise: 0.72
+    prompt: "IV drip stand seen from straight above, small round metal base with a pole and a hanging bag, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.3, 0.3, 0.7, 0.7, "#76808f"]
+      - [ellipse, 0.42, 0.42, 0.58, 0.58, "#5a626e"]
+  vital_monitor:
+    denoise: 0.55
+    prompt: "patient vital signs monitor, dark grey frame, black screen with a green heartbeat line, yellow line, blue and red readouts, two grey knobs at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#383d45", 0.18]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.1, 0.12, 0.9, 0.72, "#1c222c", 0.06]
+      - [line, 0.14, 0.32, 0.86, 0.32, "#1ec455", 0.02]
+      - [line, 0.4, 0.32, 0.46, 0.18, "#1ec455", 0.02]
+      - [line, 0.46, 0.18, 0.52, 0.44, "#1ec455", 0.02]
+      - [line, 0.14, 0.52, 0.86, 0.52, "#e6be0b", 0.02]
+      - [rect, 0.62, 0.58, 0.86, 0.68, "#df1717", 0.2]
+      - [rect, 0.14, 0.58, 0.36, 0.68, "#0ec0ed", 0.2]
+      - [ellipse, 0.2, 0.78, 0.32, 0.9, "#636b79"]
+      - [ellipse, 0.68, 0.78, 0.8, 0.9, "#636b79"]
+  specimen_fridge:
+    denoise: 0.68
+    prompt: "white laboratory specimen refrigerator seen from straight above, flat top, glass door edge at the bottom, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#91acca", 0.05]
+  lab_bench:
+    denoise: 0.7
+    prompt: "laboratory bench seen from straight above, white worktop with beakers, a sink and instruments, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8aa0c1", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.7, 0.25, 0.92, 0.7, "#798ca8", 0.15]
+      - [ellipse, 0.15, 0.3, 0.3, 0.6, "#88a8c0"]
+  fume_hood:
+    denoise: 0.62
+    prompt: "laboratory fume hood seen from straight above, white cabinet with a glass sash, worktop with equipment, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8595ad", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.1, 0.55, 0.9, 0.9, "#798ca8", 0.05]
+  scanner:
+    denoise: 0.8
+    prompt: "medical CT scanner seen from straight above, large white ring machine with a patient bed sliding through the centre, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#889dbc", 0.06]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [ellipse, 0.2, 0.15, 0.8, 0.55, "#88a8c0"]
+      - [ellipse, 0.32, 0.24, 0.68, 0.46, "#646d7a"]
+      - [rect, 0.4, 0.5, 0.6, 0.98, "#8ea1bd", 0.1]
+  bar_counter:
+    prompt: "bar counter seen from straight above, long dark wood top with a black stone surface, bottles along the back edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#2c3440", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.55, "#323b49", 0.0]
+      - [rect, 0.0, 0.55, 1.0, 1.0, "#282e37", 0.0]
+  dj_booth:
+    denoise: 0.45
+    prompt: "DJ booth, black desk with two turntables with black records, mixer in the middle with knobs and faders, purple light strip at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#272a30", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.02, 0.06, 0.98, 0.84, "#2f3339", 0.04]
+      - [ellipse, 0.06, 0.14, 0.32, 0.76, "#626a77"]
+      - [ellipse, 0.09, 0.2, 0.29, 0.7, "#222529"]
+      - [ellipse, 0.17, 0.4, 0.21, 0.5, "#d21f1f"]
+      - [ellipse, 0.68, 0.14, 0.94, 0.76, "#626a77"]
+      - [ellipse, 0.71, 0.2, 0.91, 0.7, "#222529"]
+      - [ellipse, 0.79, 0.4, 0.83, 0.5, "#1f70d2"]
+      - [rect, 0.38, 0.14, 0.62, 0.76, "#383d44", 0.05]
+      - [ellipse, 0.42, 0.2, 0.47, 0.3, "#e6be0b"]
+      - [ellipse, 0.53, 0.2, 0.58, 0.3, "#e6be0b"]
+      - [line, 0.44, 0.42, 0.44, 0.66, "#858e9b", 0.03]
+      - [line, 0.5, 0.42, 0.5, 0.66, "#858e9b", 0.03]
+      - [line, 0.56, 0.42, 0.56, 0.66, "#858e9b", 0.03]
+      - [rect, 0.0, 0.88, 1.0, 0.95, "#5a34be", 0.3]
+  speaker:
+    denoise: 0.6
+    prompt: "large PA speaker seen from straight above, flat black top, round driver visible, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#282e37", 0.08]
+    guide:
+      - [ellipse, 0.2, 0.2, 0.8, 0.8, "#373c44"]
+  pool_table:
+    denoise: 0.5
+    prompt: "Pool table, short end rail with rounded pocket at top edge, olive green wool felt play surface, thick matte black rails, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#1b7842", 0.04]
+    guide:
+      - [rect, 0.03, 0.05, 0.97, 0.95, "#218b4e", 0.03]
+      - [ellipse, 0.03, 0.03, 0.15, 0.17, "#1e232a"]
+      - [ellipse, 0.85, 0.03, 0.97, 0.17, "#1e232a"]
+      - [ellipse, 0.03, 0.83, 0.15, 0.97, "#1e232a"]
+      - [ellipse, 0.85, 0.83, 0.97, 0.97, "#1e232a"]
+  stage:
+    denoise: 0.6
+    prompt: "performance stage platform seen from straight above, dark wooden deck, empty, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#2c3440", 0.02]
+    guide:
+      - [line, 0.0, 0.33, 1.0, 0.33, "#423124", 0.02]
+      - [line, 0.0, 0.66, 1.0, 0.66, "#423124", 0.02]
+  arcade_machine:
+    denoise: 0.7
+    prompt: "arcade cabinet, black body with red side art, yellow marquee at the top edge, blue screen, control panel at the bottom edge with a red joystick and yellow, blue and green buttons, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#26292e", 0.06]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.12, "#f7b502", 0.2]
+      - [rect, 0.0, 0.12, 0.08, 0.6, "#c12121", 0.0]
+      - [rect, 0.92, 0.12, 1.0, 0.6, "#c12121", 0.0]
+      - [rect, 0.14, 0.16, 0.86, 0.56, "#1a5ebe", 0.05]
+      - [rect, 0.06, 0.6, 0.94, 0.96, "#383d44", 0.1]
+      - [ellipse, 0.18, 0.66, 0.3, 0.9, "#c61717"]
+      - [ellipse, 0.42, 0.68, 0.52, 0.86, "#dab007"]
+      - [ellipse, 0.56, 0.68, 0.66, 0.86, "#0b70e6"]
+      - [ellipse, 0.7, 0.68, 0.8, 0.86, "#27b647"]
+  capsule:
+    denoise: 0.5
+    prompt: "capsule sleeping pod seen from straight above, white rounded shell with a mattress and pillow inside, opening at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8d9aad", 0.15]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.15, 0.08, 0.85, 0.92, "#8ea1bd", 0.2]
+      - [rect, 0.2, 0.1, 0.8, 0.28, "#a5acb6", 0.3]
+      - [rect, 0.2, 0.35, 0.8, 0.9, "#798ca8", 0.1]
+  machinery:
+    denoise: 0.55
+    prompt: "air compressor on a dark steel skid, long grey horizontal tank, blue electric motor, yellow belt guard, round pressure gauge, copper pipe, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#40454e", 0.04]
+    guide:
+      - [rect, 0.04, 0.42, 0.96, 0.9, "#636c79", 0.5]
+      - [line, 0.1, 0.56, 0.9, 0.56, "#808c9e", 0.04]
+      - [rect, 0.1, 0.06, 0.42, 0.36, "#26558a", 0.1]
+      - [rect, 0.46, 0.06, 0.62, 0.36, "#d59f11", 0.1]
+      - [ellipse, 0.7, 0.1, 0.84, 0.3, "#c3b690"]
+      - [ellipse, 0.74, 0.14, 0.8, 0.26, "#2d3137"]
+      - [line, 0.62, 0.2, 0.92, 0.2, "#ab6524", 0.04]
+      - [line, 0.92, 0.2, 0.92, 0.45, "#ab6524", 0.04]
+  forklift:
+    denoise: 0.7
+    prompt: "yellow forklift, black counterweight at the top edge, black overhead guard over the black seat, steering wheel, mast and two steel forks at the bottom edge, black tires, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.0, 0.08, 0.12, 0.26, "#25282d", 0.3]
+      - [rect, 0.88, 0.08, 1.0, 0.26, "#25282d", 0.3]
+      - [rect, 0.0, 0.46, 0.12, 0.64, "#25282d", 0.3]
+      - [rect, 0.88, 0.46, 1.0, 0.64, "#25282d", 0.3]
+      - [rect, 0.08, 0.0, 0.92, 0.68, "#ce9e0e", 0.25]
+      - [rect, 0.08, 0.0, 0.92, 0.16, "#353a41", 0.3]
+      - [rect, 0.32, 0.28, 0.68, 0.46, "#26292e", 0.2]
+      - [ellipse, 0.4, 0.48, 0.6, 0.58, "#2d3137"]
+      - [line, 0.16, 0.22, 0.16, 0.62, "#292c32", 0.05]
+      - [line, 0.84, 0.22, 0.84, 0.62, "#292c32", 0.05]
+      - [line, 0.16, 0.22, 0.84, 0.22, "#292c32", 0.05]
+      - [line, 0.16, 0.62, 0.84, 0.62, "#292c32", 0.05]
+      - [rect, 0.1, 0.66, 0.9, 0.74, "#40454e", 0.2]
+      - [line, 0.3, 0.74, 0.3, 0.99, "#626b78", 0.09]
+      - [line, 0.7, 0.74, 0.7, 0.99, "#626b78", 0.09]
+  robot_arm:
+    denoise: 0.66
+    prompt: "dark grey square metal base at top edge, broad rectangular arm segments in matte safety orange, thick circular brushed steel elbow joint, short rectangular black rubber two-finger gripper at bottom, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.3, 0.3, 0.7, 0.7, "#c96a0b"]
+      - [rect, 0.45, 0.1, 0.55, 0.5, "#d27610", 0.2]
+  electrical_panel:
+    denoise: 0.65
+    prompt: "open electrical panel, grey steel cabinet, rows of white and black circuit breakers, red main switch, yellow warning label, conduits at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#636c79", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [line, 0.2, 0.0, 0.2, 0.12, "#495059", 0.08]
+      - [line, 0.4, 0.0, 0.4, 0.12, "#495059", 0.08]
+      - [line, 0.6, 0.0, 0.6, 0.12, "#495059", 0.08]
+      - [rect, 0.06, 0.14, 0.94, 0.8, "#2f343a", 0.03]
+      - [rect, 0.1, 0.22, 0.9, 0.38, "#8e96a3", 0.05]
+      - [rect, 0.1, 0.46, 0.9, 0.62, "#8e96a3", 0.05]
+      - [line, 0.14, 0.3, 0.86, 0.3, "#26292e", 0.05]
+      - [line, 0.14, 0.54, 0.86, 0.54, "#26292e", 0.05]
+      - [rect, 0.1, 0.66, 0.3, 0.76, "#cc2d1b", 0.2]
+      - [rect, 0.76, 0.84, 0.92, 0.96, "#dab007", 0.1]
+      - [rect, 0.44, 0.84, 0.56, 0.94, "#383d44", 0.3]
+  battery_bank:
+    denoise: 0.7
+    prompt: "row of three battery cabinets, dark grey steel, vent panels, green and yellow status lights, red terminals, orange cables connecting them, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.01, 0.04, 0.32, 0.96, "#414750", 0.08]
+      - [rect, 0.345, 0.04, 0.655, 0.96, "#414750", 0.08]
+      - [rect, 0.68, 0.04, 0.99, 0.96, "#414750", 0.08]
+      - [rect, 0.05, 0.14, 0.28, 0.5, "#525964", 0.05]
+      - [rect, 0.385, 0.14, 0.615, 0.5, "#525964", 0.05]
+      - [rect, 0.72, 0.14, 0.95, 0.5, "#525964", 0.05]
+      - [rect, 0.08, 0.62, 0.18, 0.72, "#27b647", 0.3]
+      - [rect, 0.415, 0.62, 0.515, 0.72, "#27b647", 0.3]
+      - [rect, 0.75, 0.62, 0.85, 0.72, "#dab007", 0.3]
+      - [ellipse, 0.22, 0.78, 0.28, 0.9, "#cc1b1b"]
+      - [ellipse, 0.555, 0.78, 0.615, 0.9, "#cc1b1b"]
+      - [ellipse, 0.89, 0.78, 0.95, 0.9, "#cc1b1b"]
+      - [line, 0.25, 0.84, 0.92, 0.84, "#d26c10", 0.05]
+  hvac_unit:
+    denoise: 0.55
+    prompt: "industrial air handling unit, light grey steel housing, two large round fan grilles, louvres along the bottom edge, copper pipes at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#727c8b", 0.04]
+    guide:
+      - [line, 0.8, 0.0, 0.8, 0.1, "#ab6524", 0.04]
+      - [line, 0.88, 0.0, 0.88, 0.1, "#ab6524", 0.04]
+      - [ellipse, 0.05, 0.12, 0.47, 0.7, "#383d44"]
+      - [ellipse, 0.09, 0.17, 0.43, 0.65, "#525964"]
+      - [ellipse, 0.21, 0.33, 0.31, 0.49, "#2e3339"]
+      - [line, 0.1, 0.41, 0.42, 0.41, "#383d44", 0.02]
+      - [line, 0.26, 0.18, 0.26, 0.64, "#383d44", 0.02]
+      - [ellipse, 0.53, 0.12, 0.95, 0.7, "#383d44"]
+      - [ellipse, 0.57, 0.17, 0.91, 0.65, "#525964"]
+      - [ellipse, 0.69, 0.33, 0.79, 0.49, "#2e3339"]
+      - [line, 0.58, 0.41, 0.9, 0.41, "#383d44", 0.02]
+      - [line, 0.74, 0.18, 0.74, 0.64, "#383d44", 0.02]
+      - [line, 0.06, 0.78, 0.94, 0.78, "#5a626e", 0.02]
+      - [line, 0.06, 0.84, 0.94, 0.84, "#5a626e", 0.02]
+      - [line, 0.06, 0.9, 0.94, 0.9, "#5a626e", 0.02]
+      - [rect, 0.82, 0.74, 0.94, 0.94, "#495059", 0.1]
+  condenser:
+    denoise: 0.65
+    prompt: "air conditioning condenser unit seen from straight above, square metal box with a large circular fan grille on top, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#77818f", 0.05]
+    guide:
+      - [ellipse, 0.15, 0.15, 0.85, 0.85, "#646d7a"]
+      - [ellipse, 0.45, 0.45, 0.55, 0.55, "#4b515b"]
+  satellite_dish:
+    denoise: 0.66
+    prompt: "satellite dish seen from straight above, large round white parabolic dish with a central arm, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.08, 0.08, 0.92, 0.92, "#889dbc"]
+      - [ellipse, 0.3, 0.3, 0.7, 0.7, "#88a8c0"]
+      - [ellipse, 0.46, 0.46, 0.54, 0.54, "#646d7a"]
+  generator:
+    denoise: 0.9
+    prompt: "diesel generator in a dark green steel enclosure, radiator louvres on the left, black exhaust stack, control panel with green and red lights, yellow warning sign, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#3a3f47", 0.04]
+    guide:
+      - [rect, 0.04, 0.06, 0.96, 0.94, "#434952", 0.03]
+      - [rect, 0.04, 0.06, 0.2, 0.94, "#2e3238", 0.03]
+      - [line, 0.06, 0.16, 0.18, 0.16, "#474d57", 0.02]
+      - [line, 0.06, 0.3, 0.18, 0.3, "#474d57", 0.02]
+      - [line, 0.06, 0.44, 0.18, 0.44, "#474d57", 0.02]
+      - [line, 0.06, 0.58, 0.18, 0.58, "#474d57", 0.02]
+      - [line, 0.06, 0.72, 0.18, 0.72, "#474d57", 0.02]
+      - [line, 0.06, 0.86, 0.18, 0.86, "#474d57", 0.02]
+      - [line, 0.28, 0.2, 0.7, 0.2, "#373c44", 0.03]
+      - [line, 0.28, 0.32, 0.7, 0.32, "#373c44", 0.03]
+      - [line, 0.28, 0.44, 0.7, 0.44, "#373c44", 0.03]
+      - [ellipse, 0.76, 0.14, 0.9, 0.38, "#26292e"]
+      - [ellipse, 0.79, 0.2, 0.87, 0.32, "#434952"]
+      - [rect, 0.3, 0.62, 0.56, 0.86, "#2e3339", 0.05]
+      - [rect, 0.34, 0.66, 0.44, 0.72, "#27b647", 0.2]
+      - [rect, 0.46, 0.66, 0.52, 0.72, "#cc2d1b", 0.2]
+      - [rect, 0.66, 0.66, 0.86, 0.84, "#dab007", 0.05]
+  fuel_tank:
+    denoise: 0.9
+    prompt: "yellow horizontal fuel tank on black steel cradles in a grey drip tray, filler cap on top, small red hazard label, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#626a77", 0.04]
+    guide:
+      - [rect, 0.02, 0.04, 0.98, 0.96, "#515863", 0.04]
+      - [rect, 0.16, 0.06, 0.24, 0.94, "#2f3339", 0.1]
+      - [rect, 0.76, 0.06, 0.84, 0.94, "#2f3339", 0.1]
+      - [rect, 0.06, 0.16, 0.94, 0.84, "#b69227", 0.5]
+      - [line, 0.12, 0.34, 0.88, 0.34, "#ecbf23", 0.05]
+      - [ellipse, 0.44, 0.4, 0.56, 0.6, "#373c43"]
+      - [ellipse, 0.47, 0.44, 0.53, 0.56, "#626a77"]
+      - [rect, 0.64, 0.54, 0.74, 0.7, "#cc2d1b", 0.1]
+      - [line, 0.94, 0.5, 0.99, 0.5, "#2f3339", 0.05]
+  suppression_tanks:
+    denoise: 0.7
+    prompt: "three red fire suppression gas cylinders in a row seen from above, silver valve heads with black handles, steel pipe manifold along the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#495059", 0.06]
+    guide:
+      - [line, 0.04, 0.12, 0.96, 0.12, "#7b8695", 0.06]
+      - [ellipse, 0.04, 0.1, 0.31, 0.9, "#b61b1b"]
+      - [ellipse, 0.365, 0.1, 0.635, 0.9, "#b61b1b"]
+      - [ellipse, 0.69, 0.1, 0.96, 0.9, "#b61b1b"]
+      - [ellipse, 0.12, 0.34, 0.23, 0.66, "#858e9b"]
+      - [ellipse, 0.445, 0.34, 0.555, 0.66, "#858e9b"]
+      - [ellipse, 0.77, 0.34, 0.88, 0.66, "#858e9b"]
+      - [ellipse, 0.155, 0.44, 0.195, 0.56, "#292c32"]
+      - [ellipse, 0.48, 0.44, 0.52, 0.56, "#292c32"]
+      - [ellipse, 0.805, 0.44, 0.845, 0.56, "#292c32"]
+      - [line, 0.175, 0.12, 0.175, 0.34, "#7b8695", 0.04]
+      - [line, 0.5, 0.12, 0.5, 0.34, "#7b8695", 0.04]
+      - [line, 0.825, 0.12, 0.825, 0.34, "#7b8695", 0.04]
+  fire_extinguisher:
+    denoise: 0.72
+    prompt: "red fire extinguisher seen from straight above, round red cylinder top with a black valve, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#b32a1c", 0]
+    guide:
+      - [ellipse, 0.38, 0.38, 0.62, 0.62, "#2f3339"]
+  car:
+    denoise: 0.55
+    prompt: "car. blue sedan seen from above, front bumper with headlights at the top edge, dark windshield, blue roof, rear window, red tail lights at the bottom edge, black tires, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.0, 0.14, 0.12, 0.26, "#222529", 0.3]
+      - [rect, 0.88, 0.14, 1.0, 0.26, "#222529", 0.3]
+      - [rect, 0.0, 0.72, 0.12, 0.84, "#222529", 0.3]
+      - [rect, 0.88, 0.72, 1.0, 0.84, "#222529", 0.3]
+      - [rect, 0.06, 0.0, 0.94, 1.0, "#2b4f88", 0.35]
+      - [rect, 0.16, 0.02, 0.3, 0.05, "#dcd077", 0.5]
+      - [rect, 0.7, 0.02, 0.84, 0.05, "#dcd077", 0.5]
+      - [rect, 0.12, 0.3, 0.88, 0.42, "#233148", 0.15]
+      - [rect, 0.14, 0.42, 0.86, 0.7, "#27487c", 0.15]
+      - [rect, 0.14, 0.7, 0.86, 0.8, "#233148", 0.15]
+      - [rect, 0.0, 0.34, 0.08, 0.38, "#27487c", 0.4]
+      - [rect, 0.92, 0.34, 1.0, 0.38, "#27487c", 0.4]
+      - [rect, 0.12, 0.95, 0.3, 0.98, "#b61b1b", 0.5]
+      - [rect, 0.7, 0.95, 0.88, 0.98, "#b61b1b", 0.5]
+  car_lift:
+    denoise: 0.55
+    prompt: "two-post car lift with yellow posts and black arms, silver car on the lift, front of the car at the top edge, grey concrete floor with yellow lines, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#59616d", 0.02]
+    guide:
+      - [rect, 0.0, 0.4, 0.1, 0.6, "#ce9e0e", 0.1]
+      - [rect, 0.9, 0.4, 1.0, 0.6, "#ce9e0e", 0.1]
+      - [line, 0.08, 0.46, 0.3, 0.22, "#2d3137", 0.03]
+      - [line, 0.08, 0.54, 0.3, 0.78, "#2d3137", 0.03]
+      - [line, 0.92, 0.46, 0.7, 0.22, "#2d3137", 0.03]
+      - [line, 0.92, 0.54, 0.7, 0.78, "#2d3137", 0.03]
+      - [rect, 0.18, 0.06, 0.82, 0.94, "#7b8593", 0.35]
+      - [rect, 0.26, 0.3, 0.74, 0.4, "#233148", 0.15]
+      - [rect, 0.27, 0.4, 0.73, 0.68, "#6f7988", 0.15]
+      - [rect, 0.27, 0.68, 0.73, 0.77, "#233148", 0.15]
+      - [line, 0.02, 0.02, 0.98, 0.02, "#ce9e0e", 0.02]
+      - [line, 0.02, 0.98, 0.98, 0.98, "#ce9e0e", 0.02]
+  ramp:
+    denoise: 0.58
+    prompt: "concrete parking garage ramp seen from straight above, a long sloped driveway with side walls and lane markings, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#828b98", 0.02]
+    guide:
+      - [line, 0.5, 0.05, 0.5, 0.95, "#ce9e0e", 0.03]
+      - [rect, 0.0, 0.0, 0.08, 1.0, "#6b7583", 0.0]
+      - [rect, 0.92, 0.0, 1.0, 1.0, "#6b7583", 0.0]
+  ambulance:
+    denoise: 0.8
+    prompt: "white ambulance seen from above, cab with dark windshield at the top edge, red and blue light bar behind the cab, red stripes along both sides, grey roof air conditioner, red cross on the roof, rear doors at the bottom edge, black tires, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.0, 0.1, 0.1, 0.2, "#222529", 0.3]
+      - [rect, 0.9, 0.1, 1.0, 0.2, "#222529", 0.3]
+      - [rect, 0.0, 0.76, 0.1, 0.88, "#222529", 0.3]
+      - [rect, 0.9, 0.76, 1.0, 0.88, "#222529", 0.3]
+      - [rect, 0.05, 0.0, 0.95, 1.0, "#8f9eb3", 0.12]
+      - [rect, 0.12, 0.13, 0.88, 0.23, "#233148", 0.15]
+      - [rect, 0.1, 0.26, 0.5, 0.3, "#cc1b1b", 0.4]
+      - [rect, 0.5, 0.26, 0.9, 0.3, "#1747c6", 0.4]
+      - [rect, 0.05, 0.36, 0.95, 1.0, "#94a3b8", 0.05]
+      - [rect, 0.05, 0.36, 0.13, 0.98, "#b32a1c", 0.0]
+      - [rect, 0.87, 0.36, 0.95, 0.98, "#b32a1c", 0.0]
+      - [rect, 0.32, 0.44, 0.68, 0.56, "#7b8593", 0.1]
+      - [rect, 0.45, 0.64, 0.55, 0.86, "#b32a1c", 0.0]
+      - [rect, 0.36, 0.7, 0.64, 0.8, "#b32a1c", 0.0]
+      - [line, 0.5, 0.92, 0.5, 1.0, "#626a77", 0.015]
+      - [rect, 0.0, 0.3, 0.05, 0.34, "#858e9b", 0.3]
+      - [rect, 0.95, 0.3, 1.0, 0.34, "#858e9b", 0.3]
+  shipping_container:
+    denoise: 0.5
+    prompt: "dark teal steel shipping container seen from above, corrugated roof with ridges across, dark corner castings, a small grey vent panel in the middle, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#33697a", 0.01]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.04, 0.96, 0.96, 1.0, "#00e5ff", 0.5]
+      - [rect, 0.0, 0.0, 0.1, 0.03, "#29444d", 0.0]
+      - [rect, 0.9, 0.0, 1.0, 0.03, "#29444d", 0.0]
+      - [rect, 0.0, 0.97, 0.1, 1.0, "#29444d", 0.0]
+      - [rect, 0.9, 0.97, 1.0, 1.0, "#29444d", 0.0]
+      - [line, 0.03, 0.08, 0.97, 0.08, "#2b5361", 0.015]
+      - [line, 0.03, 0.16, 0.97, 0.16, "#2b5361", 0.015]
+      - [line, 0.03, 0.24, 0.97, 0.24, "#2b5361", 0.015]
+      - [line, 0.03, 0.32, 0.97, 0.32, "#2b5361", 0.015]
+      - [line, 0.03, 0.4, 0.97, 0.4, "#2b5361", 0.015]
+      - [line, 0.03, 0.48, 0.97, 0.48, "#2b5361", 0.015]
+      - [line, 0.03, 0.56, 0.97, 0.56, "#2b5361", 0.015]
+      - [line, 0.03, 0.64, 0.97, 0.64, "#2b5361", 0.015]
+      - [line, 0.03, 0.72, 0.97, 0.72, "#2b5361", 0.015]
+      - [line, 0.03, 0.8, 0.97, 0.8, "#2b5361", 0.015]
+      - [line, 0.03, 0.88, 0.97, 0.88, "#2b5361", 0.015]
+      - [rect, 0.0, 0.0, 1.0, 0.012, "#29444d", 0.0]
+      - [rect, 0.0, 0.988, 1.0, 1.0, "#29444d", 0.0]
+      - [rect, 0.0, 0.0, 0.03, 1.0, "#2c5f6f", 0.0]
+      - [rect, 0.97, 0.0, 1.0, 1.0, "#2c5f6f", 0.0]
+      - [rect, 0.3, 0.42, 0.7, 0.52, "#646e7c", 0.05]
+  pew:
+    prompt: "long wooden church pew bench seen from straight above, polished light wood seat and low backrest along the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#a57b40", 0.03]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.35, "#97763f", 0.05]
+  altar:
+    prompt: "church altar table seen from straight above, rectangular stone top with a white cloth, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#7b8ca7", 0.04]
+    guide:
+      - [rect, 0.1, 0.1, 0.9, 0.9, "#ccba8d", 0.05]
+  pulpit:
+    denoise: 0.6
+    prompt: "wooden church pulpit lectern seen from straight above, a small raised wooden stand, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#97763f", 0.2]
+    guide:
+      - [rect, 0.25, 0.25, 0.75, 0.75, "#866430", 0.2]
+  confessional:
+    denoise: 0.64
+    prompt: "wooden church confessional booth seen from straight above, dark wood cabinet with two compartments, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#71522c", 0.03]
+    guide:
+      - [line, 0.5, 0.0, 0.5, 1.0, "#5c4123", 0.04]
+  organ:
+    denoise: 0.62
+    prompt: "church pipe organ seen from straight above, dark wooden console with rows of vertical metal pipes at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#634b30", 0.03]
+    guide:
+      - [rect, 0.05, 0.05, 0.95, 0.35, "#828c9b", 0.02]
+      - [line, 0.2, 0.05, 0.2, 0.35, "#646d7a", 0.03]
+      - [line, 0.4, 0.05, 0.4, 0.35, "#646d7a", 0.03]
+      - [line, 0.6, 0.05, 0.6, 0.35, "#646d7a", 0.03]
+      - [line, 0.8, 0.05, 0.8, 0.35, "#646d7a", 0.03]
+  candle_stand:
+    denoise: 0.72
+    prompt: "church votive candle stand seen from straight above, a round metal tray holding many small candles, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#846936", 0]
+    guide:
+      - [ellipse, 0.2, 0.2, 0.8, 0.8, "#c09435"]
+  tomb:
+    denoise: 0.65
+    prompt: "stone tomb sarcophagus seen from straight above, a large rectangular carved stone slab, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#747e8d", 0.03]
+    guide:
+      - [rect, 0.12, 0.12, 0.88, 0.88, "#7e8896", 0.05]
+  rigger_cocoon:
+    prompt: "reclining lounge pod seen from straight above, a padded grey reclined seat inside a rounded shell, opening at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#828c9b", 0.2]
+    guide:
+      - [rect, 0.18, 0.08, 0.82, 0.9, "#646d7a", 0.25]
+      - [rect, 0.28, 0.2, 0.72, 0.85, "#525a65", 0.2]
+  drone_dock:
+    denoise: 0.65
+    prompt: "drone landing pad, dark square base, yellow ring marking, black quadcopter drone with four grey rotors in the center, green corner lights, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#2f343a", 0.08]
+    guide:
+      - [ellipse, 0.1, 0.1, 0.9, 0.9, "#383d44"]
+      - [ellipse, 0.14, 0.14, 0.86, 0.86, "#dab007"]
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#383d44"]
+      - [line, 0.3, 0.3, 0.7, 0.7, "#26292e", 0.06]
+      - [line, 0.7, 0.3, 0.3, 0.7, "#26292e", 0.06]
+      - [ellipse, 0.42, 0.42, 0.58, 0.58, "#979eaa"]
+      - [ellipse, 0.2, 0.2, 0.38, 0.38, "#525964"]
+      - [ellipse, 0.62, 0.2, 0.8, 0.38, "#525964"]
+      - [ellipse, 0.2, 0.62, 0.38, 0.8, "#525964"]
+      - [ellipse, 0.62, 0.62, 0.8, 0.8, "#525964"]
+      - [ellipse, 0.03, 0.03, 0.09, 0.09, "#27b647"]
+      - [ellipse, 0.91, 0.03, 0.97, 0.09, "#27b647"]
+      - [ellipse, 0.03, 0.91, 0.09, 0.97, "#27b647"]
+      - [ellipse, 0.91, 0.91, 0.97, 0.97, "#27b647"]
+  drone_rack:
+    denoise: 0.5
+    prompt: "grey metal equipment rack seen from straight above, shelves holding small devices, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#7e8795", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.08, 0.15, 0.3, 0.6, "#646d7a", 0.1]
+      - [rect, 0.38, 0.15, 0.6, 0.6, "#5a626e", 0.1]
+      - [rect, 0.68, 0.15, 0.9, 0.6, "#646d7a", 0.1]
+  sim_rig:
+    prompt: "gaming chair with a desk seen from straight above, black reclined seat, backrest at the top edge, a monitor along the top, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#373c44", 0.15]
+    guide:
+      - [rect, 0.25, 0.05, 0.75, 0.15, "#282e37", 0.2]
+      - [rect, 0.3, 0.4, 0.7, 0.9, "#414750", 0.2]
+  cyberware_rack:
+    denoise: 0.55
+    prompt: "medical equipment rack seen from straight above, white and steel shelving with instruments, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#798ca8", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.08, 0.15, 0.45, 0.7, "#91acca", 0.05]
+      - [rect, 0.55, 0.15, 0.92, 0.7, "#748193", 0.05]
+  cryo_pod:
+    denoise: 0.55
+    prompt: "medical pod seen from straight above, a white capsule with a clear rounded lid over a padded bed, head at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#8bafc8", 0.18]
+    guide:
+      - [rect, 0.15, 0.08, 0.85, 0.92, "#719cde", 0.2]
+      - [ellipse, 0.25, 0.12, 0.75, 0.55, "#7eabc3"]
+  deposit_boxes:
+    denoise: 0.62
+    prompt: "bank safe deposit boxes seen from straight above, a grid wall of small steel doors, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#76808f", 0.02]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [line, 0.25, 0.0, 0.25, 1.0, "#5a626e", 0.03]
+      - [line, 0.5, 0.0, 0.5, 1.0, "#5a626e", 0.03]
+      - [line, 0.75, 0.0, 0.75, 1.0, "#5a626e", 0.03]
+      - [line, 0.0, 0.5, 1.0, 0.5, "#5a626e", 0.03]
+  evidence_locker:
+    denoise: 0.66
+    prompt: "grey steel storage locker seen from straight above, flat top with a small label, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#666f7d", 0.04]
+  autokitchen:
+    denoise: 0.65
+    prompt: "compact kitchen unit, grey worktop, steel sink with tap at the top edge, black induction hob with two rings, wooden chopping board, small herb pot, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#707a89", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.12, "#515863", 0.0]
+      - [rect, 0.06, 0.22, 0.36, 0.82, "#636b79", 0.08]
+      - [rect, 0.1, 0.28, 0.32, 0.76, "#4c535d", 0.1]
+      - [ellipse, 0.18, 0.46, 0.24, 0.58, "#2e3339"]
+      - [rect, 0.19, 0.12, 0.23, 0.28, "#858e9b", 0.4]
+      - [rect, 0.42, 0.22, 0.7, 0.82, "#23262a", 0.06]
+      - [ellipse, 0.45, 0.28, 0.58, 0.54, "#373c44"]
+      - [ellipse, 0.55, 0.52, 0.68, 0.78, "#373c44"]
+      - [rect, 0.76, 0.4, 0.94, 0.8, "#9f7643", 0.1]
+      - [ellipse, 0.8, 0.16, 0.9, 0.34, "#428630"]
+  fire_barrel:
+    denoise: 0.68
+    prompt: "metal barrel seen from straight above, a rusty steel drum with a rim, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [ellipse, "#485464", 0]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#515c6d"]
+  debris:
+    denoise: 0.7
+    prompt: "small scattered pile of building debris seen from straight above, broken plaster, dust and bits of trash on the floor, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.2, 0.25, 0.65, 0.7, "#6f7b8e"]
+      - [ellipse, 0.5, 0.4, 0.85, 0.8, "#636f82"]
+  trash_pile:
+    denoise: 0.72
+    prompt: "pile of garbage bags and trash seen from straight above, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.1, 0.2, 0.6, 0.85, "#373c44"]
+      - [ellipse, 0.45, 0.15, 0.9, 0.8, "#414750"]
+  rubble:
+    denoise: 0.72
+    prompt: "pile of concrete rubble and broken bricks seen from straight above, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.15, 0.2, 0.7, 0.8, "#6b7482"]
+      - [ellipse, 0.4, 0.3, 0.85, 0.85, "#5e6773"]
+  rubble_heap:
+    denoise: 0.72
+    prompt: "large heap of concrete rubble with twisted rebar seen from straight above, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [ellipse, 0.1, 0.12, 0.75, 0.85, "#646d7a"]
+      - [ellipse, 0.35, 0.25, 0.92, 0.9, "#585f6b"]
+  collapsed_ceiling:
+    denoise: 0.72
+    prompt: "pile of broken concrete ceiling slabs and fallen tiles with dangling cables seen from straight above, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [none]
+    guide:
+      - [rect, 0.15, 0.2, 0.7, 0.75, "#6b7482", 0.05]
+      - [rect, 0.45, 0.35, 0.9, 0.85, "#5e6773", 0.05]
+  roof_hatch:
+    denoise: 0.68
+    prompt: "steel roof access hatch seen from straight above, square metal lid with hinges and hazard stripes, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#646d7a", 0.05]
+    guide:
+      - [line, 0.1, 0.15, 0.9, 0.15, "#bd9311", 0.06]
+      - [line, 0.1, 0.85, 0.9, 0.85, "#bd9311", 0.06]
+  security_gate:
+    denoise: 0.65
+    prompt: "metal detector security gate seen from straight above, a slim dark frame forming a narrow passage, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    base: [rect, "#666f7d", 0.1]
+    guide:
+      - [rect, 0.0, 0.0, 1.0, 0.18, "#383e48", 0.1]
+      - [rect, 0.0, 0.82, 1.0, 1.0, "#383e48", 0.1]
+
+  # --- designed wealth tiers (rich, luxury) --------------------------------------------------
+  # --- bed ------------------------------------------------------------------------------------
+  bed.high:
+    prompt: "upholstered single bed with a padded grey headboard at the top edge, crisp white linen, charcoal throw blanket across the bottom, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#464c55", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.08, "#3d424a", 0.2]
+      - [rect, 0.06, 0.08, 0.94, 0.97, "#9fa6b0", 0.04]
+      - [rect, 0.14, 0.11, 0.86, 0.25, "#a5acb6", 0.3]
+      - [rect, 0.06, 0.70, 0.94, 0.90, "#373c44", 0.03]
+  bed.luxury:
+    prompt: "luxury single bed, tall tufted velvet headboard at the top edge, ivory silk sheets, gold embroidered throw across the bottom, dark walnut frame, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#593b29", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.10, "#2f3a4a", 0.2]
+      - [rect, 0.06, 0.10, 0.94, 0.97, "#7899cc", 0.04]
+      - [rect, 0.12, 0.13, 0.88, 0.27, "#759eda", 0.3]
+      - [rect, 0.06, 0.68, 0.94, 0.88, "#9f7c39", 0.03]
+
+  # --- double_bed -----------------------------------------------------------------------------
+  double_bed.high:
+    prompt: "upholstered king size bed with a padded grey headboard at the top edge, crisp white linen, four pillows, charcoal throw across the bottom, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#464c55", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.07, "#3d424a", 0.2]
+      - [rect, 0.05, 0.07, 0.95, 0.97, "#9fa6b0", 0.04]
+      - [rect, 0.10, 0.10, 0.48, 0.24, "#a5acb6", 0.3]
+      - [rect, 0.52, 0.10, 0.90, 0.24, "#a5acb6", 0.3]
+      - [rect, 0.05, 0.72, 0.95, 0.90, "#373c44", 0.03]
+  double_bed.luxury:
+    prompt: "luxury king size bed, tall tufted velvet headboard at the top edge, ivory silk sheets, many cushions, gold embroidered throw, dark walnut frame, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#593b29", 0.05]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.09, "#2f3a4a", 0.2]
+      - [rect, 0.05, 0.09, 0.95, 0.97, "#7899cc", 0.04]
+      - [rect, 0.09, 0.12, 0.34, 0.26, "#759eda", 0.3]
+      - [rect, 0.37, 0.12, 0.63, 0.26, "#2f3a4a", 0.3]
+      - [rect, 0.66, 0.12, 0.91, 0.26, "#759eda", 0.3]
+      - [rect, 0.05, 0.68, 0.95, 0.88, "#9f7c39", 0.03]
+
+  # --- sofa -----------------------------------------------------------------------------------
+  sofa.high:
+    denoise: 0.6
+    prompt: "cognac leather three seat sofa, slim walnut legs, backrest along the top edge, two cushions, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#895027", 0.12]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.10, 0.28, 0.37, 0.92, "#975a2d", 0.1]
+      - [rect, 0.37, 0.28, 0.63, 0.92, "#975a2d", 0.1]
+      - [rect, 0.63, 0.28, 0.90, 0.92, "#975a2d", 0.1]
+      - [rect, 0.14, 0.20, 0.30, 0.40, "#c5b28d", 0.3]
+  sofa.luxury:
+    denoise: 0.55
+    prompt: "luxury deep green velvet chesterfield sofa, tufted backrest along the top edge, rolled arms, gold cushions, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#215d47", 0.14]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.10, 0.28, 0.37, 0.92, "#29674e", 0.1]
+      - [rect, 0.37, 0.28, 0.63, 0.92, "#29674e", 0.1]
+      - [rect, 0.63, 0.28, 0.90, 0.92, "#29674e", 0.1]
+      - [rect, 0.14, 0.20, 0.30, 0.40, "#bc8e2c", 0.3]
+      - [rect, 0.70, 0.20, 0.86, 0.40, "#bc8e2c", 0.3]
+
+  # --- armchair -------------------------------------------------------------------------------
+  armchair.high:
+    denoise: 0.55
+    prompt: "cognac leather lounge armchair, walnut frame, backrest along the top edge, seat cushion facing the bottom edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#683f23", 0.2]
+    guide:
+      - [rect, 0.16, 0.10, 0.84, 0.34, "#895027", 0.4]
+      - [rect, 0.06, 0.24, 0.24, 0.90, "#734624", 0.5]
+      - [rect, 0.76, 0.24, 0.94, 0.90, "#734624", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#975a2d", 0.3]
+  armchair.luxury:
+    denoise: 0.55
+    prompt: "luxury deep green velvet wingback armchair, tufted backrest along the top edge, brass studs, gold cushion, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#215d47", 0.2]
+    guide:
+      - [rect, 0.12, 0.06, 0.88, 0.34, "#1f5541", 0.4]
+      - [rect, 0.06, 0.20, 0.24, 0.90, "#246249", 0.5]
+      - [rect, 0.76, 0.20, 0.94, 0.90, "#246249", 0.5]
+      - [rect, 0.24, 0.40, 0.76, 0.92, "#29674e", 0.3]
+      - [rect, 0.38, 0.36, 0.62, 0.52, "#bc8e2c", 0.3]
+
+  # --- chair ----------------------------------------------------------------------------------
+  chair.high:
+    prompt: "black leather executive office chair, high backrest along the top edge, chrome five star base, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [none]
+    guide:
+      - [line, 0.5, 0.55, 0.5, 0.08, "#7b8593", 0.07]
+      - [line, 0.5, 0.55, 0.93, 0.40, "#7b8593", 0.07]
+      - [line, 0.5, 0.55, 0.77, 0.95, "#7b8593", 0.07]
+      - [line, 0.5, 0.55, 0.23, 0.95, "#7b8593", 0.07]
+      - [line, 0.5, 0.55, 0.07, 0.40, "#7b8593", 0.07]
+      - [rect, 0.20, 0.30, 0.80, 0.85, "#2c3036", 0.35]
+      - [rect, 0.16, 0.08, 0.84, 0.32, "#272a2f", 0.4]
+  chair.luxury:
+    prompt: "luxury dining chair, dark walnut frame, cream velvet seat, curved backrest along the top edge, brass details, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [none]
+    guide:
+      - [rect, 0.14, 0.06, 0.86, 0.24, "#593b29", 0.4]
+      - [rect, 0.16, 0.22, 0.84, 0.90, "#593b29", 0.25]
+      - [rect, 0.22, 0.28, 0.78, 0.84, "#d5b97c", 0.25]
+
+  # --- desk -----------------------------------------------------------------------------------
+  desk.high:
+    prompt: "walnut executive desk with a glass inlay, two slim monitors along the top edge, leather desk pad, no chair, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.18, 0.08, 0.48, 0.18, "#282b30", 0.3]
+      - [rect, 0.52, 0.08, 0.82, 0.18, "#282b30", 0.3]
+      - [rect, 0.28, 0.45, 0.72, 0.78, "#2e3238", 0.1]
+  desk.luxury:
+    prompt: "luxury executive desk, white marble top with gold edge, one slim monitor at the top edge, leather desk pad, brass lamp, no chair, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#9f7c39", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.02, 0.03, 0.98, 0.97, "#8b9cb6", 0.04]
+      - [rect, 0.32, 0.08, 0.68, 0.18, "#282b30", 0.3]
+      - [rect, 0.30, 0.45, 0.70, 0.78, "#53301d", 0.1]
+      - [ellipse, 0.82, 0.12, 0.94, 0.30, "#bc8e2c"]
+
+  # --- table ----------------------------------------------------------------------------------
+  table.high:
+    prompt: "square walnut dining table, smooth oiled top, only the flat tabletop visible, no chairs, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#70462c", 0.06]
+    guide:
+      - [line, 0.1, 0.3, 0.9, 0.3, "#694329", 0.02]
+      - [line, 0.1, 0.7, 0.9, 0.7, "#694329", 0.02]
+  table.luxury:
+    denoise: 0.75
+    prompt: "Square tabletop, cool white Carrara marble field with soft grey veins, honed finish, broad brushed warm brass border band around outer edge, rounded corners, rear edge of tabletop at top edge, glass stains, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#9f7c39", 0.06]
+    guide:
+      - [rect, 0.03, 0.03, 0.97, 0.97, "#94a0b2", 0.05]
+      - [line, 0.15, 0.25, 0.70, 0.80, "#788290", 0.02]
+
+  # --- meeting_table --------------------------------------------------------------------------
+  meeting_table.high:
+    prompt: "long walnut conference table with a glass centre strip, only the flat tabletop visible, no chairs, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.08]
+    guide:
+      - [rect, 0.10, 0.42, 0.90, 0.58, "#6b7f9d", 0.2]
+  meeting_table.luxury:
+    prompt: "long glossy black marble boardroom table with gold inlay lines, only the tabletop visible, no chairs, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#26292f", 0.1]
+    guide:
+      - [rect, 0.05, 0.47, 0.95, 0.53, "#bc8e2c", 0.2]
+
+  # --- side_table -----------------------------------------------------------------------------
+  side_table.high:
+    prompt: "small round walnut side table with a black metal rim, a book on it, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [ellipse, "#2e3238", 0]
+    guide:
+      - [ellipse, 0.06, 0.06, 0.94, 0.94, "#70462c"]
+      - [rect, 0.30, 0.35, 0.62, 0.60, "#8b3321", 0.05]
+  side_table.luxury:
+    denoise: 0.75
+    prompt: "small round side table, black marble top with grey veins, polished brass rim, a red leather book and a small green vase with a red flower on top, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [ellipse, "#a68037", 0]
+    guide:
+      - [ellipse, 0.07, 0.07, 0.93, 0.93, "#2e3238"]
+      - [line, 0.18, 0.3, 0.62, 0.86, "#606975", 0.015]
+      - [line, 0.4, 0.12, 0.84, 0.58, "#505762", 0.01]
+      - [rect, 0.52, 0.24, 0.78, 0.46, "#7f3624", 0.08]
+      - [ellipse, 0.24, 0.52, 0.44, 0.72, "#2b715e"]
+      - [ellipse, 0.29, 0.57, 0.39, 0.67, "#bc2c3e"]
+
+  # --- nightstand -----------------------------------------------------------------------------
+  nightstand.high:
+    prompt: "walnut nightstand with a small black lamp and a book, one drawer at the bottom edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#70462c", 0.1]
+    guide:
+      - [ellipse, 0.55, 0.15, 0.85, 0.45, "#2e3238"]
+      - [rect, 0.15, 0.62, 0.85, 0.84, "#694329", 0.2]
+  nightstand.luxury:
+    prompt: "luxury nightstand with a white marble top and brass handles, brass lamp on top, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#94a0b2", 0.1]
+    guide:
+      - [ellipse, 0.55, 0.15, 0.85, 0.45, "#bc8e2c"]
+      - [rect, 0.40, 0.70, 0.60, 0.78, "#bc8e2c", 0.3]
+
+  # --- wardrobe -------------------------------------------------------------------------------
+  wardrobe.high:
+    denoise: 0.65
+    prompt: "walnut wardrobe seen from straight above, flat closed top, three door seams, back against the top edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.03]
+    guide:
+      - [line, 0.33, 0.0, 0.33, 1.0, "#543621", 0.04]
+      - [line, 0.66, 0.0, 0.66, 1.0, "#543621", 0.04]
+  wardrobe.luxury:
+    denoise: 0.65
+    prompt: "luxury built-in wardrobe of dark lacquered wood with brass trim along the edges, flat closed top, back against the top edge, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#9f7c39", 0.03]
+    guide:
+      - [rect, 0.03, 0.05, 0.97, 0.95, "#462c1d", 0.02]
+      - [line, 0.5, 0.05, 0.5, 0.95, "#9f7c39", 0.04]
+
+  # --- shelf ----------------------------------------------------------------------------------
+  shelf.high:
+    prompt: "walnut bookshelf with neatly arranged hardcover books and a ceramic vase, back against the top edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.06, 0.12, 0.32, 0.62, "#2d4358", 0.1]
+      - [rect, 0.36, 0.12, 0.60, 0.62, "#732626", 0.1]
+      - [ellipse, 0.70, 0.20, 0.88, 0.55, "#c5b28d"]
+  shelf.luxury:
+    prompt: "luxury display shelf of dark lacquered wood with brass edges, leather bound books, a gold sculpture and a crystal vase, back against the top edge, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#462c1d", 0.04]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.06, 0.12, 0.34, 0.62, "#732626", 0.1]
+      - [ellipse, 0.42, 0.15, 0.58, 0.55, "#bc8e2c"]
+      - [ellipse, 0.68, 0.18, 0.88, 0.58, "#89b7c2"]
+
+  # --- rug ------------------------------------------------------------------------------------
+  rug.high:
+    denoise: 0.75
+    prompt: "Handloom wool rug, rectangular central field, wide cream outer border with taupe inner band, smooth low pile, neatly finished short end at top edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#373c44", 0.02]
+    guide:
+      - [rect, 0.08, 0.10, 0.92, 0.90, "#c4b38a", 0.02]
+      - [rect, 0.14, 0.18, 0.86, 0.82, "#373c44", 0.02]
+  rug.luxury:
+    denoise: 0.65
+    prompt: "luxurious persian rug with an ornate medallion pattern in deep red, navy and gold, fringed ends, flat, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#83191f", 0.02]
+    guide:
+      - [rect, 0.06, 0.08, 0.94, 0.92, "#21315d", 0.02]
+      - [rect, 0.12, 0.16, 0.88, 0.84, "#8b2121", 0.02]
+      - [ellipse, 0.35, 0.30, 0.65, 0.70, "#bc8e2c"]
+
+  # --- plant ----------------------------------------------------------------------------------
+  plant.high:
+    prompt: "large fiddle leaf fig with big glossy leaves in a round matte black planter, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [none]
+    guide:
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#2e3238"]
+      - [ellipse, 0.05, 0.08, 0.60, 0.55, "#3a7c2c"]
+      - [ellipse, 0.40, 0.05, 0.95, 0.58, "#428630"]
+      - [ellipse, 0.12, 0.45, 0.88, 0.95, "#347326"]
+  plant.luxury:
+    prompt: "lush potted plant with dense dark green leaves and three glowing magenta orchid blossoms, round black lacquer planter with a thin gold rim, elite"
+    base: [none]
+    guide:
+      - [ellipse, 0.12, 0.12, 0.88, 0.88, "#bc8e2c"]
+      - [ellipse, 0.16, 0.16, 0.84, 0.84, "#16181c"]
+      - [ellipse, 0.08, 0.20, 0.42, 0.50, "#3a7c2c"]
+      - [ellipse, 0.30, 0.05, 0.64, 0.36, "#428630"]
+      - [ellipse, 0.58, 0.14, 0.92, 0.46, "#347326"]
+      - [ellipse, 0.08, 0.52, 0.42, 0.86, "#428630"]
+      - [ellipse, 0.56, 0.54, 0.92, 0.88, "#3a7c2c"]
+      - [ellipse, 0.34, 0.62, 0.66, 0.95, "#347326"]
+      - [ellipse, 0.28, 0.28, 0.72, 0.72, "#3a7c2c"]
+      - [ellipse, 0.36, 0.30, 0.48, 0.42, "#ff2fd0"]
+      - [ellipse, 0.54, 0.42, 0.66, 0.54, "#ff2fd0"]
+      - [ellipse, 0.38, 0.54, 0.50, 0.66, "#ff2fd0"]
+
+  # --- wc -------------------------------------------------------------------------------------
+  wc.high:
+    denoise: 0.6
+    prompt: "wall hung white designer toilet with a slim soft close lid, closed, flush plate at the top edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [none]
+    guide:
+      - [rect, 0.25, 0.03, 0.75, 0.14, "#2e3238", 0.3]
+      - [ellipse, 0.28, 0.12, 0.72, 0.94, "#a2a9b3"]
+  wc.luxury:
+    denoise: 0.6
+    prompt: "luxury white porcelain toilet with a gold flush button and gold hinges, lid closed, cistern at the top edge, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [none]
+    guide:
+      - [rect, 0.22, 0.05, 0.78, 0.30, "#a2a9b3", 0.25]
+      - [ellipse, 0.44, 0.12, 0.56, 0.22, "#bc8e2c"]
+      - [ellipse, 0.28, 0.25, 0.72, 0.92, "#a5acb6"]
+      - [rect, 0.36, 0.26, 0.64, 0.32, "#bc8e2c", 0.3]
+
+  # --- sink -----------------------------------------------------------------------------------
+  sink.high:
+    prompt: "rectangular white vessel basin on a walnut vanity top, matte black faucet at the top edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.05]
+    guide:
+      - [rect, 0.18, 0.20, 0.82, 0.90, "#a2a9b3", 0.25]
+      - [rect, 0.30, 0.30, 0.70, 0.80, "#959da9", 0.25]
+      - [rect, 0.45, 0.04, 0.55, 0.22, "#282b30", 0.4]
+  sink.luxury:
+    prompt: "white marble washbasin with a round bowl, gold faucet at the top edge, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#94a0b2", 0.08]
+    guide:
+      - [ellipse, 0.22, 0.22, 0.78, 0.90, "#929aa6"]
+      - [rect, 0.44, 0.03, 0.56, 0.24, "#bc8e2c", 0.4]
+
+  # --- shower ---------------------------------------------------------------------------------
+  shower.high:
+    denoise: 0.5
+    prompt: "walk-in shower with large grey stone tiles, linear drain, glass screen along one side, black rain head at the top edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#626a77", 0.02]
+    guide:
+      - [rect, 0.1, 0.80, 0.9, 0.84, "#373c44", 0.3]
+      - [rect, 0.40, 0.02, 0.60, 0.12, "#282b30", 0.4]
+      - [line, 0.97, 0.03, 0.97, 0.97, "#82b7c4", 0.03]
+  shower.luxury:
+    denoise: 0.6
+    prompt: "luxury walk-in shower with white marble floor, gold rain head at the top edge, gold linear drain, glass wall, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#94a0b2", 0.02]
+    guide:
+      - [line, 0.1, 0.4, 0.8, 0.9, "#7d8695", 0.02]
+      - [rect, 0.1, 0.84, 0.9, 0.88, "#bc8e2c", 0.3]
+      - [rect, 0.38, 0.02, 0.62, 0.14, "#bc8e2c", 0.4]
+
+  # --- stove ----------------------------------------------------------------------------------
+  stove.high:
+    denoise: 0.5
+    prompt: "stainless steel gas range seen from straight above, five burners with cast iron grates, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#7b8593", 0.04]
+    guide:
+      - [rect, 0.06, 0.06, 0.94, 0.94, "#2e3238", 0.03]
+      - [ellipse, 0.10, 0.10, 0.40, 0.40, "#40454e"]
+      - [ellipse, 0.60, 0.10, 0.90, 0.40, "#40454e"]
+      - [ellipse, 0.35, 0.35, 0.65, 0.65, "#40454e"]
+      - [ellipse, 0.10, 0.60, 0.40, 0.90, "#40454e"]
+      - [ellipse, 0.60, 0.60, 0.90, 0.90, "#40454e"]
+  stove.luxury:
+    denoise: 0.5
+    prompt: "luxury professional range cooker in deep blue enamel with brass trim, six burners with black grates, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#21385d", 0.04]
+    guide:
+      - [rect, 0.05, 0.05, 0.95, 0.80, "#26292f", 0.03]
+      - [ellipse, 0.08, 0.10, 0.34, 0.40, "#363b42"]
+      - [ellipse, 0.37, 0.10, 0.63, 0.40, "#363b42"]
+      - [ellipse, 0.66, 0.10, 0.92, 0.40, "#363b42"]
+      - [ellipse, 0.08, 0.45, 0.34, 0.75, "#363b42"]
+      - [ellipse, 0.37, 0.45, 0.63, 0.75, "#363b42"]
+      - [ellipse, 0.66, 0.45, 0.92, 0.75, "#363b42"]
+      - [rect, 0.05, 0.84, 0.95, 0.90, "#bc8e2c", 0.3]
+
+  # --- counter --------------------------------------------------------------------------------
+  counter.high:
+    prompt: "kitchen counter with a dark grey quartz worktop, undermount steel sink, a chopping board and a fruit bowl, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#40454e", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.62, 0.25, 0.9, 0.75, "#6a7482", 0.2]
+      - [rect, 0.1, 0.3, 0.35, 0.7, "#bf8846", 0.15]
+      - [ellipse, 0.40, 0.30, 0.55, 0.65, "#cf8d1c"]
+  counter.luxury:
+    prompt: "luxury kitchen counter with a white marble worktop, brass tap and a deep sink, a bowl of lemons, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#94a0b2", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.62, 0.25, 0.9, 0.75, "#8d95a2", 0.2]
+      - [rect, 0.72, 0.08, 0.80, 0.25, "#bc8e2c", 0.4]
+      - [ellipse, 0.15, 0.30, 0.35, 0.70, "#dbb315"]
+      - [line, 0.05, 0.15, 0.55, 0.90, "#7d8695", 0.015]
+
+  # --- fridge ---------------------------------------------------------------------------------
+  fridge.high:
+    denoise: 0.72
+    prompt: "black stainless steel refrigerator seen from straight above, flat dark top, door edge at the bottom, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#31353b", 0.05]
+  fridge.luxury:
+    denoise: 0.72
+    prompt: "luxury double door refrigerator in brushed steel with brass handles, flat metal top, door edge at the bottom, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#858e9b", 0.04]
+    guide:
+      - [line, 0.5, 0.0, 0.5, 1.0, "#6a7482", 0.03]
+      - [rect, 0.40, 0.86, 0.48, 0.98, "#bc8e2c", 0.3]
+      - [rect, 0.52, 0.86, 0.60, 0.98, "#bc8e2c", 0.3]
+
+  # --- stool ----------------------------------------------------------------------------------
+  stool.high:
+    prompt: "round bar stool with a cognac leather seat and a black metal rim, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [ellipse, "#282b30", 0]
+    guide:
+      - [ellipse, 0.10, 0.10, 0.90, 0.90, "#975a2d"]
+  stool.luxury:
+    denoise: 0.65
+    prompt: "round bar stool, tufted cognac leather seat with buttons, polished brass ring around the seat, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [ellipse, "#bc8e2c", 0]
+    guide:
+      - [ellipse, 0.09, 0.09, 0.91, 0.91, "#884e2b"]
+      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#935731"]
+      - [ellipse, 0.47, 0.47, 0.53, 0.53, "#6a391f"]
+      - [ellipse, 0.3, 0.3, 0.36, 0.36, "#6a391f"]
+      - [ellipse, 0.64, 0.3, 0.7, 0.36, "#6a391f"]
+      - [ellipse, 0.3, 0.64, 0.36, 0.7, "#6a391f"]
+      - [ellipse, 0.64, 0.64, 0.7, 0.7, "#6a391f"]
+
+  # --- bar_counter ----------------------------------------------------------------------------
+  bar_counter.high:
+    prompt: "walnut bar counter with a black granite top, rows of bottles and chrome taps along the back edge, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.50, "#5b3b25", 0.0]
+      - [rect, 0.0, 0.50, 1.0, 1.0, "#282b30", 0.0]
+      - [rect, 0.05, 0.08, 0.95, 0.30, "#545e6d", 0.2]
+  bar_counter.luxury:
+    denoise: 0.85
+    prompt: "luxury bar counter with a polished white marble top and a brass rail, crystal bottles and gold taps along the back edge, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#462c1d", 0.03]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.0, 0.0, 1.0, 0.50, "#53301d", 0.0]
+      - [rect, 0.0, 0.50, 1.0, 1.0, "#94a0b2", 0.0]
+      - [rect, 0.0, 0.92, 1.0, 1.0, "#bc8e2c", 0.0]
+      - [rect, 0.05, 0.08, 0.95, 0.30, "#82b7c4", 0.2]
+
+  # --- reception_desk -------------------------------------------------------------------------
+  reception_desk.high:
+    prompt: "walnut reception desk with a white stone counter along the front, slim monitor, no chair, corporate, black glass, brushed chrome, glowing cyan light lines"
+    base: [rect, "#694329", 0.08]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#00f0ff", 0.5]
+      - [rect, 0.0, 0.55, 1.0, 1.0, "#909db1", 0.05]
+      - [rect, 0.40, 0.10, 0.60, 0.20, "#282b30", 0.3]
+  reception_desk.luxury:
+    prompt: "curved white marble reception desk with a gold trim along the front, slim monitor, orchid, no chair, elite, black lacquer, gold trim, glowing magenta neon accents"
+    base: [rect, "#94a0b2", 0.2]
+    guide:
+      - [rect, 0.04, 0.0, 0.96, 0.04, "#ff2fd0", 0.5]
+      - [rect, 0.0, 0.88, 1.0, 1.0, "#bc8e2c", 0.1]
+      - [rect, 0.40, 0.10, 0.60, 0.20, "#282b30", 0.3]
+      - [ellipse, 0.80, 0.15, 0.92, 0.40, "#c467c4"]
+
+# Per-object denoise of derived tiers, set in the sprite studio.
+# Per-object denoise of derived tiers (modern2's tuning as a start), set in the sprite studio.
+derived_overrides:
+  wc.low: {denoise: 0.8}
+  shelf.low: {denoise: 0.8}
+  scanner.squatter: {denoise: 0.8}
+  robot_arm.low: {denoise: 0.95}
+  generator.squatter: {denoise: 0.65}
+  arcade_machine.low: {denoise: 0.9}
+  arcade_machine.squatter: {denoise: 0.9}
+  drone_dock.low: {denoise: 0.85}
+  autokitchen.low: {denoise: 0.6}
+  dj_booth.low: {denoise: 0.65}
+  dj_booth.squatter: {denoise: 0.7}
+  forklift.low: {denoise: 0.9}
+  forklift.squatter: {denoise: 0.9}
+  battery_bank.low: {denoise: 0.6}
+  hvac_unit.low: {denoise: 0.6}
+  hvac_unit.squatter: {denoise: 0.85}
+  car_lift.low: {denoise: 0.6}
+  medical_cart.low: {denoise: 0.65}
+  machinery.low: {denoise: 0.8}
+  machinery.squatter: {denoise: 0.75}
+  electrical_panel.low: {denoise: 0.65}
+  electrical_panel.squatter: {denoise: 0.8}
+  shipping_container.low: {denoise: 0.75}
+  shipping_container.squatter: {denoise: 0.8}
+  safe.low: {denoise: 0.8}
+  safe.squatter: {denoise: 0.8}
+  desk.low: {denoise: 0.85}
+  chair.low: {denoise: 0.9}
+  bed.low: {denoise: 0.7}
+  sofa.low: {denoise: 0.9}
+  meeting_table.low: {denoise: 0.65}
+  double_bed.squatter: {denoise: 0.9}
+  double_bed.low: {denoise: 0.85}
+  cubicle.low: {denoise: 0.75}
+  side_table.low: {denoise: 0.9}
+  stool.low: {denoise: 0.65}
+  trash_bin.low: {denoise: 0.75}
+  trash_bin.squatter: {denoise: 0.8}
+  fridge.low: {denoise: 0.65}
+  nightstand.low: {denoise: 0.75}
+  laundry_cart.low: {denoise: 0.75}
+  laundry_cart.squatter: {denoise: 0.9}
+  hospital_bed.low: {denoise: 0.7}
+  gurney.squatter: {denoise: 0.9}
+  gurney.low: {denoise: 0.75}
+  capsule.low: {denoise: 0.75}
+  car.squatter: {denoise: 0.85}
+  drone_dock.squatter: {denoise: 0.9}

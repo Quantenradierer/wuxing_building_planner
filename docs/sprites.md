@@ -82,6 +82,16 @@ worn down by img2img (denoise 0.55 / 0.7), so they stay the same object. They wa
 pick and are queued by it. Sets: `modern` (`--prompts tools/sprite_prompts_modern_wealth.yaml`
 for the tiers) and `cyberpunk` (`--set cyberpunk`).
 
+Floor textures: a prompt file's `floors:` section lists `floor.<material>` entries for the
+materials of `floor_theme` (see `tools/sprite_prompts_neon2.yaml`). They show up in the studio
+after the objects. The guide is the material as the map draws it (fill colour and joints, with
+grain), changed by the entry's `guide:` if given. They render with Flux (`floor_model: dev`):
+Pony without the object LoRA fills an empty floor with people, with it the floor comes back
+flat. The pick is cut into a seamless square (blended with itself shifted by half) of
+`texture_cells` × 96 px; give a material an even number of joints per texture (`texture_cells`
+a multiple of 2 × `tile`) so the blend keeps them in place. The studio shows a picked floor
+repeated 2×2.
+
 "Recreate text description" asks OpenAI (`--openai-model`, default gpt-5-mini) for a new
 description and writes it into the prompt file; press Retry afterwards. The key comes from
 `OPENAI_API_KEY` or a line `OPENAI_API_KEY=...` in `.env` (gitignored).

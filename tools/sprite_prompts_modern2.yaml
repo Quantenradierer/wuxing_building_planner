@@ -1300,16 +1300,21 @@ subjects:
       - [ellipse, 0.40, 0.05, 0.95, 0.58, "#4a8a3a"]
       - [ellipse, 0.12, 0.45, 0.88, 0.95, "#356a2a"]
   plant.luxury:
-    denoise: 0.85
-    prompt: "big yellow flower"
+    prompt: "lush potted plant with dense dark green leaves and three white orchid blossoms, round black marble planter with a thin gold rim"
     base: [none]
     guide:
-      - [ellipse, 0.18, 0.18, 0.82, 0.82, "#c9a14a"]
-      - [line, 0.5, 0.5, 0.02, 0.2, "#3f7a32", 0.12]
-      - [line, 0.5, 0.5, 0.98, 0.2, "#3f7a32", 0.12]
-      - [line, 0.5, 0.5, 0.1, 0.95, "#4a8a3a", 0.12]
-      - [line, 0.5, 0.5, 0.9, 0.95, "#4a8a3a", 0.12]
-      - [line, 0.5, 0.5, 0.5, 0.0, "#356a2a", 0.12]
+      - [ellipse, 0.12, 0.12, 0.88, 0.88, "#c9a14a"]
+      - [ellipse, 0.16, 0.16, 0.84, 0.84, "#1e1e22"]
+      - [ellipse, 0.08, 0.20, 0.42, 0.50, "#3f7a32"]
+      - [ellipse, 0.30, 0.05, 0.64, 0.36, "#4a8a3a"]
+      - [ellipse, 0.58, 0.14, 0.92, 0.46, "#356a2a"]
+      - [ellipse, 0.08, 0.52, 0.42, 0.86, "#4a8a3a"]
+      - [ellipse, 0.56, 0.54, 0.92, 0.88, "#3f7a32"]
+      - [ellipse, 0.34, 0.62, 0.66, 0.95, "#356a2a"]
+      - [ellipse, 0.28, 0.28, 0.72, 0.72, "#3f7a32"]
+      - [ellipse, 0.36, 0.30, 0.48, 0.42, "#f4f0f4"]
+      - [ellipse, 0.54, 0.42, 0.66, 0.54, "#f4f0f4"]
+      - [ellipse, 0.38, 0.54, 0.50, 0.66, "#f4f0f4"]
 
   # --- wc -------------------------------------------------------------------------------------
   wc.high:

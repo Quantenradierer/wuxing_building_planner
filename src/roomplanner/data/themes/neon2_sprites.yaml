@@ -1,0 +1,9 @@
+# The second cyberpunk sprite set (tools/sprite_prompts_neon2.yaml: the modern2 guides redrawn
+# cyberpunk, picked in the sprite studio): the neon look with sprites from data/sprites/neon2/.
+extends: neon_sprites
+name: neon2_sprites
+sprites: neon2
+# Floor textures floor.<material>.png (also made in the sprite studio) tile the rooms. A texture
+# spans an even number of joints, so the seamless blend keeps the joints in place.
+materials:
+  lobby: {floor: "#2b2733", pattern: tiles, tile: 3, lines: "#00000040", accent: "#ff3fa4", texture_cells: 6}

@@ -9,6 +9,9 @@ four variants: clicking one writes it to the picks file and cuts the sprite into
 data/sprites/<set>/; "Retry" queues another attempt with new seeds. The prompt file is re-read
 before every job, so a description can be fixed while the studio runs and then retried.
 
+Floor textures in the file's `floors:` section (`floor.<material>`) are drawn from the
+material of `floor_theme` and cut into seamless tiles; they come after the objects.
+
 Tiers in the file's `derived:` section (low, squatter) are not drawn from a guide but worn down
 from the picked plain sprite of their kind; they wait for that pick and are queued by it.
 
@@ -17,6 +20,9 @@ description" asks OpenAI for a new description and writes it into the prompt
 file. The key comes from OPENAI_API_KEY or a line `OPENAI_API_KEY=...` in .env (gitignored).
 
 Jobs run strictly one after another (the GPU is shared), through tools/sprites_local.py.
+"Pause queue" stops after the running job; "Resume" carries on. When the queue is empty the
+studio keeps the GPU busy: it renders another attempt of the unpicked object with the fewest
+attempts, its denoise raised by --idle-boost (default 0.1) for more variation (--no-idle: off).
 """
 
 from __future__ import annotations
@@ -62,15 +68,29 @@ only the object itself: never a wall, floor, room or surroundings. Colours as pl
 hex codes, no measurements or numbers. Never mention camera, view, style or quality tags,
 background, perspective, people or text. Answer with the description only."""
 
+DESCRIBE_FLOOR = """\
+You write subject descriptions for an image generator that makes seamless floor textures for
+top-down tabletop battle maps. The model (Pony Diffusion XL) renders a flat floor surface seen
+from straight above, img2img from a flat drawing of the floor's colour and joint pattern.
+Write ONE subject description: a single line of 12 to 35 words, comma separated phrases, plain
+concrete words for the floor material, its colour, joints, wear and small surface details.
+Only the floor surface: no furniture, objects, walls, people, shadows or perspective. Colours
+as plain words, no hex codes, no measurements or numbers. Never mention camera, view, style or
+quality tags. Answer with the description only."""
+
 
 class Studio:
-    def __init__(self, prompts: Path, picks: Path, model: str) -> None:
+    def __init__(self, prompts: Path, picks: Path, model: str, idle_boost: float | None) -> None:
         self.prompts = prompts
         self.picks = picks
         self.model = model
+        self.idle_boost = idle_boost  # None: no idle attempts
         self.jobs: queue.Queue[tuple[str, int]] = queue.Queue()
         self.queued: list[str] = []
         self.rendering: str | None = None
+        self.rendering_idle = False
+        self.running = threading.Event()  # cleared: paused after the current job
+        self.running.set()
         self.failed: set[str] = set()
         self.lock = threading.Lock()
         self._data: tuple[float, dict[str, Any]] = (0.0, {})
@@ -86,6 +106,20 @@ class Studio:
     def subjects(self) -> dict[str, Any]:
         return self.data()["subjects"]
 
+    def floors(self) -> dict[str, Any]:
+        return self.data().get("floors") or {}
+
+    def designed(self, name: str) -> dict[str, Any]:
+        """The prompt file entry of an object or floor texture."""
+        return self.subjects().get(name) or self.floors()[name] or {}
+
+    def denoise(self, name: str) -> float:
+        if name in self.derived():
+            return sprites_local.derived_denoise(self.data(), name)
+        if name in self.floors():
+            return sprites_local.floor_denoise(self.data(), name)
+        return self.subjects()[name].get("denoise", self.data()["denoise"])
+
     def derived(self) -> dict[str, tuple[str, str]]:
         return sprites_local.derived_names(self.data())
 
@@ -99,12 +133,17 @@ class Studio:
             rank = TIER_ORDER.index(tier) if tier in TIER_ORDER else len(TIER_ORDER)
             return kinds.index(kind), rank
 
-        return sorted(names, key=order)
+        return sorted(names, key=order) + list(self.floors())
 
     def attempts(self, kind: str) -> list[int]:
         pattern = re.compile(rf"{re.escape(kind)}\.(\d+)\.png")
         found = (pattern.fullmatch(p.name) for p in sprites.RAW.glob(f"{kind}.*.png"))
         return sorted(int(m.group(1)) for m in found if m)
+
+    def idle_log(self) -> dict[str, float]:
+        """Denoise of the attempts made while idle, by "<kind>.<attempt>"."""
+        path = sprites.RAW / "idle.json"
+        return json.loads(path.read_text()) if path.exists() else {}
 
     def read_picks(self) -> dict[str, Any]:
         if not self.picks.exists():
@@ -113,8 +152,8 @@ class Studio:
 
     def state(self) -> dict[str, Any]:
         picks = self.read_picks()
-        subjects = self.subjects()
         derived = self.derived()
+        idle_log = self.idle_log()
         kinds: list[dict[str, Any]] = []
         for name in self.names():
             pick = picks.get(name)
@@ -135,26 +174,34 @@ class Studio:
             prompt = (
                 sprites_local.derived_prompt(self.data(), name)
                 if base
-                else subjects[name].get("prompt", "")
-            )
-            denoise = (
-                sprites_local.derived_denoise(self.data(), name)
-                if base
-                else subjects[name].get("denoise", self.data()["denoise"])
+                else self.designed(name).get("prompt", "")
             )
             kinds.append(
                 {
                     "kind": name,
                     "prompt": prompt,
-                    "denoise": denoise,
-                    "guide": None if base else _guide_version(subjects[name]),
+                    "denoise": self.denoise(name),
+                    "floor": name in self.floors(),
+                    "guide": None if base else _guide_version(self.designed(name)),
                     "base": base,
                     "attempts": self.attempts(name),
+                    "idle": {
+                        a: idle_log[f"{name}.{a}"]
+                        for a in self.attempts(name)
+                        if f"{name}.{a}" in idle_log
+                    },
                     "pick": pick,
                     "status": status,
                 }
             )
-        return {"kinds": kinds, "queue": len(self.queued), "rendering": self.rendering}
+        return {
+            "kinds": kinds,
+            "queue": len(self.queued),
+            "rendering": self.rendering,
+            "rendering_idle": self.rendering_idle,
+            "paused": not self.running.is_set(),
+            "idle": self.idle_boost is not None,
+        }
 
     # --- actions ----------------------------------------------------------------------------
 
@@ -185,7 +232,10 @@ class Studio:
             ]
             lines = header + [f"{name}: {_flow(entry)}" for name, entry in picks.items()]
             self.picks.write_text("\n".join(lines) + "\n")
-            sprites.cut([kind])
+            if kind in self.floors():
+                sprites_local.cut_floor(kind)
+            else:
+                sprites.cut([kind])
         # The worn-down tiers of this kind can start now.
         for name, (base, _) in self.derived().items():
             if base == kind and not self.attempts(name):
@@ -194,6 +244,8 @@ class Studio:
     def describe(self, kind: str, hint: str = "") -> str:
         """Ask OpenAI for a new description of `kind` and write it into the prompt file."""
         data = self.data()
+        if kind in self.floors():
+            return self._describe_floor(kind, hint)
         spec = data["subjects"][kind]
         along, deep = sprites._sizes()[kind.split(".")[0]]
         tier = kind.partition(".")[2] or "middle"
@@ -220,9 +272,28 @@ class Studio:
             _set_prompt(self.prompts, kind, text)
         return text
 
+    def _describe_floor(self, name: str, hint: str) -> str:
+        data = self.data()
+        material = sprites_local.floor_material(data, name)
+        request = "\n".join(
+            [
+                f"Floor material: {name.removeprefix('floor.').replace('_', ' ')}",
+                f"Look of the whole set: {data.get('look', 'not specified')}",
+                f"Current description (write a different, better one): "
+                f"{self.designed(name).get('prompt', '')}",
+                f"Guide drawing: colour {material.floor}, pattern {material.pattern.value} "
+                f"every {material.tile} half-metre cells",
+                *([f"Guidance: {hint}"] if hint else []),
+            ]
+        )
+        text = _openai(self.model, DESCRIBE_FLOOR, request).strip().strip('"').replace("\n", " ")
+        with self.lock:
+            _set_prompt(self.prompts, name, text)
+        return text
+
     def set_prompt(self, kind: str, text: str, denoise: float | None = None) -> None:
         """Replace the description (and optionally the denoise) of a designed kind."""
-        if kind not in self.subjects():
+        if kind not in self.subjects() and kind not in self.floors():
             raise ValueError(f"{kind}: only designed objects have their own description")
         text = " ".join(text.split())
         if not text:
@@ -239,28 +310,68 @@ class Studio:
         if not 0.1 <= denoise <= 1.0:
             raise ValueError("denoise must be between 0.1 and 1.0")
         with self.lock:
-            if kind in self.subjects():
+            if kind in self.subjects() or kind in self.floors():
                 _set_denoise(self.prompts, kind, denoise)
             elif kind in self.derived():
                 _set_override(self.prompts, kind, denoise)
             else:
                 raise ValueError(f"unknown object {kind}")
 
+    def pause(self, paused: bool) -> None:
+        """Paused, the worker finishes its current job and then takes no further one."""
+        if paused:
+            self.running.clear()
+        else:
+            self.running.set()
+
+    def next_idle(self) -> str | None:
+        """The unpicked object with the fewest attempts (derived ones once their base is picked)."""
+        picks = self.read_picks()
+        derived = self.derived()
+        candidates = [
+            name
+            for name in self.names()
+            if name not in picks
+            and name not in self.failed
+            and name not in self.queued
+            and (name not in derived or derived[name][0] in picks)
+        ]
+        return min(candidates, key=lambda name: len(self.attempts(name)), default=None)
+
     def work(self) -> None:
         while True:
-            kind, attempt = self.jobs.get()
+            self.running.wait()
+            boost = 0.0
+            try:
+                kind, attempt = self.jobs.get(timeout=1)
+            except queue.Empty:
+                if self.idle_boost is None or not (idle := self.next_idle()):
+                    continue
+                kind, boost = idle, self.idle_boost
+                attempt = max(self.attempts(idle), default=0) + 1
+                with self.lock:
+                    self.queued.append(kind)
+            self.running.wait()  # a pause during the wait above holds the job at the head
             with self.lock:
                 self.queued.remove(kind)
                 self.rendering = kind
+                self.rendering_idle = bool(boost)
             try:
                 if kind in self.derived():
-                    sprites_local.generate_derived(kind, attempt)
+                    sprites_local.generate_derived(kind, attempt, boost)
+                elif kind in self.floors():
+                    sprites_local.generate_floor(kind, attempt, boost)
                 else:
-                    sprites_local.generate([kind], attempt)
+                    sprites_local.generate([kind], attempt, boost)
+                if boost:
+                    log = self.idle_log()
+                    log[f"{kind}.{attempt}"] = sprites_local.boosted(self.denoise(kind), boost)
+                    (sprites.RAW / "idle.json").write_text(json.dumps(log, indent=0))
             except Exception as error:  # a broken prompt entry must not stop the queue
                 print(f"FAILED {kind}: {error}", flush=True)
             with self.lock:
                 self.rendering = None
+                self.rendering_idle = False
                 if not (sprites.RAW / f"{kind}.{attempt}.png").exists():
                     self.failed.add(kind)
 
@@ -274,7 +385,10 @@ class Studio:
 
     def guide(self, kind: str) -> bytes:
         """The drawing a designed kind's img2img starts from."""
-        image = sprites_local.draw_guide(kind, self.subjects()[kind])
+        if kind in self.floors():
+            image = sprites_local.draw_floor_guide(self.data(), kind)
+        else:
+            image = sprites_local.draw_guide(kind, self.subjects()[kind])
         image.thumbnail((TILE, TILE))
         return _png(image)
 
@@ -426,6 +540,8 @@ def handler(studio: Studio) -> type[BaseHTTPRequestHandler]:
             length = int(self.headers.get("Content-Length", 0))
             data = json.loads(self.rfile.read(length) or b"{}")
             match urlparse(self.path).path:
+                case "/api/pause":
+                    studio.pause(bool(data["paused"]))
                 case "/api/retry":
                     studio.enqueue(data["kind"])
                 case "/api/pick":
@@ -469,6 +585,10 @@ def main() -> None:
     parser.add_argument("--prompts", type=Path, help="default tools/sprite_prompts_<set>.yaml")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument(
+        "--idle-boost", type=float, default=0.1, help="denoise added to attempts made while idle"
+    )
+    parser.add_argument("--no-idle", action="store_true", help="nothing while the queue is empty")
     parser.add_argument("--openai-model", default=os.environ.get("OPENAI_MODEL", "gpt-5-mini"))
     args = parser.parse_args()
 
@@ -480,7 +600,8 @@ def main() -> None:
     sprites.OUT = ROOT / "src" / "roomplanner" / "data" / "sprites" / args.set
     sprites.RAW.mkdir(parents=True, exist_ok=True)
 
-    studio = Studio(sprites_local.PROMPTS, sprites.PICKS, args.openai_model)
+    idle_boost = None if args.no_idle else args.idle_boost
+    studio = Studio(sprites_local.PROMPTS, sprites.PICKS, args.openai_model, idle_boost)
     studio.enqueue_missing()
     threading.Thread(target=studio.work, daemon=True).start()
 
