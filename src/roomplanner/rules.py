@@ -99,6 +99,11 @@ class FurnitureRule(_Strict):
         default=None, description="How many (default 1); with `per`: lower and upper bound"
     )
     per: int | None = Field(default=None, gt=0, description="One object per this many cells")
+    per_room: tuple[str, int] | None = Field(
+        default=None,
+        description="One object per this many rooms of a type opening into the room, "
+        "rounded up and bounded by `count`, never scaled (a sink per two stalls)",
+    )
     aisle: int = Field(default=3, gt=0, description="rows, grid: free cells between rows")
     margin: int = Field(
         default=2,
@@ -137,6 +142,18 @@ class FurnitureRule(_Strict):
         default=None,
         description="wall: as close as possible to a room of this type (the stage by backstage)",
     )
+    line: bool = Field(
+        default=False,
+        description="wall: side by side along one wall, the row as long as fits and nearest "
+        "the room's entrance (the sinks of a public toilet)",
+    )
+    not_against: list[str] = Field(
+        default=[],
+        description="wall: never backed against a wall to a room of these types (stalls)",
+    )
+    limit: int | None = Field(
+        default=None, gt=0, description="at: at most this many in all, not per target"
+    )
     front_clear: int = Field(
         default=0,
         ge=0,
@@ -152,6 +169,10 @@ class FurnitureRule(_Strict):
             raise ValueError(f"'{self.object}': `at` goes with placement 'at' and only with it")
         if self.toward is not None and self.placement is not Placement.ROWS:
             raise ValueError(f"'{self.object}': `toward` goes with placement 'rows' only")
+        if (self.line or self.not_against) and self.placement is not Placement.WALL:
+            raise ValueError(f"'{self.object}': `line` and `not_against` go with 'wall' only")
+        if self.limit is not None and self.placement is not Placement.AT:
+            raise ValueError(f"'{self.object}': `limit` goes with placement 'at' only")
         return self
 
     @property

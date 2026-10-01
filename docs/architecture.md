@@ -299,7 +299,9 @@ room type is `open: 1`, so it has no walls towards the hall (its long side and o
 building type's catalogs, on one ground floor (`room` forces one floor and a rectangle), its
 main entrance in the middle of the street side. A unit type is subdivided as in a strip with
 the street as its corridor; stalls are carved with the cells outside the street wall as the
-circulation they keep free. Openings, furnishing and the layers run unchanged, so a room
+circulation they keep free. With no circulation on the floor, the openings stage counts
+the entered room as reached from the start, so its stalls get their doors. Openings,
+furnishing and the layers run unchanged, so a room
 type's furniture, templates and lights can be checked without generating a building.
 
 ### Units
@@ -392,11 +394,17 @@ halves fit: pews facing the altar), and `at`
 (beside every object of kind `at`
 placed earlier in the room: chairs at desks and tables, stools at bar counters, monitors
 beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` — gone round in
-turn, and `count` is per target, never scaled). `front_clear: N` keeps a free area in front
+turn, and `count` is per target, never scaled; `limit: N` caps them over all targets: one
+bin at the end of a sink row). `wall` with `line: true` puts the objects side by side
+along one wall, the longest row that fits, of those the one nearest the room's door into
+circulation (or out of the building), without randomness: the wash row of a public toilet,
+shower room or scrub room. `not_against: [types]` keeps `wall` objects off walls to rooms
+of those types (sinks off the stall partitions). `front_clear: N` keeps a free area in front
 of an object, `N` cells deep and as wide as it plus `N / 2` on each side, from everything
 placed after it except walkable objects (the dance floor before the DJ booth). Counts are a
 range or `per: N` (one object per N cells of room, bounded by `count`), scaled by the
-tier's `furniture` factor;
+tier's `furniture` factor, or `per_room: [type, N]` (one per N rooms of that type opening
+into the room, rounded up, bounded by `count`, never scaled: a sink per two stalls);
 an exact count (`count: 1`, the default) is never scaled. A rule with `wealth:` or `security:`
 lists applies only to those tiers of the building (squatter mattresses, a guard post at the
 checkout from low security up); `rules_for` drops the others.

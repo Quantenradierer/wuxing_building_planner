@@ -29,7 +29,7 @@ rooms:
     cluster: true
     furniture:
       - {object: shower, placement: wall, per: 8, count: [1, 4]}
-      - {object: sink, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall, count: [1, 2], line: true}
       - {object: bench, placement: center, count: [0, 1]}
   locker_room:
     wealth_shift: -1          # plainer than the rest of the building

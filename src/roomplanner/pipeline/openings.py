@@ -99,6 +99,9 @@ class DefaultOpenings:
                 fixed,
                 fronts,
                 {i for i, sides in opened.items() if sides},
+                # Without circulation (a lone room) the street is it: the entered rooms
+                # count as reached, so their stalls get doors.
+                set() if circulation else {e.room for e in planned.entrances},
             )
             used: set[Edge] = set()
             grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
@@ -246,6 +249,7 @@ def _interior_doors(
     fixed: dict[int, set[Edge]] | None = None,
     fronts: dict[int, set[Edge]] | None = None,
     opened: set[int] | None = None,
+    entered: set[int] | None = None,
 ) -> list[Opening]:
     """One door per room, committed greedily: the best-ranked door of all pending rooms first.
 
@@ -261,7 +265,8 @@ def _interior_doors(
     A room left without any allowed door (a storeroom behind the core between rooms that
     are no thoroughfares, walled in by apartments) finally opens into any neighbour, a core
     room last. Open rooms (`opened`: an open kitchen) need no door and take other rooms'
-    doors only as that last resort.
+    doors only as that last resort. `entered`: rooms with an exterior door, reached from
+    the start like circulation (a lone room, entered from the street).
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
@@ -369,7 +374,7 @@ def _interior_doors(
     doors: list[Opening] = []
     door_edges: dict[int, list[Edge]] = defaultdict(list)
     linked: set[tuple[int, int]] = set()
-    connected = set(circulation)
+    connected = set(circulation) | (entered or set())
     pending = {i for i in range(len(rooms)) if i not in circulation}
     while pending:
         options = [(option, i) for i in sorted(pending) if (option := best(i)) is not None]

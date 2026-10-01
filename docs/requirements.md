@@ -269,6 +269,13 @@ Requested by the author (2026-09-27), done (2026-10-01):
   doors (`end`), facing an open dance floor 5 m deep that tables, sofas and bars keep clear
   of (`front_clear: 10`); before, it stood on any wall, often in a corner between sofas
   and shelves, with tables in front of it.
+- Public toilets compared with hand-drawn ones (2026-10-01): their sinks stood one by one
+  on random walls, against stall partitions and far from the door, 1–3 whatever the
+  stalls, the bin in any corner. Now the sinks are one row on one wall nearest the
+  entrance, never against a stall, one per two stalls (3 stalls: 2 sinks in ~85 %, 1 where
+  the wall is short), with the bin at the row's end when a flank is free (~65 %). Shower
+  and scrub rooms line their sinks up too. A lone toilet (`--room toilet`) had no stall
+  doors; now it does.
 - Every public toilet has a sink (about 4 000 toilets in 1 900 random buildings):
   the 4 × 4 rest between the entrance and two stall doors that left ~0.5 % without one
   fits a 2 × 1 sink. Toilets give up stalls until 16 cells are left for sinks

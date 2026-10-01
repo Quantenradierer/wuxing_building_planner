@@ -567,15 +567,41 @@ def test_open_offices_fill_their_depth_with_desks_up_to_the_corridor() -> None:
     assert not any(w.startswith("[hard]") for w in building.warnings)
 
 
-def test_every_public_toilet_has_a_sink_beside_its_stalls() -> None:
-    """Even a 4 x 4 rest between the entrance and the stall doors fits a 2 x 1 sink."""
+def test_public_toilets_have_one_row_of_sinks_off_the_stalls() -> None:
+    """A wash row: every sink on one wall side by side, none backed against a stall, one
+    per two stalls where the wall has room (even a 4 x 4 rest fits a 2 x 1 sink)."""
     toilets = 0
     for building_type in (BuildingType.OFFICE, BuildingType.CLINIC, BuildingType.HOTEL):
         for seed in range(3):
             params = make_params(building_type=building_type, width=56, depth=40, seed=seed)
             for floor in generate(params).floors:
                 for room in floor.rooms:
-                    if room.type == "toilet":
-                        toilets += 1
-                        assert any(o.room == room.id and o.kind == "sink" for o in floor.objects)
+                    if room.type != "toilet":
+                        continue
+                    toilets += 1
+                    sinks = [o for o in floor.objects if o.room == room.id and o.kind == "sink"]
+                    stalls = {
+                        other.id
+                        for door in floor.openings
+                        for cell in door.edges[0].cells()
+                        if set(door.edges[0].cells()) & room.cells
+                        and (other := floor.room_at(cell)) is not None
+                        and other.type == "stall"
+                    }
+                    stall_cells = {c for r in floor.rooms if r.type == "stall" for c in r.cells}
+                    assert 1 <= len(sinks) <= -(-len(stalls) // 2)
+                    assert len({o.facing for o in sinks}) == 1
+                    assert connected({c for o in sinks for c in o.cells})
+                    for sink in sinks:
+                        dx, dy = sink.facing.opposite.delta
+                        behind = {Cell(c.x + dx, c.y + dy) for c in sink.cells} - sink.cells
+                        assert not behind & stall_cells
     assert toilets >= 9
+
+
+def test_a_lone_toilet_has_doors_into_its_stalls() -> None:
+    building = generate(make_params(width=10, depth=6, room="toilet", seed=1))
+    floor = building.floors[0]
+    stalls = [r for r in floor.rooms if r.type == "stall"]
+    assert len(stalls) == 3
+    assert not any(w.startswith("[hard]") for w in building.warnings)

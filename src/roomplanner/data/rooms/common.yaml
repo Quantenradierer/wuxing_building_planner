@@ -50,8 +50,11 @@ rooms:
     cluster: true
     stalls: {room: stall, max: 3, rest_area: 16, single: wc}
     furniture:
-      - {object: sink, placement: wall, count: [1, 3]}
-      - {object: trash_bin, placement: corner, count: [0, 1]}
+      # A wash row: side by side on one wall by the entrance, not against the stalls, one
+      # sink per two stalls; the bin at its end.
+      - {object: sink, placement: wall, line: true, not_against: [stall], count: [1, 3],
+         per_room: [stall, 2]}
+      - {object: trash_bin, placement: at, at: sink, beside: [flanks], limit: 1}
   stall:                # a toilet cubicle, 1 x 1.5 m, carved out of a public toilet
     area: [4, 12]
     min_side: 2

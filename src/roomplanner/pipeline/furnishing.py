@@ -240,7 +240,10 @@ class RoomFurnisher:
                 self._at(rule, spec)
                 continue
             low, high = rule.count_range
-            if rule.per is not None:
+            if rule.per_room is not None:
+                kind, every = rule.per_room
+                count = min(high, max(low, -(-self._neighbours(kind) // every)))
+            elif rule.per is not None:
                 count = round(len(self.cells) / rule.per * factor)
                 count = min(high, max(low, count))
             elif low == high:
@@ -251,6 +254,9 @@ class RoomFurnisher:
                 count = max(1, count)
             if rule.head is not None:
                 self._pairs(rule, spec, rule.head, count)
+                continue
+            if rule.line:
+                self._side_by_side(rule, spec, count)
                 continue
             for _ in range(count):
                 if self._place_one(rule, spec):
@@ -281,6 +287,86 @@ class RoomFurnisher:
                 break
             if self._extend(rect, parts, head):
                 left -= 1
+
+    def _side_by_side(self, rule: FurnitureRule, spec: ObjectSpec, count: int) -> None:
+        """Up to `count` objects touching in a row along one wall: the longest row that fits,
+        of those the one nearest the room's entrance (no randomness: rooms of one shape get
+        the same row)."""
+        walls = self._wall_spots(rule, spec)
+        entry = self._entry_cells()
+        for n in range(count, 0, -1):
+            rows = [[_step(start, k) for k in range(n)] for start in walls]
+            rows.sort(key=lambda row: (min(self._distance(r, entry) for r in row), row[0]))
+            for row in rows:
+                if not all(self._free(rect, rule) for rect in row):
+                    continue
+                before = list(self.placed), set(self.taken), set(self.blocking)
+                if all(self._try(rule.object, rect, spec.walkable) for rect in row):
+                    return
+                self.placed, self.taken, self.blocking = before  # one of them cut the room
+
+    def _free(self, rect: Rect, rule: FurnitureRule) -> bool:
+        """Inside the room against an allowed solid wall, on free floor, off the clearances."""
+        x, y, w, h, _ = rect
+        cells = {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+        if not cells <= self.cells or cells & (self.taken | self.clearance):
+            return False
+        return self._backed_allowed(rect, rule)
+
+    def _wall_spots(self, rule: FurnitureRule, spec: ObjectSpec) -> list[Rect]:
+        """Wall spots for `spec`, without those backed against a `not_against` room."""
+        return [
+            r
+            for r in self._against_walls(spec, corners_only=False)
+            if self._backed_allowed(r, rule)
+        ]
+
+    def _backed_allowed(self, rect: Rect, rule: FurnitureRule) -> bool:
+        if not rule.not_against:
+            return True
+        facing = rect[4]
+        for cell in _back_row(rect):
+            other = self.floor.room_at(cell.neighbour(facing.opposite))
+            if other is not None and other.type in rule.not_against:
+                return False
+        return True
+
+    def _neighbours(self, kind: str) -> int:
+        """How many rooms of this type open into the room (the stalls of a public toilet,
+        not those of the toilet behind the wall)."""
+        found: set[str] = set()
+        for door in self.floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            a, b = door.edges[0].cells()
+            if a in self.cells or b in self.cells:
+                other = self.floor.room_at(b if a in self.cells else a)
+                if other is not None and other.type == kind:
+                    found.add(other.id)
+        return len(found)
+
+    def _entry_cells(self) -> list[Cell]:
+        """Inside cells of the doors into circulation or out of the building, else of any."""
+        found: list[tuple[bool, Cell]] = []
+        for door in self.floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            for edge in door.edges:
+                a, b = edge.cells()
+                inside, outside = (a, b) if a in self.cells else (b, a)
+                if inside not in self.cells or outside in self.cells:
+                    continue
+                other = self.floor.room_at(outside)
+                main = other is None or self.ctx.rules.spec(other.type).circulation
+                found.append((main, inside))
+        mains = [c for main, c in found if main]
+        return mains or [c for _, c in found]
+
+    @staticmethod
+    def _distance(rect: Rect, cells: list[Cell]) -> float:
+        x, y, w, h, _ = rect
+        cx, cy = x + w / 2, y + h / 2
+        return min((abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in cells), default=0.0)
 
     def _extend(self, rect: Rect, parts: list[PlacedObject], kind: str) -> bool:
         """Replace the group at `rect` by the bigger group `kind` with the same back wall."""
@@ -340,7 +426,7 @@ class RoomFurnisher:
     def _place_one(self, rule: FurnitureRule, spec: ObjectSpec) -> bool:
         match rule.placement:
             case Placement.WALL:
-                candidates = self._against_walls(spec, corners_only=False)
+                candidates = self._wall_spots(rule, spec)
                 self.rng.shuffle(candidates)
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
@@ -837,8 +923,9 @@ class RoomFurnisher:
         """
         low, high = rule.count_range
         along, deep = spec.size
+        left = rule.limit if rule.limit is not None else math.inf
         for target in [o for o in self.placed if o.kind == rule.at]:
-            count = self.rng.randint(low, high)
+            count = min(self.rng.randint(low, high), left)
             front, back = target.facing, target.facing.opposite
             flanks = [s for s in Side if s not in (front, back)]
             named = {"front": [front], "back": [back], "flanks": flanks}
@@ -854,6 +941,7 @@ class RoomFurnisher:
                             break
                     if placed == count:
                         break
+            left -= placed
 
     @staticmethod
     def _beside(target: PlacedObject, side: Side, along: int, deep: int) -> list[Rect]:
@@ -982,6 +1070,14 @@ def _backed(cell: Cell, side: Side, along: int, deep: int) -> Rect:
             return (cell.x, cell.y, deep, along, Side.E)
         case Side.E:
             return (cell.x - deep + 1, cell.y, deep, along, Side.W)
+
+
+def _step(rect: Rect, k: int) -> Rect:
+    """`rect` moved `k` times its own width along the wall behind it."""
+    x, y, w, h, facing = rect
+    if facing in (Side.N, Side.S):
+        return (x + k * w, y, w, h, facing)
+    return (x, y + k * h, w, h, facing)
 
 
 def _back_row(rect: Rect) -> list[Cell]:

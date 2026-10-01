@@ -57,7 +57,7 @@ rooms:
     windows: forbidden
     door_width: 3
     furniture:
-      - {object: sink, placement: wall, count: [2, 3]}
+      - {object: sink, placement: wall, count: [2, 3], line: true}
       - {object: locker, placement: wall, count: [1, 3]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   sterilization:
