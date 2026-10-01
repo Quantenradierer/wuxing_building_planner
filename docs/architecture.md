@@ -239,7 +239,9 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      and what's left is nowhere thinner than its `min_side`); places are
      skipped if the rest would lose its door to circulation, narrow gaps join a stall.
      What's left can become another type (`rest`: a cell block's `lockup`); if no stall
-     fits the room becomes the `single` type (a one-person WC). Bathrooms have no stalls.
+     fits the room becomes the `single` type (a one-person WC), or stays as it is without
+     one (the police front office, whose one "stall" is a visitor WC). No stall takes the
+     cells within an entrance's width of a planned exterior door. Bathrooms have no stalls.
      Stalls have 1-cell doors so the 2 × 2 wc fits in front of the door clearance; their
     `front` (the side towards the passage) is where the openings stage puts the door, so a
     stall at the end of the row doesn't open into its flank.
@@ -259,7 +261,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    overrides the program's). For example, an office's 3 m interior rows get mostly
    huddle and focus rooms, now and then a supply or nap room, one copy room and one break
    room; the vending room is a counted room by the core. `near: core | entrance | service`
-   pulls rooms towards those anchors.
+   pulls rooms towards those anchors. A room whose `access` names the ground floor's lobby
+   type (the waiting room) goes beside the lobby: a segment sharing a side with it whose
+   lobby end no such room has taken yet scores `NEXT_TO_BONUS` better (and the room pays no
+   fragment penalty), and the room sorts to that end, before other rooms `near` the entrance.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 8. **Behind the core**: each rectangle takes a room that found no space (required ones
    first; a piece of its size if the rectangle is bigger), else the floor's `core_back` room (a

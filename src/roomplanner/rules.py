@@ -214,7 +214,10 @@ class StallRule(_Strict):
     rest_area: int = Field(
         default=0, ge=0, description="Cells the room keeps besides its stalls (sinks)"
     )
-    single: str = Field(description="Room type if not even one stall fits")
+    single: str | None = Field(
+        default=None,
+        description="Room type if not even one stall fits (default: the room stays as it is)",
+    )
     rest: str | None = Field(
         default=None, description="Room type of what's left in front of the stalls (default: same)"
     )
@@ -701,7 +704,8 @@ def _check_references(rules: Rules) -> None:
             if template.door + spec.door_width > template.size[0]:
                 raise RulesError(f"{program.building}: {name}: template door beyond its wall")
         if spec.stalls is not None:
-            names += [spec.stalls.room, spec.stalls.single, spec.stalls.rest or spec.stalls.room]
+            stalls = spec.stalls
+            names += [stalls.room, stalls.single or stalls.room, stalls.rest or stalls.room]
     if unknown:
         raise RulesError(f"{program.building}: unknown objects {', '.join(sorted(unknown))}")
     if missing := sorted({n for n in names if n not in rules.rooms}):

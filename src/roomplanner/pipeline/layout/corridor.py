@@ -609,7 +609,8 @@ class CorridorLayout:
             core_box = main.frame.box(slot.u0, slot.u1, band.v0, band.v1)
         service = next((c for kind, _, c in hints if kind is EntranceKind.SERVICE), None)
         service_box = Box(service.x, service.y, service.x + 1, service.y + 1) if service else None
-        anchors = Anchors(core_box, entrance, service_box)
+        lobby = self._lobby_entry(ctx) if level == 0 else None
+        anchors = Anchors(core_box, entrance, service_box, lobby.room if lobby else None)
         allocator = Allocator(ctx, ctx.rules, segments, anchors, ctx.rng(f"allocate:{level}"))
         behind: list[tuple[Segment, frozenset[Cell]]] = []
         if skeleton.core_band is not None and skeleton.core_slot is not None:
@@ -622,7 +623,17 @@ class CorridorLayout:
 
         rooms = absorb_leftovers(rooms, ctx.rules)
         rooms = trim_hallways(rooms, ctx.rules, frozenset(hint for _, _, hint in hints))
-        rooms = carve_stalls(_merge_corridors(rooms), ctx.rules)
+        rooms = _merge_corridors(rooms)
+        # No stall where an exterior door goes (the front office's WC beside the entrance).
+        reach = max(rule.width for rule in ctx.rules.entrances(ctx.params).values())
+        keep = frozenset(
+            cell
+            for _, _, hint in hints
+            for dx in range(-reach, reach + 1)
+            for dy in range(-reach, reach + 1)
+            if (cell := Cell(hint.x + dx, hint.y + dy)) in rooms[_room_index(rooms, hint)].cells
+        )
+        rooms = carve_stalls(rooms, ctx.rules, keep=keep)
         entrances = [
             EntranceRequest(kind, side, _room_index(rooms, hint), hint)
             for kind, side, hint in hints

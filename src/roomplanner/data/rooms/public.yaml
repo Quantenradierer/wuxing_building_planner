@@ -52,6 +52,7 @@ rooms:
     area: [40, 400]       # the program asks for less; a slice across the building is bigger
     min_side: 6
     transit: false        # the public goes no further
+    stalls: {room: wc, width: 3, depth: 4, max: 1, rest_area: 40}   # a WC for visitors
     furniture:
       - {object: reception_post, placement: facing_exit}   # facing the entrance
       - {object: bench, placement: wall, count: [1, 3]}

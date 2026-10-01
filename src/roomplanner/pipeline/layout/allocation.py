@@ -122,10 +122,14 @@ class Anchors:
     core: Box | None
     entrance: Box | None
     service: Box | None = None  # the service entrance's facade cell (ground floor)
+    lobby: str | None = None  # room type at `entrance` (the lobby rooms in `access` open onto)
 
     def get(self, near: str | None) -> Box | None:
         anchors = {"core": self.core, "entrance": self.entrance, "service": self.service}
         return anchors.get(near or "")
+
+    def opens_onto_lobby(self, spec: RoomSpec) -> bool:
+        return self.entrance is not None and self.lobby in spec.access
 
 
 class Allocator:
@@ -294,6 +298,7 @@ class Allocator:
                 continue
             score = (
                 self._score(request, segment)
+                + self._lobby_side(request, state)
                 + self._partner_room(request, state, option)
                 + self._fragments(request, state, option)
             )
@@ -431,6 +436,21 @@ class Allocator:
     def _member_depth(self, request: Request, cluster: Cluster) -> int:
         return max(request.spec.min_side, math.ceil(request.area / cluster.column_width))
 
+    def _lobby_side(self, request: Request, state: SegmentState) -> float:
+        """Bonus for a room opening onto the lobby (`access`) where it can still go beside it:
+        the segment shares a side with the lobby and no such room took that end yet."""
+        lobby = self.anchors.entrance
+        if lobby is None or not self.anchors.opens_onto_lobby(request.spec):
+            return 0.0
+        if not _share_side(state.segment.box, lobby):
+            return 0.0
+        taken = any(
+            self.anchors.opens_onto_lobby(r.spec)
+            for slot in state.slots
+            for r in _slot_requests(slot)
+        )
+        return 0.0 if taken else -NEXT_TO_BONUS
+
     def _partner_room(self, request: Request, state: SegmentState, option: Option) -> float:
         """Penalty if rooms still to come that want to be `next_to` this one won't fit beside it."""
         partners = [r for r in self.pending if request.type in r.spec.next_to]
@@ -443,11 +463,13 @@ class Allocator:
     def _fragments(self, request: Request, state: SegmentState, option: Option) -> float:
         """Penalty if the option leaves a rest too narrow for the floor's fill rooms.
 
-        Neighbours (`next_to`) matter more: rooms with such relations don't pay it.
+        Neighbours (`next_to`, the lobby) matter more: rooms with such relations don't pay it.
         """
         if not isinstance(option, FullSlot | Cluster):
             return 0.0  # joins a cluster: no width used
         if request.spec.next_to or any(request.type in r.spec.next_to for r in self.pending):
+            return 0.0
+        if self.anchors.opens_onto_lobby(request.spec):
             return 0.0
         segment = state.segment
         widths = [
@@ -1015,16 +1037,19 @@ class Allocator:
         return self.rules.spec(room_type).next_to if room_type else []
 
     def _pull(self, slot: Slot, segment: Segment) -> int:
-        """-1 to sort towards u0, +1 towards u1, 0 anywhere."""
-        request = (
-            slot.request
-            if isinstance(slot, FullSlot)
-            else next((r for stack in slot.stacks for r, _ in stack), None)
-        )
-        if request is None or (anchor := self.anchors.get(request.near)) is None:
+        """< 0 to sort towards u0, > 0 towards u1, 0 anywhere; rooms opening onto the lobby
+        go right beside it, before other rooms `near` the entrance."""
+        request = next(iter(_slot_requests(slot)), None)
+        if request is None:
+            return 0
+        if self.anchors.opens_onto_lobby(request.spec):
+            anchor, strength = self.anchors.entrance, 2
+        else:
+            anchor, strength = self.anchors.get(request.near), 1
+        if anchor is None:
             return 0
         anchor_u, _ = segment.frame.to_local(*anchor.centre)
-        return -1 if anchor_u < segment.span.centre else 1
+        return -strength if anchor_u < segment.span.centre else strength
 
     @staticmethod
     def _rect(segment: Segment, span: Interval) -> frozenset[Cell]:
@@ -1155,6 +1180,19 @@ def _first_type(slot: Slot) -> str | None:
     if isinstance(slot, FullSlot):
         return slot.request.type
     return next((r.type for stack in slot.stacks for r, _ in stack), None)
+
+
+def _slot_requests(slot: Slot) -> list[Request]:
+    if isinstance(slot, FullSlot):
+        return [slot.request]
+    return [r for stack in slot.stacks for r, _ in stack]
+
+
+def _share_side(a: Box, b: Box) -> bool:
+    """The boxes touch along a side (not just at a corner)."""
+    across = min(a.x1, b.x1) - max(a.x0, b.x0)
+    down = min(a.y1, b.y1) - max(a.y0, b.y0)
+    return (across > 0 and down == 0) or (down > 0 and across == 0)
 
 
 def _slot_types(state: SegmentState) -> set[str]:

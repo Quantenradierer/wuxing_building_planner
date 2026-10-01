@@ -18,9 +18,13 @@ from roomplanner.rules import Rules, StallRule
 
 
 def carve_stalls(
-    rooms: list[PlannedRoom], rules: Rules, outside: frozenset[Cell] = frozenset()
+    rooms: list[PlannedRoom],
+    rules: Rules,
+    outside: frozenset[Cell] = frozenset(),
+    keep: frozenset[Cell] = frozenset(),
 ) -> list[PlannedRoom]:
-    """`outside`: cells beyond the footprint that count as circulation (a lone room's street)."""
+    """`outside`: cells beyond the footprint that count as circulation (a lone room's street);
+    `keep`: cells no stall may take (where an exterior door is planned)."""
     circulation = set(outside) | {
         cell
         for room in rooms
@@ -29,11 +33,16 @@ def carve_stalls(
     }
     result: list[PlannedRoom] = []
     for room in rooms:
-        result += carve(room, rules, circulation)
+        result += carve(room, rules, circulation, keep)
     return result
 
 
-def carve(room: PlannedRoom, rules: Rules, circulation: set[Cell]) -> list[PlannedRoom]:
+def carve(
+    room: PlannedRoom,
+    rules: Rules,
+    circulation: set[Cell],
+    keep: frozenset[Cell] = frozenset(),
+) -> list[PlannedRoom]:
     """The room split into its rest and stalls (just the room if it has no `stalls:`)."""
     rule = rules.spec(room.type).stalls
     if rule is None:
@@ -43,7 +52,7 @@ def carve(room: PlannedRoom, rules: Rules, circulation: set[Cell]) -> list[Plann
     # The passage must be as wide as the room left in front of the stalls requires.
     passage = max(rule.passage or 0, minimum)
     size = rules.stall_size(rule)
-    return _split(room, rule, size, (passage, minimum), spec.door_width, circulation)
+    return _split(room, rule, size, (passage, minimum), spec.door_width, circulation, keep)
 
 
 def _split(
@@ -53,6 +62,7 @@ def _split(
     widths: tuple[int, int],
     door: int,
     circulation: set[Cell],
+    keep: frozenset[Cell],
 ) -> list[PlannedRoom]:
     """`widths`: the passage kept free in front of the stalls and the least width of the rest
     anywhere (the room's own minimum side)."""
@@ -77,7 +87,7 @@ def _split(
                 found = [
                     (side, cells)
                     for side in sides
-                    for cells in _row(room, size, passage, ignored, side, box, limit)
+                    for cells in _row(room, size, passage, ignored | keep, side, box, limit)
                 ]
                 rest = room.cells.difference(*(cells for _, cells in found))
                 # The room must still reach circulation through a door.
@@ -89,6 +99,8 @@ def _split(
         if best:
             break
     if not best:
+        if rule.single is None:
+            return [room]
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
     rest = room.cells.difference(*(cells for _, cells in best))
     host = PlannedRoom(rule.rest or room.type, rest, room.unit, room.entry, room.host)

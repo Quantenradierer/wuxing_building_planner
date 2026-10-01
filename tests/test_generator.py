@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from roomplanner.errors import InfeasibleError
@@ -463,7 +465,7 @@ def test_the_reception_desk_stands_in_the_lobby(building_type: BuildingType, lob
     assert desks and all(o.room in lobbies for o in desks)
 
 
-def test_the_police_lobby_has_one_door_into_the_station() -> None:
+def test_the_police_lobby_has_one_door_into_the_station_and_a_visitor_wc() -> None:
     ground = generate(
         make_params(building_type=BuildingType.POLICE_STATION, width=64, depth=44, seed=5)
     ).floor(0)
@@ -475,10 +477,37 @@ def test_the_police_lobby_has_one_door_into_the_station() -> None:
         and o.entrance is None
         and any(c in lobby.cells for e in o.edges for c in e.cells())
     ]
-    assert len(inner) == 1
-    outside = next(c for c in inner[0].edges[0].cells() if c not in lobby.cells)
-    room = ground.room_at(outside)
-    assert room is not None and room.type == "corridor"
+    beyond: list[str] = []
+    for door in inner:
+        outside = next(c for c in door.edges[0].cells() if c not in lobby.cells)
+        room = ground.room_at(outside)
+        assert room is not None
+        beyond.append(room.type)
+    assert sorted(beyond) == ["corridor", "wc"]
+
+
+def test_waiting_rooms_are_beside_the_reception_lobby() -> None:
+    """A room whose `access` names the lobby goes beside it, ahead of other rooms near the
+    entrance (toilets): 60 % of clinic and 40 % of hospital waiting rooms did before."""
+    rng = random.Random(4)
+    beside, total = 0, 0
+    for building_type in (BuildingType.CLINIC, BuildingType.HOSPITAL):
+        for _ in range(8):
+            params = make_params(
+                building_type=building_type,
+                width=rng.randint(48, 70),
+                depth=rng.randint(40, 48),
+                seed=rng.randrange(2**32),
+            )
+            ground = generate(params).floor(0)
+            lobby = next(r for r in ground.rooms if r.type == "reception_lobby")
+            for room in ground.rooms:
+                if room.type == "waiting_room":
+                    total += 1
+                    beside += any(
+                        c.neighbour(side) in lobby.cells for c in room.cells for side in Side
+                    )
+    assert beside >= 0.85 * total, f"{beside} of {total}"
 
 
 def test_the_waiting_room_opens_onto_the_reception_lobby() -> None:

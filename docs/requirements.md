@@ -295,6 +295,15 @@ Requested by the author (2026-09-27), done (2026-10-01):
   buildings, 111 of 114 such ground floors got the back room; 3 squatter hotels with deep
   strips keep the stub. The coffin block keeps its stub (no fitting fill room).
 
+- Waiting rooms beside the reception lobby (2026-10-01): they opened onto it only where
+  they happened to end up beside it (60 % in clinics, 40 % in hospitals); toilets and
+  security rooms `near: entrance` often stood between. A room whose `access` names the
+  lobby now goes into a segment beside it, at the lobby end: 92 % of clinic and 88 % of
+  hospital waiting rooms (80 random buildings). The police station's front office has a
+  visitor WC (1.5 × 2 m) carved out of it, entered only from it (54 of 60 random
+  stations); before, the public toilets were behind its locked door. No stall goes where
+  an exterior door is planned.
+
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
 and neighbours before it becomes a storeroom; basements and hall back strips got real
@@ -310,9 +319,10 @@ Known weaknesses:
 - About 1 in 10 cluster hallways still runs one or two rows (0.5–1 m) past its last
   door; a dozen in 300 random buildings run on further where the only rooms beside the
   end are at their size limit (toilets, electrical and security rooms).
-- Waiting rooms open onto the reception lobby only when they end up beside it (about 60 %
-  in clinics and hospitals); the others open onto the corridor. The police station's
-  public area is just the front office: public toilets are behind its locked door.
+- Waiting rooms that find no free segment beside the lobby (the core or a narrow
+  segment beside it, a second hospital waiting room) still open onto the corridor:
+  about 1 in 12 clinic and 1 in 7 hospital waiting rooms. Police front offices under
+  about 90 cells (squatter tier) have no visitor WC.
 - A storeroom behind the elevator, walled in by the stairwell and toilet stalls, can open
   into the elevator (3 of ~1000 rooms beside cores, supermarket upper floors).
 - Rooms that belong together: about 60 % of police observation rooms sit beside an
