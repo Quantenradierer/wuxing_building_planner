@@ -265,13 +265,13 @@ subjects:
       - [ellipse, 0.0, 0.0, 1.0, 1.0, "#00d8ff"]
       - [ellipse, 0.06, 0.06, 0.94, 0.94, "#3e434b"]
   side_table.high:
-    prompt: "small round black glass side table with a glowing cyan ring, corporate executive, black glass, brushed chrome, glowing cyan light lines"
+    prompt: "0.5 m round glossy black tempered glass top, polished chrome bevel rim, concentric cyan, magenta neon rings, dark gunmetal radial seams, slim magenta LED arc, back against wall at top edge, recessed chrome power inlet"
     base: [ellipse, "#15171b", 0]
     guide:
       - [ellipse, 0.0, 0.0, 1.0, 1.0, "#00f0ff"]
       - [ellipse, 0.06, 0.06, 0.94, 0.94, "#22262c"]
   side_table.luxury:
-    prompt: "small round black marble side table with a gold rim and magenta glow, elite penthouse, black marble, gold trim, lacquer, glowing magenta neon accents"
+    prompt: "0.5m round black tempered glass top, polished chrome beveled rim, concentric cyan and magenta neon rings, etched cyan circuit traces across glass, dark gunmetal pedestal, back against wall at top edge: recessed chrome power outlet"
     base: [ellipse, "#120e14", 0]
     guide:
       - [ellipse, 0.0, 0.0, 1.0, 1.0, "#ff3ac8"]
@@ -279,7 +279,7 @@ subjects:
 
   # --- nightstand ------------------------------------------------------------------------------
   nightstand:
-    prompt: "gunmetal nightstand with a small lamp, cyan LED line on the drawer at the bottom edge, matte grey polymer and gunmetal, thin cyan LED strips"
+    prompt: "dark gunmetal nightstand, black glass top with chrome bezel, single drawer with cyan neon strip at lower front, small cylindrical magenta-cyan lamp on top, back against wall at top edge, thin cyan edge LEDs"
     base: [rect, "#3e434b", 0.1]
     guide:
       - [ellipse, 0.55, 0.15, 0.85, 0.45, "#00d8ff"]
@@ -392,7 +392,7 @@ subjects:
       - [ellipse, 0.4, 0.08, 0.95, 0.6, "#5c9a45"]
       - [ellipse, 0.15, 0.45, 0.85, 0.95, "#467d35"]
   plant.luxury:
-    prompt: "exotic bonsai in a black marble planter with a gold rim and magenta grow lights, elite penthouse, black marble, gold trim, lacquer, glowing magenta neon accents"
+    prompt: "exotic bonsai, twisted dark gunmetal trunk, dense clipped emerald foliage, shallow obsidian planter, gold rim, magenta LED growth ring, chrome root braces, cyan accent strip, back against black glass wall at top edge"
     base: [none]
     guide:
       - [ellipse, 0.16, 0.16, 0.84, 0.84, "#ff3ac8"]
@@ -477,7 +477,7 @@ subjects:
 
   # --- stove -----------------------------------------------------------------------------------
   stove:
-    prompt: "gunmetal induction cooktop with four burners outlined in cyan light, matte grey polymer and gunmetal, thin cyan LED strips"
+    prompt: "compact 1\u00d70.5 m gunmetal induction stove, four black hob circles with thin cyan rings, brushed chrome front control strip, matte grey polymer casing, back against wall at top edge with chrome backsplash, cyan vent"
     base: [rect, "#1a1c20", 0.06]
     guide:
       - [ellipse, 0.12, 0.1, 0.46, 0.44, "#00d8ff"]
@@ -489,7 +489,7 @@ subjects:
       - [ellipse, 0.16, 0.58, 0.42, 0.84, "#3e434b"]
       - [ellipse, 0.58, 0.58, 0.84, 0.84, "#3e434b"]
   stove.high:
-    prompt: "black glass induction cooktop with glowing cyan burner rings, corporate executive, black glass, brushed chrome, glowing cyan light lines"
+    prompt: "1 m \u00d7 0.5 m black glass cooktop, dark gunmetal bezel, four concentric hob rings with alternating cyan and magenta neon halos, brushed chrome slider and knobs, vented chrome backsplash at top edge"
     base: [rect, "#0c0d10", 0.06]
     guide:
       - [ellipse, 0.12, 0.1, 0.46, 0.44, "#00f0ff"]
@@ -501,7 +501,7 @@ subjects:
       - [ellipse, 0.16, 0.58, 0.42, 0.84, "#22262c"]
       - [ellipse, 0.58, 0.58, 0.84, 0.84, "#22262c"]
   stove.luxury:
-    prompt: "black marble induction cooktop with gold trim and glowing magenta burner rings, elite penthouse, black marble, gold trim, lacquer, glowing magenta neon accents"
+    prompt: "1 m wide x 0.5 m deep black glass induction stove, dark gunmetal surround, four magenta neon burner halos, chrome touch slider and knobs, cyan accent inlays, vented chrome backsplash sits at the top edge."
     base: [rect, "#0a080c", 0.06]
     guide:
       - [ellipse, 0.12, 0.1, 0.46, 0.44, "#ff3ac8"]

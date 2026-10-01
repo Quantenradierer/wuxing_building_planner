@@ -323,7 +323,7 @@ subjects:
       - [line, 0.5, 0.02, 0.5, 0.98, "#7a5a30", 0.04]
       - [line, 0.02, 0.5, 0.98, 0.5, "#7a5a30", 0.04]
   safe:
-    denoise: 0.85
+    denoise: 0.6
     prompt: "heavy steel safe, plain grey top with corner bolts, front panel at the bottom edge with an electronic PIN keypad, small green display and a steel handle"
     base: [rect, "#5a5e66", 0.06]
     guide:
@@ -1497,3 +1497,5 @@ derived_overrides:
   electrical_panel.squatter: {denoise: 0.8}
   shipping_container.low: {denoise: 0.75}
   shipping_container.squatter: {denoise: 0.8}
+  safe.low: {denoise: 0.7}
+  safe.squatter: {denoise: 0.8}
