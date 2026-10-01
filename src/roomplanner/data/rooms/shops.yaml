@@ -1,0 +1,162 @@
+# Small street shops: gun shop, talismonger, ramen bar, boutique, deli. They share one
+# pattern (programs in buildings/<type>.yaml): a sales floor on the street (the hall), its
+# counter at the back, back rooms behind it (office, storage, a staff WC) and an owner's flat
+# upstairs. The shared rooms are the common and retail ones plus the flat below; each shop
+# adds its own sales floor and one or two rooms of its trade.
+# Units are cells: lengths in cells, areas in number of cells.
+rooms:
+  # --- sales floors (the hall of each shop) ---
+  gun_shop_floor:       # glass cases, guns on the walls, the counter at the back
+    area: [40, 100000]
+    min_side: 6
+    door_width: 2
+    furniture:
+      - {object: gun_counter, placement: wall, near_room: strongroom}
+      - {object: shop_counter, placement: wall, count: [0, 1]}   # the till beside it
+      - {object: guard_post, placement: near_exit, count: [0, 1], security: [corporate, aaa]}
+      - {object: weapon_rack, placement: wall, per: 35, count: [2, 8]}
+      - {object: display_case, placement: grid, per: 30, count: [1, 8], aisle: 3, margin: 3}
+      - {object: pay_station, placement: wall, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: fire_extinguisher, placement: corner}
+  talisman_shop:        # crowded shelves of reagents and fetishes
+    area: [40, 100000]
+    min_side: 6
+    door_width: 2
+    furniture:
+      - {object: shop_counter, placement: wall, near_room: ritual_room}
+      - {object: display_case, placement: wall, count: [1, 3]}
+      - {object: candle_stand, placement: corner, count: [1, 3]}
+      - {object: reagent_shelf, placement: rows, aisle: 2, margin: 2, paired: true}
+      - {object: reagent_shelf, placement: wall, per: 30, count: [0, 6]}
+      - {object: plant, placement: corner, count: [0, 2]}     # herbs
+      - {object: cabinet, placement: wall, count: [0, 2]}     # curios
+  ramen_bar_room:       # counter seats round an open kitchen, a few small tables
+    area: [40, 100000]
+    min_side: 6
+    windows: optional
+    door_width: 2
+    furniture:
+      - {object: ramen_bar, placement: wall, near_room: prep_kitchen}
+      - {object: cafe_table, placement: grid, per: 25, count: [1, 6], aisle: 2, margin: 2}
+      - {object: vending_machine, placement: wall, count: [0, 1]}   # meal tickets
+      - {object: plant, placement: corner, count: [0, 2]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
+  boutique_floor:       # clothes racks, mannequins in the window, mirrors, changing booths
+    area: [40, 100000]
+    min_side: 6
+    door_width: 2
+    furniture:
+      - {object: shop_counter, placement: wall, near_room: storage}
+      - {object: mannequin, placement: near_exit, count: [1, 3]}   # the window display
+      - {object: fitting_booth, placement: wall, count: [2, 3]}
+      - {object: mirror, placement: wall, count: [1, 2]}
+      - {object: display_table, placement: center, count: [0, 1]}
+      - {object: clothes_rack, placement: rows, aisle: 3, margin: 3}
+      - {object: clothes_rack, placement: wall, per: 40, count: [0, 4]}
+      - {object: armchair, placement: corner, count: [0, 1], wealth: [high, luxury]}
+      - {object: plant, placement: corner, count: [0, 2]}
+  deli_floor:           # cold counter of meat and cheese, shelves, a standing table
+    area: [40, 100000]
+    min_side: 6
+    door_width: 2
+    furniture:
+      - {object: deli_counter_set, placement: wall, near_room: butchery}
+      - {object: freezer, placement: wall, count: [1, 2]}
+      - {object: display_case, placement: wall, count: [0, 2]}   # wine, oil, preserves
+      - {object: shelf, placement: wall, per: 12, count: [3, 12]}
+      - {object: cafe_table, placement: grid, count: [1, 2], aisle: 3, margin: 3}
+      - {object: gondola, placement: rows, aisle: 3, margin: 4}   # preserves, wine, pasta
+      - {object: pay_station, placement: wall, count: [0, 1]}
+      - {object: trash_bin, placement: corner, count: [0, 1]}
+
+  # --- back rooms of one trade ---
+  strongroom:           # the gun shop's secured stock: locked racks, ammunition, a safe
+    area: [16, 60]
+    min_side: 4
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: weapon_locker, placement: perimeter, count: [2, 6]}
+      - {object: safe, placement: corner}
+      - {object: weapon_rack, placement: wall, count: [0, 2]}
+      - {object: crate, placement: scatter, count: [1, 3]}    # ammunition
+  test_range:           # a short firing range: lanes towards a backstop
+    area: [56, 200]
+    min_side: 6
+    windows: forbidden
+    transit: false
+    max_aspect: 4
+    furniture:
+      - {object: shooting_lane, placement: rows, aisle: 1, margin: 2, block: 100}
+      - {object: weapon_locker, placement: wall, count: [0, 1]}
+      - {object: bench, placement: wall, count: [0, 1]}
+  gunsmith_room:        # repairs and modifications
+    area: [20, 50]
+    min_side: 4
+    windows: optional
+    furniture:
+      - {object: workbench, placement: wall, count: [1, 2]}
+      - {object: tool_rack, placement: wall, count: [1, 2]}
+      - {object: weapon_rack, placement: wall, count: [0, 1]}
+      - {object: stool, placement: at, at: workbench, beside: [front], count: [0, 1]}
+  ritual_room:          # the talismonger's consultation room: a hermetic circle, an altar
+    area: [30, 90]
+    min_side: 5
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: ritual_circle, placement: center}
+      - {object: altar, placement: end, count: [0, 1]}
+      - {object: candle_stand, placement: corner, count: [2, 4]}
+      - {object: reagent_shelf, placement: wall, count: [0, 2]}
+      - {object: armchair, placement: wall, count: [0, 2]}
+  alterations_room:     # the boutique's tailor: sewing table, rack of alterations
+    area: [20, 50]
+    min_side: 4
+    furniture:
+      - {object: workbench, placement: wall}
+      - {object: clothes_rack, placement: wall, count: [1, 2]}
+      - {object: mannequin, placement: corner, count: [1, 2]}
+      - {object: stool, placement: at, at: workbench, beside: [front], count: [0, 1]}
+  butchery:             # the deli's prep room: blocks, rails, slicer, sink
+    area: [24, 70]
+    min_side: 5
+    windows: optional
+    furniture:
+      - {object: butcher_block, placement: center, count: [1, 2]}
+      - {object: meat_rail, placement: wall, count: [1, 2]}
+      - {object: counter, placement: wall, count: [1, 2]}
+      - {object: sink, placement: wall}
+      - {object: fridge, placement: wall, count: [0, 1]}
+  cold_room:            # walk-in cold store behind the deli counter or the ramen kitchen
+    area: [12, 48]
+    min_side: 3
+    cluster: true
+    windows: forbidden
+    access: [butchery, prep_kitchen, stockroom]
+    furniture:
+      - {object: meat_rail, placement: wall, count: [0, 2]}
+      - {object: shelf, placement: wall, count: [2, 5]}
+
+  # --- the owner's flat upstairs (the hall of its floor is the living room) ---
+  flat_loft:            # living room and kitchen in one, the stairs come up into it
+    area: [40, 100000]
+    min_side: 6
+    windows: required
+    furniture:
+      # A kitchen corner, a dining table, a sitting area per 150 cells: big shops, big lofts.
+      - {object: counter, placement: wall}
+      - {object: stove, placement: wall}
+      - {object: fridge, placement: wall}
+      - {object: sink, placement: wall, count: [0, 1]}
+      - {object: dining_set, placement: center}
+      - {object: sofa_set, placement: wall, per: 150, count: [1, 3]}
+      - {object: rug, placement: scatter, per: 150, count: [0, 3]}
+      - {object: armchair, placement: scatter, per: 80, count: [0, 4]}
+      - {object: shelf, placement: wall, per: 40, count: [1, 6]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}   # the trid
+      - {object: home_workstation, placement: wall, count: [0, 1]}
+      - {object: sim_rig, placement: wall, count: [0, 1], wealth: [low, middle, high, luxury]}
+      - {object: plant, placement: corner, per: 60, count: [0, 4]}
+      - {object: mattress, placement: scatter, count: [0, 1], wealth: [squatter]}

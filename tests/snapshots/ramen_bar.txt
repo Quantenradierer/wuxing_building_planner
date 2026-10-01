@@ -1,0 +1,46 @@
+ramen_bar 24x18 cells, wealth=middle, seed=4
+
+== Ground floor ==
++===--+-----------+--DDD--+----===---===---===--+
+"www  |sss   sss h|s     s|f iii   nnnnnnn aaa n"
+"www  |          h|s     s|                    n"
+"www  |h         h|s     s|n                   n"
+|     |h         h|       |n                   n|
+|  3  |h   4     h|  1   s|n         5         n|
+|     |h         h|      s|n                   n|
+"    i|h         h|s     s|n                   n"
+"    i|h          |s      |n                    "
+"    i|h       sss|s      |n       ' f          "
++DDD--+--DDD------+--DDD--+--DDD----------------+
+|                                aaa v v iii f f|
+|                                               |
+"                                               "
+"                                               "
+"                                               "
+|                                               |
+|                                NNNNNNNNNNNNNNN|
+|                                NNNNNNNNNNNNNNN|
+|        c       c       c       NNNNNNNNNNNNNNN"
+|                                               "
+D      ttt     ttt     ttt       S   S   S   S  "
+D      ttt     ttt     ttt                      |
+D      ttt     ttt     ttt                      |
+|                                               |
+|      c       c       c 2                      "
+|                                               "
+|                                               "
+|                                               |
+|                                               |
+|                                               |
+"                                               "
+"                                               "
+"                                               "
+|                                               |
+|*                                     yyy      |
++===---===---===-------DDD-----===---===---===--+
+  objects: t bar_table, c chair, ' coffee_machine, n counter, f fridge, h meat_rail, * plant, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, y vending_machine, w wc
+    1  storage              20 cells
+    2  ramen_bar_room      312 cells
+    3  wc                   15 cells
+    4  cold_room            30 cells
+    5  prep_kitchen         55 cells

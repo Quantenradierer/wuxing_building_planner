@@ -73,6 +73,16 @@ rooms:
   count_room:    {colour: "#f4fbff", intensity: 0.85}
   surveillance_room: {colour: "#8fd6ff", intensity: 0.35}
   sky_lounge:    {spacing: 8, radius: 7, colour: "#ffcc66", intensity: 0.55}
+  # small street shops
+  gun_shop_floor: {spacing: 6, radius: 8, colour: "#f5fbff", intensity: 0.85}
+  talisman_shop: {spacing: 8, radius: 6, colour: "#ffcc88", intensity: 0.45}
+  ramen_bar_room: {spacing: 6, radius: 6, colour: "#ffd9a0", intensity: 0.6}
+  boutique_floor: {spacing: 6, radius: 8, colour: "#fff6ee", intensity: 0.9}
+  deli_floor:    {spacing: 6, radius: 8, colour: "#f5fbff", intensity: 0.85}
+  test_range:    {spacing: 8, radius: 7, colour: "#fff0d0", intensity: 0.7}
+  ritual_room:   {radius: 4, colour: "#ffb347", intensity: 0.3}             # candles
+  cold_room:     {radius: 5, colour: "#cfe8ff", intensity: 0.5}
+  flat_loft:     {spacing: 10, colour: "#ffd9a8", intensity: 0.6}
 
 accents:
   stairwell:
@@ -113,6 +123,16 @@ accents:
   gaming_floor:
     - {kind: neon, radius: 8, colour: "#ffcc66", intensity: 0.6}           # slot banks, signs
     - {kind: neon, radius: 8, colour: "#ff3fa4", intensity: 0.5}
+  gun_shop_floor:
+    - {kind: neon, radius: 5, colour: "#ff3b30", intensity: 0.5}
+  talisman_shop:
+    - {kind: neon, radius: 5, colour: "#b14dff", intensity: 0.5}
+  ramen_bar_room:
+    - {kind: neon, radius: 5, colour: "#ff3fa4", intensity: 0.6}           # noodle sign
+  boutique_floor:
+    - {kind: neon, radius: 6, colour: "#ff6fb5", intensity: 0.5}
+  ritual_room:
+    - {kind: neon, radius: 5, colour: "#b14dff", intensity: 0.5}           # the warded circle
 
 entrances:
   main: {kind: sign, radius: 8, colour: "#ff3fa4", intensity: 0.9}

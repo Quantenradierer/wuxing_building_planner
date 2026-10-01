@@ -154,6 +154,22 @@ objects:
   cash_cart:       {size: [2, 1], glyph: m}   # locked trolley for cash boxes and chips
   count_table:     {size: [6, 2], glyph: T}   # long table with bill counters and scales
 
+  # Small street shops (gun shop, talismonger, ramen bar, boutique, deli).
+  weapon_rack:     {size: [3, 1], glyph: R}      # guns on a pegboard / wall rack
+  shooting_lane:   {size: [12, 2], walkable: true, glyph: _}   # firing lane, target at the far end
+  reagent_shelf:   {size: [4, 1], glyph: s}      # jars, herbs, bones, fetishes
+  ritual_circle:   {size: [5, 5], walkable: true, glyph: o}    # hermetic circle on the floor
+  ramen_counter:   {size: [8, 2], glyph: N}      # wooden counter, bowls and chopsticks
+  stock_pot:       {size: [1, 1], glyph: v}      # broth pot on its own burner
+  clothes_rack:    {size: [4, 1], glyph: r}      # clothes on hangers, a rail
+  mannequin:       {size: [1, 1], glyph: m}
+  mirror:          {size: [2, 1], glyph: i}      # standing mirror against the wall
+  fitting_booth:   {size: [2, 2], glyph: F}      # curtained changing cubicle, 1 x 1 m
+  display_table:   {size: [3, 2], glyph: t}      # folded clothes, shoes, bags
+  deli_counter:    {size: [8, 2], glyph: N}      # glass-fronted cold counter: meat, cheese
+  butcher_block:   {size: [2, 2], glyph: b}
+  meat_rail:       {size: [4, 1], glyph: h}      # hooks with hanging meat
+
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).
 groups:
@@ -412,3 +428,38 @@ groups:
       - {object: stool, at: [2, 3], facing: N}
       - {object: stool, at: [4, 3], facing: N}
       - {object: stool, at: [6, 3], facing: N}
+  shop_counter:         # sales counter, the clerk's stool behind it
+    size: [4, 2]
+    parts:
+      - {object: stool, at: [1, 0]}
+      - {object: counter, at: [0, 1]}
+  gun_counter:          # rifles on the wall behind, 1 m for the clerk, glass cases in front
+    size: [6, 4]
+    parts:
+      - {object: weapon_rack, at: [0, 0]}
+      - {object: weapon_rack, at: [3, 0]}
+      - {object: stool, at: [4, 2], facing: S}
+      - {object: display_case, at: [0, 3]}
+      - {object: display_case, at: [3, 3]}
+  ramen_bar:            # open kitchen along the wall, cooks' gap, counter, stools
+    size: [8, 6]
+    parts:
+      - {object: stove, at: [0, 0]}
+      - {object: stock_pot, at: [2, 0]}
+      - {object: stock_pot, at: [3, 0]}
+      - {object: sink, at: [4, 0]}
+      - {object: fridge, at: [6, 0]}
+      - {object: fridge, at: [7, 0]}
+      - {object: ramen_counter, at: [0, 3]}
+      - {object: stool, at: [0, 5], facing: N}
+      - {object: stool, at: [2, 5], facing: N}
+      - {object: stool, at: [4, 5], facing: N}
+      - {object: stool, at: [6, 5], facing: N}
+  deli_counter_set:     # back counter with the slicer, 1 m for the staff, cold counter in front
+    size: [8, 4]
+    parts:
+      - {object: counter, at: [0, 0]}
+      - {object: fridge, at: [4, 0]}
+      - {object: shelf, at: [5, 0]}
+      - {object: fridge, at: [7, 0]}
+      - {object: deli_counter, at: [0, 2]}

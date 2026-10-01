@@ -1,0 +1,63 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Ramen bar: counter seats round the open kitchen, a few tables; prep kitchen and
+# cold store behind.
+# A small street shop (the pattern of gun_shop, talismonger, ramen_bar, boutique and deli; keep
+# their shared parts alike): the sales floor on the street, back rooms opening onto it
+# (office, storage, a staff WC, the trade's own rooms), stock on middle floors, the owner's
+# flat on the top floor, stock and plant in the basement.
+building: ramen_bar
+catalogs: [common, residential, retail, shops]
+layout: hall
+
+corridor:
+  width: 3
+  hallway_width: 3
+strip_depth: [5, 8]
+hall:
+  min_depth: 10
+  corridor_from: 48        # smaller shops: back rooms open onto the sales floor
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [storage, stockroom, cold_room, prep_kitchen, butchery, staff_room, manager_office]
+
+core:
+  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 2}
+  service: {width: 2}
+  emergency: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: ramen_bar_room, place: hall}
+      - {room: prep_kitchen, count: 1, priority: required}
+      - {room: cold_room, count: 1}
+      - {room: wc, count: 1, priority: required}       # one staff WC
+      - {room: manager_office, count: [0, 1]}
+      - {room: storage, fill: true}
+  flat:                    # the owner's flat
+    applies: [top]
+    rooms:
+      - {room: flat_loft, place: hall}
+      - {room: bathroom, count: 1, priority: required}
+      - {room: bedroom, count: 1}
+      - {room: bedroom, fill: true}
+      - {room: storage, fill: true}             # interior rows: no bedrooms without windows
+      - {room: closet, fill: true, priority: optional}
+  upper:
+    applies: [upper]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: staff_room, fill: true}
+      - {room: manager_office, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: mechanical_room, fill: true}

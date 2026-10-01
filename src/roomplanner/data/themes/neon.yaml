@@ -238,6 +238,20 @@ rooms:
   count_room: tech
   surveillance_room: tech
   sky_lounge: executive
+  # small street shops
+  gun_shop_floor: shop
+  talisman_shop: wood
+  ramen_bar_room: wood
+  boutique_floor: carpet
+  deli_floor: wet
+  strongroom: tech
+  test_range: industrial
+  gunsmith_room: industrial
+  ritual_room: club
+  alterations_room: carpet
+  butchery: wet
+  cold_room: industrial
+  flat_loft: wood
 
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
@@ -383,3 +397,18 @@ objects:
   slot_machine:    {shape: screen, fill: "#2a1f33", stroke: "#000000", detail: "#5a1f3a", glow: "#ffcc66"}
   cash_cart:       {shape: crate, fill: "#6a707c", stroke: "#15171d", detail: "#c9b27a"}
   count_table:     {shape: counter, fill: "#4b505c", stroke: "#15171d", detail: "#6dffb0"}
+  # small street shops
+  weapon_rack:     {shape: shelf, fill: "#2e3138", stroke: "#0f1117", detail: "#9aa6b5"}
+  shooting_lane:   {shape: rug, fill: "#1d1f24", stroke: "#0b0e14", detail: "#ff6b3d"}
+  reagent_shelf:   {shape: shelf, fill: "#3b3029", stroke: "#15120f", detail: "#6dffb0"}
+  ritual_circle:   {shape: rug, fill: "#16121e", stroke: "#b14dff", detail: "#ffcc66"}
+  ramen_counter:   {shape: counter, fill: "#5a4030", stroke: "#15120f", detail: "#ffcc66", glow: "#ff9f5a"}
+  stock_pot:       {shape: circle, fill: "#9aa6b5", stroke: "#2a2f3a", detail: "#d9a21b"}
+  clothes_rack:    {shape: shelf, fill: "#3a2f40", stroke: "#0f1117", detail: "#ff6fb5"}
+  mannequin:       {shape: circle, fill: "#d8d0c0", stroke: "#4a4038", detail: "#ff3fa4"}
+  mirror:          {shape: screen, fill: "#9fb4c8", stroke: "#2a2f3a", detail: "#e6f7ff"}
+  fitting_booth:   {shape: cubicle, fill: "#2a1f33", stroke: "#0b0e14", detail: "#ff3fa4"}
+  display_table:   {shape: table, fill: "#3b3029", stroke: "#15120f", detail: "#ff6fb5"}
+  deli_counter:    {shape: counter, fill: "#26303f", stroke: "#0f1117", detail: "#ff8a8a", glow: "#9fe8ff"}
+  butcher_block:   {shape: box, fill: "#8a6a4a", stroke: "#2a1d14", detail: "#c9a57a"}
+  meat_rail:       {shape: shelf, fill: "#6d7788", stroke: "#15171d", detail: "#c0392b"}

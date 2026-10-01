@@ -78,6 +78,16 @@ sprite_fallbacks:
   table: meeting_table
   double_bed: bed
   mattress: bed
+  weapon_rack: tool_rack
+  reagent_shelf: shelf
+  ramen_counter: bar_counter
+  stock_pot: barrel
+  clothes_rack: wardrobe
+  mannequin: coat_rack
+  display_table: table
+  deli_counter: display_case
+  butcher_block: table
+  meat_rail: tool_rack
 
 # Neutralise the base theme's neon on procedural objects that have no sprite yet (a sprite
 # overrides these). No glow keys; muted modern fills. Merge is per-kind, so only these change.
@@ -118,3 +128,17 @@ objects:
   display_case:    {shape: counter, fill: "#dfe6ee", stroke: "#8a95a5", detail: "#c3ced8"}
   crac_unit:       {shape: machine, fill: "#dfe3e8", stroke: "#7a8088", detail: "#9aa0a8"}
   chiller:         {shape: machine, fill: "#a9b0b8", stroke: "#5b616b", detail: "#c3c8cf"}
+  weapon_rack:     {shape: shelf, fill: "#8f96a0", stroke: "#5b616b", detail: "#3a3f4a"}
+  shooting_lane:   {shape: rug, fill: "#cfd3da", stroke: "#a7abb2", detail: "#e0312b"}
+  reagent_shelf:   {shape: shelf, fill: "#b58f63", stroke: "#5b4630", detail: "#7a9a6a"}
+  ritual_circle:   {shape: rug, fill: "#d8d3df", stroke: "#8a7aa8", detail: "#b8a46a"}
+  ramen_counter:   {shape: counter, fill: "#c2a377", stroke: "#5b4630", detail: "#d8c3a5"}
+  stock_pot:       {shape: circle, fill: "#c4c8cc", stroke: "#7a8088", detail: "#9aa0a8"}
+  clothes_rack:    {shape: shelf, fill: "#c4c8cc", stroke: "#7a8088", detail: "#b58fa8"}
+  mannequin:       {shape: circle, fill: "#e9e4dc", stroke: "#8a8378", detail: "#c9c2b2"}
+  mirror:          {shape: screen, fill: "#dfe8f0", stroke: "#8a95a5", detail: "#f4f8fb"}
+  fitting_booth:   {shape: cubicle, fill: "#b9a8b8", stroke: "#6b5b6b", detail: "#d8ccd6"}
+  display_table:   {shape: table, fill: "#c2a377", stroke: "#5b4630", detail: "#a7864f"}
+  deli_counter:    {shape: counter, fill: "#dfe6ee", stroke: "#8a95a5", detail: "#d99a9a"}
+  butcher_block:   {shape: box, fill: "#c9a57a", stroke: "#5b4630", detail: "#a7864f"}
+  meat_rail:       {shape: shelf, fill: "#bcc0c6", stroke: "#7a8088", detail: "#b04a3a"}

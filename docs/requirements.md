@@ -92,6 +92,11 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | chop_shop   | hall            | workshop with car lifts, paint booth, parts storage |
 | data_centre | corridor        | server halls behind mantraps, NOC, UPS and cooling |
 | casino      | hall            | gaming floor, high-roller salons, cage → count room → vault |
+| gun_shop    | hall            | cases, wall racks, strongroom; firing range (rich)  |
+| talismonger | hall            | reagent shelves, ritual room with hermetic circle   |
+| ramen_bar   | hall            | counter seats round an open kitchen, cold room      |
+| boutique    | hall            | clothes racks, changing booths, mirrors, tailor     |
+| deli        | hall            | meat and cheese counter, butchery, cold room        |
 
 ## Building rules
 
@@ -191,6 +196,14 @@ on the top floor of taller casinos. The money path is a unit (`cage_complex`): t
 cage opens onto the floor, the count room lies behind it and the vault behind that (in deep
 rows beside it); only the cage has a door out, the others have the tier's locks. The eye
 in the sky (surveillance room) is on the first upper floor, else on the ground floor.
+Small street shops on one pattern (2026-10-01): `gun_shop`, `talismonger`, `ramen_bar`,
+`boutique`, `deli`. A hall building without a service corridor: the sales floor on the
+street with its counter against a wall near the trade's back room, back rooms opening onto
+it (staff WC, office, storage and the trade's own rooms from the `shops` room catalog),
+stock rooms on middle floors, the owner's flat on the top floor (a loft as the floor's hall,
+bedrooms and a bathroom behind it), stock and plant in the basement; rich gun shops have a
+firing range there. The programs share their structure (keep them alike); the rooms are
+shared through the catalogs (`common`, `residential`, `retail`, `shops`).
 
 ## Roadmap (v2)
 
@@ -224,6 +237,9 @@ All seven milestones are implemented (2026-09-26).
   supermarkets, police stations and casinos need about 36 × 36 cells (18 m), factories
   40 × 40, hospitals 48 × 48, others 32 × 32 (data centres too: smaller ones lack the space
   for the ground floor's NOC, security post, loading dock and a server hall with its mantrap).
+  Small street shops fit every tier from 24 × 24 with
+  stairs and a basement (boutique 16 × 16, gun shop 21 × 21, middle tier 19–22); one floor
+  fits from 13 cells deep or wide (ramen bar 15).
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
@@ -406,6 +422,11 @@ Known weaknesses:
   count table) have prompts but no sprites yet and are drawn with stand-ins (pool table,
   arcade machine, laundry cart, lab bench). About 1 in 250 multi-floor casinos keeps a
   1-cell-wide hallway end between two toilets (hard warning).
+- Small street shops: the owner's flat is reached only through the shop (no own street
+  door); in wide shops its loft (the floor's hall) is large and sparse; the staff WC grows
+  with leftover space (up to ~60 cells at luxury); the firing range exists only as the
+  basement's hall, so only with `floors_below` ≥ 1; the counter stands on a side wall when
+  the back wall is full of doors.
 - Basements are mostly mechanical rooms side by side (one laundry, staff room and
   storeroom); a garage level would be more realistic for big buildings.
 

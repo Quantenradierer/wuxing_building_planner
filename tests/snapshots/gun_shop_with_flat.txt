@@ -1,0 +1,140 @@
+gun_shop 26x18 cells, wealth=high, seed=3
+
+== Floor 1 ==
++--===---===--+===--+===---===---===--+===---===----+
+"ddd N bbb N a|www i|#################|ddd N bbb N a"
+"ddd   bbb   a|www i|#################|ddd   bbb   a"
+"ddd   bbb   a|www i|#################|ddd   bbb   a"
+|ddd   bbb   a|     |#################|ddd   bbb   a|
+|ddd 3 bbb   a|  4  |#################|ddd 5 bbb   a|
+|      bbb    |     |                 |      bbb    |
+"      bbb    |     |        1        |      bbb    "
+"             |     |                 |             "
+"            k|    k|                 |            k"
++--DDD--------+DDD--+------DDD--------+--DDD--------+
+|~~~~~~~ ddddd     AAA                       vvv   *|
+|~~~~~~~ ddddd     AAA                              |
+"~~~~~~~ ddddd     AAA   ~~~~~~~ AAA     AAA        "
+"~~~~~~~                 ~~~~~~~ AAA     AAA        "
+"~~~~~~~ AAA             ~~~~~~~ AAA     AAA       }"
+|        AAA             ~~~~~~~                    |
+|}       AAA             ~~~~~~~                 ooo|
+|                                                ooo|
+"ooo                                         ttt ooo"
+"ooo                                         ttt ooo"
+"ooo ttt                 2         ~~~~~     ttt ooo"
+|ooo ttt                           ~~~~~         ooo|
+|ooo ttt               c eee c     ~~~~~         ooo|
+|ooo                     eee       ~~~~~            |
+"ooo                   c eee c     ~~~~~           }"
+"                                  ~~~~~            "
+"}                                 ~~~~~           n"
+|                                                  n|
+|s                     ttt                         n|
+|s                     ttt                         n|
+"s             SSS     ttt                         n"
+"              SSS                                 n"
+"              SSS   ooooooo                       n"
+|              SSS   ooooooo                        |
+|sss <<<<< iii SSS } ooooooo } sss   sss   f sss sss|
++--===---===---===---===---===---===---===---===----+
+  objects: A armchair, b bed, k cabinet, c chair, t coffee_table, n counter, e dining_table, f fridge, d home_desk, N nightstand, * plant, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, v stove, < wall_screen, a wardrobe, w wc
+    1  stairwell            45 cells
+    2  flat_loft           338 cells
+    3  bedroom              35 cells
+    4  bathroom             15 cells
+    5  bedroom              35 cells
+
+== Ground floor ==
++--===----+--DDD----+===---===---===--+-------------+
+"  www    |s       s|#################|LLL LLL LLL R|
+"  www    |s       s|#################|            R|
+"  www   i|s   KKK s|#################|    KKK KKK R|
+|        i|    KKK  |#################|    KKK KKK R|
+|    4   i|s 2 KKK s|#################|R   KKK KKK R|
+|         |s       s|                 |R            |
+"         |s       s|        1        |R     5      |
+"         |         |                 |R            |
+"         |      sss|                 |R     LLL   )|
++--DDD----+--DDD----+------DDD--------+--DDD--------+
+|                    RRRRR         c         RRRRR  |
+|                                                   |
+"                                nnnnnnn            "
+"                                                   "
+"R                                                  "
+|R                                                  |
+|R                                                  |
+|R                                                  |
+"R         ddddd       ddddd       ddddd            |
+"                                                   |
+"                                                   D
+|                                                   D
+|                        3                          D
+|                                                   |
+"                                            d     R|
+"                                            d     R|
+"<         ddddd       ddddd       ddddd     d     R|
+|<                                           d     R|
+|<                                           d     R|
+|<                                                  |
+"<                                           d     R"
+"                                            d     R"
+"                                            d c   R"
+|                                            d     R|
+|' RRRRR RRRRR     RRRRR       RRRRR RRRRR   d     R|
++--===---===---===-------DDD-----===---===---===----+
+  objects: n counter, K crate, d display_case, ' fire_extinguisher, ) safe, s shelf, i sink, # stairs, c stool, < wall_screen, w wc, L weapon_locker, R weapon_rack
+    1  stairwell            45 cells
+    2  storage              25 cells
+    3  gun_shop_floor      338 cells
+    4  wc                   25 cells
+    5  strongroom           35 cells
+
+== Basement B1 ==
++-------------------+-----------------+-------------+
+|' HHHHHHH EEE HHHHH|#################|E bbbbb     E|
+|  HHHHHHH     HHHHH|#################|E           E|
+|  HHHHHHH     HHHHH|#################|E           E|
+|  HHHHHHH     HHHHH|#################|             |
+|  HHHHHHH 3   HHHHH|#################|E     4      |
+|              HHHHH|                 |E            |
+|              HHHHH|        1        |E           E|
+|                   |                 |            E|
+|                   |                 |'       EEE E|
++--DDD--------------+------DDD--------+--DDD--------+
+|                                                   |
+|                                                   |
+|                                                   |
+|                                                   |
+|              _______________________              |
+|              _______________________              |
+|              _______________________              |
+|                                                   |
+|                                                   |
+|                                                   |
+|              _______________________              |
+|              _______________________              |
+|              _______________________              |
+|                                                   |
+|                        2                          |
+|                                                   |
+|              _______________________              |
+|              _______________________              |
+|              _______________________              |
+|                                                   |
+|                                                   |
+|                                                   |
+|                                                   |
+|                                                   |
+|                                                   |
++---------------------------------------------------+
+  objects: b battery_bank, E electrical_panel, ' fire_extinguisher, H hvac_unit, _ shooting_lane, # stairs
+    1  stairwell            45 cells
+    2  test_range          338 cells
+    3  mechanical_room      50 cells
+    4  electrical_room      35 cells
+
+Warnings:
+  - Ground floor: dropped gunsmith_room (no space)
+  - Ground floor: dropped manager_office (no space)
+  - Floor 1: dropped bedroom (no space)

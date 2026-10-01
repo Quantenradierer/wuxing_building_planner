@@ -815,3 +815,98 @@ subjects:
       - [rect, 0.1, 0.2, 0.25, 0.7, "#3a3f4a", 0.1]
       - [rect, 0.6, 0.2, 0.75, 0.7, "#3a3f4a", 0.1]
       - [rect, 0.35, 0.3, 0.5, 0.6, "#6d8a5a", 0.05]
+  # Small street shops (gun shop, talismonger, ramen bar, boutique, deli).
+  weapon_rack:
+    prompt: "wall rack of rifles and pistols on a grey pegboard seen from straight above, back against the top edge"
+    base: [rect, "#8f96a0", 0.03]
+    guide:
+      - [line, 0.08, 0.5, 0.45, 0.5, "#2b2f38", 0.25]
+      - [line, 0.55, 0.5, 0.92, 0.5, "#2b2f38", 0.25]
+  shooting_lane:
+    prompt: "indoor shooting range lane seen from straight above, grey floor lane with painted lines, paper target at the right end"
+    base: [rect, "#c9cdd3", 0.0]
+    guide:
+      - [line, 0.0, 0.05, 1.0, 0.05, "#e0b020", 0.05]
+      - [line, 0.0, 0.95, 1.0, 0.95, "#e0b020", 0.05]
+      - [rect, 0.94, 0.2, 0.99, 0.8, "#f4f4f0", 0.0]
+  reagent_shelf:
+    prompt: "narrow wooden shelf with glass jars, dried herbs and small bottles seen from straight above, back against the top edge"
+    base: [rect, "#8a5a3a", 0.05]
+    guide:
+      - [ellipse, 0.05, 0.2, 0.2, 0.8, "#7a9a6a"]
+      - [ellipse, 0.3, 0.2, 0.45, 0.8, "#c9b27a"]
+      - [ellipse, 0.55, 0.2, 0.7, 0.8, "#8a6a9a"]
+      - [ellipse, 0.8, 0.2, 0.95, 0.8, "#6a8a9a"]
+  ritual_circle:
+    prompt: "chalk magic circle drawn on a dark wooden floor seen from straight above, runes in a ring, candles on the rim"
+    base: [none]
+    guide:
+      - [ellipse, 0.02, 0.02, 0.98, 0.98, "#d8d3c8"]
+      - [ellipse, 0.1, 0.1, 0.9, 0.9, "#4a4038"]
+      - [ellipse, 0.2, 0.2, 0.8, 0.8, "#d8d3c8"]
+      - [ellipse, 0.24, 0.24, 0.76, 0.76, "#4a4038"]
+  ramen_counter:
+    prompt: "long light wood ramen bar counter seen from straight above, bowls of noodles, chopsticks and small pots along it"
+    base: [rect, "#c2a377", 0.03]
+    guide:
+      - [ellipse, 0.08, 0.3, 0.18, 0.75, "#f4efe6"]
+      - [ellipse, 0.35, 0.3, 0.45, 0.75, "#f4efe6"]
+      - [ellipse, 0.62, 0.3, 0.72, 0.75, "#f4efe6"]
+  stock_pot:
+    prompt: "large steel stock pot of broth on a gas burner seen from straight above"
+    base: [rect, "#3a3d42", 0.1]
+    guide:
+      - [ellipse, 0.1, 0.1, 0.9, 0.9, "#b9bec6"]
+      - [ellipse, 0.2, 0.2, 0.8, 0.8, "#c9a06a"]
+  clothes_rack:
+    prompt: "chrome clothes rail with shirts and jackets on hangers seen from straight above, back against the top edge"
+    base: [rect, "#c4c8cc", 0.05]
+    guide:
+      - [rect, 0.04, 0.1, 0.3, 0.9, "#6a7a9a", 0.1]
+      - [rect, 0.34, 0.1, 0.62, 0.9, "#b58f63", 0.1]
+      - [rect, 0.66, 0.1, 0.96, 0.9, "#3a3f4a", 0.1]
+  mannequin:
+    denoise: 0.7
+    prompt: "white shop mannequin wearing a jacket seen from straight above, shoulders and head"
+    base: [none]
+    guide:
+      - [ellipse, 0.1, 0.3, 0.9, 0.7, "#3a3f4a"]
+      - [ellipse, 0.35, 0.35, 0.65, 0.65, "#e9e4dc"]
+  mirror:
+    prompt: "standing full length mirror seen from straight above, a slim frame with a reflective edge"
+    base: [rect, "#8a95a5", 0.1]
+    guide:
+      - [rect, 0.06, 0.2, 0.94, 0.8, "#dfe8f0", 0.1]
+  fitting_booth:
+    prompt: "small square changing cubicle seen from straight above, light walls, fabric curtain along the bottom edge, a stool inside"
+    base: [rect, "#d8ccd6", 0.03]
+    guide:
+      - [rect, 0.08, 0.08, 0.92, 0.85, "#eeeae4", 0.0]
+      - [line, 0.0, 0.92, 1.0, 0.92, "#8a5a6a", 0.12]
+  display_table:
+    prompt: "low light wood shop display table with folded shirts and a pair of shoes seen from straight above"
+    base: [rect, "#c2a377", 0.05]
+    guide:
+      - [rect, 0.1, 0.15, 0.4, 0.5, "#6a7a9a", 0.05]
+      - [rect, 0.5, 0.15, 0.85, 0.5, "#e9e4dc", 0.05]
+      - [rect, 0.2, 0.6, 0.6, 0.85, "#3a3f4a", 0.1]
+  deli_counter:
+    prompt: "refrigerated glass deli counter seen from straight above, hams, sausages and cheese wheels under the glass, scale at the top edge"
+    base: [rect, "#dfe6ee", 0.03]
+    guide:
+      - [rect, 0.04, 0.3, 0.96, 0.9, "#cfd9e2", 0.02]
+      - [rect, 0.1, 0.4, 0.3, 0.8, "#b04a3a", 0.1]
+      - [ellipse, 0.4, 0.4, 0.55, 0.8, "#e0c060"]
+      - [rect, 0.65, 0.4, 0.9, 0.8, "#c9705a", 0.1]
+  butcher_block:
+    prompt: "thick end grain wooden butcher block seen from straight above, a cleaver on it"
+    base: [rect, "#c9a57a", 0.05]
+    guide:
+      - [rect, 0.55, 0.3, 0.85, 0.5, "#9aa0a8", 0.05]
+  meat_rail:
+    prompt: "steel rail with hooks and hanging cuts of meat seen from straight above, back against the top edge"
+    base: [rect, "#bcc0c6", 0.05]
+    guide:
+      - [ellipse, 0.05, 0.15, 0.25, 0.85, "#b04a3a"]
+      - [ellipse, 0.4, 0.15, 0.6, 0.85, "#b04a3a"]
+      - [ellipse, 0.75, 0.15, 0.95, 0.85, "#b04a3a"]

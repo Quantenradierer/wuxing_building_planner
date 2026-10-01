@@ -32,6 +32,12 @@ class BuildingType(StrEnum):
     STUFFER_SHACK = "stuffer_shack"
     DIVE_BAR = "dive_bar"
     CHOP_SHOP = "chop_shop"
+    # Small street shops (one pattern: sales floor, back rooms, a flat upstairs).
+    GUN_SHOP = "gun_shop"
+    TALISMONGER = "talismonger"
+    RAMEN_BAR = "ramen_bar"
+    BOUTIQUE = "boutique"
+    DELI = "deli"
 
 
 class Wealth(StrEnum):
