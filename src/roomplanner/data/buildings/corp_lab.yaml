@@ -36,6 +36,7 @@ floor_roles:
       - {room: server_room, count: 1}
       - {room: wet_lab, count: [1, 2]}
       - {room: specimen_storage, count: [1, 2]}
+      - {room: storage, count: 1, near: service}   # deliveries in through the back door
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: generator_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: spider_room, count: 1, near: core, security: [corporate, aaa], priority: optional}

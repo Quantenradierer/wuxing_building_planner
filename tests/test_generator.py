@@ -803,3 +803,35 @@ def test_lone_room_carves_stalls_and_subdivides_units() -> None:
 def test_unknown_lone_room_lists_the_known_ones() -> None:
     with pytest.raises(InfeasibleError, match=r"no room type 'pool'.*meeting_room"):
         generate(make_params(room="pool"))
+
+
+@pytest.mark.parametrize(
+    ("building_type", "width", "depth", "wealth", "floors", "seed"),
+    [
+        (BuildingType.OFFICE, 67, 44, Wealth.HIGH, 2, 683244),
+        (BuildingType.CLINIC, 55, 34, Wealth.LOW, 1, 918064),
+        (BuildingType.CORP_LAB, 46, 31, Wealth.LOW, 1, 264856),
+        (BuildingType.COSMETIC_CLINIC, 67, 39, Wealth.LOW, 1, 934576),
+        (BuildingType.STREET_DOC, 60, 40, Wealth.MIDDLE, 1, 5),
+        (BuildingType.NIGHTCLUB, 43, 49, Wealth.LUXURY, 2, 598980),
+        (BuildingType.CHURCH, 62, 42, Wealth.MIDDLE, 1, 517971),
+    ],
+)
+def test_back_door_opens_into_a_back_of_house_room(
+    building_type: BuildingType, width: int, depth: int, wealth: Wealth, floors: int, seed: int
+) -> None:
+    """Not into an office or exam room that happens to be on the service facade."""
+    params = make_params(
+        building_type=building_type,
+        width=width,
+        depth=depth,
+        wealth=wealth,
+        floors_above=floors,
+        seed=seed,
+    )
+    ground = generate(params).floor(0)
+    rules = rules_for(building_type, wealth)
+    (door,) = [o for o in ground.openings if o.entrance == "service"]
+    room = next(r for c in door.edges[0].cells() if (r := ground.room_at(c)) is not None)
+    spec = rules.spec(room.type)
+    assert spec.facade_door or spec.circulation or room.type in rules.program.service_rooms

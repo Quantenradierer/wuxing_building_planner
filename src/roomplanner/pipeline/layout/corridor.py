@@ -540,8 +540,13 @@ class CorridorLayout:
                         rooms.append(PlannedRoom("corridor", cells))
 
         entrance: Box | None = None
+        reserved: list[str] = []  # the back room, standing in for a counted room
         if level == 0:
+            planned = len(rooms)
             entrance = self._ground_floor(ctx, skeleton, rooms, extra, hints, rng, warnings)
+            lobby_entry = self._lobby_entry(ctx)
+            skip = {"corridor", lobby_entry.room if lobby_entry else None}
+            reserved = [r.type for r in rooms[planned:] if r.type not in skip]
             self._emergency_exit(ctx, skeleton, hints, warnings)
 
         segments: list[Segment] = []
@@ -618,7 +623,7 @@ class CorridorLayout:
             segment = Segment(main.frame, band, slot, band.facade, 1, main.grid)
             behind = [(segment, cells) for cells in skeleton.core_back]
         existing = [r.type for r in rooms]
-        rooms += allocator.allocate(role, level, level_name(level), behind, existing)
+        rooms += allocator.allocate(role, level, level_name(level), behind, existing, reserved)
         warnings += allocator.warnings
 
         rooms = absorb_leftovers(rooms, ctx.rules)
@@ -824,6 +829,16 @@ class CorridorLayout:
             band = rng.choice(corridors)
             u = 0 if service is LocalSide.U0 else frame.length - 1
             hint = frame.cell(u, (band.v0 + band.v1) // 2)
+            if band.kind is BandKind.STRIP:
+                # A back-of-house strip ends at the door: a back room at that end.
+                end = 0 if service is LocalSide.U0 else frame.length
+                blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
+                junctions = tuple(main.no_facade.get(band.index, []))
+                back = self._back_room(ctx, grid, main.bands, band, end, blocked, junctions, rng)
+                if back is not None and end in (back[1].u0, back[1].u1):
+                    kind, span = back
+                    extra.setdefault(band.index, []).append(span)
+                    rooms.append(PlannedRoom(kind, frame.rect(span.u0, span.u1, band.v0, band.v1)))
         else:
             band = self._facade_band(main.bands, service)
             v = 0 if service is LocalSide.V0 else frame.depth - 1
@@ -834,14 +849,11 @@ class CorridorLayout:
                 target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
                 blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
                 junctions = tuple(main.no_facade.get(band.index, []))
-                kind, span = "corridor", None
-                if program.service_stub:
-                    # A back room through to the door, else a corridor stub.
-                    back = self._back_room(ctx, grid, band, target, blocked, junctions, rng)
-                    kind, span = back or (
-                        "corridor",
-                        self._choose(grid, width, target, blocked, avoid=junctions),
-                    )
+                # A back room through to the door, else (`service_stub`) a corridor stub.
+                back = self._back_room(ctx, grid, main.bands, band, target, blocked, junctions, rng)
+                kind, span = back or ("corridor", None)
+                if back is None and program.service_stub:
+                    span = self._choose(grid, width, target, blocked, avoid=junctions)
                 if span is not None:
                     extra.setdefault(band.index, []).append(span)
                     cells = frame.rect(span.u0, span.u1, band.v0, band.v1)
@@ -902,6 +914,7 @@ class CorridorLayout:
     def _back_room(
         ctx: Context,
         grid: Grid,
+        bands: list[Band],
         band: Band,
         target: float,
         blocked: list[Interval],
@@ -909,20 +922,33 @@ class CorridorLayout:
         rng: random.Random,
     ) -> tuple[str, Interval] | None:
         """A full-depth back room on the service facade that the back door opens into: the
-        first of the ground floor's fill rooms among the program's `service_rooms` (parcel
-        drone bay, staff room) whose slot isn't far too big for it."""
+        first of the ground floor's rooms among the program's `service_rooms` (parcel drone
+        bay, storeroom, staff room) whose slot isn't far too big for it. Fill rooms and
+        rooms the floor always gets count; the allocator places one room fewer of the latter.
+        None in a hall building with a vehicle bay, which openings prefer anyway."""
         _, role = ctx.rules.role_for(0, ctx.params)
         values = variables(ctx.params, 0)
-        fills = {e.room for e in role.rooms if e.fill and evaluate(e.when, values)}
-        for room in (r for r in ctx.rules.program.service_rooms if r in fills):
-            spec = ctx.rules.spec(room)
-            low, high = spec.area
-            width = max(math.ceil(rng.randint(low, high) / band.depth), spec.min_side)
+        always = [
+            e
+            for e in role.rooms
+            if (e.fill or (e.count is not None and e.count_range[0] > 0))
+            and evaluate(e.when, values)
+        ]
+        hall = any(b.kind is BandKind.HALL for b in bands)
+        if hall and any(ctx.rules.spec(e.room).facade_door for e in always):
+            return None  # the back strip's vehicle bay takes the door anyway
+        entries = {e.room: e for e in reversed(always)}
+        for entry in (entries[r] for r in ctx.rules.program.service_rooms if r in entries):
+            spec = ctx.rules.spec(entry.room)
+            low, high = entry.area or spec.area
+            # A modest room: open-ended fill rooms (stockrooms) would take the whole strip.
+            area = rng.randint(low, min(high, 2 * low))
+            width = max(math.ceil(area / band.depth), spec.min_side)
             if width * band.depth > high * BACK_ROOM_SLACK:
                 continue
             span = CorridorLayout._choose(grid, width, target, blocked, avoid=junctions)
             if span is not None:
-                return room, span
+                return entry.room, span
         return None
 
     # --- helpers ----------------------------------------------------------------------

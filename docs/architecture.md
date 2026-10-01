@@ -178,13 +178,17 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    rectangles behind the core are rooms of their own on every floor (see Allocation).
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
    slice across the whole part (street on a short end). When no corridor touches the service
-   side, the back door opens into a room on that facade, preferring the program's
-   `service_rooms` in their order (loading bay, stockroom, storage, …, cold storage last);
-   programs with `service_stub: true` (apartments, hotels, coffin block) reserve a back
-   room there instead, a full-depth slot from the corridor to the door: the first of the
-   ground floor's fill rooms in `service_rooms` (parcel drone bay, staff room) whose slot
-   is at most 1.5× its maximum area, else a corridor stub. The back door goes into that
-   room or stub first.
+   side, the layout reserves a back room there, a full-depth slot from the corridor (or
+   hall) to the door: the first of the ground floor's rooms in the program's `service_rooms`
+   (loading bay, stockroom, storage, staff room, …) that the floor always gets (fill rooms,
+   counted rooms with a minimum of one; the allocator then places one counted room fewer),
+   sized between its minimum and twice that, and at most 1.5× its maximum area. Behind a
+   short end without corridor (small hall buildings) the slot must end at that end. Hall
+   buildings whose ground floor always has a vehicle bay (warehouse, factory) reserve
+   none: the bay takes the door. Without a back room, programs with `service_stub: true`
+   (apartments, hotels, coffin block) get a corridor stub; the others' back door opens into
+   a room on that facade, preferring `service_rooms` in their order. The back door goes
+   into the back room or stub first.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot, unless no room could stack behind them) which go into *clusters*: a side hallway

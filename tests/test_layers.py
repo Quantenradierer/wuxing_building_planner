@@ -3,7 +3,7 @@
 from roomplanner.generator import generate
 from roomplanner.geometry import Axis, Cell
 from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
-from roomplanner.params import BuildingType, Condition, Security
+from roomplanner.params import BuildingType, Condition, EntranceKind, Security
 from roomplanner.rules import rules_for
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
@@ -98,8 +98,15 @@ def test_layers_round_trip_through_json() -> None:
 def test_some_storage_rooms_are_closets_entered_through_their_host() -> None:
     found = 0
     for seed in range(12):
+        # Without a back door: the floor's one counted storeroom would be the back room.
         building = generate(
-            make_params(building_type=BuildingType.OFFICE, width=60, depth=40, seed=seed)
+            make_params(
+                building_type=BuildingType.OFFICE,
+                width=60,
+                depth=40,
+                seed=seed,
+                entrances=(EntranceKind.EMERGENCY,),
+            )
         )
         ground = building.floor(0)
         rules = rules_for(BuildingType.OFFICE, building.params.wealth)

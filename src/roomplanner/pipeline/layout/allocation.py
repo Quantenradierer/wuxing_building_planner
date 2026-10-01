@@ -167,16 +167,21 @@ class Allocator:
         floor_name: str,
         behind: list[tuple[Segment, frozenset[Cell]]] | None = None,
         existing: Iterable[str] = (),
+        reserved: Iterable[str] = (),
     ) -> list[PlannedRoom]:
         """Rooms of the floor's segments; `behind`: rectangles behind the core, which take
         rooms that don't fit elsewhere (required ones first), else the floor's `core_back`
         room, else fill rooms. `existing`: types already on the floor, which count against
-        the fill rooms' `limit`."""
+        the fill rooms' `limit`. `reserved`: rooms the layout placed already (the back room),
+        each standing in for one counted room of its type."""
         self.level = level
         self.core_back = role.core_back or self.rules.program.core_back
         self.floor_name = floor_name
         self.dropped: list[Request] = []
         requests, fills = self._requests(role, level)
+        for room in reserved:
+            if (request := next((r for r in requests if r.type == room), None)) is not None:
+                requests.remove(request)
         self.fill_types = {e.room for e in fills}
         self.fills = fills
         self.fill_counts = dict(Counter(existing))

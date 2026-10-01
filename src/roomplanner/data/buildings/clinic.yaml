@@ -35,6 +35,7 @@ floor_roles:
       - {room: security_room, count: 1, near: entrance, security: [corporate, aaa]}
       - {room: xray, count: [0, 1], wealth: [low, middle, high, luxury]}
       - {room: exam_room, count: [2, 4]}
+      - {room: storage, count: 1, near: service}   # supplies in through the back door
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: docwagon_bay, count: [0, 1], near: service, wealth: [high, luxury], priority: optional}
       - {room: generator_room, count: [0, 1], near: service, when: "floors_below == 0", wealth: [middle, high, luxury], priority: optional}

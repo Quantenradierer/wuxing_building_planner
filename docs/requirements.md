@@ -325,6 +325,18 @@ Requested by the author (2026-09-27), done (2026-10-01):
   behind the core, away from the sales floor, 11 % → 8 % (of those left, some border it
   behind the public stairs or sit in a wing).
 
+- Back doors into back rooms (2026-10-01): where no corridor reaches the service facade,
+  the back door opened into whatever room stood there: in 300 random buildings (15 per
+  type), a third of the offices and street docs, a quarter of the clinics, half of the corp
+  labs and cosmetic clinics and some hospitals, nightclubs and churches had it in an office,
+  exam, consultation, operating, recovery or meeting room, a VIP room or a toilet. Every program now reserves a back room at the door
+  (only apartments, hotels and the coffin block did): the first room of the ground floor
+  among its `service_rooms` (a storeroom, staff room, backstage, DocWagon bay), standing in
+  for one counted room of that type. Clinics, corp labs and cosmetic clinics have a
+  storeroom by the back door; a church's back door goes into the sacristy. 600 random
+  buildings (30 per type): none left. Hotel staff rooms behind the back door are at most twice their
+  minimum area (they ranged up to the maximum).
+
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
 and neighbours before it becomes a storeroom; basements and hall back strips got real
@@ -351,8 +363,10 @@ Known weaknesses:
   the scrub room on one side, so sterilization, ICU and recovery rooms compete for the
   other (ICU beside an OR in about 1 in 5 surgery floors). Partners across the service
   corridor of a hall (factory control room, stuffer shack cashier booth) never touch it.
-- Without a corridor or back room on the service facade the plain service door opens into
-  whatever room is there (an exam room or storeroom in small clinics).
+- Parking garages: a storeroom behind the core walled in by the stairwell, the elevators and
+  toilet stalls opens onto the stairwell across the stairs on about 1 in 6 ground floors
+  (1 in 16 before the back rooms of 2026-10-01; the toilet now often goes to the core's
+  other side).
 - Vehicle access: every bay with `facade_door` (loading bay, DocWagon bay, sally port,
   garage, warehouse, factory and chop shop halls) gets its own roller door, and such rooms
   never go into clusters or behind the core, where they would have no facade. Still open:
