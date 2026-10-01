@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -146,6 +147,7 @@ class Studio:
                     "kind": name,
                     "prompt": prompt,
                     "denoise": denoise,
+                    "guide": None if base else _guide_version(subjects[name]),
                     "base": base,
                     "attempts": self.attempts(name),
                     "pick": pick,
@@ -286,6 +288,12 @@ def _flow(entry: Any) -> str:
     if isinstance(entry, dict):
         return "{" + ", ".join(f"{k}: {v}" for k, v in entry.items()) + "}"
     return str(entry)
+
+
+def _guide_version(spec: dict[str, Any]) -> str:
+    """Changes whenever the guide drawing does, so the browser reloads its thumbnail."""
+    drawing = json.dumps([spec.get("base"), spec.get("guide")], sort_keys=True)
+    return hashlib.sha1(drawing.encode()).hexdigest()[:10]
 
 
 def _guide_colours(spec: dict[str, Any]) -> str:

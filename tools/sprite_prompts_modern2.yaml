@@ -358,7 +358,7 @@ subjects:
       - [rect, 0.76, 0.68, 0.92, 0.74, "#111111", 0.4]
       - [rect, 0.08, 0.68, 0.24, 0.92, "#8a8f98", 0.1]
   weapon_locker:
-    denoise: 0.65
+    denoise: 0.7
     prompt: "open gun rack, steel frame, dark interior with rifles lying in a row, wooden stocks on the right, yellow hazard stripe at the bottom edge"
     base: [rect, "#4a4e56", 0.04]
     guide:
@@ -414,7 +414,7 @@ subjects:
     guide:
       - [rect, 0.06, 0.12, 0.94, 0.88, "#cdd9e2", 0.03]
   laundry_cart:
-    denoise: 0.65
+    denoise: 0.75
     prompt: "laundry cart, dark metal frame, grey-blue canvas bag full of colorful towels in yellow, red, blue and green, handle bar at the top edge"
     base: [rect, "#3a3d42", 0.08]
     guide:
@@ -443,7 +443,7 @@ subjects:
     guide:
       - [rect, 0.05, 0.15, 0.2, 0.5, "#3a3d42", 0.15]
   conveyor:
-    denoise: 0.6
+    denoise: 0.55
     prompt: "roller conveyor, grey metal side rails, dark rollers across, three cardboard boxes on it"
     base: [rect, "#3a3d42", 0.02]
     guide:
@@ -496,7 +496,7 @@ subjects:
     prompt: "white medical supply cabinet seen from straight above, flat top with glass doors, back against the top edge"
     base: [rect, "#dfe6ee", 0.05]
   medical_cart:
-    denoise: 0.65
+    denoise: 0.75
     prompt: "medical cart, pale blue top tray, steel kidney dish, blue box of gloves, small bottles, white gauze pad, green container, black handle bar at the top edge"
     base: [rect, "#5f6670", 0.06]
     guide:
@@ -628,7 +628,7 @@ subjects:
       - [rect, 0.2, 0.1, 0.8, 0.28, "#ffffff", 0.3]
       - [rect, 0.2, 0.35, 0.8, 0.9, "#c3ced8", 0.1]
   machinery:
-    denoise: 0.7
+    denoise: 0.55
     prompt: "air compressor on a dark steel skid, long grey horizontal tank, blue electric motor, yellow belt guard, round pressure gauge, copper pipe"
     base: [rect, "#4a4d52", 0.04]
     guide:
@@ -668,7 +668,7 @@ subjects:
       - [ellipse, 0.3, 0.3, 0.7, 0.7, "#d97a1b"]
       - [rect, 0.45, 0.1, 0.55, 0.5, "#e08a2a", 0.2]
   electrical_panel:
-    denoise: 0.7
+    denoise: 0.4
     prompt: "open electrical panel, grey steel cabinet, rows of white and black circuit breakers, red main switch, yellow warning label, conduits at the top edge"
     base: [rect, "#8a9099", 0.04]
     guide:
@@ -738,7 +738,7 @@ subjects:
       - [ellipse, 0.3, 0.3, 0.7, 0.7, "#cdd9e2"]
       - [ellipse, 0.46, 0.46, 0.54, 0.54, "#8a929e"]
   generator:
-    denoise: 0.7
+    denoise: 0.9
     prompt: "diesel generator in a dark green steel enclosure, radiator louvres on the left, black exhaust stack, control panel with green and red lights, yellow warning sign"
     base: [rect, "#3e4a3c", 0.04]
     guide:
@@ -798,8 +798,8 @@ subjects:
     guide:
       - [ellipse, 0.38, 0.38, 0.62, 0.62, "#2b2d31"]
   car:
-    denoise: 0.65
-    prompt: "blue sedan seen from above, front bumper with headlights at the top edge, dark windshield, blue roof, rear window, red tail lights at the bottom edge, black tires"
+    denoise: 0.55
+    prompt: "car. blue sedan seen from above, front bumper with headlights at the top edge, dark windshield, blue roof, rear window, red tail lights at the bottom edge, black tires"
     base: [none]
     guide:
       - [rect, 0.0, 0.14, 0.12, 0.26, "#151515", 0.3]
@@ -842,47 +842,52 @@ subjects:
       - [rect, 0.0, 0.0, 0.08, 1.0, "#9aa0a8", 0.0]
       - [rect, 0.92, 0.0, 1.0, 1.0, "#9aa0a8", 0.0]
   ambulance:
-    denoise: 0.65
-    prompt: "yellow ambulance seen from above, cab and windshield at the top edge, blue light bar, green and yellow checker stripe, roof air conditioner, red cross on the roof"
+    denoise: 0.8
+    prompt: "white ambulance seen from above, cab with dark windshield at the top edge, red and blue light bar behind the cab, red stripes along both sides, grey roof air conditioner, red cross on the roof, rear doors at the bottom edge, black tires"
     base: [none]
     guide:
       - [rect, 0.0, 0.1, 0.1, 0.2, "#151515", 0.3]
       - [rect, 0.9, 0.1, 1.0, 0.2, "#151515", 0.3]
       - [rect, 0.0, 0.76, 0.1, 0.88, "#151515", 0.3]
       - [rect, 0.9, 0.76, 1.0, 0.88, "#151515", 0.3]
-      - [rect, 0.05, 0.0, 0.95, 1.0, "#e8d040", 0.12]
-      - [rect, 0.12, 0.14, 0.88, 0.24, "#1a2230", 0.15]
-      - [rect, 0.1, 0.27, 0.9, 0.31, "#2a5ad8", 0.4]
-      - [rect, 0.05, 0.36, 0.22, 0.42, "#2a8a4a", 0.0]
-      - [rect, 0.22, 0.36, 0.39, 0.42, "#e8d040", 0.0]
-      - [rect, 0.39, 0.36, 0.61, 0.42, "#2a8a4a", 0.0]
-      - [rect, 0.61, 0.36, 0.78, 0.42, "#e8d040", 0.0]
-      - [rect, 0.78, 0.36, 0.95, 0.42, "#2a8a4a", 0.0]
-      - [rect, 0.3, 0.5, 0.7, 0.62, "#c8ccd2", 0.1]
-      - [rect, 0.42, 0.7, 0.58, 0.86, "#c42a2a", 0.05]
-      - [line, 0.5, 0.94, 0.5, 1.0, "#5a5e66", 0.02]
+      - [rect, 0.05, 0.0, 0.95, 1.0, "#e6e9ee", 0.12]
+      - [rect, 0.12, 0.13, 0.88, 0.23, "#1a2230", 0.15]
+      - [rect, 0.1, 0.26, 0.5, 0.3, "#d83a3a", 0.4]
+      - [rect, 0.5, 0.26, 0.9, 0.3, "#2a5ad8", 0.4]
+      - [rect, 0.05, 0.36, 0.95, 1.0, "#f0f2f5", 0.05]
+      - [rect, 0.05, 0.36, 0.13, 0.98, "#c0392b", 0.0]
+      - [rect, 0.87, 0.36, 0.95, 0.98, "#c0392b", 0.0]
+      - [rect, 0.32, 0.44, 0.68, 0.56, "#b8bcc2", 0.1]
+      - [rect, 0.45, 0.64, 0.55, 0.86, "#c0392b", 0.0]
+      - [rect, 0.36, 0.7, 0.64, 0.8, "#c0392b", 0.0]
+      - [line, 0.5, 0.92, 0.5, 1.0, "#8a8e94", 0.015]
+      - [rect, 0.0, 0.3, 0.05, 0.34, "#c8ccd2", 0.3]
+      - [rect, 0.95, 0.3, 1.0, 0.34, "#c8ccd2", 0.3]
   shipping_container:
-    denoise: 0.6
-    prompt: "orange steel shipping container seen from above, corrugated roof with ridges across, dark corner castings"
-    base: [rect, "#c45a2a", 0.01]
+    denoise: 0.75
+    prompt: "dark teal steel shipping container seen from above, corrugated roof with ridges across, dark corner castings, a small grey vent panel in the middle"
+    base: [rect, "#3a6b7a", 0.01]
     guide:
-      - [rect, 0.0, 0.0, 0.1, 0.03, "#3a3a3a", 0.0]
-      - [rect, 0.9, 0.0, 1.0, 0.03, "#3a3a3a", 0.0]
-      - [rect, 0.0, 0.97, 0.1, 1.0, "#3a3a3a", 0.0]
-      - [rect, 0.9, 0.97, 1.0, 1.0, "#3a3a3a", 0.0]
-      - [line, 0.03, 0.08, 0.97, 0.08, "#9a4520", 0.015]
-      - [line, 0.03, 0.16, 0.97, 0.16, "#9a4520", 0.015]
-      - [line, 0.03, 0.24, 0.97, 0.24, "#9a4520", 0.015]
-      - [line, 0.03, 0.32, 0.97, 0.32, "#9a4520", 0.015]
-      - [line, 0.03, 0.4, 0.97, 0.4, "#9a4520", 0.015]
-      - [line, 0.03, 0.48, 0.97, 0.48, "#9a4520", 0.015]
-      - [line, 0.03, 0.56, 0.97, 0.56, "#9a4520", 0.015]
-      - [line, 0.03, 0.64, 0.97, 0.64, "#9a4520", 0.015]
-      - [line, 0.03, 0.72, 0.97, 0.72, "#9a4520", 0.015]
-      - [line, 0.03, 0.8, 0.97, 0.8, "#9a4520", 0.015]
-      - [line, 0.03, 0.88, 0.97, 0.88, "#9a4520", 0.015]
-      - [rect, 0.0, 0.0, 1.0, 0.012, "#7a3818", 0.0]
-      - [rect, 0.0, 0.988, 1.0, 1.0, "#7a3818", 0.0]
+      - [rect, 0.0, 0.0, 0.1, 0.03, "#22343a", 0.0]
+      - [rect, 0.9, 0.0, 1.0, 0.03, "#22343a", 0.0]
+      - [rect, 0.0, 0.97, 0.1, 1.0, "#22343a", 0.0]
+      - [rect, 0.9, 0.97, 1.0, 1.0, "#22343a", 0.0]
+      - [line, 0.03, 0.08, 0.97, 0.08, "#2a4a55", 0.015]
+      - [line, 0.03, 0.16, 0.97, 0.16, "#2a4a55", 0.015]
+      - [line, 0.03, 0.24, 0.97, 0.24, "#2a4a55", 0.015]
+      - [line, 0.03, 0.32, 0.97, 0.32, "#2a4a55", 0.015]
+      - [line, 0.03, 0.4, 0.97, 0.4, "#2a4a55", 0.015]
+      - [line, 0.03, 0.48, 0.97, 0.48, "#2a4a55", 0.015]
+      - [line, 0.03, 0.56, 0.97, 0.56, "#2a4a55", 0.015]
+      - [line, 0.03, 0.64, 0.97, 0.64, "#2a4a55", 0.015]
+      - [line, 0.03, 0.72, 0.97, 0.72, "#2a4a55", 0.015]
+      - [line, 0.03, 0.8, 0.97, 0.8, "#2a4a55", 0.015]
+      - [line, 0.03, 0.88, 0.97, 0.88, "#2a4a55", 0.015]
+      - [rect, 0.0, 0.0, 1.0, 0.012, "#22343a", 0.0]
+      - [rect, 0.0, 0.988, 1.0, 1.0, "#22343a", 0.0]
+      - [rect, 0.0, 0.0, 0.03, 1.0, "#2f5a68", 0.0]
+      - [rect, 0.97, 0.0, 1.0, 1.0, "#2f5a68", 0.0]
+      - [rect, 0.3, 0.42, 0.7, 0.52, "#8a9aa0", 0.05]
   pew:
     prompt: "long wooden church pew bench seen from straight above, polished light wood seat and low backrest along the top edge"
     base: [rect, "#b58f5a", 0.03]
@@ -1211,7 +1216,7 @@ subjects:
       - [ellipse, 0.06, 0.06, 0.94, 0.94, "#6a4630"]
       - [rect, 0.30, 0.35, 0.62, 0.60, "#8a3a2a", 0.05]
   side_table.luxury:
-    denoise: 0.65
+    denoise: 0.5
     prompt: "small round side table, black marble top with grey veins, polished brass rim, a red leather book and a small green vase with a red flower on top"
     base: [ellipse, "#b8924a", 0]
     guide:
@@ -1470,3 +1475,11 @@ derived_overrides:
   arcade_machine.squatter: {denoise: 0.9}
   drone_dock.low: {denoise: 0.75}
   autokitchen.low: {denoise: 0.6}
+  dj_booth.low: {denoise: 0.65}
+  dj_booth.squatter: {denoise: 0.7}
+  forklift.low: {denoise: 0.7}
+  forklift.squatter: {denoise: 0.8}
+  battery_bank.low: {denoise: 0.6}
+  hvac_unit.low: {denoise: 0.6}
+  hvac_unit.squatter: {denoise: 0.85}
+  car_lift.low: {denoise: 0.6}

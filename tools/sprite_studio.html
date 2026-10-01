@@ -103,7 +103,7 @@ function card(k) {
   const derived = k.base ? `<div class="derived">worn down from the picked ${k.base}</div>` : "";
   const describe = k.base ? "" : `<button class="describe edit">Edit description</button>
       <button class="describe gpt">Recreate text description</button>`;
-  const guide = k.base ? "" : `<img class="guide" src="/guide/${k.kind}" alt=""
+  const guide = k.base ? "" : `<img class="guide" src="/guide/${k.kind}?v=${k.guide}" alt=""
       title="Guide drawing: fixes shape and colours; the description adds detail">`;
   el.innerHTML = `<div class="top">${current}${guide}<div class="info">
       <div class="kind">${k.kind}${badge}</div>${derived}<div class="prompt"></div>
