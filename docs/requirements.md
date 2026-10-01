@@ -245,17 +245,18 @@ All seven milestones are implemented (2026-09-26).
 - No fire escapes (they need surroundings).
 - Adjacency preferences are limited to `near`, `next_to`, `vestibule` and door `access` lists.
 - Small footprints can be infeasible for rich tiers or big programs: cosmetic clinics,
-  supermarkets, police stations and casinos need about 36 × 36 cells (18 m), factories
-  40 × 40, hospitals 48 × 48, others 32 × 32 (data centres too: smaller ones lack the space
-  for the ground floor's NOC, security post, loading dock and a server hall with its mantrap).
-  Small street shops fit every tier from 24 × 24 with
-  stairs and a basement (boutique 16 × 16, gun shop 21 × 21, middle tier 19–22); one floor
-  fits from 13 cells deep or wide (ramen bar 15). The single flats are smaller: safehouse 22 × 22 or
-  24 × 18 cells, hacker den 22 × 22 or 22 × 18, mage's flat 28 × 28 or 30 × 22 (the lodge
-  needs 3.5 m round its circle); at these sizes optional rooms (med room, second
-  bedroom, alchemy lab) are often left out. Prisons need 34 × 34 with one floor (32 × 32
-  with more); small prisons drop the intake holding cells, the vehicle sally port, mess hall, kitchen
-  and infirmary before their one cell block.
+  supermarkets and police stations need about 36 × 36 cells (18 m), data centres 36 × 36
+  (the ground floor holds the NOC, security post, loading dock and a server hall with its
+  mantrap), casinos 38 × 38, factories 40 × 40, hospitals and single-floor prisons 48 × 48,
+  others 32 × 32 (single floor, any tier, security and street/service side). Prisons from
+  34 × 34 only work for some sides and tiers (about 1 in 3 fails up to 40 × 40); small
+  prisons drop the intake holding cells, the vehicle sally port, mess hall, kitchen and
+  infirmary before their one cell block. Small street shops fit every tier from 24 × 24
+  with stairs and a basement (boutique 16 × 16, gun shop 21 × 21, middle tier 19–22); one
+  floor fits from 13 cells deep or wide (ramen bar 15). The single flats are smaller:
+  safehouse 22 × 22 or 24 × 18 cells, hacker den 22 × 22 or 22 × 18, mage's flat 28 × 28
+  or 30 × 22 (the lodge needs 3.5 m round its circle); at these sizes optional rooms (med
+  room, second bedroom, alchemy lab) are often left out.
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
