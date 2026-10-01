@@ -143,6 +143,8 @@ objects:
   ambulance:       {size: [4, 10], glyph: a}   # DocWagon armoured ambulance, nose to the wall
   evidence_locker: {size: [2, 1], glyph: L}
   shipping_container: {size: [5, 12], glyph: "["}
+  crac_unit:       {size: [4, 2], glyph: W}      # data hall air conditioner: cold air into the raised floor
+  chiller:         {size: [6, 3], glyph: G}      # water chiller of the cooling plant
 
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).

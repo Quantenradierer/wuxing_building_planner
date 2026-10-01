@@ -1,0 +1,99 @@
+# Data centres: server halls behind mantraps, the NOC, power and cooling plant.
+# Units are cells (1 cell = 0.5 m): lengths in cells, areas in number of cells.
+rooms:
+  data_hall:            # white space: rack rows back to back (hot / cold aisles), CRACs on the walls
+    area: [80, 900]
+    min_side: 8
+    windows: forbidden
+    transit: false
+    door_width: 3             # racks are wheeled in
+    vestibule: mantrap        # the only way in is through the mantrap
+    furniture:
+      - {object: crac_unit, placement: wall, per: 80, count: [1, 6]}
+      - {object: server_rack, placement: rows, aisle: 3, paired: true, margin: 2, block: 24}
+      - {object: suppression_tanks, placement: wall, count: [0, 1]}
+      - {object: terminal, placement: wall, count: [0, 1]}        # crash cart / KVM console
+      - {object: fire_extinguisher, placement: wall, per: 300, count: [1, 3]}
+  mantrap:              # two interlocked doors, one person at a time: badge, then biometrics
+    area: [12, 72]
+    min_side: 3
+    windows: forbidden
+    furniture:
+      - {object: security_gate, placement: wall, count: [0, 1]}
+  noc:                  # network operations centre: console rows facing a video wall
+    area: [48, 160]
+    min_side: 7
+    windows: optional
+    furniture:
+      - {object: wall_screen, placement: end}
+      - {object: console, placement: rows, aisle: 2, margin: 2, block: 12, toward: wall_screen}
+      - {object: wall_screen, placement: wall, count: [0, 2]}
+      - {object: server_rack, placement: wall, count: [0, 1]}
+      - {object: coffee_machine, placement: corner, count: [0, 1]}
+  cooling_plant:        # chillers and pumps feeding the CRACs; dry coolers sit on the roof
+    wealth_shift: -1
+    area: [40, 200]
+    min_side: 7
+    windows: forbidden
+    transit: false
+    door_width: 3
+    furniture:
+      - {object: chiller, placement: wall, per: 50, count: [1, 3]}
+      - {object: hvac_unit, placement: wall, count: [0, 2]}
+      - {object: machinery, placement: wall, count: [1, 2]}       # pumps
+      - {object: electrical_panel, placement: wall, count: [1, 2]}
+      - {object: fire_extinguisher, placement: corner}
+  ups_room:             # battery strings bridging the seconds until the generators run
+    wealth_shift: -1
+    area: [30, 140]
+    min_side: 5
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: battery_bank, placement: rows, aisle: 2, margin: 1}
+      - {object: electrical_panel, placement: wall, count: [1, 3]}
+      - {object: fire_extinguisher, placement: corner}
+  suppression_room:     # inert gas bottles for the halls' fire suppression
+    wealth_shift: -1
+    area: [9, 36]
+    min_side: 3
+    windows: forbidden
+    transit: false
+    cluster: true
+    furniture:
+      - {object: suppression_tanks, placement: perimeter, count: [2, 8]}
+  meet_me_room:         # where the carriers' fibre meets the tenants: patch racks, cross-connects
+    area: [24, 80]
+    min_side: 5
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: server_rack, placement: perimeter, count: [3, 12]}
+      - {object: electrical_panel, placement: wall, count: [0, 1]}
+      - {object: fire_extinguisher, placement: corner}
+  loading_dock:         # goods in: a loading bay that stays on the facade for its roller door
+    area: [48, 140]
+    min_side: 8
+    windows: required         # keeps it out of the interior rows of deep (racetrack) floors
+    door_width: 4
+    facade_door: 6
+    next_to: [staging_room]
+    furniture:
+      - {object: pallet, placement: scatter, count: [1, 4]}
+      - {object: crate, placement: scatter, count: [1, 4]}
+      - {object: forklift, placement: scatter, count: [0, 1]}
+      - {object: fire_extinguisher, placement: corner}
+  staging_room:         # unpacking, burn-in and repairs before hardware goes on the floor
+    area: [30, 100]
+    min_side: 5
+    windows: optional
+    door_width: 3
+    next_to: [loading_dock]
+    connect: [loading_dock]
+    furniture:
+      - {object: workbench, placement: wall, count: [1, 3]}
+      - {object: server_rack, placement: wall, count: [1, 3]}
+      - {object: shelf, placement: wall, count: [1, 3]}
+      - {object: crate, placement: scatter, count: [1, 3]}
+      - {object: pallet, placement: scatter, count: [0, 1]}
+      - {object: stool, placement: at, at: workbench, count: [0, 1]}

@@ -66,6 +66,15 @@ CASES: dict[str, dict[str, Any]] = {
         "seed": 6,
     },
     "stuffer_shack": {"building_type": BuildingType.SUPERMARKET, "width": 30, "depth": 26},
+    "data_centre": {
+        "building_type": BuildingType.DATA_CENTRE,
+        "width": 60,
+        "depth": 44,
+        "floors_above": 2,
+        "floors_below": 1,
+        "security": Security.CORPORATE,
+        "seed": 3,
+    },
     "office_luxury_executive": {
         "width": 72,
         "depth": 36,

@@ -1,0 +1,94 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Data centre: a windowless box of server halls, each behind a mantrap; the NOC and the
+# security post by the checkpoint lobby; power (UPS, generators) and cooling plant; a
+# loading dock with a staging room for new hardware.
+building: data_centre
+catalogs: [common, office, hospitality, industry, data_centre]
+layout: corridor
+
+corridor:
+  width: 4                 # racks are wheeled through
+  hallway_width: 3
+strip_depth: [12, 18]
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [loading_dock, staging_room, storage, ups_room, utility, staff_room]
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [5, 6], when: "floors_total >= 2"}   # freight: racks go up in it
+  - {room: elevator, size: [5, 6], when: "floors_total >= 3 and width + depth >= 120"}
+
+entrances:
+  main: {width: 2}         # the checkpoint
+  service: {width: 6}      # the loading dock's roller door
+  emergency: {width: 2}
+  roof: {width: 2}
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: corp_lobby, place: entrance, area: [60, 140], priority: required}
+      - {room: security_room, count: 1, near: entrance, priority: required}
+      - {room: noc, count: 1, priority: required}
+      - {room: data_hall, count: 1, area: [80, 200], priority: required, when: "floors_above == 1"}
+      - {room: data_hall, count: 1, area: [80, 200], when: "floors_above >= 2", priority: optional}   # small sites: the halls are upstairs
+      - {room: loading_dock, count: 1, near: service, priority: required}
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: staging_room, count: 1, near: service}
+      - {room: guard_room, count: 1, near: entrance, security: [corporate, aaa]}
+      - {room: spider_room, count: 1, security: [corporate, aaa], priority: optional}
+      - {room: ups_room, count: 1}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: generator_room, count: [1, 2], near: service, when: "floors_below == 0", priority: optional}
+      - {room: suppression_room, count: [0, 1], priority: optional}
+      - {room: staff_room, count: [0, 1]}
+      - {room: locker_room, count: [0, 1], priority: optional}
+      - {room: office, count: [1, 3]}
+      - {room: meeting_room, count: [0, 1], wealth: [middle, high, luxury]}
+      # No office fill: the facades are white space too; thin interior rows get the
+      # electrical and battery rooms. The first unlimited fill room also backs facade
+      # stacks (offices) and narrow slivers, where a hall would lack its mantrap.
+      - {room: ups_room, fill: true}
+      - {room: data_hall, fill: true, weight: 4}
+      - {room: electrical_room, fill: true, weight: 0.5, limit: 3}
+      - {room: cooling_plant, fill: true, limit: 1}
+      - {room: meet_me_room, fill: true, limit: 1}
+      - {room: suppression_room, fill: true, limit: 1}
+  roof:                     # dry coolers and condensers on the flat roof
+    applies: [top]
+    when: "floors_above >= 3 and roll >= 50"
+    roof: roof
+  halls:
+    applies: [upper, top]
+    rooms:
+      - {room: data_hall, count: 1, area: [80, 200], priority: required}
+      - {room: toilet, count: [0, 1], near: core}
+      - {room: ups_room, count: 1}
+      - {room: cooling_plant, count: 1}
+      - {room: suppression_room, count: [0, 1], priority: optional}
+      - {room: network_closet, count: [0, 1], near: core, priority: optional}
+      - {room: meet_me_room, count: [0, 1], priority: optional}
+      - {room: office, count: [0, 2]}
+      - {room: meeting_room, count: [0, 1], wealth: [middle, high, luxury]}
+      - {room: kitchenette, count: [0, 1], near: core}
+      - {room: ups_room, fill: true}                 # first: behind offices, see above
+      - {room: data_hall, fill: true, weight: 4}
+      - {room: electrical_room, fill: true, weight: 0.5, limit: 3}
+      - {room: suppression_room, fill: true, limit: 1}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: generator_room, count: [1, 2], when: "level + 1 == 0", priority: required}
+      - {room: utility, count: 1}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: ups_room, count: [1, 2]}
+      - {room: cooling_plant, count: 1}
+      - {room: vault, count: [0, 1], security: [aaa], priority: optional}   # the tape vault
+      - {room: storage, count: [0, 1], near: core}
+      - {room: cooling_plant, fill: true}
+      - {room: data_hall, fill: true, weight: 4}
+      - {room: mechanical_room, fill: true}

@@ -607,6 +607,23 @@ subjects:
     base: [rect, "#3a6b7a", 0.02]
     guide:
       - [line, 0.5, 0.0, 0.5, 1.0, "#2a4a55", 0.02]
+  crac_unit:
+    denoise: 0.64
+    prompt: "computer room air conditioner seen from straight above, white steel cabinet, two round fan grilles on the flat top, vent louvres along the bottom edge"
+    base: [rect, "#e6e9ed", 0.04]
+    guide:
+      - [ellipse, 0.08, 0.15, 0.45, 0.75, "#9aa2ae"]
+      - [ellipse, 0.55, 0.15, 0.92, 0.75, "#9aa2ae"]
+      - [rect, 0.05, 0.85, 0.95, 0.95, "#b8c0ca", 0.0]
+  chiller:
+    denoise: 0.64
+    prompt: "industrial water chiller seen from straight above, large grey steel housing, two big round fan grilles on top, insulated blue pipes at the top edge"
+    base: [rect, "#a8adb5", 0.03]
+    guide:
+      - [ellipse, 0.1, 0.25, 0.45, 0.9, "#7a828e"]
+      - [ellipse, 0.55, 0.25, 0.9, 0.9, "#7a828e"]
+      - [line, 0.3, 0.0, 0.3, 0.2, "#3a6b9a", 0.06]
+      - [line, 0.7, 0.0, 0.7, 0.2, "#3a6b9a", 0.06]
   pew:
     prompt: "long wooden church pew bench seen from straight above, polished light wood seat and low backrest along the top edge"
     base: [rect, "#b58f5a", 0.03]

@@ -221,6 +221,15 @@ rooms:
   shelter: concrete
   cashier_booth: shop
   executive_quarters: executive
+  data_hall: tech
+  mantrap: tech
+  noc: tech
+  cooling_plant: industrial
+  ups_room: industrial
+  suppression_room: industrial
+  meet_me_room: tech
+  loading_dock: industrial
+  staging_room: concrete
 
 default_object: {shape: box, fill: "#343a48", stroke: "#11131a", detail: "#8a93a8"}
 objects:
@@ -358,3 +367,5 @@ objects:
   ambulance:       {shape: rounded, fill: "#e6ebf1", stroke: "#3b4350", detail: "#e0312b", glow: "#e0312b"}
   evidence_locker: {shape: shelf, fill: "#56606e", stroke: "#15171d", detail: "#ffb347"}
   shipping_container: {shape: box, fill: "#8a4a2c", stroke: "#1f0d0a"}
+  crac_unit:       {shape: machine, fill: "#c9d1db", stroke: "#15171d", detail: "#3a3f48", glow: "#4fc3f7"}
+  chiller:         {shape: machine, fill: "#5d6b78", stroke: "#0f1117", detail: "#9fe8ff"}

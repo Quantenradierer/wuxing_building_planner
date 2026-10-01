@@ -90,6 +90,7 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | church      | hall            | nave with pews and altar, choir loft, crypt         |
 | dive_bar    | hall            | taproom: bar with stools, booths, pool table        |
 | chop_shop   | hall            | workshop with car lifts, paint booth, parts storage |
+| data_centre | corridor        | server halls behind mantraps, NOC, UPS and cooling |
 
 ## Building rules
 
@@ -214,7 +215,8 @@ All seven milestones are implemented (2026-09-26).
 - Adjacency preferences are limited to `near`, `next_to`, `vestibule` and door `access` lists.
 - Small footprints can be infeasible for rich tiers or big programs: cosmetic clinics,
   supermarkets and police stations need about 36 × 36 cells (18 m), factories 40 × 40,
-  hospitals 48 × 48, others 32 × 32.
+  hospitals 48 × 48, others 32 × 32 (data centres too: smaller ones lack the space for
+  the ground floor's NOC, security post, loading dock and a server hall with its mantrap).
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
@@ -380,6 +382,13 @@ Known weaknesses:
   storerooms behind small service rooms; flat closets (`front_fill`) are ~3 % of the area.
 - Basements are mostly mechanical rooms side by side (one laundry, staff room and
   storeroom); a garage level would be more realistic for big buildings.
+
+- Data centres (2026-10-01): every server hall is entered only through its mantrap (639
+  halls in 120 random buildings, all of them); halls are the first choice of every fill,
+  but thin interior rows of deep floors become UPS and electrical rooms, so halls are
+  about 30 % of the floor area. The loading dock has `windows: required` only to keep it
+  on a facade (a `facade_door` room may otherwise land in an interior row and lose its
+  roller door); about 7 in 100 docks then report a missing window.
 
 Possible extensions: surroundings (street, yard, parking, fire escapes, roof), more themes
 (corporate white, Barrens, print), a web UI with preview, more building types and variants

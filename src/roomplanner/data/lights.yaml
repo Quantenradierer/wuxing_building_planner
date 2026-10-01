@@ -60,6 +60,13 @@ rooms:
   body_bank:     {colour: "#9fe8ff", intensity: 0.5}
   subject_holding: {colour: "#dfe8ff", intensity: 0.4}
   shelter:       {spacing: 10, radius: 6, colour: "#ffb347", intensity: 0.35}
+  data_hall:     {spacing: 8, radius: 8, colour: "#e8f4ff", intensity: 0.7}
+  mantrap:       {radius: 4, colour: "#f4fbff", intensity: 0.8}
+  noc:           {colour: "#6fa8ff", intensity: 0.4}
+  meet_me_room:  {colour: "#8c7bff", intensity: 0.5}
+  ups_room:      {spacing: 10, radius: 6, colour: "#ffd9a0", intensity: 0.45}
+  cooling_plant: {spacing: 10, radius: 6, colour: "#ffd9a0", intensity: 0.45}
+  suppression_room: {radius: 4, colour: "#ffd9a0", intensity: 0.4}
 
 accents:
   stairwell:
@@ -93,6 +100,10 @@ accents:
     - {kind: neon, radius: 5, colour: "#c6ff00", intensity: 0.4}
   nave:
     - {kind: neon, radius: 6, colour: "#ffcc66", intensity: 0.5}           # candles, altar glow
+  data_hall:
+    - {kind: neon, radius: 6, colour: "#00ff9c", intensity: 0.5}          # rack status LEDs
+  noc:
+    - {kind: neon, radius: 6, colour: "#00e5ff", intensity: 0.6}          # the video wall
 
 entrances:
   main: {kind: sign, radius: 8, colour: "#ff3fa4", intensity: 0.9}

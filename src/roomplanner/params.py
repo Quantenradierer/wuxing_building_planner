@@ -22,6 +22,7 @@ class BuildingType(StrEnum):
     PARKING_GARAGE = "parking_garage"
     FACTORY = "factory"
     CHURCH = "church"
+    DATA_CENTRE = "data_centre"
     # Variants of the types above.
     CORP_OFFICE = "corp_office"
     STREET_DOC = "street_doc"
