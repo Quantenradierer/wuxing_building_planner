@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import webbrowser
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -29,6 +30,7 @@ from roomplanner.render.image import DEFAULT_CELL_PX, RenderOptions
 from roomplanner.render.image import render_building as render_images
 from roomplanner.render.theme import load_theme
 from roomplanner.serialization import from_json, to_json
+from roomplanner.ui.server import make_server
 
 app = typer.Typer(no_args_is_help=True, help="Generate Shadowrun/cyberpunk building battle maps.")
 
@@ -146,6 +148,29 @@ def render(
         output,
         _ImageSettings(theme, cell_px, labels, grid, grid_m, lights),
     )
+
+
+@app.command()
+def ui(
+    port: Annotated[int, typer.Option(help="Port to listen on")] = 8000,
+    host: Annotated[str, typer.Option(help="Interface to listen on")] = "127.0.0.1",
+    browser: Annotated[bool, typer.Option(help="Open the page in the browser")] = True,
+) -> None:
+    """Start the local web UI: all parameters, floor viewer with toggleable layers."""
+    try:
+        server = make_server(host, port)
+    except OSError as error:
+        _fail(f"cannot listen on {host}:{port}: {error.strerror}")
+    url = f"http://{host}:{server.server_port}/"
+    typer.echo(f"Roomplanner UI on {url} (Ctrl+C to stop)")
+    if browser:
+        webbrowser.open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
 
 
 @dataclass(frozen=True)

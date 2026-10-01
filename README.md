@@ -20,6 +20,11 @@ uv run roomplanner generate -t nightclub -w 56 -d 36 -f dd2vtt -o vtt/club.dd2vt
 uv run roomplanner generate -t corp_lab -w 60 -d 40 --floors-above 3 -f foundry -o vtt/lab
 ```
 
+Interactive: `uv run roomplanner ui` opens a local page (http://127.0.0.1:8000) with all
+parameters, a floor switcher and toggleable layers drawn over the themed image: room areas
+and descriptions (type, id, m²), units, walls, doors and windows, locks and entrances,
+furniture, security devices, lights and a grid. Hover a room for its furniture and devices.
+
 Foundry: copy the `vtt/lab` folder to `<Foundry Data>/roomplanner/lab/`, create a script
 macro from `import-macro.js` and run it once. Stairs and elevators teleport tokens between
 the floor scenes (Foundry v12+ Scene Regions).

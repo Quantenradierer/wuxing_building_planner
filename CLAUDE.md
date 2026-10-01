@@ -21,6 +21,7 @@ uv run pyright                   # strict mode
 uv run roomplanner generate --type office --width 60 --depth 40 --floors-above 3 --seed 1
 uv run roomplanner generate -t office -w 48 -d 30 -f png -o /tmp/office.png --labels
 uv run roomplanner generate -t hotel -w 56 -d 36 --floors-above 2 -f foundry -o /tmp/hotel
+uv run roomplanner ui                # local web UI on :8000 (--port, --no-browser)
 ```
 
 uv is installed inside `.venv` (`.venv/bin/uv`) if it's not on PATH.

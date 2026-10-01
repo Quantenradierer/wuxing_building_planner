@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roomplanner</title>
+<style>
+  :root {
+    --bg: #14161b; --panel: #1c1f26; --line: #2c313b; --text: #d9dde5; --muted: #8a91a0;
+    --accent: #3fd1c4; --error: #ff6b6b; --warn: #f5c35b;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text); display: flex;
+    font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  aside {
+    width: 270px; flex: none; overflow-y: auto; background: var(--panel);
+    border-right: 1px solid var(--line); padding: 12px 14px 20px;
+  }
+  h1 { font-size: 15px; margin: 0 0 10px; letter-spacing: .04em; }
+  h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+    margin: 16px 0 6px; border-bottom: 1px solid var(--line); padding-bottom: 3px;
+  }
+  label.field { display: grid; grid-template-columns: 96px 1fr; align-items: center;
+    gap: 6px; margin: 4px 0; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .pair label.field { grid-template-columns: 1fr; gap: 1px; }
+  input, select, button {
+    font: inherit; color: var(--text); background: #12141a; border: 1px solid var(--line);
+    border-radius: 4px; padding: 4px 6px; min-width: 0; width: 100%;
+  }
+  input[type=checkbox] { width: auto; margin: 0; }
+  button { cursor: pointer; width: auto; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #0b1514; border-color: var(--accent);
+    font-weight: 600; width: 100%; padding: 7px; margin-top: 12px; }
+  button.primary:disabled { opacity: .5; cursor: wait; }
+  .row { display: flex; gap: 6px; align-items: center; }
+  .checks { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .checks label { display: flex; gap: 5px; align-items: center; cursor: pointer; }
+  .layers label { display: flex; gap: 6px; align-items: center; margin: 3px 0; cursor: pointer; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  header {
+    display: flex; gap: 8px; align-items: center; padding: 8px 12px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tabs button.active { border-color: var(--accent); color: var(--accent); }
+  .spacer { flex: 1; }
+  #status { color: var(--muted); }
+  #status.error { color: var(--error); }
+  #viewport { flex: 1; overflow: auto; position: relative; }
+  #stage { position: relative; margin: 16px; }
+  #stage img, #stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #stage img { image-rendering: auto; }
+  #empty { color: var(--muted); padding: 40px; text-align: center; }
+  #warnings { margin: 0; padding: 6px 12px 6px 28px; color: var(--warn);
+    border-top: 1px solid var(--line); max-height: 90px; overflow-y: auto; }
+  #warnings:empty { display: none; }
+  #tip {
+    position: fixed; pointer-events: none; background: rgba(12,14,18,.95); color: var(--text);
+    border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; max-width: 280px;
+    display: none; z-index: 10; font-size: 12px;
+  }
+  #tip b { color: var(--accent); }
+  svg text { font-family: system-ui, sans-serif; pointer-events: none; }
+  .room-hit { fill: transparent; cursor: crosshair; }
+  .room-hit:hover { fill: rgba(63, 209, 196, .18); }
+</style>
+</head>
+<body>
+<aside>
+  <h1>Roomplanner</h1>
+  <form id="form">
+    <h2>Building</h2>
+    <label class="field">Type <select name="building_type"></select></label>
+    <div class="pair">
+      <label class="field">Width (cells) <input name="width" type="number" min="1" value="48"></label>
+      <label class="field">Depth (cells) <input name="depth" type="number" min="1" value="30"></label>
+    </div>
+    <div class="pair">
+      <label class="field">Floors above <input name="floors_above" type="number" min="1" value="1"></label>
+      <label class="field">Basements <input name="floors_below" type="number" min="0" value="0"></label>
+    </div>
+    <label class="field">Shape <select name="shape"></select></label>
+    <label class="field">Wealth <select name="wealth"></select></label>
+    <label class="field">Condition <select name="condition"></select></label>
+    <label class="field">Security <select name="security"></select></label>
+
+    <h2>Site</h2>
+    <label class="field">Street side <select name="street_side"></select></label>
+    <label class="field">Service side <select name="service_side"></select></label>
+    <div class="row" style="margin:6px 0 2px">
+      <input type="checkbox" id="entrances-override"><label for="entrances-override">Override entrances</label>
+    </div>
+    <div class="checks" id="entrances"></div>
+
+    <h2>Seed</h2>
+    <div class="row">
+      <input name="seed" type="number" min="0" placeholder="random">
+      <button type="button" id="reroll" title="New random seed and generate">🎲</button>
+    </div>
+
+    <h2>Image</h2>
+    <label class="field">Theme <select name="theme"></select></label>
+    <label class="field">Pixels / cell <input name="cell_px" type="number" min="4" max="100"></label>
+    <div class="checks"><label><input type="checkbox" name="lighting" checked> Baked lighting</label></div>
+
+    <button class="primary" id="go" type="submit">Generate</button>
+  </form>
+
+  <h2>Layers</h2>
+  <div class="layers" id="layers"></div>
+  <label class="field">Grid every <input id="grid-step" type="number" min="1" value="3"></label>
+</aside>
+
+<main>
+  <header>
+    <div class="tabs" id="floors"></div>
+    <span class="spacer"></span>
+    <span id="status">Set parameters and generate.</span>
+    <button type="button" id="zoom-out" title="Zoom out">−</button>
+    <button type="button" id="zoom-fit" title="Fit">Fit</button>
+    <button type="button" id="zoom-in" title="Zoom in">+</button>
+    <button type="button" id="dl-png" disabled>Image</button>
+    <button type="button" id="dl-json" disabled>JSON</button>
+  </header>
+  <div id="viewport">
+    <div id="empty">No building yet.</div>
+    <div id="stage" hidden>
+      <img id="map" alt="">
+      <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+  <ul id="warnings"></ul>
+</main>
+<div id="tip"></div>
+
+<script>
+"use strict";
+const SVG = "http://www.w3.org/2000/svg";
+const M2_PER_CELL = 0.25;
+const ROOM_LABEL_PX = 12;
+const LAYERS = [
+  ["image", "Themed map", true, "#888"],
+  ["rooms", "Room areas", false, "#6aa9ff"],
+  ["walls", "Walls", false, "#e8e8e8"],
+  ["labels", "Room descriptions", true, "#ffffff"],
+  ["units", "Units", false, "#c792ea"],
+  ["openings", "Doors & windows", false, "#f5c35b"],
+  ["locks", "Locks & entrances", false, "#ff6b6b"],
+  ["objects", "Furniture", false, "#9be37a"],
+  ["devices", "Security devices", false, "#ff8a3d"],
+  ["lights", "Lights", false, "#fff3a0"],
+  ["grid", "Grid", false, "#7a8190"],
+];
+const $ = (id) => document.getElementById(id);
+const form = $("form");
+const state = { data: null, level: 0, zoom: null, layers: {} };
+
+function store(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
+function recall(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+
+function fillSelect(name, values, selected, blank) {
+  const select = form.elements[name];
+  if (blank) select.add(new Option(blank, ""));
+  for (const v of values) select.add(new Option(v.replace(/_/g, " "), v));
+  select.value = selected;
+}
+
+async function init() {
+  const options = await (await fetch("/api/options")).json();
+  fillSelect("building_type", options.building_types, "office");
+  fillSelect("shape", options.shape, "rectangle");
+  fillSelect("wealth", options.wealth, "middle");
+  fillSelect("condition", options.condition, "maintained");
+  fillSelect("security", options.security, "low");
+  fillSelect("street_side", options.sides, "S");
+  fillSelect("service_side", options.sides, "", "opposite of street");
+  fillSelect("theme", options.themes, options.defaults.theme);
+  form.elements.cell_px.value = options.defaults.cell_px;
+  for (const kind of options.entrances) {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${kind}" ${kind === "main" ? "checked" : ""}> ${kind}`;
+    $("entrances").append(label);
+  }
+  restoreForm();
+  syncEntrances();
+
+  const saved = recall("roomplanner.layers") || {};
+  for (const [key, title, on, swatch] of LAYERS) {
+    state.layers[key] = key in saved ? saved[key] : on;
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" ${state.layers[key] ? "checked" : ""}>
+      <span class="swatch" style="background:${swatch}"></span>${title}`;
+    label.querySelector("input").addEventListener("change", (e) => {
+      state.layers[key] = e.target.checked;
+      store("roomplanner.layers", state.layers);
+      draw();
+    });
+    $("layers").append(label);
+  }
+}
+
+function syncEntrances() {
+  const on = $("entrances-override").checked;
+  for (const box of $("entrances").querySelectorAll("input")) box.disabled = !on;
+  $("entrances").style.opacity = on ? 1 : .45;
+}
+$("entrances-override").addEventListener("change", syncEntrances);
+
+function formValues() {
+  const f = form.elements;
+  const params = {
+    building_type: f.building_type.value,
+    width: +f.width.value, depth: +f.depth.value,
+    floors_above: +f.floors_above.value, floors_below: +f.floors_below.value,
+    shape: f.shape.value, wealth: f.wealth.value, condition: f.condition.value,
+    security: f.security.value, street_side: f.street_side.value,
+    service_side: f.service_side.value || null,
+    seed: f.seed.value === "" ? null : +f.seed.value,
+  };
+  if ($("entrances-override").checked) {
+    params.entrances = [...$("entrances").querySelectorAll("input:checked")].map((b) => b.value);
+  }
+  return {
+    params, theme: f.theme.value, cell_px: +f.cell_px.value, lighting: f.lighting.checked,
+  };
+}
+
+function saveForm() {
+  const values = {};
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    values[el.name] = el.type === "checkbox" ? el.checked : el.value;
+  }
+  values.entrances_override = $("entrances-override").checked;
+  values.entrances = [...$("entrances").querySelectorAll("input:checked")].map((b) => b.value);
+  store("roomplanner.form", values);
+}
+
+function restoreForm() {
+  const values = recall("roomplanner.form");
+  if (!values) return;
+  for (const el of form.elements) {
+    if (!el.name || !(el.name in values)) continue;
+    if (el.type === "checkbox") el.checked = values[el.name]; else el.value = values[el.name];
+  }
+  $("entrances-override").checked = !!values.entrances_override;
+  for (const box of $("entrances").querySelectorAll("input")) {
+    box.checked = (values.entrances || []).includes(box.value);
+  }
+}
+
+async function generate() {
+  const request = formValues();
+  saveForm();
+  $("go").disabled = true;
+  setStatus("Generating…");
+  const started = performance.now();
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || response.statusText);
+    const levels = body.building.floors.map((f) => f.level);
+    state.data = body;
+    if (!levels.includes(state.level)) state.level = levels.includes(0) ? 0 : levels[0];
+    const b = body.building;
+    setStatus(`${b.params.building_type.replace(/_/g, " ")} · ${b.width}×${b.height} cells ` +
+      `(${b.width * 0.5}×${b.height * 0.5} m) · seed ${b.seed} · ` +
+      `${Math.round(performance.now() - started)} ms`);
+    renderTabs();
+    renderWarnings();
+    $("dl-png").disabled = $("dl-json").disabled = false;
+    $("empty").hidden = true;
+    $("stage").hidden = false;
+    draw();
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    $("go").disabled = false;
+  }
+}
+
+form.addEventListener("submit", (e) => { e.preventDefault(); generate(); });
+$("reroll").addEventListener("click", () => {
+  form.elements.seed.value = Math.floor(Math.random() * 2 ** 32);
+  generate();
+});
+
+function setStatus(text, error = false) {
+  $("status").textContent = text;
+  $("status").classList.toggle("error", error);
+}
+
+function renderTabs() {
+  const tabs = $("floors");
+  tabs.innerHTML = "";
+  const floors = [...state.data.building.floors].sort((a, b) => b.level - a.level);
+  for (const floor of floors) {
+    const button = document.createElement("button");
+    button.textContent = floor.name;
+    button.title = floor.role ? `role: ${floor.role}` : "";
+    button.classList.toggle("active", floor.level === state.level);
+    button.addEventListener("click", () => { state.level = floor.level; renderTabs(); draw(); });
+    tabs.append(button);
+  }
+}
+
+function renderWarnings() {
+  const list = $("warnings");
+  list.innerHTML = "";
+  for (const warning of state.data.building.warnings) {
+    const item = document.createElement("li");
+    item.textContent = warning;
+    list.append(item);
+  }
+}
+
+// --- drawing ----------------------------------------------------------------------------
+
+function hue(text) {
+  let h = 0;
+  for (const ch of text) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  return h;
+}
+
+function el(name, attrs = {}, parent = null) {
+  const node = document.createElementNS(SVG, name);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (parent) parent.append(node);
+  return node;
+}
+
+function cellsPath(cells) {
+  return cells.map(([x, y]) => `M${x} ${y}h1v1h-1z`).join("");
+}
+
+function edgeCoords([x, y, axis]) {
+  return axis === "h" ? [x, y, x + 1, y] : [x, y, x, y + 1];
+}
+
+function edgesPath(edges) {
+  return edges.map((e) => { const [a, b, c, d] = edgeCoords(e); return `M${a} ${b}L${c} ${d}`; })
+    .join("");
+}
+
+function centre(cells) {
+  const cx = cells.reduce((s, c) => s + c[0], 0) / cells.length;
+  const cy = cells.reduce((s, c) => s + c[1], 0) / cells.length;
+  let best = cells[0], dist = Infinity;
+  for (const c of cells) {
+    const d = (c[0] + .5 - cx) ** 2 + (c[1] + .5 - cy) ** 2;
+    if (d < dist) { dist = d; best = c; }
+  }
+  return [best[0] + .5, best[1] + .5];
+}
+
+function bounds(cells) {
+  const xs = cells.map((c) => c[0]), ys = cells.map((c) => c[1]);
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs) + 1, Math.max(...ys) + 1];
+}
+
+function label(group, x, y, lines, size, colour = "#fff") {
+  const text = el("text", {
+    x, y, "font-size": size, "text-anchor": "middle", fill: colour,
+    stroke: "rgba(0,0,0,.75)", "stroke-width": size * .18, "paint-order": "stroke",
+  }, group);
+  lines.forEach(([content, scale, weight], i) => {
+    const span = el("tspan", {
+      x, dy: i === 0 ? `${-(lines.length - 1) * .55}em` : "1.1em",
+      "font-size": size * scale, "font-weight": weight || "normal",
+    }, text);
+    span.textContent = content;
+  });
+}
+
+function draw() {
+  const data = state.data;
+  if (!data) return;
+  const b = data.building;
+  const floor = b.floors.find((f) => f.level === state.level);
+  const pad = data.padding;
+  const cols = b.width + 2 * pad, rows = b.height + 2 * pad;
+  if (state.zoom === null) fit();
+  const stage = $("stage");
+  stage.style.width = `${cols * state.zoom}px`;
+  stage.style.height = `${rows * state.zoom}px`;
+
+  const img = $("map");
+  img.src = data.images[String(floor.level)];
+  img.hidden = !state.layers.image;
+
+  const svg = $("overlay");
+  svg.innerHTML = "";
+  svg.setAttribute("viewBox", `${-pad} ${-pad} ${cols} ${rows}`);
+  if (!state.layers.image) el("rect", { x: -pad, y: -pad, width: cols, height: rows, fill: "#101217" }, svg);
+  const L = state.layers;
+
+  if (L.rooms) {
+    const g = el("g", { "fill-opacity": L.image ? .35 : .55 }, svg);
+    for (const room of floor.rooms) {
+      el("path", { d: cellsPath(room.cells), fill: `hsl(${hue(room.type)} 55% 50%)` }, g);
+    }
+  }
+  if (L.units) {
+    const g = el("g", {}, svg);
+    for (const room of floor.rooms) {
+      if (!room.unit) continue;
+      el("path", { d: cellsPath(room.cells), fill: `hsl(${hue(room.unit)} 70% 60%)`,
+        "fill-opacity": .3 }, g);
+    }
+  }
+  if (L.grid) {
+    const step = Math.max(1, +$("grid-step").value || 1);
+    let d = "";
+    for (let x = 0; x <= b.width; x += step) d += `M${x} 0V${b.height}`;
+    for (let y = 0; y <= b.height; y += step) d += `M0 ${y}H${b.width}`;
+    el("path", { d, stroke: "rgba(200,210,230,.35)", "stroke-width": .05, fill: "none" }, svg);
+  }
+  if (L.lights) {
+    const g = el("g", {}, svg);
+    for (const light of floor.lights) {
+      const id = `l${Math.random().toString(36).slice(2)}`;
+      const grad = el("radialGradient", { id }, g);
+      const alpha = light.state === "off" ? 0 : .45 * light.intensity;
+      el("stop", { offset: 0, "stop-color": light.colour, "stop-opacity": alpha }, grad);
+      el("stop", { offset: 1, "stop-color": light.colour, "stop-opacity": 0 }, grad);
+      el("circle", { cx: light.x, cy: light.y, r: light.radius, fill: `url(#${id})` }, g);
+      el("circle", { cx: light.x, cy: light.y, r: .25, fill: light.colour,
+        stroke: light.state === "on" ? "#000" : "#f00", "stroke-width": .08,
+        "stroke-dasharray": light.state === "flicker" ? ".1 .1" : "none" }, g)
+        .append(title(`${light.kind} light · ${light.state} · r ${light.radius}`));
+    }
+  }
+  if (L.objects) {
+    const g = el("g", {}, svg);
+    for (const obj of floor.objects) {
+      el("rect", { x: obj.x + .05, y: obj.y + .05, width: obj.w - .1, height: obj.h - .1,
+        fill: obj.blocking === false ? "rgba(155,227,122,.08)" : "rgba(155,227,122,.22)",
+        stroke: "#9be37a", "stroke-width": .06, rx: .1 }, g)
+        .append(title(`${obj.kind} (${obj.w}×${obj.h}, faces ${obj.facing})`));
+      // Front marker: a tick on the side the object faces.
+      const [fx, fy] = { N: [obj.x + obj.w / 2, obj.y], S: [obj.x + obj.w / 2, obj.y + obj.h],
+        E: [obj.x + obj.w, obj.y + obj.h / 2], W: [obj.x, obj.y + obj.h / 2] }[obj.facing];
+      el("circle", { cx: fx, cy: fy, r: .12, fill: "#9be37a" }, g);
+      const size = Math.min(.55, (obj.w * 1.6) / Math.max(4, obj.kind.length));
+      if (size >= .22) {
+        label(g, obj.x + obj.w / 2, obj.y + obj.h / 2 + size * .35,
+          [[obj.kind.replace(/_/g, " "), 1]], size, "#d8f7c6");
+      }
+    }
+  }
+  if (L.walls) {
+    el("path", { d: edgesPath(floor.walls), stroke: "#e8e8e8", "stroke-width": .18,
+      "stroke-linecap": "square", fill: "none" }, svg);
+  }
+  if (L.openings) {
+    const g = el("g", { fill: "none", "stroke-linecap": "butt" }, svg);
+    for (const o of floor.openings) {
+      const colour = { door: "#f5c35b", window: "#5ec8ff", breach: "#c08a5b" }[o.kind];
+      const path = el("path", { d: edgesPath(o.edges), stroke: colour, "stroke-width": .32,
+        "stroke-dasharray": o.kind === "breach" || o.state === "missing" ? ".2 .15" : "none",
+        opacity: o.state === "blocked" ? .5 : 1 }, g);
+      path.append(title(describeOpening(o)));
+      if (o.kind === "door" && o.state === "blocked") {
+        const [x0, y0, x1, y1] = runCoords(o.edges);
+        el("path", { d: `M${x0} ${y0}L${x1} ${y1}`, stroke: "#ff3b3b", "stroke-width": .1 }, g);
+      }
+    }
+  }
+  if (L.devices) {
+    const g = el("g", {}, svg);
+    for (const d of floor.devices) {
+      const cx = d.x + .5, cy = d.y + .5;
+      const [dx, dy] = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] }[d.facing];
+      el("path", { d: `M${cx} ${cy}L${cx + dx * .7} ${cy + dy * .7}`, stroke: "#ff8a3d",
+        "stroke-width": .1 }, g);
+      el("circle", { cx, cy, r: .38, fill: "#2a1508", stroke: "#ff8a3d", "stroke-width": .08 }, g)
+        .append(title(`${d.kind.replace(/_/g, " ")} · rating ${d.rating} · faces ${d.facing}`));
+      label(g, cx, cy + .16, [[d.kind[0].toUpperCase(), 1, "bold"]], .45, "#ffb27a");
+    }
+  }
+  if (L.locks) {
+    const g = el("g", {}, svg);
+    for (const o of floor.openings) {
+      if (o.kind !== "door" || (!o.lock && !o.entrance)) continue;
+      const [x0, y0, x1, y1] = runCoords(o.edges);
+      const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+      const text = [o.entrance ? o.entrance.toUpperCase() : null,
+        o.lock ? `${o.lock}${o.rating ? " " + o.rating : ""}` : null].filter(Boolean).join(" · ");
+      el("circle", { cx: mx, cy: my, r: .2, fill: o.lock ? "#ff6b6b" : "#f5c35b" }, g);
+      label(g, mx, my - .45, [[text, 1, "bold"]], .5, o.entrance ? "#ffe08a" : "#ffb0b0");
+    }
+  }
+  if (L.labels) {
+    const g = el("g", {}, svg);
+    const size = ROOM_LABEL_PX / state.zoom;  // the same on screen for every room and zoom
+    for (const room of floor.rooms) {
+      const name = room.type.replace(/_/g, " ");
+      const [cx, cy] = centre(room.cells);
+      const lines = [[name, 1, "600"], [`${room.id} · ${room.cells.length * M2_PER_CELL} m²`, .8]];
+      if (room.unit) lines.push([`unit ${room.unit}`, .8]);
+      label(g, cx, cy, lines, size);
+    }
+  }
+  // Hover targets for the room tooltip, on top of everything.
+  const hits = el("g", {}, svg);
+  for (const room of floor.rooms) {
+    const path = el("path", { d: cellsPath(room.cells), class: "room-hit" }, hits);
+    path.addEventListener("mousemove", (e) => showTip(e, roomInfo(room, floor)));
+    path.addEventListener("mouseleave", hideTip);
+  }
+}
+
+function runCoords(edges) {
+  const first = edgeCoords(edges[0]), last = edgeCoords(edges[edges.length - 1]);
+  return [first[0], first[1], last[2], last[3]];
+}
+
+function describeOpening(o) {
+  const parts = [`${o.kind} (${o.edges.length} cells)`];
+  if (o.state) parts.push(o.state);
+  if (o.material) parts.push(o.material);
+  if (o.lock) parts.push(`lock: ${o.lock}${o.rating ? " " + o.rating : ""}`);
+  if (o.entrance) parts.push(`${o.entrance} entrance`);
+  return parts.join(" · ");
+}
+
+function title(text) {
+  const node = document.createElementNS(SVG, "title");
+  node.textContent = text;
+  return node;
+}
+
+function roomInfo(room, floor) {
+  const counts = {};
+  for (const obj of floor.objects) {
+    if (obj.room === room.id) counts[obj.kind] = (counts[obj.kind] || 0) + 1;
+  }
+  const devices = floor.devices.filter((d) => d.room === room.id).map((d) => d.kind);
+  const [x0, y0, x1, y1] = bounds(room.cells);
+  const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+  let html = `<b>${esc(room.type.replace(/_/g, " "))}</b> <span style="color:var(--muted)">${esc(room.id)}</span><br>` +
+    `${room.cells.length} cells · ${room.cells.length * M2_PER_CELL} m² · ` +
+    `${(x1 - x0) * .5}×${(y1 - y0) * .5} m box`;
+  if (room.unit) html += `<br>unit ${esc(room.unit)}`;
+  const furniture = Object.entries(counts).map(([k, n]) => (n > 1 ? `${n}× ` : "") + k.replace(/_/g, " "));
+  if (furniture.length) html += `<br>${esc(furniture.join(", "))}`;
+  if (devices.length) html += `<br><span style="color:#ff8a3d">${esc(devices.join(", "))}</span>`;
+  return html;
+}
+
+function showTip(event, html) {
+  const tip = $("tip");
+  tip.innerHTML = html;
+  tip.style.display = "block";
+  const x = Math.min(event.clientX + 14, innerWidth - tip.offsetWidth - 8);
+  const y = Math.min(event.clientY + 14, innerHeight - tip.offsetHeight - 8);
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+}
+function hideTip() { $("tip").style.display = "none"; }
+
+// --- zoom & downloads -------------------------------------------------------------------
+
+function fit() {
+  const b = state.data.building, pad = state.data.padding;
+  const vp = $("viewport");
+  const zx = (vp.clientWidth - 32) / (b.width + 2 * pad);
+  const zy = (vp.clientHeight - 32) / (b.height + 2 * pad);
+  state.zoom = Math.max(2, Math.min(zx, zy));
+}
+function zoomBy(factor) {
+  if (!state.data) return;
+  state.zoom = Math.max(2, Math.min(200, state.zoom * factor));
+  draw();
+}
+$("zoom-in").addEventListener("click", () => zoomBy(1.25));
+$("zoom-out").addEventListener("click", () => zoomBy(1 / 1.25));
+$("zoom-fit").addEventListener("click", () => { if (state.data) { fit(); draw(); } });
+$("viewport").addEventListener("wheel", (e) => {
+  if (!e.ctrlKey || !state.data) return;
+  e.preventDefault();
+  zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15);
+}, { passive: false });
+$("grid-step").addEventListener("input", draw);
+
+function download(name, href) {
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = name;
+  a.click();
+}
+function stem() {
+  const b = state.data.building;
+  return `${b.params.building_type}_${b.seed}`;
+}
+$("dl-json").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(state.data.building)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  download(`${stem()}.json`, url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+$("dl-png").addEventListener("click", () => {
+  const level = state.level;
+  const tag = level >= 0 ? `F${level}` : `B${-level}`;
+  download(`${stem()}_${tag}.webp`, state.data.images[String(level)]);
+});
+
+init().catch((error) => setStatus(`Could not load options: ${error.message}`, true));
+</script>
+</body>
+</html>

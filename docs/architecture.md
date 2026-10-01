@@ -18,6 +18,8 @@ src/roomplanner/
   render/theme.py            theme model and loader
   render/shapes.py           procedural object shapes
   cli.py                     Typer CLI
+  ui/server.py               local web UI: stdlib HTTP server, /api/generate -> JSON + images
+  ui/index.html              the UI page; overlay layers drawn in SVG from the JSON contract
   export/common.py           grid scale, wall runs, stable ids
   export/uvtt.py             Universal VTT (.dd2vtt)
   export/foundry.py          Foundry VTT scenes + import macro
