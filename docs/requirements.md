@@ -245,13 +245,15 @@ Decided by the author (2026-09-27):
 - Tactical layer: the unused `cover` field was removed from objects.
 
 Requested by the author (2026-09-27), still open:
-- Sinks: make them smaller again (2 × 1) so they fit better in kitchens.
 - Drone rooms need some order (docks and racks placed in a tidy arrangement).
 - Supermarkets rarely have a second floor; when they do, the stairs are public stairs on
   the sales floor, not in a separate stairwell.
 - Nightclubs need a DJ table.
 
 Done from that list (2026-10-01):
+- Sinks are 2 × 1 cells again (1 × 0.5 m; they were 2 × 2). Kitchens get their optional
+  sink about half the time (60 apartment/office/clinic/hotel/hospital kitchens: 14 → 29);
+  the square sprites are stretched until 2:1 ones are rendered.
 - Urinals are gone (object kind, sprites and the `line`/`alternate` rule options
   that only served them); public toilets have stalls and sinks.
 - Focus rooms are booths of 16–30 cells (mostly 4 × 6, 2 × 3 m); they were up to 48.
