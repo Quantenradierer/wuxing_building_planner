@@ -244,10 +244,7 @@ Decided by the author (2026-09-27):
 - No stalls in shower rooms and locker rooms for now.
 - Tactical layer: the unused `cover` field was removed from objects.
 
-Requested by the author (2026-09-27), still open:
-- Nightclubs need a DJ table.
-
-Done from that list (2026-10-01):
+Requested by the author (2026-09-27), done (2026-10-01):
 - Sinks are 2 × 1 cells again (1 × 0.5 m; they were 2 × 2). Kitchens get their optional
   sink about half the time (60 apartment/office/clinic/hotel/hospital kitchens: 14 → 29);
   the square sprites are stretched until 2:1 ones are rendered.
@@ -268,6 +265,10 @@ Done from that list (2026-10-01):
 - Drone rooms are tidy: docks stand on one lattice (`grid`, 1 m apart, 0.5 m from the
   walls) and racks side by side along one wall (`perimeter`), in drone bays and rigger
   workshops; they were scattered. Bays in buildings (6–9 cells wide) hold 1–5 docks.
+- The nightclub's DJ booth heads the hall: in the middle of the short wall farthest from the
+  doors (`end`), facing an open dance floor 5 m deep that tables, sofas and bars keep clear
+  of (`front_clear: 10`); before, it stood on any wall, often in a corner between sofas
+  and shelves, with tables in front of it.
 
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)

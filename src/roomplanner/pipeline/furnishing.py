@@ -366,9 +366,22 @@ class RoomFurnisher:
                     x, y, w, h, _ = r
                     return abs(x + w / 2 - (x0 + x1) / 2) + abs(y + h / 2 - (y0 + y1) / 2)
 
-                # Facing along the long axis = backed against a short wall.
+                # Facing along the long axis = backed against a short wall; of those the wall
+                # whose middle is farthest from the doors, then its middle (not the corner
+                # farthest from a door on a long wall).
+                middles: dict[Side, Rect] = {}
+                for r in candidates:
+                    if r[4] not in middles or off_centre(r) < off_centre(middles[r[4]]):
+                        middles[r[4]] = r
+                wall_distance = {s: self._door_distance(r) for s, r in middles.items()}
                 candidates.sort(
-                    key=lambda r: (r[4] not in long_axis, -self._door_distance(r), off_centre(r), r)
+                    key=lambda r: (
+                        r[4] not in long_axis,
+                        -wall_distance[r[4]],
+                        off_centre(r),
+                        -self._door_distance(r),
+                        r,
+                    )
                 )
             case Placement.FIXED:
                 # Far corner of the room's box: only the room's shape decides.
@@ -409,8 +422,26 @@ class RoomFurnisher:
             if self._try(rule.object, rect, spec.walkable):
                 if rule.placement is Placement.FACING_EXIT:
                     self.clearance = self.clearance | self._approach(rect)
+                if rule.front_clear:
+                    self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
                 return True
         return False
+
+    def _in_front(self, rect: Rect, depth: int) -> frozenset[Cell]:
+        """The room's cells in front of an object, `depth` deep and as wide as it plus
+        `depth // 2` on each side: the dance floor before the DJ booth stays free."""
+        x, y, w, h, facing = rect
+        side = depth // 2
+        match facing:
+            case Side.S:
+                xs, ys = range(x - side, x + w + side), range(y + h, y + h + depth)
+            case Side.N:
+                xs, ys = range(x - side, x + w + side), range(y - depth, y)
+            case Side.E:
+                xs, ys = range(x + w, x + w + depth), range(y - side, y + h + side)
+            case Side.W:
+                xs, ys = range(x - depth, x), range(y - side, y + h + side)
+        return frozenset(Cell(cx, cy) for cx in xs for cy in ys) & self.cells
 
     def _approach(self, rect: Rect) -> frozenset[Cell]:
         """The room's cells in front of an object, its width wide, up to the wall it faces:

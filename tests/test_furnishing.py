@@ -187,6 +187,31 @@ def test_altar_on_a_short_wall_and_a_central_aisle_between_the_pews(width: int, 
             assert all(not (p.x <= middle < p.x + p.w) for p in pews)
 
 
+@pytest.mark.parametrize(("width", "depth"), [(48, 32), (56, 36), (40, 28)])
+def test_dj_booth_heads_the_hall_before_a_free_dance_floor(width: int, depth: int) -> None:
+    for seed in range(4):
+        params = make_params(
+            building_type=BuildingType.NIGHTCLUB, width=width, depth=depth, seed=seed
+        )
+        ground = generate(params).floor(0)
+        hall = next(r for r in ground.rooms if r.type == "dance_floor")
+        booth = next(o for o in ground.objects if o.kind == "dj_booth")
+        assert booth.cells <= hall.cells
+        # In the middle of a wall, facing into the hall.
+        xs, ys = [c.x for c in hall.cells], [c.y for c in hall.cells]
+        if booth.facing in (Side.E, Side.W):
+            assert abs(booth.y + booth.h / 2 - (min(ys) + max(ys) + 1) / 2) <= 1
+        else:
+            assert abs(booth.x + booth.w / 2 - (min(xs) + max(xs) + 1) / 2) <= 1
+        # Nothing stands on the dance floor in front of it.
+        dx, dy = booth.facing.delta
+        front = {
+            Cell(c.x + dx * step, c.y + dy * step) for c in booth.cells for step in range(1, 9)
+        }
+        blocked = {c for o in ground.objects if o.blocking and o is not booth for c in o.cells}
+        assert not front & hall.cells & blocked
+
+
 def test_a_small_stuffer_shack_has_more_than_one_row_of_gondolas() -> None:
     for seed in range(1, 4):
         params = make_params(

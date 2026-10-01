@@ -137,6 +137,12 @@ class FurnitureRule(_Strict):
         default=None,
         description="wall: as close as possible to a room of this type (the stage by backstage)",
     )
+    front_clear: int = Field(
+        default=0,
+        ge=0,
+        description="Free floor kept in front of it, this many cells deep and as wide as it "
+        "plus half that on each side (the dance floor before the DJ booth)",
+    )
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 

@@ -89,12 +89,13 @@ rooms:
     min_side: 10
     door_width: 4
     furniture:
+      # The DJ booth heads the hall, facing an open dance floor (5 m deep).
+      - {object: dj_booth, placement: end, front_clear: 10}
       - {object: bar_set, placement: wall, count: [1, 2]}
       - {object: guard_post, placement: near_exit}                      # bouncer at the door
       - {object: coat_check, placement: near_exit}                      # cloakroom counter
       - {object: security_gate, placement: near_exit, count: [0, 2]}   # MAD scanner
       - {object: cafe_table, placement: grid, per: 60, count: [1, 6]}
-      - {object: dj_booth, placement: wall}
       - {object: speaker, placement: corner, count: [2, 4]}
       - {object: sofa, placement: wall, count: [1, 4]}
       - {object: stage, placement: wall, count: [0, 1], near_room: backstage}

@@ -372,14 +372,16 @@ circulation first, all across and backed against the far wall, facing the door; 
 cells stay free at the door, at most `reach` deep; the size comes from the room, not the
 catalog: stairs span the stairwell, the elevator car is the shaft; a room without a door,
 like open public stairs, takes the open side with the most room behind it), `end` (the
-middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
-the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
+middle of the short wall whose middle is farthest from the doors: the altar, the DJ booth),
+`fixed` (a corner decided by the room's shape only: parking ramps line up across levels),
+`center`, `scatter`, `near_exit`
 (checkouts), `wall` with `near_room: <type>` (as close to such a room as possible: the stage
 by the backstage), `grid` (one lattice centred in the room, `aisle` apart and `margin` from
 the walls, every object facing alike, the outer ring first: cafe tables, lobby armchairs),
 `facing_exit` (on the axis of the room's exterior door, `margin` cells past its clearance,
-facing it: the reception desk), `perimeter` (side by side along every wall, as many as fit:
-vending machines), `axis` (on a wall at an end of the biggest object's long axis, facing
+facing it: the reception desk; the way from the door to it stays free), `perimeter` (side
+by side along every wall, as many as fit: vending machines), `axis` (on a wall at an end of
+the biggest object's long axis, facing
 it: the screen and whiteboard at the ends of a meeting table) and `rows`
 (shelves, desks, racks with aisles and a cross aisle every `block` cells, shifted across
 the spare width to where most fit, e.g. clear of doors along one wall, else against an open
@@ -390,8 +392,11 @@ halves fit: pews facing the altar), and `at`
 (beside every object of kind `at`
 placed earlier in the room: chairs at desks and tables, stools at bar counters, monitors
 beside beds; `beside` picks the target's sides — `front`, `back`, `flanks` — gone round in
-turn, and `count` is per target, never scaled). Counts are a range or `per: N` (one
-object per N cells of room, bounded by `count`), scaled by the tier's `furniture` factor;
+turn, and `count` is per target, never scaled). `front_clear: N` keeps a free area in front
+of an object, `N` cells deep and as wide as it plus `N / 2` on each side, from everything
+placed after it except walkable objects (the dance floor before the DJ booth). Counts are a
+range or `per: N` (one object per N cells of room, bounded by `count`), scaled by the
+tier's `furniture` factor;
 an exact count (`count: 1`, the default) is never scaled. A rule with `wealth:` or `security:`
 lists applies only to those tiers of the building (squatter mattresses, a guard post at the
 checkout from low security up); `rules_for` drops the others.
