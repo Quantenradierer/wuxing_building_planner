@@ -11,7 +11,8 @@ facade:
   module: 3
   window: 2
 cluster_filler: storage
-service_stub: true         # a back corridor to the yard, not through a flat
+service_stub: true         # a back room to the yard (parcel drones, laundry), not a flat
+service_rooms: [drone_bay, laundry, storage, utility]
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}

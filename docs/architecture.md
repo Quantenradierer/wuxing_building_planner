@@ -180,8 +180,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    slice across the whole part (street on a short end). When no corridor touches the service
    side, the back door opens into a room on that facade, preferring the program's
    `service_rooms` in their order (loading bay, stockroom, storage, …, cold storage last);
-   programs with `service_stub: true`
-   (apartments, hotels) carve a corridor stub to the service side instead.
+   programs with `service_stub: true` (apartments, hotels, coffin block) reserve a back
+   room there instead, a full-depth slot from the corridor to the door: the first of the
+   ground floor's fill rooms in `service_rooms` (parcel drone bay, staff room) whose slot
+   is at most 1.5× its maximum area, else a corridor stub. The back door goes into that
+   room or stub first.
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot, unless no room could stack behind them) which go into *clusters*: a side hallway

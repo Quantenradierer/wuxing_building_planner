@@ -58,6 +58,7 @@ from roomplanner.rules import (
 )
 
 MIN_GAP_CELLS = 3  # free space left next to reserved slots, if any: the smallest room
+BACK_ROOM_SLACK = 1.5  # a back room may be this much over its maximum area, else a stub
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
 
 
@@ -822,13 +823,18 @@ class CorridorLayout:
                 target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
                 blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
                 junctions = tuple(main.no_facade.get(band.index, []))
-                span = None
+                kind, span = "corridor", None
                 if program.service_stub:
-                    span = self._choose(grid, width, target, blocked, avoid=junctions)
+                    # A back room through to the door, else a corridor stub.
+                    back = self._back_room(ctx, grid, band, target, blocked, junctions, rng)
+                    kind, span = back or (
+                        "corridor",
+                        self._choose(grid, width, target, blocked, avoid=junctions),
+                    )
                 if span is not None:
                     extra.setdefault(band.index, []).append(span)
                     cells = frame.rect(span.u0, span.u1, band.v0, band.v1)
-                    rooms.append(PlannedRoom("corridor", cells))
+                    rooms.append(PlannedRoom(kind, cells))
                     hint = frame.cell(int(span.centre), v)
                 else:
                     # The back door opens into a room on that facade (openings prefer the
@@ -880,6 +886,33 @@ class CorridorLayout:
 
         cell, side = max(options, key=distance)
         hints.append((EntranceKind.EMERGENCY, side, cell))
+
+    @staticmethod
+    def _back_room(
+        ctx: Context,
+        grid: Grid,
+        band: Band,
+        target: float,
+        blocked: list[Interval],
+        junctions: tuple[Interval, ...],
+        rng: random.Random,
+    ) -> tuple[str, Interval] | None:
+        """A full-depth back room on the service facade that the back door opens into: the
+        first of the ground floor's fill rooms among the program's `service_rooms` (parcel
+        drone bay, staff room) whose slot isn't far too big for it."""
+        _, role = ctx.rules.role_for(0, ctx.params)
+        values = variables(ctx.params, 0)
+        fills = {e.room for e in role.rooms if e.fill and evaluate(e.when, values)}
+        for room in (r for r in ctx.rules.program.service_rooms if r in fills):
+            spec = ctx.rules.spec(room)
+            low, high = spec.area
+            width = max(math.ceil(rng.randint(low, high) / band.depth), spec.min_side)
+            if width * band.depth > high * BACK_ROOM_SLACK:
+                continue
+            span = CorridorLayout._choose(grid, width, target, blocked, avoid=junctions)
+            if span is not None:
+                return room, span
+        return None
 
     # --- helpers ----------------------------------------------------------------------
 

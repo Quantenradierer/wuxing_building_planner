@@ -96,6 +96,28 @@ def test_service_door_prefers_the_loading_bay() -> None:
 
 
 @pytest.mark.parametrize(
+    ("building_type", "back_room"),
+    [(BuildingType.APARTMENT, "drone_bay"), (BuildingType.HOTEL, "staff_room")],
+)
+@pytest.mark.parametrize("seed", [1, 2, 3])
+def test_back_door_opens_into_a_back_room_not_a_corridor_stub(
+    building_type: BuildingType, back_room: str, seed: int
+) -> None:
+    """The room runs from the corridor to the service facade; no dead-end corridor."""
+    building = generate(
+        make_params(building_type=building_type, width=56, depth=36, street_side=Side.S, seed=seed)
+    )
+    ground = building.floor(0)
+    service = next(o for o in ground.openings if o.entrance == "service")
+    rooms = {ground.room_at(c) for c in service.edges[0].cells()} - {None}
+    assert [r.type for r in rooms if r is not None] == [back_room]
+    room = next(r for r in rooms if r is not None)
+    corridors = {c for r in ground.rooms if r.type == "corridor" for c in r.cells}
+    assert any(c.neighbour(s) in corridors for c in room.cells for s in Side)
+    assert len(room.cells) <= rules_for(building_type, Wealth.MIDDLE).spec(back_room).area[1] * 1.5
+
+
+@pytest.mark.parametrize(
     ("shape", "seed"), [(Shape.RECTANGLE, 1), (Shape.RECTANGLE, 2), (Shape.T, 18), (Shape.L, 4)]
 )
 def test_supermarket_stairs_are_open_stairs_on_the_sales_floor(shape: Shape, seed: int) -> None:

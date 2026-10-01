@@ -473,7 +473,9 @@ def _exterior_door(
 
     # Tiny rooms (coffins, stalls) only as a last resort: the door would fill them.
     roomy = [r for r in first if r.area >= ROOMY], [r for r in others if r.area >= ROOMY]
-    tiers = (vehicle, *service, corridor, *roomy, first, others, last)
+    # The layout reserved a back room or corridor stub for it (`service_stub`): that first.
+    reserved = [hinted] if back and ctx.rules.program.service_stub else []
+    tiers = (vehicle, reserved, *service, corridor, *roomy, first, others, last)
     # A wide door (loading dock) that would blind a room needing windows: a plain door.
     widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
     for candidates_from in tiers:

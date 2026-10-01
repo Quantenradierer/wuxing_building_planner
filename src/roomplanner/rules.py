@@ -463,7 +463,10 @@ class BuildingProgram(_Strict):
         "(default: the cluster filler)",
     )
     service_stub: bool = Field(
-        default=False, description="Carve a corridor to the service side instead of a back room"
+        default=False,
+        description="Reserve a back room for the back door on the service facade (the first "
+        "ground-floor fill room among `service_rooms`), else carve a corridor stub to it; "
+        "instead of any room that happens to be there",
     )
     service_rooms: list[str] = Field(
         default=[

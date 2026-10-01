@@ -287,6 +287,13 @@ Requested by the author (2026-09-27), done (2026-10-01):
   goes entirely. Rooms may have alcoves and wings of at least 1.5 m beyond a main
   rectangle of their minimum size. 300 random buildings: of ~520 hallways that ran on,
   ~410 were cut back or removed; nearly all of the rest run on one or two rows.
+- No corridor stub to the back door (2026-10-01): apartment and hotel ground floors ran a
+  dead-end corridor through the service-side strip to it. Now a back room takes that slot,
+  from the corridor to the facade, and the back door opens into it: the parcel drone bay
+  in apartments, the staff room in hotels (the first ground-floor fill room in the
+  program's `service_rooms`, not more than 1.5× its maximum area). Of 300 random
+  buildings, 111 of 114 such ground floors got the back room; 3 squatter hotels with deep
+  strips keep the stub. The coffin block keeps its stub (no fitting fill room).
 
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
@@ -298,7 +305,8 @@ every type ≤ 5 % except apartments (9 %, a third of it flat closets).
 `tests/test_storage.py` keeps the share below 5 %.
 
 Known weaknesses:
-- Apartment and hotel floors have a corridor stub to the service door.
+- Squatter hotels with deep strips (about 1 in 20 hotels) still have a corridor stub to the
+  service door: their staff room would be too big for the full-depth slot.
 - About 1 in 10 cluster hallways still runs one or two rows (0.5–1 m) past its last
   door; a dozen in 300 random buildings run on further where the only rooms beside the
   end are at their size limit (toilets, electrical and security rooms).
