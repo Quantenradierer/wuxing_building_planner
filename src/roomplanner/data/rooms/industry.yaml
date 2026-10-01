@@ -247,8 +247,8 @@ rooms:
     min_side: 6
     furniture:
       - {object: workbench, placement: wall, count: [1, 3]}
-      - {object: drone_rack, placement: wall, count: [1, 3]}
-      - {object: drone_dock, placement: scatter, count: [0, 2]}
+      - {object: drone_rack, placement: perimeter, count: [1, 3]}
+      - {object: drone_dock, placement: grid, count: [0, 2], aisle: 2, margin: 1}
       - {object: rigger_cocoon, placement: wall, count: [0, 1]}
       - {object: tool_rack, placement: wall, count: [0, 2]}
       - {object: crate, placement: scatter, count: [0, 2]}

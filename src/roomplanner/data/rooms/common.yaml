@@ -214,14 +214,14 @@ rooms:
       - {object: wall_screen, placement: wall, count: [2, 4]}
       - {object: server_rack, placement: wall, count: [0, 1]}
       - {object: weapon_locker, placement: wall, count: [0, 1]}
-  drone_bay:            # security drones charging, spares on the wall
+  drone_bay:            # security drones charging in rows, spares on the wall
     area: [30, 100]
     min_side: 5
     windows: optional
     door_width: 3
     furniture:
-      - {object: drone_dock, placement: scatter, per: 12, count: [2, 8]}
-      - {object: drone_rack, placement: wall, count: [1, 3]}
+      - {object: drone_dock, placement: grid, per: 12, count: [2, 8], aisle: 2, margin: 1}
+      - {object: drone_rack, placement: perimeter, count: [1, 3]}
       - {object: workbench, placement: wall, count: [0, 1]}
       - {object: electrical_panel, placement: wall, count: [0, 1]}
       - {object: fire_extinguisher, placement: corner}
