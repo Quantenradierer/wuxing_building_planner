@@ -257,7 +257,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    fit, `weight` sets how often each is picked, and `limit` caps how many a floor gets
    (new annex hosts and the room behind the core included; a floor role's `core_back`
    overrides the program's). For example, an office's 3 m interior rows get mostly
-   huddle rooms, some focus rooms, one copy room and one break room. `near: core | entrance | service`
+   huddle and focus rooms, now and then a supply or nap room, one copy room and one break
+   room; the vending room is a counted room by the core. `near: core | entrance | service`
    pulls rooms towards those anchors.
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 8. **Behind the core**: each rectangle takes a room that found no space (required ones
@@ -417,7 +418,9 @@ circulation (or out of the building), without randomness: the wash row of a publ
 shower room or scrub room. `not_against: [types]` keeps `wall` objects off walls to rooms
 of those types (sinks off the stall partitions). `front_clear: N` keeps a free area in front
 of an object, `N` cells deep and as wide as it plus `N / 2` on each side, from everything
-placed after it except walkable objects (the dance floor before the DJ booth). Counts are a
+placed after it except walkable objects (the dance floor before the DJ booth).
+`accessible: true` places an object only where free floor touches its front or a flank (not
+its back), and no later object may take the last such cell (the beds of a nap room). Counts are a
 range or `per: N` (one object per N cells of room, bounded by `count`), scaled by the
 tier's `furniture` factor, or `per_room: [type, N]` (one per N rooms of that type opening
 into the room, rounded up, bounded by `count`, never scaled: a sink per two stalls);

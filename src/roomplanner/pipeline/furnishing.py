@@ -219,6 +219,7 @@ class RoomFurnisher:
                 self.blocking |= obj.cells
         self.placed: list[PlacedObject] = []
         self.last_group: Rect | None = None  # where the last group went
+        self.access: list[frozenset[Cell]] = []  # cells next to `accessible` objects
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
@@ -505,7 +506,7 @@ class RoomFurnisher:
             case Placement.ROWS | Placement.AT:
                 return False
         for rect in candidates:
-            if self._try(rule.object, rect, spec.walkable):
+            if self._try(rule.object, rect, spec.walkable, rule.accessible):
                 if rule.placement is Placement.FACING_EXIT:
                     self.clearance = self.clearance | self._approach(rect)
                 if rule.front_clear:
@@ -977,7 +978,7 @@ class RoomFurnisher:
         if solid & self.clearance:
             return False
         free = self.cells - self.blocking - solid
-        if not free or not self._reachable(free):
+        if not free or not self._reachable(free) or not self._accessible(free):
             return False
         self.taken |= box
         self.blocking |= solid
@@ -1024,7 +1025,23 @@ class RoomFurnisher:
                 return False
         return True
 
-    def _try(self, kind: str, rect: Rect, walkable: bool = False) -> bool:
+    def _access_cells(self, rect: Rect) -> frozenset[Cell]:
+        """The room's cells next to an object's front and flanks: not behind it."""
+        x, y, w, h, facing = rect
+        sides = {
+            Side.N: {Cell(cx, y - 1) for cx in range(x, x + w)},
+            Side.S: {Cell(cx, y + h) for cx in range(x, x + w)},
+            Side.W: {Cell(x - 1, cy) for cy in range(y, y + h)},
+            Side.E: {Cell(x + w, cy) for cy in range(y, y + h)},
+        }
+        del sides[facing.opposite]
+        return frozenset(set[Cell]().union(*sides.values())) & self.cells
+
+    def _accessible(self, free: set[Cell] | frozenset[Cell]) -> bool:
+        """Every `accessible` object keeps a free cell at its front or a flank."""
+        return all(access & free for access in self.access)
+
+    def _try(self, kind: str, rect: Rect, walkable: bool = False, accessible: bool = False) -> bool:
         if kind in self.ctx.rules.groups:
             return self._try_group(kind, rect)
         x, y, w, h, facing = rect
@@ -1039,8 +1056,14 @@ class RoomFurnisher:
                 return False
             if not ring_is_one_run(free, x, y, w, h) and not self._reachable(free):
                 return False
+            if not self._accessible(free):
+                return False
+            if accessible and not self._access_cells(rect) & free:
+                return False
             self.blocking |= cells
         self.taken |= cells
+        if accessible:
+            self.access.append(self._access_cells(rect))
         self.placed.append(PlacedObject(kind, x, y, w, h, facing, self.room.id, not walkable))
         return True
 

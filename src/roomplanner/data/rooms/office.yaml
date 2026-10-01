@@ -76,7 +76,7 @@ rooms:
     cluster: true
     windows: forbidden
     furniture:
-      - {object: capsule, placement: perimeter, count: 20, sideways: true}   # side by side
+      - {object: capsule, placement: perimeter, count: 20, sideways: true, accessible: true}
       - {object: locker, placement: wall, count: [0, 3]}
   copy_room:                # printers, paper, mail
     area: [20, 48]

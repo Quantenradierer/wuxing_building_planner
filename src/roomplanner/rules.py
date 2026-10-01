@@ -160,6 +160,11 @@ class FurnitureRule(_Strict):
         description="Free floor kept in front of it, this many cells deep and as wide as it "
         "plus half that on each side (the dance floor before the DJ booth)",
     )
+    accessible: bool = Field(
+        default=False,
+        description="Free floor stays next to its front or a flank, also after later objects "
+        "(every bed of a nap room can be got into)",
+    )
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 
