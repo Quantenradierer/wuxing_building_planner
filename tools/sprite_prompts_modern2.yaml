@@ -323,20 +323,27 @@ subjects:
       - [line, 0.5, 0.02, 0.5, 0.98, "#7a5a30", 0.04]
       - [line, 0.02, 0.5, 0.98, 0.5, "#7a5a30", 0.04]
   safe:
-    denoise: 0.7
-    prompt: "heavy steel safe, grey top with corner bolts, door at the bottom edge with a brass combination dial and a steel handle, a stack of documents on top"
+    denoise: 0.85
+    prompt: "heavy steel safe, plain grey top with corner bolts, front panel at the bottom edge with an electronic PIN keypad, small green display and a steel handle"
     base: [rect, "#5a5e66", 0.06]
     guide:
-      - [rect, 0.06, 0.06, 0.94, 0.8, "#6e737c", 0.04]
-      - [rect, 0.0, 0.8, 1.0, 1.0, "#33363c", 0.03]
-      - [ellipse, 0.4, 0.82, 0.6, 0.98, "#c9a14a"]
-      - [ellipse, 0.46, 0.86, 0.54, 0.94, "#6a5228"]
-      - [rect, 0.68, 0.85, 0.88, 0.93, "#a8adb5", 0.4]
+      - [rect, 0.06, 0.06, 0.94, 0.56, "#6e737c", 0.04]
       - [ellipse, 0.1, 0.1, 0.15, 0.15, "#3a3d44"]
       - [ellipse, 0.85, 0.1, 0.9, 0.15, "#3a3d44"]
-      - [ellipse, 0.1, 0.68, 0.15, 0.73, "#3a3d44"]
-      - [ellipse, 0.85, 0.68, 0.9, 0.73, "#3a3d44"]
-      - [rect, 0.22, 0.26, 0.62, 0.52, "#c4a46a", 0.04]
+      - [ellipse, 0.1, 0.47, 0.15, 0.52, "#3a3d44"]
+      - [ellipse, 0.85, 0.47, 0.9, 0.52, "#3a3d44"]
+      - [rect, 0.0, 0.58, 1.0, 1.0, "#33363c", 0.03]
+      - [rect, 0.24, 0.61, 0.62, 0.69, "#2f9a6a", 0.1]
+      - [rect, 0.24, 0.72, 0.34, 0.78, "#c8ccd2", 0.2]
+      - [rect, 0.38, 0.72, 0.48, 0.78, "#c8ccd2", 0.2]
+      - [rect, 0.52, 0.72, 0.62, 0.78, "#c8ccd2", 0.2]
+      - [rect, 0.24, 0.8, 0.34, 0.86, "#c8ccd2", 0.2]
+      - [rect, 0.38, 0.8, 0.48, 0.86, "#c8ccd2", 0.2]
+      - [rect, 0.52, 0.8, 0.62, 0.86, "#c8ccd2", 0.2]
+      - [rect, 0.24, 0.88, 0.34, 0.94, "#c8ccd2", 0.2]
+      - [rect, 0.38, 0.88, 0.48, 0.94, "#c8ccd2", 0.2]
+      - [rect, 0.52, 0.88, 0.62, 0.94, "#c8ccd2", 0.2]
+      - [rect, 0.72, 0.64, 0.84, 0.94, "#a8adb5", 0.3]
   atm:
     denoise: 0.7
     prompt: "cash machine, dark grey body, green bank logo strip at the top edge, blue screen, keypad with silver keys and a card slot at the bottom edge"
@@ -864,7 +871,7 @@ subjects:
       - [rect, 0.0, 0.3, 0.05, 0.34, "#c8ccd2", 0.3]
       - [rect, 0.95, 0.3, 1.0, 0.34, "#c8ccd2", 0.3]
   shipping_container:
-    denoise: 0.75
+    denoise: 0.8
     prompt: "dark teal steel shipping container seen from above, corrugated roof with ridges across, dark corner castings, a small grey vent panel in the middle"
     base: [rect, "#3a6b7a", 0.01]
     guide:
@@ -1216,7 +1223,7 @@ subjects:
       - [ellipse, 0.06, 0.06, 0.94, 0.94, "#6a4630"]
       - [rect, 0.30, 0.35, 0.62, 0.60, "#8a3a2a", 0.05]
   side_table.luxury:
-    denoise: 0.5
+    denoise: 0.75
     prompt: "small round side table, black marble top with grey veins, polished brass rim, a red leather book and a small green vase with a red flower on top"
     base: [ellipse, "#b8924a", 0]
     guide:
@@ -1483,3 +1490,10 @@ derived_overrides:
   hvac_unit.low: {denoise: 0.6}
   hvac_unit.squatter: {denoise: 0.85}
   car_lift.low: {denoise: 0.6}
+  medical_cart.low: {denoise: 0.65}
+  machinery.low: {denoise: 0.8}
+  machinery.squatter: {denoise: 0.75}
+  electrical_panel.low: {denoise: 0.65}
+  electrical_panel.squatter: {denoise: 0.8}
+  shipping_container.low: {denoise: 0.75}
+  shipping_container.squatter: {denoise: 0.8}
