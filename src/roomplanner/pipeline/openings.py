@@ -264,9 +264,10 @@ def _interior_doors(
     An annex (closet) opens only into its host and is never passed through.
     A room left without any allowed door (a storeroom behind the core between rooms that
     are no thoroughfares, walled in by apartments) finally opens into any neighbour, a core
-    room last. Open rooms (`opened`: an open kitchen) need no door and take other rooms'
-    doors only as that last resort. `entered`: rooms with an exterior door, reached from
-    the start like circulation (a lone room, entered from the street).
+    room last, in the program's core order (the stairwell before an elevator car). Open
+    rooms (`opened`: an open kitchen) need no door and take other rooms' doors only as that
+    last resort. `entered`: rooms with an exterior door, reached from the start like
+    circulation (a lone room, entered from the street).
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
@@ -322,7 +323,8 @@ def _interior_doors(
             if j in circulation:
                 rank = -2 if rooms[j].type in spec.access else -1
             elif rooms[j].type in core_types:
-                rank = len(spec.access) + 1
+                # Stairs before an elevator: a door onto a landing, not into the car.
+                rank = len(spec.access) + 1 + core_types.index(rooms[j].type)
             elif rooms[j].type in spec.access:
                 rank = spec.access.index(rooms[j].type)
             else:
@@ -349,15 +351,16 @@ def _interior_doors(
                 found.append(k)
         return found
 
-    def start_near(i: int, run: Run, width: int, margin: int) -> int:
+    def start_near(i: int, j: int, run: Run, width: int, margin: int) -> int:
         """Door position: close to the partners' doors (else their rooms), else by the wall's start.
 
         Core rooms (stairwell, elevator) share their cells on every floor: their door goes
-        in the middle of the wall, so it is in the same place on all floors.
+        in the middle of the wall, so it is in the same place on all floors. A stranded room
+        opening into a core room goes close to the core's own door (the landing).
         """
         if rooms[i].type in core_types:
             return (len(run) - width) // 2
-        others = partners(i)
+        others = [j] if rooms[j].type in core_types else partners(i)
         targets = [(e.x, e.y) for k in others for e in door_edges.get(k, [])]
         targets = targets or [(c.x, c.y) for k in others for c in rooms[k].cells]
         if not targets:
@@ -370,7 +373,7 @@ def _interior_doors(
 
         return min(range(margin, len(run) - width - margin + 1), key=gap)
 
-    core_types = {c.room for c in ctx.rules.program.core}
+    core_types = list(dict.fromkeys(c.room for c in ctx.rules.program.core))
     doors: list[Opening] = []
     door_edges: dict[int, list[Edge]] = defaultdict(list)
     linked: set[tuple[int, int]] = set()
@@ -390,7 +393,7 @@ def _interior_doors(
         margin = 1 if width > 1 and len(run) >= width + 2 else 0
         inside = next(c for c in run[0].cells() if owner.get(c) == i)
         outside = next(c for c in run[0].cells() if c != inside)
-        start = start_near(i, run, width, margin)
+        start = start_near(i, owner[outside], run, width, margin)
         # A room laid out in advance has its door where its template has it (or mirrored).
         spots = [
             s

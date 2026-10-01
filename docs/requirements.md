@@ -304,6 +304,12 @@ Requested by the author (2026-09-27), done (2026-10-01):
   stations); before, the public toilets were behind its locked door. No stall goes where
   an exterior door is planned.
 
+- No door into the elevator car (2026-10-01): a storeroom walled in by the stairwell, the
+  elevator, toilet stalls and the facade (clinic and corp lab upper floors, factories)
+  opened into the elevator. Such a stranded room now opens onto the stairwell, at the end
+  of the wall nearest its landing: of 905 random buildings, 7 rooms opened into an
+  elevator before, none now.
+
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
 and neighbours before it becomes a storeroom; basements and hall back strips got real
@@ -323,8 +329,8 @@ Known weaknesses:
   segment beside it, a second hospital waiting room) still open onto the corridor:
   about 1 in 12 clinic and 1 in 7 hospital waiting rooms. Police front offices under
   about 90 cells (squatter tier) have no visitor WC.
-- A storeroom behind the elevator, walled in by the stairwell and toilet stalls, can open
-  into the elevator (3 of ~1000 rooms beside cores, supermarket upper floors).
+- A room walled in by core rooms and toilet stalls with no stairwell beside it would still
+  open into an elevator car (none in 905 random buildings).
 - Rooms that belong together: about 60 % of police observation rooms sit beside an
   interview room (`next_to` only orders rooms within one strip segment); a supermarket
   stockroom borders the sales floor in about half the cases (the others sit behind a

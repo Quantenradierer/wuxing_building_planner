@@ -392,6 +392,48 @@ def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingTyp
 
 
 @pytest.mark.parametrize(
+    ("building_type", "width", "depth", "shape", "street_side", "seed"),
+    [
+        (BuildingType.CLINIC, 58, 30, Shape.U, Side.N, 1393621959),
+        (BuildingType.CORP_LAB, 40, 48, Shape.U, Side.E, 2480825302),
+    ],
+)
+def test_a_walled_in_storeroom_opens_onto_the_stairs_not_into_the_elevator(
+    building_type: BuildingType, width: int, depth: int, shape: Shape, street_side: Side, seed: int
+) -> None:
+    """Between stairwell, elevator, toilet stalls and the facade: the landing, not the car."""
+    params = make_params(
+        building_type=building_type,
+        width=width,
+        depth=depth,
+        floors_above=3 if building_type is BuildingType.CORP_LAB else 2,
+        wealth=Wealth.LUXURY if building_type is BuildingType.CORP_LAB else Wealth.MIDDLE,
+        shape=shape,
+        street_side=street_side,
+        seed=seed,
+    )
+    stranded = 0
+    for floor in generate(params).floors:
+        for door in floor.openings:
+            if door.kind is not OpeningKind.DOOR or door.entrance is not None:
+                continue
+            sides = {floor.room_at(c) for c in door.edges[0].cells()}
+            types = {r.type for r in sides if r is not None}
+            if "storage" in types and "stairwell" in types:
+                stranded += 1
+        for room in floor.rooms:
+            if room.type == "elevator":
+                doors = [
+                    o
+                    for o in floor.openings
+                    if o.kind is OpeningKind.DOOR
+                    and any(c in room.cells for e in o.edges for c in e.cells())
+                ]
+                assert len(doors) == 1, floor.name
+    assert stranded
+
+
+@pytest.mark.parametrize(
     "building_type",
     [BuildingType.OFFICE, BuildingType.HOSPITAL, BuildingType.APARTMENT, BuildingType.WAREHOUSE],
 )

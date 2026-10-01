@@ -354,7 +354,8 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
 - Core rooms (stairwell, elevator) have the same cells on every floor, and so the same
   door: it uses a wall that borders circulation on all floors, in the middle of that wall.
   Only other core rooms may open into the stairwell (`transit: false`). A room left without
-  any allowed door finally opens into any neighbour, a core room last.
+  any allowed door finally opens into any neighbour, a core room last, in the program's
+  core order: onto the stairwell's landing (close to its door) before into an elevator car.
 - A room's door goes as close as possible to the doors of its `next_to` / `connect`
   partners (either direction; to their rooms if they have no door yet): the loading bay's
   door faces the warehouse floor's across the service corridor.
