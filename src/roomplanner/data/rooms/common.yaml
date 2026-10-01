@@ -48,7 +48,7 @@ rooms:
     area: [24, 56]
     min_side: 3
     cluster: true
-    stalls: {room: stall, width: 2, depth: 3, max: 3, rest_area: 16, single: wc}
+    stalls: {room: stall, max: 3, rest_area: 16, single: wc}
     furniture:
       - {object: sink, placement: wall, count: [1, 3]}
       - {object: urinal, placement: wall, count: [1, 3], line: true, alternate: true}  # men's only
@@ -59,7 +59,12 @@ rooms:
     door_width: 1       # a narrow cubicle door keeps its clearance off the wc
     windows: forbidden
     transit: false
-    furniture:
+    templates:          # drawn with the door in the south wall
+      - size: [2, 3]
+        door: 0
+        parts:
+          - {object: wc, at: [0, 0]}
+    furniture:          # a stall widened by a gap too narrow to use
       - {object: wc, placement: back}
   wc:                   # single toilet room (a public toilet too small for stalls)
     area: [12, 32]

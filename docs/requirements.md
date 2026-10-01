@@ -245,7 +245,6 @@ Decided by the author (2026-09-27):
 - Tactical layer: the unused `cover` field was removed from objects.
 
 Requested by the author (2026-09-27), still open:
-- Coffin units are still too large: let their door open outwards so they can shrink further.
 - Urinals: their placement doesn't make sense; remove them.
 - Sinks: make them smaller again (2 × 1) so they fit better in kitchens.
 - Drone rooms need some order (docks and racks placed in a tidy arrangement).
@@ -255,6 +254,11 @@ Requested by the author (2026-09-27), still open:
 
 Done from that list (2026-10-01):
 - Focus rooms are booths of 16–30 cells (mostly 4 × 6, 2 × 3 m); they were up to 48.
+- Coffin units are pods of 2 × 5 cells (1 × 2.5 m; a row's last one 3 × 5) along both
+  sides of a coffin hall's aisle, hatches opening out; they were 4 × 4 to 4 × 7 rooms.
+  Small rooms (pods, toilet stalls, holding cells) are laid out from `templates:` (size,
+  door, objects) instead of being furnished by rules. Door clearances are as deep as the
+  door is wide only on the side the leaf swings into, one cell on the other.
 
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)

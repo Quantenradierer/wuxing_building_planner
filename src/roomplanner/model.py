@@ -183,7 +183,8 @@ class Floor:
         return self.door_clearances().get(room.id, frozenset())
 
     def door_clearances(self) -> dict[str, frozenset[Cell]]:
-        """Door clearance of every room with a door, by room id."""
+        """Door clearance of every room with a door, by room id: as deep as the door is wide
+        on the side the leaf swings into, one step on the other (a hatch opening out)."""
         owner = {cell: room for room in self.rooms for cell in room.cells}
         clear: dict[str, set[Cell]] = {}
         for door in self.openings:
@@ -197,7 +198,8 @@ class Floor:
                     if room is None:
                         continue
                     dx, dy = cell.x - other.x, cell.y - other.y
-                    for step in range(depth):
+                    swept = door.swing is None or door.swing.towards.delta == (dx, dy)
+                    for step in range(depth if swept else 1):
                         ahead = Cell(cell.x + dx * step, cell.y + dy * step)
                         if ahead in room.cells:
                             clear.setdefault(room.id, set()).add(ahead)

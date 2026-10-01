@@ -61,6 +61,14 @@ class GroupSpec(_Strict):
     parts: list[GroupPart] = Field(min_length=1)
 
 
+class RoomTemplate(GroupSpec):
+    """A small room laid out in advance (a stall, a coffin pod): its size and objects, drawn
+    with the door in the south wall (the group's front); rooms of its size and door
+    position get exactly these objects, turned or mirrored."""
+
+    door: int = Field(ge=0, description="First cell of the door along the south wall")
+
+
 class ObjectCatalog(_Strict):
     objects: dict[str, ObjectSpec]
     groups: dict[str, GroupSpec] = {}
@@ -169,9 +177,16 @@ class StallRule(_Strict):
     """Cubicles along one wall of a public toilet, each a small room entered from it."""
 
     room: str = Field(description="Room type of a stall")
-    width: int = Field(default=2, gt=0, description="Cells along the wall")
-    depth: int = Field(default=3, gt=0, description="Cells from the wall")
-    max: int = Field(default=6, gt=0)
+    width: int | None = Field(
+        default=None, gt=0, description="Cells along the wall (default: the stall's template)"
+    )
+    depth: int | None = Field(
+        default=None, gt=0, description="Cells from the wall (default: the stall's template)"
+    )
+    max: int = Field(default=6, gt=0, description="Stalls per row")
+    sides: Literal[1, 2] = Field(
+        default=1, description="2: a row on each of two opposite walls, the passage between"
+    )
     passage: int | None = Field(
         default=None, gt=0, description="Free cells in front of the stalls (default: min_side)"
     )
@@ -205,6 +220,10 @@ class RoomSpec(_Strict):
     )
     max_aspect: float = Field(default=2.5, ge=1)
     door_width: int = Field(default=2, gt=0)
+    door_opens_out: bool = Field(
+        default=False,
+        description="Its door swings out of it (coffin units): no door clearance inside",
+    )
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
     vestibule: str | None = Field(
         default=None, description="Entered only through this room type, placed beside it"
@@ -231,6 +250,9 @@ class RoomSpec(_Strict):
         default=None,
         gt=0,
         description="Ground floor: its own exterior door this wide (vehicles, deliveries)",
+    )
+    templates: list[RoomTemplate] = Field(
+        default=[], description="Fixed layouts by size; furniture rules for other shapes"
     )
     furniture: list[FurnitureRule] = []
     wealth: dict[Wealth, RoomTier] = {}
@@ -458,6 +480,12 @@ class Rules:
     def spec(self, room: str) -> RoomSpec:
         return self.rooms[room]
 
+    def stall_size(self, rule: StallRule) -> tuple[int, int]:
+        """(along the wall, deep) of a stall: the rule's, else its first template's."""
+        templates = self.spec(rule.room).templates
+        along, deep = templates[0].size if templates else (2, 3)
+        return rule.width or along, rule.depth or deep
+
     def entrances(self, params: GenerationParams) -> dict[EntranceKind, EntranceRule]:
         """The entrances to build: the program's, or the parameter's list (main implied)."""
         program = self.program.entrances
@@ -637,8 +665,12 @@ def _check_references(rules: Rules) -> None:
     used |= {c for s in rules.rooms.values() for f in s.furniture for c in f.choose}
     used |= {f.at for s in rules.rooms.values() for f in s.furniture if f.at}
     used |= {f.toward for s in rules.rooms.values() for f in s.furniture if f.toward}
+    used |= {p.object for s in rules.rooms.values() for t in s.templates for p in t.parts}
     unknown = used - set(rules.objects) - set(rules.groups)
-    for spec in rules.rooms.values():
+    for name, spec in rules.rooms.items():
+        for template in spec.templates:
+            if template.door + spec.door_width > template.size[0]:
+                raise RulesError(f"{program.building}: {name}: template door beyond its wall")
         if spec.stalls is not None:
             names += [spec.stalls.room, spec.stalls.single, spec.stalls.rest or spec.stalls.room]
     if unknown:

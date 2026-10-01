@@ -34,7 +34,7 @@ floor_roles:
       - {room: storage, count: [0, 1], priority: optional}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
       - {room: vending_room, count: 1, near: entrance, priority: optional}
-      - {room: coffin_unit, fill: true}
+      - {room: coffin_hall, fill: true}
       - {room: vending_room, fill: true, priority: optional}  # leftovers
       - {room: locker_room, fill: true, priority: optional}
       - {room: shower_room, fill: true, priority: optional}
@@ -45,7 +45,7 @@ floor_roles:
       - {room: toilet, count: [1, 2], near: core, priority: required}
       - {room: shower_room, count: 1, near: core}
       - {room: vending_room, count: [0, 1], near: core, priority: optional}
-      - {room: coffin_unit, fill: true}
+      - {room: coffin_hall, fill: true}
       - {room: vending_room, fill: true, priority: optional}  # leftovers
       - {room: locker_room, fill: true, priority: optional}
       - {room: shower_room, fill: true, priority: optional}
@@ -56,7 +56,7 @@ floor_roles:
       - {room: utility, count: 1, priority: required}
       - {room: laundry, count: [0, 1]}
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
-      - {room: coffin_unit, fill: true}
+      - {room: coffin_hall, fill: true}
       - {room: vending_room, fill: true, priority: optional}  # leftovers
       - {room: locker_room, fill: true, priority: optional}
       - {room: shower_room, fill: true, priority: optional}

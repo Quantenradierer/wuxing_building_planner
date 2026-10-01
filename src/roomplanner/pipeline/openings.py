@@ -379,13 +379,23 @@ def _interior_doors(
         if not options:
             break
         (_, run), i = min(options, key=lambda o: o[0][0])
-        width = ctx.rules.spec(rooms[i].type).door_width
+        spec = ctx.rules.spec(rooms[i].type)
+        width = spec.door_width
         # Keep doors off the corners; a narrow cubicle door may sit in one (room for the wc).
         margin = 1 if width > 1 and len(run) >= width + 2 else 0
         inside = next(c for c in run[0].cells() if owner.get(c) == i)
         outside = next(c for c in run[0].cells() if c != inside)
         start = start_near(i, run, width, margin)
-        door = _door(run, width, inside, None, rng, start)
+        # A room laid out in advance has its door where its template has it (or mirrored).
+        spots = [
+            s
+            for t in spec.templates
+            if t.size[0] == len(run)
+            for s in (t.door, len(run) - t.door - width)
+        ]
+        if spots:
+            start = min(spots, key=lambda s: (abs(s - start), s))
+        door = _door(run, width, outside if spec.door_opens_out else inside, None, rng, start)
         doors.append(door)
         door_edges[i] += door.edges
         j = owner[outside]

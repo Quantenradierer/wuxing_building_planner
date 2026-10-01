@@ -1,7 +1,8 @@
 """Security layer: door locks and materials, devices, floodlights and guard furniture.
 
 Rules come from `data/security.yaml`, one tier per `security` level. An interior door gets
-the lock of the room it opens into (its swing side); exterior doors the tier's exterior
+the lock of the room it opens into (its swing side, or the room it swings out of:
+`door_opens_out`); exterior doors the tier's exterior
 lock; a unit's front door the `unit` entry.
 """
 
@@ -29,7 +30,7 @@ class RulesSecurity:
         for floor in floors:
             rng = ctx.rng(f"security:{floor.level}")
             owner = {cell: room for room in floor.rooms for cell in room.cells}
-            openings = tuple(_lock(tier, floor, door, owner) for door in floor.openings)
+            openings = tuple(_lock(ctx, tier, floor, door, owner) for door in floor.openings)
             devices = _Devices(ctx, floor, tier, owner, rng).place()
             lights: list[Light] = []
             if tier.floodlights is not None:
@@ -47,7 +48,9 @@ class RulesSecurity:
         return secured
 
 
-def _lock(tier: SecurityTier, floor: Floor, door: Opening, owner: dict[Cell, Room]) -> Opening:
+def _lock(
+    ctx: Context, tier: SecurityTier, floor: Floor, door: Opening, owner: dict[Cell, Room]
+) -> Opening:
     if door.kind is not OpeningKind.DOOR or door.swing is None:
         return door
     rule: LockRule | None
@@ -59,6 +62,8 @@ def _lock(tier: SecurityTier, floor: Floor, door: Opening, owner: dict[Cell, Roo
         inside = a if door.swing.towards in (Side.N, Side.W) else b
         outside_cell = b if inside == a else a
         room, other = owner.get(inside), owner.get(outside_cell)
+        if other is not None and ctx.rules.spec(other.type).door_opens_out:
+            room, other = other, room
         if room is None:
             return door
         if room.unit is None:

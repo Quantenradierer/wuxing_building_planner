@@ -42,15 +42,15 @@ office 60x44 cells, wealth=middle, seed=7
 |                 |        hhh        +D--+D--+D------+       |<   hhh    |            P|         |       |      hhh    |
 |                 |        hhh        |      10       D       |< c hhh c  |            P|      c  |  c    |      hhh    "
 |                 |                   |               D       |           |             |         |       |             "
-D                 |        c c        |iii iii iii    D       |           |             |    ddddd|ddddd  |      c c    "
-D                 |                   |iii iii iii    |       |           |             |    ddddd|ddddd  |             |
-D        2        |                   |iii iii iii www|      1|           |             |    ddddd|ddddd  |             |
-D                 +-----------+-------+-+-------------+       +-------+---+---+---+-----+---------+-------+---+---------+
-D                 |           |    ddddd|             |       |*   AAA|WWW|WWW|WWW|iii  |         |          *|sss     s"
-D                 |           |    ddddd|             |       |    AAA|WWW|WWW|WWW|iii  |         |           |        s"
-D                 D    c c    |    ddddd|      c c    |       D    AAA|WWW|WWW|WWW|iii  |    27   |    28     |s       s"
-|                 D           |         |             |       D       |   |   |   |     |         |           |s        |
-|                 D  19hhh    |    20c  |    21hhh    |       D  22   |24 |25 |26 |     |c hhh c  |  c hhh c  |s 29KKK s|
+D            RRR  |        c c        |iii iii iii    D       |           |             |    ddddd|ddddd  |      c c    "
+D            RRR  |                   |iii iii iii    |       |           |             |    ddddd|ddddd  |             |
+D        2   RRR  |                   |iii iii iii www|      1|           |             |    ddddd|ddddd  |             |
+D            RRR  +-----------+-------+-+-------------+       +-------+---+---+---+-----+---------+-------+---+---------+
+D            RRR c|           |    ddddd|             |       |*   AAA|WWW|WWW|WWW|iii  |         |          *|sss     s"
+D            RRR  |           |    ddddd|             |       |    AAA|WWW|WWW|WWW|iii  |         |           |        s"
+D            RRR  D    c c    |    ddddd|      c c    |       D    AAA|WWW|WWW|WWW|iii  |    27   |    28     |s       s"
+|            RRR  D           |         |             |       D       |   |   |   |     |         |           |s        |
+|            RRR  D  19hhh    |    20c  |    21hhh    |       D  22   |24 |25 |26 |     |c hhh c  |  c hhh c  |s 29KKK s|
 |                 |    hhh    |         |      hhh    |       |       +D--+D--+D--+     |  hhh    |    hhh    |    KKK s|
 "                 |    hhh    |         |      hhh    |       |    ddd|          23     |c hhh c  |  c hhh c  |    KKK s"
 "                 |           |         |             |       |    ddd|                 |         |           |         "
@@ -90,7 +90,7 @@ D                 D    c c    |    ddddd|      c c    |       D    AAA|WWW|WWW|W
 |                 |            ddd ddd    |F     ddd ddd    |      ddd ddd    |F     ddd ddd    |            ddd ddd    |
 |                U|            ddd ddd    |F     ddd ddd    |      ddd ddd    |F     ddd ddd    |            ddd ddd    |
 +===---===---===--+===---===---===---===--+===---===---===--+===---===---===--+===---===---===--+===---===---===---===--+
-  objects: A armchair, b battery_bank, q bench, k cabinet, t canteen_table, c chair, P copier, K crate, E electrical_panel, F filing_cabinet, ' fire_extinguisher, h huddle_table, l locker, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, < wall_screen, W wc
+  objects: A armchair, b battery_bank, q bench, k cabinet, t canteen_table, c chair, P copier, K crate, E electrical_panel, F filing_cabinet, ' fire_extinguisher, h huddle_table, l locker, d office_desk, * plant, R reception_desk, ^ roof_hatch, s shelf, } side_table, i sink, U trash_bin, w urinal, < wall_screen, W wc
     1  corridor            456 cells
     2  reception_lobby     396 cells
     3  office              144 cells

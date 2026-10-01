@@ -41,7 +41,7 @@ rooms:
     min_side: 8
     windows: forbidden
     door_width: 2
-    stalls: {room: holding_cell, width: 4, depth: 4, max: 6, rest: lockup, single: holding_cell}
+    stalls: {room: holding_cell, max: 6, rest: lockup, single: holding_cell}
   lockup:               # what's left of a cell block: the walk in front of the cells
     area: [16, 200]
     min_side: 4
@@ -63,7 +63,14 @@ rooms:
     min_side: 4
     windows: forbidden
     transit: false
-    furniture:
+    door_opens_out: true  # cell doors open into the walk
+    templates:            # drawn with the door in the south wall
+      - size: [4, 4]
+        door: 1
+        parts:
+          - {object: bench, at: [0, 0]}
+          - {object: wc, at: [0, 1]}
+    furniture:            # a cell widened by a gap, or a single cell
       - {object: wc, placement: corner}
       - {object: bench, placement: wall}
       - {object: sink, placement: wall, count: [0, 1]}

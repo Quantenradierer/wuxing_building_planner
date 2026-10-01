@@ -3,6 +3,8 @@
 A room whose catalog entry has `stalls:` is split after allocation: along its longest wall
 that doesn't touch circulation (the entrance side stays free) a row of stall rooms is cut
 off, each entered only from the rest of the room (an annex of it), which keeps the sinks.
+With `sides: 2` (a coffin motel's pods) a row goes along each of two opposite walls and
+the rest is the aisle between them. A stall has the size of its first template, if any.
 Stalls are given up while the rest is smaller than `rest_area` (room for the sinks). If not
 even one stall and a passage in front of it fit, the room becomes the single-toilet type
 instead. Stalls have real walls and doors, so they block sight in the VTT exports.
@@ -31,12 +33,18 @@ def carve_stalls(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
         spec = rules.spec(room.type)
         # The passage must be as wide as the room left in front of the stalls requires.
         passage = max(rule.passage or 0, rules.spec(rule.rest or room.type).min_side)
-        result += _split(room, rule, passage, spec.door_width, circulation)
+        size = rules.stall_size(rule)
+        result += _split(room, rule, size, passage, spec.door_width, circulation)
     return result
 
 
 def _split(
-    room: PlannedRoom, rule: StallRule, passage: int, door: int, circulation: set[Cell]
+    room: PlannedRoom,
+    rule: StallRule,
+    size: tuple[int, int],
+    passage: int,
+    door: int,
+    circulation: set[Cell],
 ) -> list[PlannedRoom]:
     """`passage`: the room's own minimum side, kept free in front of the stalls."""
     xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
@@ -44,42 +52,49 @@ def _split(
     if len(room.cells) != (x1 - x0) * (y1 - y0):  # only plain rectangles
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
     box = (x0, y0, x1, y1)
-    best: list[frozenset[Cell]] = []
-    wall = Side.N
+    layouts: list[tuple[Side, ...]] = [(side,) for side in Side]
+    if rule.sides == 2:  # both rows if they fit, else one
+        layouts = [(Side.N, Side.S), (Side.W, Side.E), *layouts]
+    best: list[tuple[Side, frozenset[Cell]]] = []  # (wall, cells) of each stall
     # Fewer stalls rather than no space for the sinks.
     for limit in range(rule.max, 0, -1):
-        for side in Side:
-            across = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
-            if across < rule.depth + passage:
+        for walls in layouts:
+            across = y1 - y0 if walls[0] in (Side.N, Side.S) else x1 - x0
+            if across < len(walls) * size[1] + passage:
                 continue
             for strict in (False, True):
-                found = _row(
-                    room, rule, passage, circulation if strict else set(), side, box, limit
-                )
-                rest = room.cells.difference(*found)
+                ignored = circulation if strict else set[Cell]()
+                found = [
+                    (side, cells)
+                    for side in walls
+                    for cells in _row(room, size, passage, ignored, side, box, limit)
+                ]
+                rest = room.cells.difference(*(cells for _, cells in found))
                 # The room must still reach circulation through a door.
                 if found and _door_run(rest, circulation) >= door:
                     if len(found) > len(best) and len(rest) >= rule.rest_area:
-                        best, wall = found, side
+                        best = found
                     break
         if best:
             break
     if not best:
         return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
-    rest = room.cells.difference(*best)
+    rest = room.cells.difference(*(cells for _, cells in best))
     host = PlannedRoom(rule.rest or room.type, rest, room.unit, room.entry, room.host)
     # Every door faces the passage, so the stalls all look alike (not into a flank where
     # the room wraps round the end of the row).
-    front = wall.opposite
     return [
         host,
-        *(PlannedRoom(rule.room, cells, room.unit, host=host, front=front) for cells in best),
+        *(
+            PlannedRoom(rule.room, cells, room.unit, host=host, front=wall.opposite)
+            for wall, cells in best
+        ),
     ]
 
 
 def _row(
     room: PlannedRoom,
-    rule: StallRule,
+    size: tuple[int, int],
     passage: int,
     circulation: set[Cell],
     side: Side,
@@ -92,13 +107,14 @@ def _row(
     """
     x0, y0, x1, y1 = box
     along = x1 - x0 if side in (Side.N, Side.S) else y1 - y0
+    width, depth = size
 
     def cells(start: int, width: int) -> frozenset[Cell]:
         return frozenset(
             c
             for c in room.cells
             if start <= _along(c, side, x0, y0) < start + width
-            and _depth(c, side, x0, y0, x1, y1) < rule.depth
+            and _depth(c, side, x0, y0, x1, y1) < depth
         )
 
     def free(block: frozenset[Cell]) -> bool:
@@ -106,10 +122,10 @@ def _row(
 
     spans: list[tuple[int, int]] = []  # (start, width)
     start = 0
-    while start + rule.width <= along and len(spans) < limit:
-        if free(cells(start, rule.width)):
-            spans.append((start, rule.width))
-            start += rule.width
+    while start + width <= along and len(spans) < limit:
+        if free(cells(start, width)):
+            spans.append((start, width))
+            start += width
         else:
             start += 1
     # Close gaps too narrow to use (to the neighbouring stall), or give the stall up.

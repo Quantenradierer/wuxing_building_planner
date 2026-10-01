@@ -1,8 +1,8 @@
 """Lights, security and condition layers, and annexes (closets entered through a room)."""
 
 from roomplanner.generator import generate
-from roomplanner.geometry import Cell
-from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState
+from roomplanner.geometry import Axis, Cell
+from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
 from roomplanner.params import BuildingType, Condition, Security
 from roomplanner.rules import rules_for
 from roomplanner.serialization import from_json, to_json
@@ -130,16 +130,31 @@ def test_corporate_offices_get_a_security_room() -> None:
     assert not has_security_room(Security.NONE)
 
 
-def test_coffin_units_are_small_and_stacked() -> None:
+def test_coffin_units_are_pods_along_both_sides_of_an_aisle() -> None:
     building = generate(
         make_params(building_type=BuildingType.COFFIN_BLOCK, width=48, depth=36, seed=6)
     )
-    coffins = [r for r in building.floor(0).rooms if r.type == "coffin_unit"]
-    assert len(coffins) >= 20
-    small = [r for r in coffins if r.area <= 24]
-    assert len(small) >= 0.8 * len(coffins)
     ground = building.floor(0)
-    assert all(any(o.room == r.id and o.kind == "bed" for o in ground.objects) for r in coffins)
+    pods = [r for r in ground.rooms if r.type == "coffin_unit"]
+    assert len(pods) >= 30
+    # The templates' sizes: 2 x 5, a row's last pod 3 x 5.
+    assert all(sorted(_box(r)) in ([2, 5], [3, 5]) for r in pods)
+    assert all(any(o.room == r.id and o.kind == "bed" for o in ground.objects) for r in pods)
+    aisles = {r.id: r for r in ground.rooms if r.type == "coffin_aisle"}
+    for door in doors(ground):
+        a, b = (ground.room_at(c) for c in door.edges[0].cells())
+        if a is None or b is None or "coffin_unit" not in (a.type, b.type):
+            continue
+        pod, other = (a, b) if a.type == "coffin_unit" else (b, a)
+        assert other.id in aisles  # each pod opens onto its aisle
+        assert door.swing is not None
+        inside = next(c for c in door.edges[0].cells() if c in other.cells)
+        assert inside.neighbour(door.swing.towards.opposite) in pod.cells  # the hatch opens out
+
+
+def _box(room: Room) -> list[int]:
+    xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
+    return [max(xs) - min(xs) + 1, max(ys) - min(ys) + 1]
 
 
 def test_operating_rooms_are_entered_through_their_scrub_room() -> None:
@@ -158,3 +173,22 @@ def test_operating_rooms_are_entered_through_their_scrub_room() -> None:
             if c not in room.cells and (other := surgery.room_at(c)) is not None
         }
         assert neighbours == {"scrub_room"}
+
+
+def test_rooms_of_a_template_size_get_the_template_layout() -> None:
+    """Toilet stalls of 2 x 3 cells: the wc against the back wall, the door row free."""
+    building = generate(make_params(width=60, depth=40, floors_above=3, seed=1))
+    checked = 0
+    for floor in building.floors:
+        for stall in (r for r in floor.rooms if r.type == "stall" and sorted(_box(r)) == [2, 3]):
+            (door,) = [d for d in doors(floor) if any(c in stall.cells for c in d.edges[0].cells())]
+            front = {c for e in door.edges for c in e.cells() if c in stall.cells}
+            assert len(front) == 1
+            (wc,) = [o for o in floor.objects if o.room == stall.id]
+            assert wc.kind == "wc" and (wc.w, wc.h) == (2, 2)
+            (inside,) = front
+            across_y = door.edges[0].axis is Axis.H  # a door in a north or south wall
+            row = {c for c in stall.cells if (c.y == inside.y if across_y else c.x == inside.x)}
+            assert len(row) == 2 and not row & wc.cells
+            checked += 1
+    assert checked >= 4

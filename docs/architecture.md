@@ -98,7 +98,8 @@ Opening
                                        none | mechanical | maglock | cardreader | biometric
   entrance                             exterior doors: main | service | emergency
 Swing
-  towards: Side                        side of the wall the leaf opens into
+  towards: Side                        side of the wall the leaf opens into (the door's own
+                                       room, or out of it with `door_opens_out`: pods, cells)
   hinge: Side                          end of the run the hinge sits at
 PlacedObject
   kind, x, y, w, h                     covers cells [x, x+w) × [y, y+h)
@@ -181,7 +182,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
 5. **Allocation** fills the remaining strip segments. Rooms span the full strip depth, except
    small rooms (toilets, storage; rooms marked `cluster: true` or too small for a full-depth
    slot, unless no room could stack behind them) which go into *clusters*: a side hallway
-   from the corridor with rooms stacked along it (small fill rooms such as coffins, and windowless fill rooms too big for the strip).
+   from the corridor with rooms stacked along it (small fill rooms, and windowless fill rooms too big for the strip).
    Rooms that need windows go into a *facade stack* instead when a full-depth slot would
    make them far too big (exam rooms, wards and offices in deep strips): the side hallway
    runs to the facade, the window room sits at its end and the floor's first windowless
@@ -214,8 +215,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      a neighbour sharing one whole side if the union stays a rectangle and the neighbour
      within 1.4x its maximum; slivers up to 8 cells thick may widen a corridor stub. Core,
      unit, annex, host and stall rooms keep their shape; requested storerooms stay.
-   - *Stalls*: a room with `stalls:` (public toilets, cell blocks) gets a row of stall
-     rooms along the wall where most fit, each an annex entered only from the room, with
+   - *Stalls*: a room with `stalls:` (public toilets, cell blocks, coffin halls) gets a row
+     of stall rooms along the wall where most fit (`sides: 2`: one along each of two
+     opposite walls if both fit; a coffin hall's pods either side of its aisle), each the
+     size of the stall's first template and an annex entered only from the room, with
      a passage in front (`passage`, at least the `min_side` of what's left); places are
      skipped if the rest would lose its door to circulation, narrow gaps join a stall.
      What's left can become another type (`rest`: a cell block's `lockup`); if no stall
@@ -223,6 +226,13 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      Stalls have 1-cell doors so the 2 × 2 wc fits in front of the door clearance; their
     `front` (the side towards the passage) is where the openings stage puts the door, so a
     stall at the end of the row doesn't open into its flank.
+   - *Templates* (`templates:` of a room: stalls, holding cells, coffin pods): small rooms
+     laid out in advance, drawn like a group with the door in the south wall (`door`: its
+     first cell). The openings stage puts the door of a room whose wall has a template's
+     length at the template's spot (or the mirrored one); furnishing gives a rectangular
+     room of a template's size whose one door is there exactly the template's objects,
+     turned to face the door and mirrored if need be. Other shapes (a stall widened by a
+     gap) use the furniture rules.
 6. **Order**: required → normal → optional; fixed counts before `share` rooms, which shrink
    or split instead of crowding others out. `fill` rooms take the rest, preferring rooms that
    need windows on facades and windowless ones inside; `fill` rooms with
@@ -394,7 +404,7 @@ nightstands).
 all (meeting rooms: round, standard, long or U-shaped table).
 Walkable objects (stairs, elevator car, rugs) may cover door clearances and never block. A
 placement is rejected if it covers another object or a door's clearance (as deep as the door
-is wide) or splits the room's free floor; a ring test around the object avoids most flood
+is wide on the side the leaf swings into, one cell on the other) or splits the room's free floor; a ring test around the object avoids most flood
 fills.
 
 ### Lights, security, condition

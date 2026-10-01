@@ -18,7 +18,7 @@ from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
 from roomplanner.params import EntranceKind, Wealth
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.registry import register
-from roomplanner.rules import FurnitureRule, GroupSpec, ObjectSpec, Placement
+from roomplanner.rules import FurnitureRule, GroupPart, GroupSpec, ObjectSpec, Placement
 
 type Rect = tuple[int, int, int, int, Side]  # x, y, w, h, facing
 
@@ -49,7 +49,10 @@ class RulesFurnishing:
                 if room is hatch:
                     # After the stairs, so they stand where they do on the other floors.
                     rules = [*rules, FurnitureRule(object="roof_hatch", placement=Placement.CORNER)]
-                if rules:
+                if (fixed := template_layout(ctx, floor, room)) is not None:
+                    wealth = object_wealth(ctx, room)
+                    objects += [replace(o, wealth=wealth) for o in fixed]
+                elif rules:
                     clearance = clearances.get(room.id, frozenset())
                     wealth = object_wealth(ctx, room)
                     frame = _RoomFrame(room, clearance, solid, (room is hatch, odd))
@@ -993,6 +996,82 @@ def _turn(side: Side, facing: Side) -> Side:
     """`side` of a group drawn facing S, once the group faces `facing`."""
     steps = _CLOCKWISE.index(facing) - _CLOCKWISE.index(Side.S)
     return _CLOCKWISE[(_CLOCKWISE.index(side) + steps) % 4]
+
+
+def template_layout(ctx: Context, floor: Floor, room: Room) -> list[PlacedObject] | None:
+    """The objects of the room's template of its size whose door is where the room's is
+    (turned to face the door, mirrored if need be); None if no template fits."""
+    templates = ctx.rules.spec(room.type).templates
+    if not templates:
+        return None
+    xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
+    x0, y0 = min(xs), min(ys)
+    w, h = max(xs) - x0 + 1, max(ys) - y0 + 1
+    if len(room.cells) != w * h:
+        return None
+    doors: set[tuple[Cell, Side]] = set()  # (cell inside, wall) of each door cell
+    for door in floor.openings:
+        if door.kind is OpeningKind.DOOR:
+            for edge in door.edges:
+                a, b = edge.cells()
+                for inside, outside in ((a, b), (b, a)):
+                    if inside in room.cells and outside not in room.cells:
+                        side = next(s for s in Side if inside.neighbour(s) == outside)
+                        doors.add((inside, side))
+    if len({side for _, side in doors}) != 1:
+        return None
+    facing = next(iter(doors))[1]
+    objects = ctx.rules.objects
+    for template in templates:
+        along, deep = template.size
+        if (w, h) != ((along, deep) if facing in (Side.N, Side.S) else (deep, along)):
+            continue
+        rect = (x0, y0, w, h, facing)
+        width = len(doors)
+        for group, at in (
+            (template, template.door),
+            (_mirrored(template, objects), along - template.door - width),
+        ):
+            spots = {_template_cell(u, deep - 1, along, deep, rect) for u in range(at, at + width)}
+            if spots != {cell for cell, _ in doors}:
+                continue
+            return [
+                PlacedObject(
+                    part.object, px, py, pw, ph, turned, room.id, not objects[part.object].walkable
+                )
+                for part, (px, py, pw, ph, turned) in zip(
+                    group.parts, group_parts(group, objects, rect), strict=True
+                )
+            ]
+    return None
+
+
+def _mirrored(group: GroupSpec, objects: dict[str, ObjectSpec]) -> GroupSpec:
+    """The group mirrored along its wall (west and east swapped)."""
+    along = group.size[0]
+    parts: list[GroupPart] = []
+    for part in group.parts:
+        size = objects[part.object].size
+        lw = size[0] if part.facing in (Side.N, Side.S) else size[1]
+        facing = {Side.E: Side.W, Side.W: Side.E}.get(part.facing, part.facing)
+        parts.append(
+            GroupPart(object=part.object, at=(along - part.at[0] - lw, part.at[1]), facing=facing)
+        )
+    return GroupSpec(size=group.size, parts=parts)
+
+
+def _template_cell(u: int, v: int, along: int, deep: int, rect: Rect) -> Cell:
+    """Cell (u, v) of a group drawn facing S, once placed at `rect` (as `group_parts`)."""
+    x0, y0, _, _, facing = rect
+    match facing:
+        case Side.S:
+            return Cell(x0 + u, y0 + v)
+        case Side.N:
+            return Cell(x0 + along - u - 1, y0 + deep - v - 1)
+        case Side.E:
+            return Cell(x0 + v, y0 + along - u - 1)
+        case Side.W:
+            return Cell(x0 + deep - v - 1, y0 + u)
 
 
 def group_parts(group: GroupSpec, objects: dict[str, ObjectSpec], rect: Rect) -> list[Rect]:
