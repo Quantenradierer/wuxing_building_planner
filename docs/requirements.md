@@ -245,8 +245,6 @@ Decided by the author (2026-09-27):
 - Tactical layer: the unused `cover` field was removed from objects.
 
 Requested by the author (2026-09-27), still open:
-- Supermarkets rarely have a second floor; when they do, the stairs are public stairs on
-  the sales floor, not in a separate stairwell.
 - Nightclubs need a DJ table.
 
 Done from that list (2026-10-01):
@@ -261,6 +259,12 @@ Done from that list (2026-10-01):
   Small rooms (pods, toilet stalls, holding cells) are laid out from `templates:` (size,
   door, objects) instead of being furnished by rules. Door clearances are as deep as the
   door is wide only on the side the leaf swings into, one cell on the other.
+- Supermarkets with more than one floor have public stairs on the sales floor instead of
+  a stairwell: 5 × 10 cells against the hall's back edge, open to it on the long side and
+  one end (`place: hall` core entry, `open: 1`); the freight elevator stays in the back of
+  house. The hall then needs 15 cells of depth instead of 12, so L, T and U footprints need
+  arms 3 cells thicker (120 random 2–3 floor supermarkets: 16 rejected as too small for
+  their shape, 8 before). One floor stays the default.
 - Drone rooms are tidy: docks stand on one lattice (`grid`, 1 m apart, 0.5 m from the
   walls) and racks side by side along one wall (`perimeter`), in drone bays and rigger
   workshops; they were scattered. Bays in buildings (6–9 cells wide) hold 1–5 docks.

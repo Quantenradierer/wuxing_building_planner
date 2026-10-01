@@ -12,6 +12,13 @@ rooms:
       - {object: display_case, placement: wall, count: [0, 2]}
       - {object: atm, placement: wall, count: [0, 1]}
       - {object: pay_station, placement: wall, count: [0, 2]}   # credstick readers
+  public_stairs:        # open stairs on the sales floor, against its back edge
+    area: [40, 120]
+    min_side: 5
+    open: 1               # no walls to the hall on its long side and one end
+    transit: false
+    furniture:
+      - {object: stairs, placement: fill, landing: 2, reach: 8}   # from the open end
   stockroom:
     area: [40, 100000]
     min_side: 6

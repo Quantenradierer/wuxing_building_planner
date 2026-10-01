@@ -43,7 +43,11 @@ MOVE_NONE, MOVE_NORMAL = 0, 20
 DOOR_NONE, DOOR_DOOR = 0, 1
 DOOR_CLOSED, DOOR_OPEN, DOOR_LOCKED = 0, 1, 2
 
-TRANSPORT = {"stairwell": "stairs", "elevator": "elevator_car"}  # room type -> object kind
+TRANSPORT = {
+    "stairwell": "stairs",
+    "public_stairs": "stairs",
+    "elevator": "elevator_car",
+}  # room type -> object kind
 ASSET_ROOT = "roomplanner"
 DARKNESS = 0.6  # scene darkness when the VTT does the lighting
 
@@ -219,7 +223,7 @@ class _Scene:
                 (o for o in self.floor.objects if o.room == room.id and o.kind == kind), None
             )
             up, down = self._halves(room, vehicle)
-            label = "Stairs" if room.type == "stairwell" else "Elevator"
+            label = "Elevator" if room.type == "elevator" else "Stairs"
             regions.append(self._region(key, "arrival", f"{label} (arrive)", self._arrival(room)))
             for target, half, direction in ((above, up, "up"), (below, down, "down")):
                 if target is None:

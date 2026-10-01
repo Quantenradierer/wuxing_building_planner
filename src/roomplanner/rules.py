@@ -337,6 +337,11 @@ class CoreEntry(_Strict):
     room: str
     size: Range
     when: str | None = None
+    place: Literal["hall"] | None = Field(
+        default=None,
+        description="hall: in the hall against its back edge instead of the core slot "
+        "(public stairs on a sales floor; hall layout only)",
+    )
 
     @model_validator(mode="after")
     def _check_when(self) -> Self:

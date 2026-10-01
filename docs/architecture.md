@@ -286,6 +286,11 @@ end-side service door into a back-of-house room.
 (across the short end if the street is there, else along the facade): the church's
 narthex, which the portal opens into and the nave opens onto (`connect`; circulation rooms
 that connect keep a wall with a door between them).
+Core entries with `place: hall` (the supermarket's `public_stairs`) stand in the main part's
+hall instead of the core slot: against its back edge, long side along it, with at least the
+hall room's `min_side` of hall left at each end that isn't an end of the hall, and clear of
+connector stubs entering from behind; the hall's minimum depth grows by their depth. The
+room type is `open: 1`, so it has no walls towards the hall (its long side and one end).
 
 ### Room layout
 
@@ -365,7 +370,8 @@ facing the door's wall, then the door, without randomness: the wcs of a row of s
 face their doors), `fill` (the room's rectangle at its door, into
 circulation first, all across and backed against the far wall, facing the door; `landing`
 cells stay free at the door, at most `reach` deep; the size comes from the room, not the
-catalog: stairs span the stairwell, the elevator car is the shaft), `end` (the
+catalog: stairs span the stairwell, the elevator car is the shaft; a room without a door,
+like open public stairs, takes the open side with the most room behind it), `end` (the
 middle of the short wall farthest from the doors: the altar), `fixed` (a corner decided by
 the room's shape only: parking ramps line up across levels), `center`, `scatter`, `near_exit`
 (checkouts), `wall` with `near_room: <type>` (as close to such a room as possible: the stage

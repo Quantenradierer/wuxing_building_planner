@@ -436,8 +436,9 @@ class RoomFurnisher:
         """The room's rectangle at its door (to circulation first), all across, backed against
         the far wall and facing the door; `landing` cells stay free at the door, and it is at
         most `reach` deep. Only doors decide, so a core room gets it at the same spot on
-        every floor."""
-        doors = self._doors()
+        every floor. An open room without a door (public stairs) takes the open side it is
+        deepest from."""
+        doors = self._doors() or self._open_sides()
         if not doors:
             return []
         inside, side = doors[0]
@@ -475,6 +476,23 @@ class RoomFurnisher:
                 side = next(s for s in Side if inside.neighbour(s) == outside)
                 found.append((not circulation, inside, side))
         return [(cell, side) for _, cell, side in sorted(found)]
+
+    def _open_sides(self) -> list[tuple[Cell, Side]]:
+        """(cell inside, side of the room) of each edge into another room without a wall,
+        the sides with the most room behind them first."""
+        x0, y0, x1, y1 = self.box
+        found: list[tuple[int, Cell, Side]] = []
+        for cell in self.cells:
+            for side in Side:
+                outside = cell.neighbour(side)
+                if outside in self.cells or Edge.of(cell, side) in self.floor.walls:
+                    continue
+                if self.floor.room_at(outside) is None:
+                    continue
+                extent = y1 - y0 if side in (Side.N, Side.S) else x1 - x0
+                found.append((-extent, cell, side))
+        found.sort(key=lambda f: (f[0], f[1], list(Side).index(f[2])))
+        return [(cell, side) for _, cell, side in found]
 
     def _largest_rect(self, cell: Cell) -> tuple[int, int, int, int]:
         """(x0, y0, x1, y1) of the largest rectangle of room cells containing `cell`."""

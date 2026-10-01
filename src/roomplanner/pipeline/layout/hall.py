@@ -11,10 +11,19 @@ from __future__ import annotations
 import random
 
 from roomplanner.errors import RulesError
-from roomplanner.pipeline.base import Context
+from roomplanner.pipeline.base import AllocationError, Context, PlannedRoom
 from roomplanner.pipeline.layout.corridor import CorridorLayout, Part
-from roomplanner.pipeline.layout.frame import Band, BandKind, Frame, Grid, LocalSide
+from roomplanner.pipeline.layout.frame import (
+    Band,
+    BandKind,
+    Frame,
+    Grid,
+    Interval,
+    LocalSide,
+    free_intervals,
+)
 from roomplanner.pipeline.registry import register
+from roomplanner.rules import CoreEntry
 
 BACK_OF_HOUSE_SHARE = 0.3  # of the depth, within the program's strip_depth
 
@@ -82,6 +91,48 @@ class HallLayout(CorridorLayout):
             v += size
         return Part(frame, Grid.centred(program.facade.module, frame.length), bands)
 
+    def _hall_core(
+        self, ctx: Context, main: Part, entries: list[CoreEntry], rng: random.Random
+    ) -> list[PlannedRoom]:
+        """Public stairs in the hall: side by side against its back edge, long side along
+        it, open to the hall (see `open`). Hall is left at both ends if it can be, else
+        they stand at an end of the hall (the emergency exit there is in the middle of the
+        hall's depth, clear of them); they keep clear of connector stubs entering the hall
+        from behind."""
+        band = next(b for b in main.bands if b.kind is BandKind.HALL)
+        sizes = [sorted(e.size) for e in entries]  # (deep, long)
+        deep = max(d for d, _ in sizes)
+        width = sum(long for _, long in sizes)
+        gap = _hall_room_min(ctx)
+        behind = main.bands[band.index + 1 if band.index == 0 else band.index - 1]
+        stubs = main.reserved.get(behind.index, [])
+        inside: list[int] = []  # hall at both ends
+        flush: list[int] = []  # at an end of the hall (or of a piece of it)
+        for span in (
+            free_intervals(main.frame.length, main.blocked(band))
+            if band.depth - deep >= gap
+            else []
+        ):
+            for u0 in range(span.u0, span.u1 - width + 1):
+                stairs = Interval(u0, u0 + width)
+                if any(stairs.overlaps(s) for s in stubs):
+                    continue
+                left, right = u0 - span.u0, span.u1 - stairs.u1
+                if left >= gap and right >= gap:
+                    inside.append(u0)
+                elif (left >= gap or left == 0) and (right >= gap or right == 0):
+                    flush.append(u0)
+        if not inside and not flush:
+            raise AllocationError("no space for the stairs in the hall")
+        u0 = rng.choice(inside or flush)
+        back_at_v1 = band.index == 0  # the hall's back edge borders the corridor or strip
+        rooms: list[PlannedRoom] = []
+        for entry, (d, long) in zip(entries, sizes, strict=True):
+            v0, v1 = (band.v1 - d, band.v1) if back_at_v1 else (band.v0, band.v0 + d)
+            rooms.append(PlannedRoom(entry.room, main.frame.rect(u0, u0 + long, v0, v1)))
+            u0 += long
+        return rooms
+
 
 def _has_corridor(ctx: Context, length: int | None = None) -> bool:
     """A service corridor at this main part length (unknown: the building's longer side)."""
@@ -92,6 +143,16 @@ def _has_corridor(ctx: Context, length: int | None = None) -> bool:
 
 
 def _hall_min(ctx: Context) -> int:
+    """Minimum hall depth: deeper with stairs in it, so the hall stays wide enough beside them."""
     if ctx.rules.program.hall is None:
         raise RulesError(f"{ctx.rules.program.building}: the hall layout needs `hall:` settings")
-    return ctx.rules.program.hall.min_depth
+    in_hall = [min(c.size) for c in ctx.rules.active_core(ctx.params) if c.place == "hall"]
+    stairs = max(in_hall) + _hall_room_min(ctx) if in_hall else 0
+    return max(ctx.rules.program.hall.min_depth, stairs)
+
+
+def _hall_room_min(ctx: Context) -> int:
+    """The largest `min_side` of the hall rooms (sales floor, stockroom) of all floor roles."""
+    roles = ctx.rules.program.floor_roles.values()
+    halls = {e.room for role in roles for e in role.rooms if e.place == "hall"}
+    return max((ctx.rules.spec(room).min_side for room in halls), default=0)

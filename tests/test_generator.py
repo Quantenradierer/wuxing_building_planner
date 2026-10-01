@@ -95,6 +95,38 @@ def test_service_door_prefers_the_loading_bay() -> None:
     assert [r.type for r in rooms if r is not None] == ["loading_bay"]
 
 
+@pytest.mark.parametrize(
+    ("shape", "seed"), [(Shape.RECTANGLE, 1), (Shape.RECTANGLE, 2), (Shape.T, 18), (Shape.L, 4)]
+)
+def test_supermarket_stairs_are_open_stairs_on_the_sales_floor(shape: Shape, seed: int) -> None:
+    building = generate(
+        make_params(
+            building_type=BuildingType.SUPERMARKET,
+            width=70 if shape is Shape.T else 56,
+            depth=33 if shape is Shape.T else 46,
+            floors_above=2,
+            floors_below=1,
+            shape=shape,
+            seed=seed,
+        )
+    )
+    assert not hard_violations(building)
+    for floor in building.floors:
+        assert not any(r.type == "stairwell" for r in floor.rooms)
+        stairs = next(r for r in floor.rooms if r.type == "public_stairs")
+        hall = {"sales_floor"} if floor.level >= 0 else {"stockroom"}
+        neighbours = {
+            room.type
+            for c in stairs.cells
+            for side in Side
+            if Edge.of(c, side) not in floor.walls
+            and (room := floor.room_at(c.neighbour(side))) is not None
+            and room is not stairs
+        }
+        assert neighbours and neighbours <= hall | {"corridor"}  # open to the hall
+        assert any(o.kind == "stairs" and o.room == stairs.id for o in floor.objects)
+
+
 def test_top_floor_stairwell_has_a_roof_hatch() -> None:
     building = generate(make_params(floors_above=3))
     top = building.floor(2)

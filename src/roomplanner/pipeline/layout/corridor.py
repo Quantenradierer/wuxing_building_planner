@@ -214,7 +214,8 @@ class CorridorLayout:
                 if part.cross is None:
                     raise AllocationError("no space for the cross corridor")
 
-        core_entries = ctx.rules.active_core(ctx.params)
+        core = ctx.rules.active_core(ctx.params)
+        core_entries = [c for c in core if c.place is None]
         if core_entries:
             band = self._core_band(main, street, rng)
             skeleton.core_band = band
@@ -227,7 +228,15 @@ class CorridorLayout:
                 rng,
                 skeleton.lobby_slice,
             )
+        if in_hall := [c for c in core if c.place == "hall"]:
+            skeleton.core_rooms += self._hall_core(ctx, main, in_hall, rng)
         return skeleton
+
+    def _hall_core(
+        self, ctx: Context, main: Part, entries: list[CoreEntry], rng: random.Random
+    ) -> list[PlannedRoom]:
+        """Core rooms with `place: hall`; only the hall layout has a hall."""
+        raise RulesError(f"{ctx.rules.program.building}: `place: hall` core rooms need a hall")
 
     def _part(
         self,
@@ -542,6 +551,7 @@ class CorridorLayout:
                 balcony_role = below
         balcony_band = self._balcony_band(ctx, main) if balcony_role is not None else None
         cut: frozenset[Cell] = frozenset()
+        core_cells = frozenset(c for r in skeleton.core_rooms for c in r.cells)
         for part in skeleton.parts:
             part_slice = slice_ if part is main else None
             for band in part.bands:
@@ -559,6 +569,7 @@ class CorridorLayout:
                     street = part.frame.local(ctx.params.street_side)
                     for span in free_intervals(part.frame.length, part.blocked(band)):
                         cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
+                        cells -= core_cells  # public stairs stand in the hall
                         kind = hall if span.width >= minimum else "corridor"
                         if foyer is not None and kind == hall:
                             lobby = _foyer(part.frame, span, band, street, foyer.depth, minimum)
