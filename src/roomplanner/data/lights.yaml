@@ -67,6 +67,12 @@ rooms:
   ups_room:      {spacing: 10, radius: 6, colour: "#ffd9a0", intensity: 0.45}
   cooling_plant: {spacing: 10, radius: 6, colour: "#ffd9a0", intensity: 0.45}
   suppression_room: {radius: 4, colour: "#ffd9a0", intensity: 0.4}
+  gaming_floor:  {spacing: 8, radius: 8, colour: "#ffd9a0", intensity: 0.7}
+  high_roller_room: {colour: "#ffcc66", intensity: 0.55}
+  cash_cage:     {colour: "#f4fbff", intensity: 0.8}
+  count_room:    {colour: "#f4fbff", intensity: 0.85}
+  surveillance_room: {colour: "#8fd6ff", intensity: 0.35}
+  sky_lounge:    {spacing: 8, radius: 7, colour: "#ffcc66", intensity: 0.55}
 
 accents:
   stairwell:
@@ -104,6 +110,9 @@ accents:
     - {kind: neon, radius: 6, colour: "#00ff9c", intensity: 0.5}          # rack status LEDs
   noc:
     - {kind: neon, radius: 6, colour: "#00e5ff", intensity: 0.6}          # the video wall
+  gaming_floor:
+    - {kind: neon, radius: 8, colour: "#ffcc66", intensity: 0.6}           # slot banks, signs
+    - {kind: neon, radius: 8, colour: "#ff3fa4", intensity: 0.5}
 
 entrances:
   main: {kind: sign, radius: 8, colour: "#ff3fa4", intensity: 0.9}

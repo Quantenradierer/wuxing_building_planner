@@ -82,6 +82,14 @@ CASES: dict[str, dict[str, Any]] = {
         "wealth": Wealth.LUXURY,
         "seed": 3,
     },
+    "casino": {
+        "building_type": BuildingType.CASINO,
+        "width": 52,
+        "depth": 36,
+        "floors_above": 3,
+        "seed": 7,
+        "security": Security.CORPORATE,
+    },
 }
 
 

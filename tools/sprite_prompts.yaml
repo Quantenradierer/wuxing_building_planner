@@ -21,6 +21,10 @@ exclude:
   meeting_table: chair
   round_table: chair
   table: chair
+  card_table: chair
+  roulette_table: chair
+  slot_machine: stool
+  count_table: chair
   bar_counter: stool
   bed: nightstand
   double_bed: nightstand
@@ -159,6 +163,12 @@ subjects:
   shipping_container: "rusty red corrugated steel shipping container seen from straight above, only the roof visible"
   crac_unit: "white computer room air conditioner cabinet seen from straight above, only the flat top visible, two round fan grilles, vents along the bottom edge"
   chiller: "large industrial water chiller seen from straight above, grey steel housing, two big round fan grilles on top, insulated pipes at the top edge"
+  card_table: "casino blackjack table seen from straight above, green felt half-moon layout, straight dealer edge with a chip tray at the top edge, curved player side at the bottom edge, no chairs"
+  roulette_table: "casino roulette table seen from straight above, roulette wheel at the right end, green felt betting layout with red and black numbers, no chairs"
+  craps_table: "casino craps table seen from straight above, long oval tub with padded rail, green felt layout with betting areas, dice"
+  slot_machine: "casino slot machine cabinet seen from straight above, only the flat top visible, glowing screen edge and buttons at the bottom edge, no stool"
+  cash_cart: "locked steel cash trolley seen from straight above, flat lid with a padlock, small wheels at the corners"
+  count_table: "long steel counting table seen from straight above, banknote counting machines and stacks of cash on the top, no chairs"
 
 # Wealth variants, cut to <kind>.<tier>.png. The renderer falls back towards the default
 # sprite: luxury uses the .high variant, low the default one.

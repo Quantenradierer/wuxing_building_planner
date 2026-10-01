@@ -91,6 +91,7 @@ Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2,
 | dive_bar    | hall            | taproom: bar with stools, booths, pool table        |
 | chop_shop   | hall            | workshop with car lifts, paint booth, parts storage |
 | data_centre | corridor        | server halls behind mantraps, NOC, UPS and cooling |
+| casino      | hall            | gaming floor, high-roller salons, cage → count room → vault |
 
 ## Building rules
 
@@ -184,6 +185,12 @@ YAML: corp branch office (`corp_office`), street doc (`street_doc`), coffin bloc
 (`coffin_block`), convenience store (`stuffer_shack`).
 Later: police station, parking garage, factory and church, plus the variants dive bar
 (`dive_bar`, of the nightclub) and chop shop (`chop_shop`, of the warehouse).
+Casino (2026-10-01, hall): a gaming floor with slots along the walls, slot banks, card,
+roulette and craps tables and a bar; high-roller salons; a sky lounge with restaurant tables
+on the top floor of taller casinos. The money path is a unit (`cage_complex`): the cash
+cage opens onto the floor, the count room lies behind it and the vault behind that (in deep
+rows beside it); only the cage has a door out, the others have the tier's locks. The eye
+in the sky (surveillance room) is on the first upper floor, else on the ground floor.
 
 ## Roadmap (v2)
 
@@ -214,9 +221,9 @@ All seven milestones are implemented (2026-09-26).
 - No fire escapes (they need surroundings).
 - Adjacency preferences are limited to `near`, `next_to`, `vestibule` and door `access` lists.
 - Small footprints can be infeasible for rich tiers or big programs: cosmetic clinics,
-  supermarkets and police stations need about 36 × 36 cells (18 m), factories 40 × 40,
-  hospitals 48 × 48, others 32 × 32 (data centres too: smaller ones lack the space for
-  the ground floor's NOC, security post, loading dock and a server hall with its mantrap).
+  supermarkets, police stations and casinos need about 36 × 36 cells (18 m), factories
+  40 × 40, hospitals 48 × 48, others 32 × 32 (data centres too: smaller ones lack the space
+  for the ground floor's NOC, security post, loading dock and a server hall with its mantrap).
 - Very large buildings (≈100 × 100 m, several floors) take a few seconds to generate.
 - The ASCII renderer is a debug view.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
@@ -394,6 +401,11 @@ Known weaknesses:
   it to the doors saved only ~5 % and cut closets off; smaller units would help more.
 - Small apartment buildings (one or two segments per floor) still keep leftover
   storerooms behind small service rooms; flat closets (`front_fill`) are ~3 % of the area.
+- Casinos: the back-of-house rooms open straight onto the gaming floor (no staff
+  corridor); the casino objects (card, roulette and craps tables, slot machines, cash cart,
+  count table) have prompts but no sprites yet and are drawn with stand-ins (pool table,
+  arcade machine, laundry cart, lab bench). About 1 in 250 multi-floor casinos keeps a
+  1-cell-wide hallway end between two toilets (hard warning).
 - Basements are mostly mechanical rooms side by side (one laundry, staff room and
   storeroom); a garage level would be more realistic for big buildings.
 

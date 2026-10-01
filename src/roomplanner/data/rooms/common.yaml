@@ -233,6 +233,7 @@ rooms:
     min_side: 4
     windows: forbidden
     transit: false
+    access: [count_room]      # a casino vault: entered through the count room
     furniture:
       - {object: deposit_boxes, placement: wall, per: 6, count: [1, 6]}
       - {object: safe, placement: corner, count: [1, 2]}

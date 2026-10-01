@@ -1,0 +1,80 @@
+# Casinos: gaming floor, high-roller salons and the money path (cage, count room, vault).
+# Units are cells (1 cell = 0.5 m): lengths in cells, areas in number of cells.
+rooms:
+  gaming_floor:         # the hall: slots along the walls, table games in the middle
+    area: [100, 100000]
+    min_side: 10
+    door_width: 4
+    furniture:
+      - {object: guard_post, placement: near_exit}                     # door security
+      - {object: security_gate, placement: near_exit, count: [0, 2], security: [corporate, aaa]}
+      - {object: bar_set, placement: wall}
+      - {object: craps_table, placement: center, count: [0, 1], wealth: [middle, high, luxury]}
+      - {object: roulette_set, placement: center, count: [1, 2]}
+      - {object: card_table_set, placement: grid, per: 70, count: [2, 10], aisle: 3, margin: 4}
+      - {object: slot_machine, placement: perimeter, per: 16, count: [6, 40]}
+      - {object: stool, placement: at, at: slot_machine, beside: [front]}
+      - {object: slot_bank, placement: scatter, per: 200, count: [0, 4]}
+      - {object: atm, placement: wall, count: [1, 2]}
+      - {object: plant, placement: corner, count: [1, 4]}
+      - {object: trash_bin, placement: wall, count: [1, 2]}
+  high_roller_room:     # private salon: one table, a host's bar, sofas
+    wealth_shift: +1          # fancier than the rest of the building
+    area: [40, 120]
+    min_side: 6
+    windows: optional
+    furniture:
+      - {object: card_table_set, placement: center}
+      - {object: roulette_set, placement: wall, count: [0, 1]}
+      - {object: counter, placement: wall, count: [0, 1]}            # the host's bar
+      - {object: sofa_set, placement: wall, count: [0, 1]}
+      - {object: rug, placement: center, count: [0, 1]}
+      - {object: plant, placement: corner, count: [1, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+  cage_complex:         # a unit, subdivided per the program's `units:` (cage, count room, vault)
+    area: [60, 240]
+    min_side: 9
+    windows: forbidden
+  cash_cage:            # the cashier cage on the floor: teller windows, chips and cash
+    area: [12, 160]
+    min_side: 3
+    windows: forbidden
+    furniture:
+      - {object: counter, placement: wall, count: [2, 4]}            # teller windows
+      - {object: stool, placement: at, at: counter, beside: [front], count: [0, 1]}
+      - {object: safe, placement: corner, count: [1, 2]}
+      - {object: cash_cart, placement: wall, count: [1, 2]}
+      - {object: terminal, placement: corner, count: [0, 1]}
+  count_room:           # where the drop is counted: tables with bill counters, carts
+    area: [24, 90]
+    min_side: 5
+    windows: forbidden
+    access: [cash_cage]
+    furniture:
+      - {object: count_table, placement: wall, count: [1, 2]}
+      - {object: chair, placement: at, at: count_table, beside: [front], count: 2}
+      - {object: cash_cart, placement: wall, count: [1, 3]}
+      - {object: safe, placement: corner, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}        # the camera feed
+  surveillance_room:    # the eye in the sky: camera walls over every table
+    area: [24, 80]
+    min_side: 5
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: console, placement: wall, count: [2, 4]}
+      - {object: wall_screen, placement: wall, count: [2, 5]}
+      - {object: server_rack, placement: wall, count: [0, 2]}
+      - {object: rigger_cocoon, placement: wall, count: [0, 1], security: [corporate, aaa]}
+      - {object: coffee_machine, placement: corner, count: [0, 1]}
+  sky_lounge:           # the top floor's hall: restaurant tables, a bar, sofas by the windows
+    area: [80, 100000]
+    min_side: 10
+    door_width: 3
+    furniture:
+      - {object: bar_set, placement: wall}
+      - {object: sofa_set, placement: wall, per: 120, count: [1, 6]}
+      - {object: dining_set, placement: grid, per: 30, count: [4, 40], aisle: 3, margin: 4}
+      - {object: plant, placement: corner, count: [2, 4]}
+      - {object: coat_rack, placement: corner, count: [0, 1]}
+      - {object: wall_screen, placement: wall, count: [0, 2]}

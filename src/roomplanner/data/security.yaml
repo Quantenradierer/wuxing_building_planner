@@ -8,6 +8,7 @@ tiers:
     rooms:
       unit: {lock: mechanical}           # front doors of apartments
       police_lobby: {lock: mechanical}   # into the station from the public front office
+      count_room: {lock: mechanical}     # casino: behind the cage
   low:
     rating: 2
     exterior: {lock: mechanical}
@@ -24,7 +25,9 @@ tiers:
       cashier_booth: {lock: mechanical, material: security}
       data_hall: {lock: mechanical, material: security}
       mantrap: {lock: mechanical}
-    cameras: {entrances: true, rooms: [sales_floor]}
+      count_room: {lock: mechanical, material: security}
+      surveillance_room: {lock: mechanical}
+    cameras: {entrances: true, rooms: [sales_floor, gaming_floor]}
   corporate:
     rating: 4
     exterior: {lock: maglock, material: security}
@@ -56,6 +59,8 @@ tiers:
       meet_me_room: {lock: cardreader, material: security}
       ups_room: {lock: mechanical}
       cooling_plant: {lock: mechanical}
+      count_room: {lock: cardreader, material: security, rating: 5}
+      surveillance_room: {lock: cardreader, material: security}
       executive_office: {lock: cardreader}
       board_room: {lock: cardreader}
       pharmacy: {lock: cardreader, material: security}
@@ -66,7 +71,8 @@ tiers:
       stockroom: {lock: maglock}
       utility: {lock: mechanical}
     cameras: {entrances: true, corridor_per: 120, rooms: [lobby, reception_lobby, police_lobby, sales_floor, server_room, waiting_room,
-                                                       data_hall, mantrap]}
+                                                       data_hall, mantrap, gaming_floor, cash_cage,
+                                                       count_room]}
     alarm_panels: true
     motion_sensors: [server_room, archive, host_room, vault, data_hall]
     floodlights: {kind: flood, radius: 10, colour: "#f4fbff", intensity: 0.9}
@@ -110,6 +116,8 @@ tiers:
       meet_me_room: {lock: biometric, material: security}
       ups_room: {lock: cardreader}
       cooling_plant: {lock: cardreader}
+      count_room: {lock: biometric, material: security, rating: 7}
+      surveillance_room: {lock: biometric, material: security}
       executive_office: {lock: biometric}
       board_room: {lock: biometric}
       pharmacy: {lock: biometric, material: security}
@@ -121,10 +129,11 @@ tiers:
       utility: {lock: cardreader, material: security}
       corridor: {lock: cardreader}
     cameras: {entrances: true, corridor_per: 60, rooms: [lobby, reception_lobby, police_lobby, sales_floor, server_room, waiting_room, stairwell, security_room, archive, lab, executive_office,
-                                                      data_hall, mantrap, noc]}
+                                                      data_hall, mantrap, noc, gaming_floor, cash_cage,
+                                                      count_room, vault]}
     alarm_panels: true
     motion_sensors: [server_room, archive, executive_office, board_room, lab, stairwell, storage,
-                     host_room, vault, drone_bay, data_hall, meet_me_room]
+                     host_room, vault, drone_bay, data_hall, meet_me_room, count_room]
     floodlights: {kind: flood, radius: 12, colour: "#f4fbff", intensity: 1.0}
     furniture:
       lobby:

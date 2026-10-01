@@ -1,0 +1,88 @@
+# Units are cells: lengths in cells, areas in number of cells.
+# Casino: a gaming floor hall (slots, table games, a bar), high-roller salons, the cage
+# with count room and vault behind it, the eye in the sky, security and back of house.
+building: casino
+catalogs: [common, office, hospitality, retail, casino]
+layout: hall
+
+corridor:
+  width: 4
+  hallway_width: 3
+strip_depth: [10, 14]      # back-of-house row
+hall:
+  min_depth: 14
+  corridor_from: 1000      # never: the back rooms open straight onto the floor
+facade:
+  module: 3
+  window: 2
+cluster_filler: storage
+service_rooms: [staff_room, locker_room, storage, commercial_kitchen, security_room, utility]
+
+core:
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: elevator, size: [4, 5], when: "floors_total >= 2"}
+
+entrances:
+  main: {width: 6}         # grand doors
+  service: {width: 2}      # staff, deliveries, the armoured car
+  emergency: {width: 3}
+  roof: {width: 2}
+
+# The money path: the cage opens onto the floor; the count room is behind it, the vault
+# behind that (or beside it, off the cage, in deep rows). Only the cage has a door out.
+units:
+  cage_complex:
+    hall: cash_cage
+    hall_width: 4
+    back: [count_room, vault]
+
+floor_roles:
+  ground:
+    applies: [ground]
+    rooms:
+      - {room: gaming_floor, place: hall}
+      - {room: cage_complex, count: 1, priority: required}
+      - {room: surveillance_room, count: 1, when: "floors_total == 1", priority: required}
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: security_room, count: 1, priority: required}   # the security office
+      - {room: toilet, count: 1, near: core, priority: optional}
+      - {room: manager_office, count: 1, when: "floors_total == 1", priority: optional}
+      - {room: locker_room, count: 1, priority: optional}
+      - {room: guard_room, count: [0, 1], security: [corporate, aaa], priority: optional}
+      - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: high_roller_room, fill: true}
+      - {room: staff_room, fill: true}
+  upper:
+    applies: [upper]
+    rooms:
+      - {room: gaming_floor, place: hall}         # high-limit floor
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: surveillance_room, count: 1, when: "level == 1", priority: required}   # the eye in the sky
+      - {room: high_roller_room, count: [1, 2]}
+      - {room: manager_office, count: 1, priority: optional}
+      - {room: toilet, count: 1, near: core, priority: optional}
+      - {room: high_roller_room, fill: true}
+      - {room: office, fill: true}
+  top:                     # restaurant and lounge on top, the offices beside it
+    applies: [top]
+    rooms:
+      - {room: sky_lounge, place: hall}
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: surveillance_room, count: 1, when: "level == 1", priority: required}
+      - {room: commercial_kitchen, count: 1, wealth: [middle, high, luxury], priority: optional}
+      - {room: manager_office, count: [1, 2]}
+      - {room: high_roller_room, count: [0, 1], priority: optional}
+      - {room: toilet, count: 1, near: core, priority: optional}
+      - {room: office, fill: true}
+      - {room: high_roller_room, fill: true}
+  basement:
+    applies: [basement]
+    rooms:
+      - {room: stockroom, place: hall}
+      - {room: utility, count: 1, priority: required}
+      - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: generator_room, count: 1, when: "level + 1 == 0", priority: optional}
+      - {room: vault, count: [0, 1], security: [corporate, aaa]}
+      - {room: storage, count: [0, 1], near: core}
+      - {room: staff_room, fill: true}
+      - {room: mechanical_room, fill: true}
