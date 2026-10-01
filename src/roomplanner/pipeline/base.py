@@ -40,6 +40,7 @@ class PlannedRoom:
     leftover: bool = False  # a storeroom filling space no room fits; neighbours may absorb it
     front: Side | None = None  # the wall its door goes in if it can (stalls: towards the passage)
     hub: bool = False  # doors and walls treat it as circulation (a hall without a corridor)
+    hallway: bool = False  # a cluster's side hallway: ends after its last door
 
 
 @dataclass(frozen=True)

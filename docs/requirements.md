@@ -280,6 +280,13 @@ Requested by the author (2026-09-27), done (2026-10-01):
   the 4 × 4 rest between the entrance and two stall doors that left ~0.5 % without one
   fits a 2 × 1 sink. Toilets give up stalls until 16 cells are left for sinks
   (`rest_area`), or become a single WC.
+- Cluster hallways end after their last door (2026-10-01): they ran on to the facade
+  (clinic toilets and storage). The end joins a room beside it, which becomes irregular
+  (an L round the hallway's end) — the first rooms that aren't rectangles or a toilet
+  around its stalls. A hallway that no room needs (its rooms all open onto the corridor)
+  goes entirely. Rooms may have alcoves and wings of at least 1.5 m beyond a main
+  rectangle of their minimum size. 300 random buildings: of ~520 hallways that ran on,
+  ~410 were cut back or removed; nearly all of the rest run on one or two rows.
 
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
@@ -291,8 +298,10 @@ every type ≤ 5 % except apartments (9 %, a third of it flat closets).
 `tests/test_storage.py` keeps the share below 5 %.
 
 Known weaknesses:
-- Cluster hallways run on to the facade past their last door (clinic toilets and storage),
-  and apartment and hotel floors have a corridor stub to the service door.
+- Apartment and hotel floors have a corridor stub to the service door.
+- About 1 in 10 cluster hallways still runs one or two rows (0.5–1 m) past its last
+  door; a dozen in 300 random buildings run on further where the only rooms beside the
+  end are at their size limit (toilets, electrical and security rooms).
 - Waiting rooms open onto the reception lobby only when they end up beside it (about 60 %
   in clinics and hospitals); the others open onto the corridor. The police station's
   public area is just the front office: public toilets are behind its locked door.

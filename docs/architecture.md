@@ -124,7 +124,9 @@ Invariants checked by `validation.py` (all hard unless noted):
 - Every edge between a footprint and a non-footprint cell is a wall; walls touch the
   footprint; openings lie on walls and never share edges; door swings fit their wall.
 - With rules: every room is at least `min_side` wide everywhere (circulation rooms are
-  measured across the open space they form together); core rooms (stairs,
+  measured across the open space they form together), or, if irregular, its largest
+  rectangle is at least `min_side` each way and every part beyond it (an alcove, the
+  end of a hallway it wraps round) at least 3 cells (1.5 m) wide; core rooms (stairs,
   elevators) occupy the same cells on every floor and have their doors into circulation
   at the same edges; rooms that need windows have one (soft).
 - Objects lie inside their room and don't overlap; blocking objects keep door clearances
@@ -216,11 +218,22 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
      a neighbour sharing one whole side if the union stays a rectangle and the neighbour
      within 1.4x its maximum; slivers up to 8 cells thick may widen a corridor stub. Core,
      unit, annex, host and stall rooms keep their shape; requested storerooms stay.
+   - *Hallway ends* (`layout/hallways.py`, after absorbing): a cluster's side hallway is
+     cut back to its last door: every room that reaches circulation only through it keeps
+     as long a wall on it as before, up to its door width plus a cell either side; cells
+     where an exterior door is planned stay hallway. The end joins the neighbour sharing
+     the longest wall with it (not core, unit, annex or host rooms) if it is at least
+     3 cells thick and the room stays within 1.4x its maximum (a public toilet counted
+     without its stalls, and only if it keeps as many); the room becomes irregular,
+     wrapped round the hallway's end. A hallway no room needs goes entirely. Ends of
+     one or two rows stay hallway.
    - *Stalls*: a room with `stalls:` (public toilets, cell blocks, coffin halls) gets a row
      of stall rooms along the wall where most fit (`sides: 2`: one along each of two
      opposite walls if both fit; a coffin hall's pods either side of its aisle), each the
      size of the stall's first template and an annex entered only from the room, with
-     a passage in front (`passage`, at least the `min_side` of what's left); places are
+     a passage in front (`passage`, at least the `min_side` of what's left; an irregular
+     room's stalls go in its largest rectangle, against walls it doesn't continue beyond,
+     and what's left is nowhere thinner than its `min_side`); places are
      skipped if the rest would lose its door to circulation, narrow gaps join a stall.
      What's left can become another type (`rest`: a cell block's `lockup`); if no stall
      fits the room becomes the `single` type (a one-person WC). Bathrooms have no stalls.

@@ -7,7 +7,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
-from roomplanner.geometry import Cell, Edge, Side, boundary_edges, connected
+from roomplanner.geometry import (
+    Cell,
+    Edge,
+    Side,
+    boundary_edges,
+    connected,
+    largest_rectangle,
+)
 from roomplanner.model import Building, Floor, OpeningKind
 from roomplanner.rules import Rules, WindowRule
 
@@ -180,7 +187,10 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
             continue
         spec = rules.spec(room.type)
         space = open_space if spec.circulation else room.cells
-        if (thinnest := _thinnest(room.cells, space)) < spec.min_side:
+        thinnest = _thinnest(room.cells, space)
+        if thinnest < spec.min_side and not (
+            not spec.circulation and _alcoved(room.cells, spec.min_side)
+        ):
             message = (
                 f"{room.type} {room.id} is {thinnest} cells wide in places, minimum {spec.min_side}"
             )
@@ -190,6 +200,19 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
             message = f"{room.type} {room.id} has no window"
             violations.append(Violation(Severity.SOFT, floor.level, message))
     return violations
+
+
+MIN_ALCOVE = 3  # cells (1.5 m): the least width of a part of a room beyond its main rectangle
+
+
+def _alcoved(cells: frozenset[Cell], min_side: int) -> bool:
+    """An irregular room: its largest rectangle is at least `min_side` each way and every
+    part beyond it (an alcove, a wing) at least MIN_ALCOVE wide."""
+    x0, y0, x1, y1 = largest_rectangle(cells)
+    if min(x1 - x0, y1 - y0) < min_side:
+        return False
+    rest = frozenset(c for c in cells if not (x0 <= c.x < x1 and y0 <= c.y < y1))
+    return not rest or _thinnest(rest, cells) >= min(MIN_ALCOVE, min_side)
 
 
 def _thinnest(cells: frozenset[Cell], space: frozenset[Cell]) -> int:

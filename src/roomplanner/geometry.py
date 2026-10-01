@@ -96,6 +96,26 @@ def rectangle(x: int, y: int, width: int, height: int) -> frozenset[Cell]:
     return frozenset(Cell(cx, cy) for cx in range(x, x + width) for cy in range(y, y + height))
 
 
+def largest_rectangle(cells: frozenset[Cell]) -> tuple[int, int, int, int]:
+    """(x0, y0, x1, y1) of the largest rectangle of the cells (the room itself if it is one)."""
+    xs, ys = [c.x for c in cells], [c.y for c in cells]
+    bx0, by0, bx1, by1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
+    best = (0, (bx0, by0, bx0 + 1, by0 + 1))
+    heights = [0] * (bx1 - bx0)
+    for y in range(by0, by1):
+        heights = [h + 1 if Cell(bx0 + i, y) in cells else 0 for i, h in enumerate(heights)]
+        for i in range(len(heights)):
+            low = heights[i]
+            for j in range(i, len(heights)):
+                low = min(low, heights[j])
+                if low == 0:
+                    break
+                area = low * (j - i + 1)
+                if area > best[0]:
+                    best = (area, (bx0 + i, y + 1 - low, bx0 + j + 1, y + 1))
+    return best[1]
+
+
 @lru_cache(maxsize=16)
 def boundary_edges(cells: frozenset[Cell]) -> frozenset[Edge]:
     """Edges separating the given cells from everything else."""

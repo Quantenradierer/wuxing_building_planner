@@ -134,3 +134,33 @@ def test_detects_objects_outside_their_room() -> None:
     stray = PlacedObject("pallet", -5, -5, 1, 1, Side.S, ground.rooms[0].id)
     broken = with_ground_floor(building, replace(ground, objects=(stray,)))
     assert any("outside room" in m for m in messages(broken))
+
+
+def test_irregular_rooms_may_have_alcoves_of_at_least_one_and_a_half_metres() -> None:
+    params = make_params()
+    building = generate(params)
+    ground = building.floor(0)
+    rules = rules_for(params.building_type, params.wealth)
+    office = next(r for r in ground.rooms if r.type == "office")
+    x0, y0 = min(c.x for c in office.cells), min(c.y for c in office.cells)
+    wide = max(c.x for c in office.cells) - x0 > max(c.y for c in office.cells) - y0
+    for width, ok in ((3, True), (2, False)):
+        # Cut a notch off one end: what is left beside it is an alcove `width` cells wide.
+        def notched(c: Cell, width: int = width) -> bool:
+            across, along = (c.y - y0, c.x - x0) if wide else (c.x - x0, c.y - y0)
+            return across >= width and along < 3
+
+        notch = frozenset(c for c in office.cells if notched(c))
+        rooms = replace_room(
+            ground,
+            office,
+            replace(office, cells=office.cells - notch),
+            Room("0.99", "storage", notch),
+        )
+        broken = with_ground_floor(building, replace(ground, rooms=rooms))
+        thin = [
+            v
+            for v in hard_violations(broken, rules)
+            if "office" in v.message and "wide" in v.message
+        ]
+        assert (not thin) is ok

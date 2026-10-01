@@ -12,7 +12,7 @@ instead. Stalls have real walls and doors, so they block sight in the VTT export
 
 from __future__ import annotations
 
-from roomplanner.geometry import Cell, Side
+from roomplanner.geometry import Cell, Side, largest_rectangle
 from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.rules import Rules, StallRule
 
@@ -29,53 +29,61 @@ def carve_stalls(
     }
     result: list[PlannedRoom] = []
     for room in rooms:
-        rule = rules.spec(room.type).stalls
-        if rule is None:
-            result.append(room)
-            continue
-        spec = rules.spec(room.type)
-        # The passage must be as wide as the room left in front of the stalls requires.
-        passage = max(rule.passage or 0, rules.spec(rule.rest or room.type).min_side)
-        size = rules.stall_size(rule)
-        result += _split(room, rule, size, passage, spec.door_width, circulation)
+        result += carve(room, rules, circulation)
     return result
+
+
+def carve(room: PlannedRoom, rules: Rules, circulation: set[Cell]) -> list[PlannedRoom]:
+    """The room split into its rest and stalls (just the room if it has no `stalls:`)."""
+    rule = rules.spec(room.type).stalls
+    if rule is None:
+        return [room]
+    spec = rules.spec(room.type)
+    minimum = rules.spec(rule.rest or room.type).min_side
+    # The passage must be as wide as the room left in front of the stalls requires.
+    passage = max(rule.passage or 0, minimum)
+    size = rules.stall_size(rule)
+    return _split(room, rule, size, (passage, minimum), spec.door_width, circulation)
 
 
 def _split(
     room: PlannedRoom,
     rule: StallRule,
     size: tuple[int, int],
-    passage: int,
+    widths: tuple[int, int],
     door: int,
     circulation: set[Cell],
 ) -> list[PlannedRoom]:
-    """`passage`: the room's own minimum side, kept free in front of the stalls."""
-    xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
-    x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
-    if len(room.cells) != (x1 - x0) * (y1 - y0):  # only plain rectangles
-        return [PlannedRoom(rule.single, room.cells, room.unit, room.entry, room.host)]
-    box = (x0, y0, x1, y1)
+    """`widths`: the passage kept free in front of the stalls and the least width of the rest
+    anywhere (the room's own minimum side)."""
+    passage, minimum = widths
+    # An irregular room (wrapped round a hallway's end) gets its stalls in its largest
+    # rectangle, against walls the room doesn't continue beyond.
+    box = largest_rectangle(room.cells)
+    x0, y0, x1, y1 = box
+    walls = {side for side in Side if not any(c in room.cells for c in beyond(box, side))}
     layouts: list[tuple[Side, ...]] = [(side,) for side in Side]
     if rule.sides == 2:  # both rows if they fit, else one
         layouts = [(Side.N, Side.S), (Side.W, Side.E), *layouts]
     best: list[tuple[Side, frozenset[Cell]]] = []  # (wall, cells) of each stall
     # Fewer stalls rather than no space for the sinks.
     for limit in range(rule.max, 0, -1):
-        for walls in layouts:
-            across = y1 - y0 if walls[0] in (Side.N, Side.S) else x1 - x0
-            if across < len(walls) * size[1] + passage:
+        for sides in layouts:
+            across = y1 - y0 if sides[0] in (Side.N, Side.S) else x1 - x0
+            if across < len(sides) * size[1] + passage or not walls.issuperset(sides):
                 continue
             for strict in (False, True):
                 ignored = circulation if strict else set[Cell]()
                 found = [
                     (side, cells)
-                    for side in walls
+                    for side in sides
                     for cells in _row(room, size, passage, ignored, side, box, limit)
                 ]
                 rest = room.cells.difference(*(cells for _, cells in found))
                 # The room must still reach circulation through a door.
-                if found and _door_run(rest, circulation) >= door:
-                    if len(found) > len(best) and len(rest) >= rule.rest_area:
+                if found and door_run(rest, circulation) >= door:
+                    roomy = len(rest) >= rule.rest_area and thinnest(rest, rest) >= minimum
+                    if len(found) > len(best) and roomy:
                         best = found
                     break
         if best:
@@ -116,7 +124,9 @@ def _row(
         return frozenset(
             c
             for c in room.cells
-            if start <= _along(c, side, x0, y0) < start + width
+            if x0 <= c.x < x1
+            and y0 <= c.y < y1
+            and start <= _along(c, side, x0, y0) < start + width
             and _depth(c, side, x0, y0, x1, y1) < depth
         )
 
@@ -151,7 +161,7 @@ def _row(
     return [cells(s0, w) for s0, w in spans]
 
 
-def _door_run(cells: frozenset[Cell], circulation: set[Cell]) -> int:
+def door_run(cells: frozenset[Cell], circulation: set[Cell]) -> int:
     """Longest straight run of walls between these cells and circulation."""
     longest = 0
     for side in Side:
@@ -183,3 +193,32 @@ def _depth(cell: Cell, side: Side, x0: int, y0: int, x1: int, y1: int) -> int:
             return cell.x - x0
         case Side.E:
             return x1 - 1 - cell.x
+
+
+def beyond(box: tuple[int, int, int, int], side: Side) -> list[Cell]:
+    """The cells just outside the box on `side`."""
+    x0, y0, x1, y1 = box
+    match side:
+        case Side.N:
+            return [Cell(x, y0 - 1) for x in range(x0, x1)]
+        case Side.S:
+            return [Cell(x, y1) for x in range(x0, x1)]
+        case Side.W:
+            return [Cell(x0 - 1, y) for y in range(y0, y1)]
+        case Side.E:
+            return [Cell(x1, y) for y in range(y0, y1)]
+
+
+def thinnest(cells: frozenset[Cell], space: frozenset[Cell]) -> int:
+    """Smallest straight extent of `space` through any of `cells`, across or along."""
+
+    def run(cell: Cell, side: Side) -> int:
+        n = 1
+        for direction in (side, side.opposite):
+            c = cell.neighbour(direction)
+            while c in space:
+                n += 1
+                c = c.neighbour(direction)
+        return n
+
+    return min(min(run(c, Side.E), run(c, Side.S)) for c in cells)

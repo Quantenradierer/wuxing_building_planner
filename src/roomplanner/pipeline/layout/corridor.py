@@ -42,6 +42,7 @@ from roomplanner.pipeline.layout.frame import (
     LocalSide,
     free_intervals,
 )
+from roomplanner.pipeline.layout.hallways import trim_hallways
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
 from roomplanner.pipeline.layout.parts import decompose, wing_frame
 from roomplanner.pipeline.layout.stalls import carve_stalls
@@ -619,6 +620,7 @@ class CorridorLayout:
         warnings += allocator.warnings
 
         rooms = absorb_leftovers(rooms, ctx.rules)
+        rooms = trim_hallways(rooms, ctx.rules, frozenset(hint for _, _, hint in hints))
         rooms = carve_stalls(_merge_corridors(rooms), ctx.rules)
         entrances = [
             EntranceRequest(kind, side, _room_index(rooms, hint), hint)

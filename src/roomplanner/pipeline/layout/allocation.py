@@ -1089,7 +1089,8 @@ class Allocator:
         used = max(sum(d for _, d in stack) for stack in cluster.stacks)
         back = self._leftover_room(segment, span.width, band.depth - used) if used else None
         depth = used if back is not None else band.depth
-        rooms.append(PlannedRoom("corridor", self._depth_rect(segment, hallway, 0, depth)))
+        cells = self._depth_rect(segment, hallway, 0, depth)
+        rooms.append(PlannedRoom("corridor", cells, hallway=True))
         if back is not None:
             rooms.append(PlannedRoom(back, self._depth_rect(segment, span, depth, band.depth)))
 
