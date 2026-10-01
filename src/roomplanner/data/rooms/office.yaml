@@ -38,7 +38,7 @@ rooms:
       - {object: whiteboard, placement: axis, count: [0, 1]}    # the other end
       - {object: cabinet, placement: wall, count: [0, 2]}
   focus_room:               # windowless quiet room for one or two: calls, focused work
-    area: [20, 48]
+    area: [16, 30]            # a booth: one desk and a chair, 2 x 3 m at most
     min_side: 4
     furniture:
       - {object: workstation, placement: back}   # one desk, away from the door

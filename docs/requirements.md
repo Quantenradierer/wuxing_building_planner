@@ -244,6 +244,18 @@ Decided by the author (2026-09-27):
 - No stalls in shower rooms and locker rooms for now.
 - Tactical layer: the unused `cover` field was removed from objects.
 
+Requested by the author (2026-09-27), still open:
+- Coffin units are still too large: let their door open outwards so they can shrink further.
+- Urinals: their placement doesn't make sense; remove them.
+- Sinks: make them smaller again (2 × 1) so they fit better in kitchens.
+- Drone rooms need some order (docks and racks placed in a tidy arrangement).
+- Supermarkets rarely have a second floor; when they do, the stairs are public stairs on
+  the sales floor, not in a separate stairwell.
+- Nightclubs need a DJ table.
+
+Done from that list (2026-10-01):
+- Focus rooms are booths of 16–30 cells (mostly 4 × 6, 2 × 3 m); they were up to 48.
+
 Storage share (2026-09-27): leftover space goes to the row's rooms, other fill rooms
 (`priority: optional` fill rooms for leftovers only: studios, drone bays, vending rooms)
 and neighbours before it becomes a storeroom; basements and hall back strips got real
