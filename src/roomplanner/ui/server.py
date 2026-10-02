@@ -3,6 +3,7 @@
 The server only generates and renders: `POST /api/generate` returns the building's JSON
 (the contract, see serialization.py) plus the themed image of every floor. The page draws
 its overlay layers (rooms, labels, doors, objects, devices, lights, grid) from that JSON.
+`POST /api/export/foundry` takes the same request and returns the Foundry export as a zip.
 """
 
 from __future__ import annotations
@@ -10,6 +11,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import zipfile
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
@@ -19,6 +21,8 @@ from PIL import Image
 from pydantic import ValidationError
 
 from roomplanner.errors import RoomplannerError
+from roomplanner.export.common import ExportOptions
+from roomplanner.export.foundry import to_foundry
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
 from roomplanner.params import (
@@ -30,6 +34,7 @@ from roomplanner.params import (
     Shape,
     Wealth,
 )
+from roomplanner.render.image import DEFAULT_CELL_PX as VTT_CELL_PX
 from roomplanner.render.image import RenderOptions, render_floor
 from roomplanner.render.theme import load_theme
 from roomplanner.rules import load_rules
@@ -66,13 +71,7 @@ def options() -> JsonObject:
 
 def generate_response(request: JsonObject) -> JsonObject:
     """Generate and render a building for the page. Raises RequestError, RoomplannerError."""
-    raw = request.get("params")
-    if not isinstance(raw, dict):
-        raise RequestError("missing params")
-    try:
-        params = GenerationParams.model_validate(raw)
-    except ValidationError as error:
-        raise RequestError(_validation_message(error)) from error
+    params = _params(request)
     cell_px = request.get("cell_px", DEFAULT_CELL_PX)
     if not isinstance(cell_px, int) or not 4 <= cell_px <= MAX_CELL_PX:
         raise RequestError(f"cell_px must be 4..{MAX_CELL_PX}")
@@ -84,6 +83,37 @@ def generate_response(request: JsonObject) -> JsonObject:
         for floor in building.floors
     }
     return {"building": to_dict(building), "images": images, "padding": PADDING}
+
+
+def foundry_zip(request: JsonObject) -> tuple[str, bytes]:
+    """The Foundry export (see export/foundry.py) of the requested building, as a zip with
+    one top-level folder to unpack into `<Foundry Data>/roomplanner/`. Uses the CLI's VTT
+    defaults (finer images, Foundry does the lighting), not the page's preview settings.
+    """
+    params = _params(request)
+    theme = load_theme(str(request.get("theme", "neon")))
+    building = generate(params)
+    name = f"{building.params.building_type}_{building.seed}"
+    export = to_foundry(building, theme, ExportOptions(cell_px=VTT_CELL_PX), name)
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        for file, data in export.images.items():
+            archive.writestr(f"{name}/{file}", data)  # PNGs: already compressed
+        archive.writestr(
+            f"{name}/scenes.json", json.dumps(export.scenes, indent=1), zipfile.ZIP_DEFLATED
+        )
+        archive.writestr(f"{name}/import-macro.js", export.macro, zipfile.ZIP_DEFLATED)
+    return f"{name}.zip", buffer.getvalue()
+
+
+def _params(request: JsonObject) -> GenerationParams:
+    raw = request.get("params")
+    if not isinstance(raw, dict):
+        raise RequestError("missing params")
+    try:
+        return GenerationParams.model_validate(raw)
+    except ValidationError as error:
+        raise RequestError(_validation_message(error)) from error
 
 
 def _data_url(image: Image.Image) -> str:
@@ -110,7 +140,7 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
 
     def do_POST(self) -> None:
-        if self.path != "/api/generate":
+        if self.path not in ("/api/generate", "/api/export/foundry"):
             self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
             return
         try:
@@ -118,7 +148,13 @@ class _Handler(BaseHTTPRequestHandler):
             request = json.loads(self.rfile.read(length) or b"{}")
             if not isinstance(request, dict):
                 raise RequestError("expected a JSON object")
-            self._json(HTTPStatus.OK, generate_response(cast(JsonObject, request)))
+            request = cast(JsonObject, request)
+            if self.path == "/api/generate":
+                self._json(HTTPStatus.OK, generate_response(request))
+            else:
+                name, archive = foundry_zip(request)
+                disposition = f'attachment; filename="{name}"'
+                self._send(HTTPStatus.OK, archive, "application/zip", disposition)
         except (RequestError, json.JSONDecodeError) as error:
             self._json(HTTPStatus.BAD_REQUEST, {"error": str(error)})
         except RoomplannerError as error:
@@ -127,9 +163,13 @@ class _Handler(BaseHTTPRequestHandler):
     def _json(self, status: HTTPStatus, body: JsonObject) -> None:
         self._send(status, json.dumps(body).encode(), "application/json")
 
-    def _send(self, status: HTTPStatus, body: bytes, content_type: str) -> None:
+    def _send(
+        self, status: HTTPStatus, body: bytes, content_type: str, disposition: str | None = None
+    ) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
+        if disposition:
+            self.send_header("Content-Disposition", disposition)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

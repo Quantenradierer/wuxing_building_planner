@@ -27,7 +27,8 @@ furniture, security devices, lights and a grid. Hover a room for its furniture a
 
 Foundry: copy the `vtt/lab` folder to `<Foundry Data>/roomplanner/lab/`, create a script
 macro from `import-macro.js` and run it once. Stairs and elevators teleport tokens between
-the floor scenes (Foundry v12+ Scene Regions).
+the floor scenes (Foundry v12+ Scene Regions). In the UI, the Foundry button downloads the
+same export as a zip: unpack it into `<Foundry Data>/roomplanner/` and run the macro.
 
 ## Parameters
 

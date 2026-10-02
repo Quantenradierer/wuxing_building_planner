@@ -129,6 +129,8 @@
     <button type="button" id="zoom-in" title="Zoom in">+</button>
     <button type="button" id="dl-png" disabled>Image</button>
     <button type="button" id="dl-json" disabled>JSON</button>
+    <button type="button" id="dl-foundry" disabled
+      title="Zip for Foundry VTT: unpack into &lt;Foundry Data&gt;/roomplanner/, run import-macro.js once as GM">Foundry</button>
   </header>
   <div id="viewport">
     <div id="empty">No building yet.</div>
@@ -161,7 +163,7 @@ const LAYERS = [
 ];
 const $ = (id) => document.getElementById(id);
 const form = $("form");
-const state = { data: null, level: 0, zoom: null, layers: {} };
+const state = { data: null, request: null, level: 0, zoom: null, layers: {} };
 
 function store(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
 function recall(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
@@ -293,6 +295,7 @@ async function generate() {
     if (!response.ok) throw new Error(body.error || response.statusText);
     const levels = body.building.floors.map((f) => f.level);
     state.data = body;
+    state.request = { ...request, params: { ...request.params, seed: body.building.seed } };
     if (!levels.includes(state.level)) state.level = levels.includes(0) ? 0 : levels[0];
     const b = body.building;
     setStatus(`${b.params.building_type.replace(/_/g, " ")} · ${b.width}×${b.height} cells ` +
@@ -300,7 +303,7 @@ async function generate() {
       `${Math.round(performance.now() - started)} ms`);
     renderTabs();
     renderWarnings();
-    $("dl-png").disabled = $("dl-json").disabled = false;
+    $("dl-png").disabled = $("dl-json").disabled = $("dl-foundry").disabled = false;
     $("empty").hidden = true;
     $("stage").hidden = false;
     draw();
@@ -635,6 +638,29 @@ $("dl-png").addEventListener("click", () => {
   const level = state.level;
   const tag = level >= 0 ? `F${level}` : `B${-level}`;
   download(`${stem()}_${tag}.webp`, state.data.images[String(level)]);
+});
+
+$("dl-foundry").addEventListener("click", async () => {
+  const button = $("dl-foundry");
+  button.disabled = true;
+  setStatus("Exporting for Foundry…");
+  try {
+    // The same parameters with the seed that was used: the same building, rendered for a VTT.
+    const response = await fetch("/api/export/foundry", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(state.request),
+    });
+    if (!response.ok) throw new Error((await response.json()).error || response.statusText);
+    const url = URL.createObjectURL(await response.blob());
+    download(`${stem()}.zip`, url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setStatus(`${stem()}.zip: unpack into <Foundry Data>/roomplanner/, ` +
+      "then run import-macro.js once as a script macro.");
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
 });
 
 init().catch((error) => setStatus(`Could not load options: ${error.message}`, true));
