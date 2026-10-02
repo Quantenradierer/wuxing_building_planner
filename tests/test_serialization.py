@@ -11,6 +11,7 @@ from .conftest import make_params
 
 def test_round_trip() -> None:
     building = generate(make_params(floors_above=2, floors_below=1))
+    assert any(o.sliding for f in building.floors for o in f.openings)  # elevator doors
     assert from_json(to_json(building)) == building
 
 

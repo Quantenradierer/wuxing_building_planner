@@ -365,8 +365,8 @@ Building types:
   about 7 in 100 docks report a missing window.
 
 Rendering and export:
-- Elevator doors are drawn and exported as hinged doors swinging into the car; they should
-  slide.
+- Elevator doors slide (`sliding` in the JSON, drawn on the landing side), but the Foundry
+  export still makes them plain doors; they should get the `slide` door animation.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
 - Foundry export needs the import macro (scenes keep their ids so the stairs stay linked).
 

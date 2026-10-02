@@ -52,6 +52,9 @@ class Opening:
     lock: str | None = None
     rating: int | None = None
     entrance: str | None = None
+    # Doors only: the leaves slide aside (elevator doors) instead of swinging; the swing
+    # then only says which side of the wall they run on.
+    sliding: bool = False
 
     def __post_init__(self) -> None:
         if not self.edges:
@@ -72,6 +75,8 @@ class Opening:
                 raise ValueError("a door hinge must sit at one end of its wall run")
         elif self.swing is not None:
             raise ValueError(f"{self.kind} openings have no swing")
+        elif self.sliding:
+            raise ValueError(f"{self.kind} openings do not slide")
         if self.state not in _STATES[self.kind]:
             raise ValueError(f"a {self.kind} cannot be {self.state}")
 

@@ -493,6 +493,9 @@ class _Canvas:
             case OpeningState.BLOCKED:
                 self._barricade(opening)
                 return
+            case _ if opening.sliding:
+                self._sliding_door(opening, leaf_colour, width)
+                return
             case OpeningState.BROKEN:
                 # The leaf hangs askew, half open, without a swing arc.
                 hx, hy = (ax, ay) if swing.hinge in (Side.W, Side.N) else (bx, by)
@@ -520,6 +523,22 @@ class _Canvas:
             self.draw_base.line(
                 (hx, hy, hx + tx * size, hy + ty * size), fill=leaf_colour, width=width
             )
+
+    def _sliding_door(self, opening: Opening, leaf_colour: Colour, width: int) -> None:
+        """Two leaves parallel to the wall, meeting in the middle, on the side away from the
+        swing (an elevator's landing doors, outside the car); a broken door is pried open."""
+        assert opening.swing is not None
+        (ax, ay), (bx, by) = self._run(opening)
+        tx, ty = opening.swing.towards.opposite.delta
+        off = self._thickness(opening.edges[0]) / 2 + width / 2
+        mx, my = (ax + bx) / 2, (ay + by) / 2
+        gap = 0.25 if opening.state is OpeningState.BROKEN else 0.03
+        for (jx, jy), shift in (((ax, ay), -gap), ((bx, by), gap)):
+            # From a little behind the jamb to the middle (less the pried gap).
+            ex, ey = mx + (bx - ax) * shift, my + (by - ay) * shift
+            sx, sy = jx + (jx - mx) * 0.2, jy + (jy - my) * 0.2
+            line = (sx + tx * off, sy + ty * off, ex + tx * off, ey + ty * off)
+            self.draw_base.line(line, fill=leaf_colour, width=width)
 
     def _lock_marker(self, opening: Opening, lock_colour: str) -> None:
         """A small glowing box on the jamb opposite the hinge, on the swing side."""

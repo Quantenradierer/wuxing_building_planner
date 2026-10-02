@@ -262,6 +262,9 @@ class RoomSpec(_Strict):
         default=False,
         description="Its door swings out of it (coffin units): no door clearance inside",
     )
+    door_slides: bool = Field(
+        default=False, description="Its door slides aside instead of swinging (elevators)"
+    )
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
     vestibule: str | None = Field(
         default=None, description="Entered only through this room type, placed beside it"

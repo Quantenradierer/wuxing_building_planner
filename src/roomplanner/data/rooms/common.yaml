@@ -45,6 +45,7 @@ rooms:
     min_side: 3
     windows: forbidden
     transit: false        # rooms open onto a landing, not into the car
+    door_slides: true
     furniture:
       - {object: elevator_car, placement: fill}   # the car is the shaft
   toilet:               # public toilet: stalls along one wall, sinks outside

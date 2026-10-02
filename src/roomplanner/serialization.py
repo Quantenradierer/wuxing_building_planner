@@ -199,6 +199,8 @@ def _opening_to_dict(opening: Opening) -> JsonObject:
     for key in ("material", "lock", "rating", "entrance"):
         if (value := getattr(opening, key)) is not None:
             result[key] = value
+    if opening.sliding:
+        result["sliding"] = True
     return result
 
 
@@ -213,6 +215,7 @@ def _opening_from_dict(data: JsonObject) -> Opening:
         lock=data.get("lock"),
         rating=data.get("rating"),
         entrance=data.get("entrance"),
+        sliding=data.get("sliding", False),
     )
 
 

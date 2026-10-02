@@ -835,3 +835,16 @@ def test_back_door_opens_into_a_back_of_house_room(
     room = next(r for c in door.edges[0].cells() if (r := ground.room_at(c)) is not None)
     spec = rules.spec(room.type)
     assert spec.facade_door or spec.circulation or room.type in rules.program.service_rooms
+
+
+def test_elevator_doors_slide_and_others_swing() -> None:
+    building = generate(make_params(width=60, depth=40, floors_above=3, seed=1))
+    sliding = 0
+    for floor in building.floors:
+        for door in floor.openings:
+            if door.kind is not OpeningKind.DOOR:
+                continue
+            types = {r.type for c in door.edges[0].cells() if (r := floor.room_at(c))}
+            assert door.sliding == ("elevator" in types)
+            sliding += door.sliding
+    assert sliding >= len(building.floors)

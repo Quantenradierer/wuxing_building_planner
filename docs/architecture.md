@@ -99,6 +99,8 @@ Opening
   material, lock, rating               doors, optional: standard | glass | security | blast;
                                        none | mechanical | maglock | cardreader | biometric
   entrance                             exterior doors: main | service | emergency
+  sliding                              doors, optional: the leaves slide aside (elevators,
+                                       `door_slides`); the swing only gives their side
 Swing
   towards: Side                        side of the wall the leaf opens into (the door's own
                                        room, or out of it with `door_opens_out`: pods, cells)

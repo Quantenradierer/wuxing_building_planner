@@ -404,6 +404,8 @@ def _interior_doors(
         if spots:
             start = min(spots, key=lambda s: (abs(s - start), s))
         door = _door(run, width, outside if spec.door_opens_out else inside, None, rng, start)
+        if spec.door_slides:
+            door = replace(door, sliding=True)
         doors.append(door)
         door_edges[i] += door.edges
         j = owner[outside]
