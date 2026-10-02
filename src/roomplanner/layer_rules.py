@@ -11,7 +11,7 @@ from importlib import resources
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from roomplanner.params import Condition, Security
+from roomplanner.params import Condition, Security, Wealth
 from roomplanner.rules import FurnitureRule, load_yaml
 
 
@@ -110,11 +110,23 @@ class ConditionTier(_Strict):
     lights_flicker: float = Field(default=0, ge=0, le=1)
     lights_off: float = Field(default=0, ge=0, le=1)
     power: bool = Field(default=True, description="False: only emergency lights work")
+    rubble: bool = Field(default=False, description="Debris includes the rubble kinds")
+    look_shift: int = Field(default=0, description="Sprite tiers up (+) or down (-) from wealth")
+    looks: tuple[Wealth, Wealth] = Field(
+        default=(Wealth.SQUATTER, Wealth.LUXURY), description="Lowest and highest sprite tier"
+    )
+
+    def look(self, wealth: Wealth) -> Wealth:
+        """The sprite tier of objects of this wealth: shifted, then clamped to `looks`."""
+        tiers = list(Wealth)
+        low, high = (tiers.index(t) for t in self.looks)
+        return tiers[min(high, max(low, tiers.index(wealth) + self.look_shift))]
 
 
 class ConditionTable(_Strict):
     fixtures: list[str] = Field(default=[], description="Objects never removed")
     debris: list[str] = Field(description="Object kinds used as debris")
+    rubble: list[str] = Field(default=[], description="Debris kinds only for `rubble` tiers")
     collapse: list[str] = Field(description="Object kinds used for collapsed spots")
     tiers: dict[Condition, ConditionTier]
 

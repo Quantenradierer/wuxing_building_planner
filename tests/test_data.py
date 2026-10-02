@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 from roomplanner.layer_rules import load_condition, load_lighting, load_security
-from roomplanner.params import BuildingType
+from roomplanner.params import BuildingType, Condition, Wealth
 from roomplanner.render.theme import load_theme
 from roomplanner.rules import load_groups, load_objects, load_rules
 
@@ -29,7 +29,13 @@ def test_layer_rules_only_use_known_objects() -> None:
     objects = set(load_objects())
     condition = load_condition()
     placeable = objects | set(load_groups())
-    assert set(condition.debris) | set(condition.collapse) | set(condition.fixtures) <= objects
+    assert (
+        set(condition.debris)
+        | set(condition.rubble)
+        | set(condition.collapse)
+        | set(condition.fixtures)
+        <= objects
+    )
     for tier in load_security().tiers.values():
         for rules in tier.furniture.values():
             assert {r.object for r in rules} <= placeable
@@ -50,3 +56,23 @@ def test_object_glyphs_avoid_wall_door_and_room_number_glyphs() -> None:
 
     clashes = {k: s.glyph for k, s in load_objects().items() if s.glyph in RESERVED_GLYPHS}
     assert not clashes
+
+
+@pytest.mark.parametrize(
+    ("condition", "looks"),
+    [
+        (Condition.PRISTINE, ["middle", "middle", "high", "luxury", "luxury"]),
+        (Condition.MAINTAINED, ["low", "low", "middle", "high", "high"]),
+        (Condition.RUN_DOWN, ["squatter", "squatter", "low", "middle", "middle"]),
+        (Condition.DERELICT, ["squatter", "squatter", "squatter", "low", "low"]),
+        (Condition.RUINED, ["squatter", "squatter", "squatter", "low", "low"]),
+    ],
+)
+def test_condition_moves_the_sprite_look(condition: Condition, looks: list[str]) -> None:
+    tier = load_condition().tiers[condition]
+    assert [tier.look(w) for w in Wealth] == looks
+
+
+def test_only_derelict_and_ruined_leave_rubble() -> None:
+    tiers = load_condition().tiers
+    assert [c for c in Condition if tiers[c].rubble] == [Condition.DERELICT, Condition.RUINED]

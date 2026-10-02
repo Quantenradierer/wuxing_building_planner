@@ -5,7 +5,8 @@ and objects, objects, walls with windows and doors, room labels, grid. Neon mark
 strips, window glass, screens, lights) go to a glow layer that is blurred and added on top.
 Objects with a sprite in the theme are drawn as that picture, rotated to their facing; their
 shadow follows the sprite's outline. `<kind>.<wealth>.png` variants are preferred for the
-object's wealth tier (or the next tier towards middle) over the plain `<kind>.png`.
+object's look (or the next tier towards middle) over the plain `<kind>.png`; the look is the
+object's wealth moved and clamped by the building's condition (`data/condition.yaml`).
 A `floor.<material>.png` in the sprite directory tiles the floors of that material, aligned to
 the building grid so neighbouring rooms of the same material continue the texture.
 The picture is drawn at a higher resolution and scaled down for anti-aliasing.
@@ -25,6 +26,7 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from roomplanner.geometry import Axis, Cell, Edge, Side
+from roomplanner.layer_rules import load_condition
 from roomplanner.model import (
     Building,
     Floor,
@@ -321,7 +323,8 @@ class _Canvas:
         directory = self.theme.sprites
         if directory is None:
             return None
-        tier = obj.wealth or self.building.params.wealth
+        params = self.building.params
+        tier = load_condition().tiers[params.condition].look(obj.wealth or params.wealth)
         sprites = _sprites(directory)
         name = sprite_name(sprites, obj.kind, tier)
         if name is None and (stand_in := self.theme.sprite_fallbacks.get(obj.kind)):

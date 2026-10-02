@@ -195,9 +195,10 @@ def _debris(
             kind = rng.choice(table.collapse)
             rules.append(FurnitureRule(object=kind, placement=Placement.SCATTER))
         if tier.debris_per is not None:
+            debris = table.debris + (table.rubble if tier.rubble else [])
             count = _count(room.area / tier.debris_per, rng)
             for _ in range(count):
-                kind = rng.choice(table.debris)
+                kind = rng.choice(debris)
                 rules.append(FurnitureRule(object=kind, placement=Placement.SCATTER))
         if not rules:
             continue

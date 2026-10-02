@@ -1,15 +1,22 @@
 # Condition levels: wear and damage applied after furnishing, lights and security.
 # The building always stays reachable: doors are only blocked where that cuts nothing
 # off, breaches only add connections and debris keeps every room walkable.
+# Sprite look: the wealth tier moved by `look_shift`, clamped to `looks` (lowest, highest).
 fixtures: [stairs, elevator_car, wc, sink, shower, roof_hatch, checkout, server_rack,
            morgue_drawers, machinery, guard_desk, security_gate, terminal]
-debris: [debris, trash_pile, debris, rubble]
+debris: [debris, trash_pile, debris]
+rubble: [rubble]  # only tiers with `rubble: true`
 collapse: [rubble_heap, collapsed_ceiling]
 tiers:
-  pristine: {}
+  pristine:
+    look_shift: 1
+    looks: [middle, luxury]
   maintained:
+    looks: [low, high]
     lights_flicker: 0.02
   run_down:
+    look_shift: -1
+    looks: [squatter, middle]
     furniture_removed: 0.15
     debris_per: 150
     doors_broken: 0.08
@@ -19,6 +26,9 @@ tiers:
     lights_flicker: 0.15
     lights_off: 0.15
   derelict:
+    look_shift: -2
+    looks: [squatter, low]
+    rubble: true
     furniture_removed: 0.45
     debris_per: 60
     doors_broken: 0.25
@@ -29,6 +39,9 @@ tiers:
     lights_flicker: 0.3
     power: false
   ruined:
+    look_shift: -2
+    looks: [squatter, low]
+    rubble: true
     furniture_removed: 0.7
     debris_per: 30
     doors_broken: 0.35

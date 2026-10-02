@@ -39,6 +39,10 @@ picks with `attempt` below 10 (those are from the older model).
   the top edge"; cars: front bumper at the top, since they park nose to the wall).
 - Wealth variants are `<kind>.high` (used for high and luxury) and `<kind>.squatter`.
   Lookup falls back towards middle, then to the theme's `sprite_fallbacks` stand-in.
+- The tier looked up is the object's wealth moved by the building's condition
+  (`look_shift` / `looks` in `data/condition.yaml`): pristine middle..luxury (one up),
+  maintained low..high, run down squatter..middle (one down), derelict and ruined
+  squatter..low (two down).
 - A new object kind gets a prompt and, until its sprite is picked, a stand-in in
   `sprite_fallbacks` of `data/themes/neon_sprites.yaml` (e.g. `office_desk: desk`).
 - Stairs, elevator cars, wall screens and whiteboards stay procedural.

@@ -279,6 +279,9 @@ To verify:
   ambulance, evidence_locker, shipping_container). Needs a Midjourney round.
 
 Decided by the author (2026-09-27):
+- Condition moves the sprite look (2026-10-02): pristine one tier up (middle..luxury),
+  maintained as is (low..high), run down one down (squatter..middle, no rubble), derelict
+  and ruined two down (squatter..low, with rubble).
 - Sprite wealth fallback steps towards middle (luxury → high → middle, squatter → low →
   middle); it is only the fallback.
 - `wealth_shift` of rooms stays relative to the building (executive office +1); revisit
