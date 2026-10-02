@@ -475,3 +475,54 @@ earlier attempt became valid). Known weaknesses: a block whose slot is narrower 
 block plus its sally port (rare) opens onto the corridor directly; mess hall and
 kitchen are not always neighbours (`next_to` works within a strip segment only); the yard
 is not modelled (needs surroundings), the gym stands in for it.
+
+## Building code (2026-10-02)
+
+`tools/codecheck.py` generates a fixed sample of 100 buildings (all 31 types, random size,
+floors, wealth, security and shape; 296 floors) and counts how many pass German building
+rules (`uv run python tools/codecheck.py [count] [--json out.json]`; the docstring says how
+each rule is measured). Baseline:
+
+| Rule (source)                                              | Pass                      |
+|------------------------------------------------------------|---------------------------|
+| Escape distance ≤ 35 m to a stairwell or exit (MBO §35)    | 78 / 100                  |
+| Two escape routes, strict (MBO §33)                        | 19 / 100                  |
+| Two escape routes, rescue windows on floors 1–7 count      | 98 / 100                  |
+| Dead-end corridor ≤ 15 m                                   | 52 / 100                  |
+| Corridor ≥ 1.0 m (ASR A2.3) / ≥ 1.5 m (DIN 18040)          | 100 / 100                 |
+| Doors ≥ 0.9 m (DIN 18100)                                  | 40 / 100; 100 except stalls |
+| 1.5 × 1.5 m turning space at doors (DIN 18040)             | 0 / 100 (29 % of door sides fail) |
+| Stairwell 2.5 × 4.5 m (DIN 18065, 3 m floors)              | 61 / 81 (79 at 2.5 × 4.0) |
+| Lift car 1.1 × 1.4 m (DIN EN 81-70)                        | 100 / 100                 |
+| Window area ≥ 1/8 of floor area (MBO §47)                  | 47 / 65 (57 of 857 rooms) |
+| 8 m² + 6 m² per further workstation (ASR A1.2)             | 29 / 67 (264 of 553 rooms) |
+| Parking stall 2.3 × 5 m, aisle 6.5 m (MGarVO)              | 0 / 3                     |
+
+Open issues, in suggested order:
+1. Desk density (YAML): `office` and similar rooms place a `desk_pair` per 16 cells
+   (2 desks per 4 m²); ASR A1.2 needs ~24 cells per desk. `per: 48`; a dense cubicle farm
+   could stay as a low/squatter look.
+2. Parking (YAML, maybe a `rows` gap option): `parking_deck` cars stand 4 cells apart
+   (2 m stalls, 2.3 m needed) on a 7-cell lane (3.5 m, 6.5 m needed): `aisle: 13`, a 1-cell
+   gap between cars. About 30 % fewer cars per deck.
+3. Stairwell size (YAML): 14 small programs use `stairwell size: [5, 8]` → `[5, 9]`; prison
+   (5 × 6) and dive bar (6 × 6) stairwells are shortened by `_core` to fit a shallow strip
+   down to the 40-cell minimum area: raise `stairwell.area[0]` to 45.
+4. Window area (code): one 2-cell window per facade module leaves deep rooms (mostly
+   bedrooms, offices, church choir lofts and naves) too dark. Rooms that need windows should
+   get more windows from the facade grid until window cells ≥ area / 24
+   (`pipeline/openings.py`); `facade.window: 3` is the blunt alternative.
+5. Second stairwell (layout code): the corridor layout has one core slot near the middle
+   (`layout/corridor.py`, `_core`), so floors of big buildings have one escape route, long
+   escape distances and long dead ends (21 of the 22 failures over 35 m, 45 of 48 dead-end
+   failures are single-stair floors). A core entry with its own slot near the far end of the
+   main corridor (`place: far`, `when: width + depth >= 90`), with its own exterior exit on
+   the ground floor; long wings may need one too. Also a second way in for the runners.
+6. Keep the numbers: escape distance, dead ends, two routes and window ratio as soft
+   validator warnings (not for derelict/ruined), and a property test over a seed sweep
+   asserting pass rates.
+
+Not pursued: turning space (half the failures are coffin pods and WC stalls, the rest
+furniture; DIN 18040 only applies to accessible routes) and 1-cell stall doors (0.5 m; a
+2-cell door does not fit a 2-wide stall template). Not checked: toilet counts (ASR A4.1,
+needs a headcount) and furniture clearances (DIN 18011).
