@@ -23,7 +23,7 @@ cluster_filler: storage
 service_rooms: [storage, stockroom, cold_room, prep_kitchen, butchery, staff_room, manager_office]
 
 core:
-  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 9], when: "floors_total >= 2"}
 
 entrances:
   main: {width: 2}

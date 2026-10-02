@@ -17,7 +17,7 @@ facade:
 cluster_filler: storage
 
 core:
-  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 9], when: "floors_total >= 2"}
 
 entrances:
   main: {width: 2}

@@ -280,20 +280,17 @@ Building code (measured in "Building code" below), in suggested order:
 1. Parking (YAML, maybe a `rows` gap option): `parking_deck` cars stand 4 cells apart
    (2 m stalls, 2.3 m needed) on a 7-cell lane (3.5 m, 6.5 m needed): `aisle: 13`, a 1-cell
    gap between cars. About 30 % fewer cars per deck.
-2. Stairwell size (YAML): 14 small programs use `stairwell size: [5, 8]` → `[5, 9]`; prison
-   (5 × 6) and dive bar (6 × 6) stairwells are shortened by `_core` to fit a shallow strip
-   down to the 40-cell minimum area: raise `stairwell.area[0]` to 45.
-3. Window area (code): one 2-cell window per facade module leaves deep rooms (mostly
+2. Window area (code): one 2-cell window per facade module leaves deep rooms (mostly
    bedrooms, offices, church choir lofts and naves) too dark. Rooms that need windows should
    get more windows from the facade grid until window cells ≥ area / 24
    (`pipeline/openings.py`); `facade.window: 3` is the blunt alternative.
-4. Second stairwell (layout code): the corridor layout has one core slot near the middle
+3. Second stairwell (layout code): the corridor layout has one core slot near the middle
    (`layout/corridor.py`, `_core`), so floors of big buildings have one escape route, long
    escape distances and long dead ends (21 of the 22 failures over 35 m, 45 of 48 dead-end
    failures are single-stair floors). A core entry with its own slot near the far end of the
    main corridor (`place: far`, `when: width + depth >= 90`), with its own exterior exit on
    the ground floor; long wings may need one too. Also a second way in for the runners.
-5. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
+4. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
    area as soft validator warnings (not for derelict/ruined), and a property test over a
    seed sweep asserting pass rates.
 
@@ -385,18 +382,22 @@ each rule is measured). Results (2026-10-03):
 
 | Rule (source)                                              | Pass                      |
 |------------------------------------------------------------|---------------------------|
-| Escape distance ≤ 35 m to a stairwell or exit (MBO §35)    | 78 / 100                  |
+| Escape distance ≤ 35 m to a stairwell or exit (MBO §35)    | 79 / 100                  |
 | Two escape routes, strict (MBO §33)                        | 19 / 100                  |
 | Two escape routes, rescue windows on floors 1–7 count      | 98 / 100                  |
-| Dead-end corridor ≤ 15 m                                   | 52 / 100                  |
+| Dead-end corridor ≤ 15 m                                   | 51 / 100                  |
 | Corridor ≥ 1.0 m (ASR A2.3) / ≥ 1.5 m (DIN 18040)          | 100 / 100                 |
-| Doors ≥ 0.9 m (DIN 18100)                                  | 40 / 100; 100 except stalls |
+| Doors ≥ 0.9 m (DIN 18100)                                  | 41 / 100; 100 except stalls |
 | 1.5 × 1.5 m turning space at doors (DIN 18040)             | 0 / 100 (29 % of door sides fail) |
-| Stairwell 2.5 × 4.5 m (DIN 18065, 3 m floors)              | 61 / 81 (79 at 2.5 × 4.0) |
+| Stairwell 2.5 × 4.5 m (DIN 18065, 3 m floors)              | 81 / 81                   |
 | Lift car 1.1 × 1.4 m (DIN EN 81-70)                        | 100 / 100                 |
-| Window area ≥ 1/8 of floor area (MBO §47)                  | 47 / 65 (57 of 857 rooms) |
-| 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (43 of 552 rooms) |
+| Window area ≥ 1/8 of floor area (MBO §47)                  | 47 / 65 (57 of 852 rooms) |
+| 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (42 of 546 rooms) |
 | Parking stall 2.3 × 5 m, aisle 6.5 m (MGarVO)              | 0 / 3                     |
+
+Done: stairwell size. Small programs ask for 5 × 9 cells (was 5 × 8); the catalog minimum is
+45 cells and does not shrink at squatter and low tier, so a stairwell is only shortened to a
+shallow strip while it keeps 4.5 m (else it turns across the strip).
 
 Done: desk density. Offices have a desk per 10 m² (`per: 40, scale: false`, so richer
 offices are bigger, not denser), open offices and squad rooms blocks of four desks with

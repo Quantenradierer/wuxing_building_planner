@@ -32,8 +32,11 @@ rooms:
       - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   stairwell:
-    area: [40, 240]
+    area: [45, 240]       # 2.5 x 4.5 m flight with landings (DIN 18065)
     min_side: 5
+    wealth:               # the code minimum does not shrink with the tier
+      squatter: {area: [45, 180]}
+      low: {area: [45, 216]}
     transit: false        # no rooms open into it (but the core's elevator may)
     furniture:
       - {object: stairs, placement: fill, landing: 2, reach: 8}   # at the door: same spot on every floor

@@ -20,7 +20,7 @@ cluster_filler: storage
 service_rooms: [sacristy, kitchenette, storage, utility]   # the priest comes in at the back
 
 core:
-  - {room: stairwell, size: [5, 8], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 9], when: "floors_total >= 2"}
 
 entrances:
   main: {width: 4}         # the portal
