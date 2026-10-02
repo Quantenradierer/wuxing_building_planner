@@ -8,7 +8,8 @@ windows on floors 1-7), dead-end corridors <= 15 m, corridor width (ASR A2.3, DI
 door width >= 0.9 m (DIN 18100), 1.5 x 1.5 m turning space at doors (DIN 18040), stairwell
 >= 2.5 x 4.5 m (DIN 18065, 3 m floors), lift car 1.1 x 1.4 m (DIN EN 81-70), window area
 >= 1/8 of floor area with 1.5 m tall windows (MBO 47), 8 + 6 m2 per workstation (ASR A1.2),
-parking stall 2.3 x 5 m and 6.5 m aisle (MGarVO).
+parking stall >= 2.3 m wide with an aisle in front of 6.5 m, 6.0 m at 2.4 m stalls and 5.5 m
+at 2.5 m stalls (MGarVO 4).
 
 1 cell = 0.5 m. Distances use octile moves (diagonals through open corners), i.e. walking
 paths; furniture is ignored. Exits: exterior doors on the ground floor, stairwells (and
@@ -322,20 +323,22 @@ def check(b: Building) -> dict:
                     and o.facing == car.facing
                     and ((o.y == car.y) if along_x else (o.x == car.x))
                 ]
+                pitch = 5
                 if mates:
                     pitch = min(abs(o.x - car.x) if along_x else abs(o.y - car.y) for o in mates)
                     if pitch < 5:
                         park_pitch_fail += 1
+                lane = 11 if pitch >= 5 else 13  # 5.5 m at 2.5 m stalls, else 6.5 m
                 dx, dy = car.facing.delta
                 front = [c for c in car.cells if Cell(c.x + dx, c.y + dy) not in car.cells]
                 run = 0
-                while run < 13:
+                while run < lane:
                     nxt = [Cell(c.x + dx * (run + 1), c.y + dy * (run + 1)) for c in front]
                     if all(n in rm.cells and n not in others for n in nxt):
                         run += 1
                     else:
                         break
-                if run < 13:
+                if run < lane:
                     park_aisle_fail += 1
     r["fails"] = fails
     r.update(

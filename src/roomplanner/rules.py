@@ -112,6 +112,12 @@ class FurnitureRule(_Strict):
     )
     paired: bool = Field(default=False, description="rows: back to back pairs, aisle after each")
     block: int = Field(default=12, gt=0, description="rows: cells between cross aisles")
+    gap: int = Field(default=0, ge=0, description="rows: free cells between neighbours in a row")
+    lanes: bool = Field(
+        default=False,
+        description="rows: every row faces an aisle (row, aisle, two rows back to back, "
+        "aisle, ..., a parking deck's drive lanes)",
+    )
     head: str | None = Field(
         default=None,
         description="`object` is a pair of desks, `count` counts desks; an odd one (or one "

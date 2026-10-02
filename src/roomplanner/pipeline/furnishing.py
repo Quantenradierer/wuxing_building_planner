@@ -854,22 +854,34 @@ class RoomFurnisher:
         start, end = (Side.N, Side.S) if horizontal else (Side.W, Side.E)
         m0 = 0 if toward is None and self._open_side(start) else m
         m1 = 0 if toward is None and self._open_side(end) else m
-        per_block = max(1, math.floor(rule.block / along))  # cross aisle every `block` cells
+        pitch = along + rule.gap
+        per_block = max(1, math.floor((rule.block + rule.gap) / pitch))  # cross aisle every `block`
         rows: list[tuple[int, Side]] = []  # offset across the room, facing
         across = m0
-        while across + deep <= width - m1:
+        lanes = rule.lanes and toward is None
+        if lanes and across + deep + rule.aisle <= width - m1:
+            rows.append((across, Side.S))  # facing the first lane
+            across += deep + rule.aisle
+            while across + deep <= width - m1:
+                if across + 2 * deep + rule.aisle <= width - m1:  # back to back between lanes
+                    rows += [(across, Side.N), (across + deep, Side.S)]
+                    across += 2 * deep + rule.aisle
+                else:  # the last row, facing the lane before it
+                    rows.append((across, Side.N))
+                    across += deep
+        while across + deep <= width - m1 and not lanes:
             if rule.paired and toward is None and across + 2 * deep <= width - m1:
                 rows += [(across, Side.N), (across + deep, Side.S)]
                 across += 2 * deep + rule.aisle
             else:
                 rows.append((across, Side.S))
                 across += deep + rule.aisle
-        positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle)]
+        positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle, rule.gap)]
         if toward is None and positions:  # centred along the room
             spare = length - m - (positions[-1] + along)
             positions = [p + spare // 2 for p in positions]
         if toward is not None and positions:  # centred, the side aisles equally wide
-            half = _line((length - 2 * m - rule.aisle) // 2, along, per_block, rule.aisle)
+            half = _line((length - 2 * m - rule.aisle) // 2, along, per_block, rule.aisle, rule.gap)
             if half:  # two mirrored halves with a central aisle
                 span = half[-1] + along
                 start = (length - 2 * span - rule.aisle) // 2
@@ -898,7 +910,8 @@ class RoomFurnisher:
 
         # Rows shifted across the spare width to where most fit (clear of doors on one side);
         # of those, against an open side if there is one, else centred.
-        spare = max(0, width - m1 - (rows[-1][0] + deep)) if rows else 0
+        tail = rule.aisle if lanes and rows and rows[-1][1] is Side.S else 0
+        spare = max(0, width - m1 - (rows[-1][0] + deep + tail)) if rows else 0
         target = 0 if m0 < m1 else spare if m1 < m0 else spare // 2
         if toward is not None:
             target = 0
@@ -906,7 +919,8 @@ class RoomFurnisher:
             range(spare + 1), key=lambda s: (sum(map(free, rects(s))), -abs(s - target), -s)
         )
         for rect in rects(shift):
-            self._try(rule.object, rect, spec.walkable)
+            if self._try(rule.object, rect, spec.walkable) and rule.front_clear:
+                self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
 
     def _open_side(self, side: Side) -> bool:
         """True if most of the room's box edge on `side` has no wall (open to a corridor)."""
@@ -1075,8 +1089,9 @@ class RoomFurnisher:
         return True
 
 
-def _line(length: int, along: int, per_block: int, aisle: int) -> list[int]:
-    """Offsets of objects packed into `length` cells, an aisle after every `per_block`."""
+def _line(length: int, along: int, per_block: int, aisle: int, gap: int = 0) -> list[int]:
+    """Offsets of objects packed into `length` cells, `gap` cells apart and an aisle after
+    every `per_block`."""
     offsets: list[int] = []
     position, in_block = 0, 0
     while position + along <= length:
@@ -1086,6 +1101,8 @@ def _line(length: int, along: int, per_block: int, aisle: int) -> list[int]:
         if in_block == per_block:
             position += aisle
             in_block = 0
+        else:
+            position += gap
     return offsets
 
 

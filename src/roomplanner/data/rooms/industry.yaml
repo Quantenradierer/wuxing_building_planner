@@ -216,7 +216,8 @@ rooms:
     door_width: 4
     furniture:
       - {object: ramp, placement: fixed}   # lines up with the ramp on the next level
-      - {object: car, placement: rows, aisle: 7, margin: 0, block: 40}   # a one-way 3.5 m lane
+      - {object: car, placement: rows, aisle: 11, gap: 1, lanes: true, margin: 0, block: 40,
+         front_clear: 11}   # 2.5 m stalls facing 5.5 m drive lanes (MGarVO)
       - {object: pay_station, placement: wall, count: [0, 2]}
       - {object: drone_dock, placement: scatter, count: [1, 2], security: [corporate, aaa]}
       - {object: fire_extinguisher, placement: wall, per: 400, count: [1, 4]}
