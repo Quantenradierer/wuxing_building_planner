@@ -3,7 +3,7 @@
 Generator for Shadowrun/cyberpunk building battle maps. Output: versioned JSON, ASCII debug
 view, themed images (Pillow) and VTT exports (Universal VTT, Foundry scenes).
 
-- Requirements, status and known limitations: `docs/requirements.md`
+- Requirements, status and open issues: `docs/requirements.md`
 - Architecture (coordinates, data model, pipeline, layouts, JSON contract): `docs/architecture.md`
 - Decisions and their reasons: `docs/decisions/`
 - Sprites (Midjourney object pictures): `docs/sprites.md`; read it before generating sprites

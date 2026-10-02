@@ -272,15 +272,36 @@ middle, squatter → low → middle), then to the theme's stand-in.
 
 All v1 milestones and v2 roadmap steps (shapes, layout fixes, image renderer, security,
 condition, lights, more entrances, new building types, VTT export) are implemented. The
-history is in git.
+history is in git. What is left is under "Open issues".
+
+## Open issues
+
+Building code (measured in "Building code" below), in suggested order:
+1. Parking (YAML, maybe a `rows` gap option): `parking_deck` cars stand 4 cells apart
+   (2 m stalls, 2.3 m needed) on a 7-cell lane (3.5 m, 6.5 m needed): `aisle: 13`, a 1-cell
+   gap between cars. About 30 % fewer cars per deck.
+2. Stairwell size (YAML): 14 small programs use `stairwell size: [5, 8]` → `[5, 9]`; prison
+   (5 × 6) and dive bar (6 × 6) stairwells are shortened by `_core` to fit a shallow strip
+   down to the 40-cell minimum area: raise `stairwell.area[0]` to 45.
+3. Window area (code): one 2-cell window per facade module leaves deep rooms (mostly
+   bedrooms, offices, church choir lofts and naves) too dark. Rooms that need windows should
+   get more windows from the facade grid until window cells ≥ area / 24
+   (`pipeline/openings.py`); `facade.window: 3` is the blunt alternative.
+4. Second stairwell (layout code): the corridor layout has one core slot near the middle
+   (`layout/corridor.py`, `_core`), so floors of big buildings have one escape route, long
+   escape distances and long dead ends (21 of the 22 failures over 35 m, 45 of 48 dead-end
+   failures are single-stair floors). A core entry with its own slot near the far end of the
+   main corridor (`place: far`, `when: width + depth >= 90`), with its own exterior exit on
+   the ground floor; long wings may need one too. Also a second way in for the runners.
+5. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
+   area as soft validator warnings (not for derelict/ruined), and a property test over a
+   seed sweep asserting pass rates.
 
 To verify:
 - VTT exports in a real Foundry (doors, windows, lights, stair/elevator teleports) and a
   Universal VTT viewer; so far only checked against the format descriptions.
 - Object kinds without a sprite are drawn with stand-ins (`sprite_fallbacks`); open sprite
   work is listed in `docs/sprites.md`. Re-render the examples once the sets are complete.
-
-## Known limitations
 
 Footprints:
 - Small footprints can be infeasible for rich tiers or big programs. Minimum footprints
@@ -350,7 +371,6 @@ Building types:
   about 7 in 100 docks report a missing window.
 
 Rendering and export:
-- The ASCII renderer is a debug view.
 - Elevator doors are drawn and exported as hinged doors swinging into the car; they should
   slide.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
@@ -377,27 +397,6 @@ each rule is measured). Results (2026-10-03):
 | Window area ≥ 1/8 of floor area (MBO §47)                  | 47 / 65 (57 of 857 rooms) |
 | 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (43 of 552 rooms) |
 | Parking stall 2.3 × 5 m, aisle 6.5 m (MGarVO)              | 0 / 3                     |
-
-Open issues, in suggested order:
-1. Parking (YAML, maybe a `rows` gap option): `parking_deck` cars stand 4 cells apart
-   (2 m stalls, 2.3 m needed) on a 7-cell lane (3.5 m, 6.5 m needed): `aisle: 13`, a 1-cell
-   gap between cars. About 30 % fewer cars per deck.
-2. Stairwell size (YAML): 14 small programs use `stairwell size: [5, 8]` → `[5, 9]`; prison
-   (5 × 6) and dive bar (6 × 6) stairwells are shortened by `_core` to fit a shallow strip
-   down to the 40-cell minimum area: raise `stairwell.area[0]` to 45.
-3. Window area (code): one 2-cell window per facade module leaves deep rooms (mostly
-   bedrooms, offices, church choir lofts and naves) too dark. Rooms that need windows should
-   get more windows from the facade grid until window cells ≥ area / 24
-   (`pipeline/openings.py`); `facade.window: 3` is the blunt alternative.
-4. Second stairwell (layout code): the corridor layout has one core slot near the middle
-   (`layout/corridor.py`, `_core`), so floors of big buildings have one escape route, long
-   escape distances and long dead ends (21 of the 22 failures over 35 m, 45 of 48 dead-end
-   failures are single-stair floors). A core entry with its own slot near the far end of the
-   main corridor (`place: far`, `when: width + depth >= 90`), with its own exterior exit on
-   the ground floor; long wings may need one too. Also a second way in for the runners.
-5. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
-   area as soft validator warnings (not for derelict/ruined), and a property test over a
-   seed sweep asserting pass rates.
 
 Done: desk density. Offices have a desk per 10 m² (`per: 40, scale: false`, so richer
 offices are bigger, not denser), open offices and squad rooms blocks of four desks with
