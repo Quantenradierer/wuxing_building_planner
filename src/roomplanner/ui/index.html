@@ -130,7 +130,7 @@
     <button type="button" id="dl-png" disabled>Image</button>
     <button type="button" id="dl-json" disabled>JSON</button>
     <button type="button" id="dl-foundry" disabled
-      title="Zip for Foundry VTT: unpack into &lt;Foundry Data&gt;/roomplanner/, run import-macro.js once as GM">Foundry</button>
+      title="Universal VTT files (.dd2vtt) for Foundry's Universal Battlemap Importer, one per floor">Foundry</button>
   </header>
   <div id="viewport">
     <div id="empty">No building yet.</div>
@@ -646,16 +646,17 @@ $("dl-foundry").addEventListener("click", async () => {
   setStatus("Exporting for Foundry…");
   try {
     // The same parameters with the seed that was used: the same building, rendered for a VTT.
-    const response = await fetch("/api/export/foundry", {
+    const response = await fetch("/api/export/dd2vtt", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(state.request),
     });
     if (!response.ok) throw new Error((await response.json()).error || response.statusText);
+    const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition"))[1];
     const url = URL.createObjectURL(await response.blob());
-    download(`${stem()}.zip`, url);
+    download(name, url);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setStatus(`${stem()}.zip: unpack into <Foundry Data>/roomplanner/, ` +
-      "then run import-macro.js once as a script macro.");
+    setStatus(`${name}: import with Foundry's Universal Battlemap Importer ` +
+      "(Scenes sidebar), one .dd2vtt per floor.");
   } catch (error) {
     setStatus(error.message, true);
   } finally {

@@ -3,7 +3,8 @@
 The server only generates and renders: `POST /api/generate` returns the building's JSON
 (the contract, see serialization.py) plus the themed image of every floor. The page draws
 its overlay layers (rooms, labels, doors, objects, devices, lights, grid) from that JSON.
-`POST /api/export/foundry` takes the same request and returns the Foundry export as a zip.
+`POST /api/export/dd2vtt` takes the same request and returns Universal VTT files for Foundry's
+Universal Battlemap Importer: one `.dd2vtt`, or a zip of them for several floors.
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from pydantic import ValidationError
 
 from roomplanner.errors import RoomplannerError
 from roomplanner.export.common import ExportOptions
-from roomplanner.export.foundry import to_foundry
+from roomplanner.export.uvtt import uvtt_json
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
 from roomplanner.params import (
@@ -85,25 +86,32 @@ def generate_response(request: JsonObject) -> JsonObject:
     return {"building": to_dict(building), "images": images, "padding": PADDING}
 
 
-def foundry_zip(request: JsonObject) -> tuple[str, bytes]:
-    """The Foundry export (see export/foundry.py) of the requested building, as a zip with
-    one top-level folder to unpack into `<Foundry Data>/roomplanner/`. Uses the CLI's VTT
-    defaults (finer images, Foundry does the lighting), not the page's preview settings.
+def dd2vtt_export(request: JsonObject) -> tuple[str, bytes, str]:
+    """Universal VTT files of the requested building as (file name, body, content type): the
+    `.dd2vtt` itself for one floor, a zip of one per floor otherwise. Uses the CLI's VTT
+    defaults (finer images, the VTT does the lighting), not the page's preview settings.
     """
     params = _params(request)
     theme = load_theme(str(request.get("theme", "neon")))
     building = generate(params)
-    name = f"{building.params.building_type}_{building.seed}"
-    export = to_foundry(building, theme, ExportOptions(cell_px=VTT_CELL_PX), name)
+    stem = f"{building.params.building_type}_{building.seed}"
+    export = ExportOptions(cell_px=VTT_CELL_PX)
+    files = {
+        f"{stem}_{_floor_tag(floor.level)}.dd2vtt": uvtt_json(building, floor, theme, export)
+        for floor in building.floors
+    }
+    if len(files) == 1:
+        [(name, text)] = files.items()
+        return name, text.encode(), "application/json"
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
-        for file, data in export.images.items():
-            archive.writestr(f"{name}/{file}", data)  # PNGs: already compressed
-        archive.writestr(
-            f"{name}/scenes.json", json.dumps(export.scenes, indent=1), zipfile.ZIP_DEFLATED
-        )
-        archive.writestr(f"{name}/import-macro.js", export.macro, zipfile.ZIP_DEFLATED)
-    return f"{name}.zip", buffer.getvalue()
+        for name, text in files.items():
+            archive.writestr(name, text)  # the embedded image is already compressed
+    return f"{stem}.zip", buffer.getvalue(), "application/zip"
+
+
+def _floor_tag(level: int) -> str:
+    return f"F{level}" if level >= 0 else f"B{-level}"
 
 
 def _params(request: JsonObject) -> GenerationParams:
@@ -140,7 +148,7 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
 
     def do_POST(self) -> None:
-        if self.path not in ("/api/generate", "/api/export/foundry"):
+        if self.path not in ("/api/generate", "/api/export/dd2vtt"):
             self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
             return
         try:
@@ -152,9 +160,9 @@ class _Handler(BaseHTTPRequestHandler):
             if self.path == "/api/generate":
                 self._json(HTTPStatus.OK, generate_response(request))
             else:
-                name, archive = foundry_zip(request)
+                name, body, content_type = dd2vtt_export(request)
                 disposition = f'attachment; filename="{name}"'
-                self._send(HTTPStatus.OK, archive, "application/zip", disposition)
+                self._send(HTTPStatus.OK, body, content_type, disposition)
         except (RequestError, json.JSONDecodeError) as error:
             self._json(HTTPStatus.BAD_REQUEST, {"error": str(error)})
         except RoomplannerError as error:
