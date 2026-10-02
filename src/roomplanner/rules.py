@@ -117,6 +117,14 @@ class FurnitureRule(_Strict):
         description="`object` is a pair of desks, `count` counts desks; an odd one (or one "
         "left over when no wall takes another pair) turns a pair into this group",
     )
+    single: str | None = Field(
+        default=None, description="head: a lone desk with no pair to join is this group"
+    )
+    scale: bool = Field(
+        default=True,
+        description="False: the count ignores the tier's furniture factor (desks per "
+        "workplace area: richer rooms are bigger, not denser)",
+    )
     toward: str | None = Field(
         default=None, description="rows: face the object of this kind placed before (the altar)"
     )

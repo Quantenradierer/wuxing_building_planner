@@ -147,7 +147,7 @@ rooms:
     windows: required         # blinds down, but a flat's room
     furniture:
       - {object: rigger_cocoon, placement: wall}
-      - {object: console, placement: wall, count: [1, 2]}
+      - {object: console, placement: wall, per: 40, count: [1, 2], scale: false}
       - {object: server_rack, placement: wall, count: [1, 2]}
       - {object: wall_screen, placement: wall, count: [1, 3]}
       - {object: portable_ac, placement: corner, count: [1, 2]}

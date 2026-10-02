@@ -324,15 +324,19 @@ def test_bigger_buildings_get_more_elevators_whose_cars_fill_the_shaft() -> None
     assert all(car >= shaft * 0.7 for shaft, car in small + large)
 
 
-def test_offices_have_three_to_seven_desks_in_pairs_each_with_a_chair() -> None:
-    floor = generate(make_params(width=60, depth=40, floors_above=3, seed=1)).floor(2)
-    offices = [r for r in floor.rooms if r.type == "office"]
-    assert offices
-    for room in offices:
-        kinds = [o.kind for o in floor.objects if o.room == room.id]
-        desks = kinds.count("office_desk")
-        assert 2 <= desks <= 7
-        assert kinds.count("chair") == desks
+def test_offices_have_a_desk_per_ten_square_metres_each_with_a_chair() -> None:
+    for wealth in (Wealth.SQUATTER, Wealth.MIDDLE, Wealth.LUXURY):
+        params = make_params(width=60, depth=40, floors_above=3, wealth=wealth, seed=1)
+        floor = generate(params).floor(1)
+        offices = [r for r in floor.rooms if r.type == "office"]
+        assert offices
+        for room in offices:
+            kinds = [o.kind for o in floor.objects if o.room == room.id]
+            desks = kinds.count("office_desk")
+            m2 = len(room.cells) / 4
+            assert 1 <= desks <= 6
+            assert desks == 1 or 8 + 6 * (desks - 1) <= m2  # ASR A1.2, at any wealth
+            assert kinds.count("chair") == desks
 
 
 def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:
@@ -563,7 +567,9 @@ def test_open_offices_fill_their_depth_with_desks_up_to_the_corridor() -> None:
     floor = building.floor(1)
     room = next(r for r in floor.rooms if r.type == "open_office")
     desks = [o for o in floor.objects if o.room == room.id and o.kind == "office_desk"]
-    assert len(desks) * 6 >= len(room.cells) // 4  # a desk per ~4 m² at least
+    m2 = len(room.cells) / 4
+    assert len(desks) * 8 >= m2  # a desk per 8 m² at least
+    assert 8 + 6 * (len(desks) - 1) <= m2  # ASR A1.2: 8 m² + 6 m² per further desk
     assert not any(w.startswith("[hard]") for w in building.warnings)
 
 

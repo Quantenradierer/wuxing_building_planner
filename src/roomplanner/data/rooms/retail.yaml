@@ -51,7 +51,7 @@ rooms:
       - {object: crate, placement: scatter, count: [0, 3]}
       - {object: barrel, placement: scatter, count: [0, 2]}
   manager_office:
-    area: [24, 60]
+    area: [32, 60]          # 8 m2: one workplace (ASR A1.2)
     min_side: 5
     furniture:
       - {object: desk_with_visitors, placement: wall}

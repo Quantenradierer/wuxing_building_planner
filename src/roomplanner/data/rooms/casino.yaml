@@ -62,7 +62,7 @@ rooms:
     windows: forbidden
     transit: false
     furniture:
-      - {object: console, placement: wall, count: [2, 4]}
+      - {object: console, placement: wall, per: 40, count: [1, 4], scale: false}
       - {object: wall_screen, placement: wall, count: [2, 5]}
       - {object: server_rack, placement: wall, count: [0, 2]}
       - {object: rigger_cocoon, placement: wall, count: [0, 1], security: [corporate, aaa]}

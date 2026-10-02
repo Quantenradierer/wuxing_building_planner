@@ -225,8 +225,9 @@ class RoomFurnisher:
 
     def place(self, rules: list[FurnitureRule], scale: bool = True) -> list[PlacedObject]:
         """Place objects by rule; `scale`: multiply counts by the wealth tier's factor."""
-        factor = self.ctx.rules.wealth.furniture if scale else 1.0
+        tier_factor = self.ctx.rules.wealth.furniture if scale else 1.0
         for rule in rules:
+            factor = tier_factor if rule.scale else 1.0
             if rule.choose:
                 kinds = [*self._choices(rule), self._main_part(rule.object) or rule.object]
                 for kind in kinds:
@@ -254,7 +255,7 @@ class RoomFurnisher:
             if low > 0:
                 count = max(1, count)
             if rule.head is not None:
-                self._pairs(rule, spec, rule.head, count)
+                self._pairs(rule, spec, rule.head, count, rule.single)
                 continue
             if rule.line:
                 self._side_by_side(rule, spec, count)
@@ -273,9 +274,12 @@ class RoomFurnisher:
                     break
         return self.placed
 
-    def _pairs(self, rule: FurnitureRule, spec: ObjectSpec, head: str, desks: int) -> None:
+    def _pairs(
+        self, rule: FurnitureRule, spec: ObjectSpec, head: str, desks: int, single: str | None
+    ) -> None:
         """`desks` desks as pairs (`rule.object`) against the walls; a desk left over (odd
-        count, or no wall for another pair) goes across the end of a pair (`head`)."""
+        count, or no wall for another pair) goes across the end of a pair (`head`), a lone
+        desk as `single`."""
         pairs: list[tuple[Rect, list[PlacedObject]]] = []
         for _ in range(desks // 2):
             before = len(self.placed)
@@ -283,6 +287,9 @@ class RoomFurnisher:
                 break
             pairs.append((self.last_group, self.placed[before:]))
         left = desks - 2 * len(pairs)
+        if not pairs and left > 0 and single is not None:
+            self._place_one(rule.model_copy(update={"object": single}), self._spec(single))
+            return
         for rect, parts in pairs:
             if left <= 0:
                 break

@@ -6,8 +6,10 @@ rooms:
     max_aspect: 1.6           # roughly square, not a corridor of desks
     windows: required
     furniture:
-      # 3-7 desks: pairs against the walls, an odd desk across the end of a pair.
-      - {object: desk_pair, placement: wall, per: 16, count: [3, 7], head: desk_trio}
+      # A desk per 10 m2 (ASR A1.2: 8 m2 + 6 m2 per further desk): pairs against the walls,
+      # an odd desk across the end of a pair, a lone one with its chair.
+      - {object: desk_pair, placement: wall, per: 40, count: [1, 6], scale: false,
+         head: desk_trio, single: workstation}
       - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
       - {object: cabinet, placement: corner, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
@@ -19,7 +21,8 @@ rooms:
     circulation: true         # no wall to the corridor: the traffic passes the desks
     door_width: 3
     furniture:
-      - {object: workstation, placement: rows, aisle: 2, paired: true}
+      # Blocks of four desks with 2 m aisles round them: 6 m2 a desk (ASR A1.2).
+      - {object: workstation, placement: rows, aisle: 4, block: 6, paired: true}
       - {object: copier, placement: wall, count: [1, 2]}
       - {object: filing_cabinet, placement: wall, per: 80, count: [1, 6]}
       - {object: plant, placement: corner, count: [1, 4]}

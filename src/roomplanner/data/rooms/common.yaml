@@ -213,7 +213,7 @@ rooms:
     windows: forbidden
     furniture:
       - {object: rigger_cocoon, placement: wall, count: [1, 2]}
-      - {object: console, placement: wall, count: [1, 2]}
+      - {object: console, placement: wall, per: 40, count: [1, 2], scale: false}
       - {object: wall_screen, placement: wall, count: [2, 4]}
       - {object: server_rack, placement: wall, count: [0, 1]}
       - {object: weapon_locker, placement: wall, count: [0, 1]}
