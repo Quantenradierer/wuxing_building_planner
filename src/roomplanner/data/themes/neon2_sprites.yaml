@@ -11,7 +11,7 @@ materials:
   concrete:   {floor: "#373d48", pattern: tiles, tile: 4, lines: "#00000050", bevel: "#ffffff0a", variation: 0.05, grain: 0.18}
   corridor:   {floor: "#303540", pattern: tiles, tile: 2, lines: "#00000058", bevel: "#ffffff0c", variation: 0.04, grain: 0.11, accent: "#00e5ff"}
   lobby:      {floor: "#3e3948", pattern: tiles, tile: 3, lines: "#00000060", bevel: "#ffffff16", variation: 0.07, grain: 0.05, accent: "#ff3fa4"}
-  carpet:     {floor: "#3e4459", pattern: tiles, tile: 2, lines: "#00000020", variation: 0.1, grain: 0.2}
+  carpet:     {floor: "#2f4444", pattern: tiles, tile: 2, lines: "#00000028", variation: 0.12, grain: 0.2}
   executive:  {floor: "#51433d", pattern: planks, tile: 1, lines: "#00000090", bevel: "#ffffff12", variation: 0.2, grain: 0.13, streaks: true, accent: "#ffcc66"}
   wood:       {floor: "#53443b", pattern: planks, tile: 1, lines: "#00000090", bevel: "#ffffff12", variation: 0.2, grain: 0.13, streaks: true}
   wet:        {floor: "#3f5158", pattern: tiles, tile: 1, lines: "#ffffff1a", variation: 0.05, grain: 0.05}
@@ -27,3 +27,5 @@ materials:
   rooftop:    {floor: "#3d4046", pattern: tiles, tile: 4, lines: "#00000050", bevel: "#ffffff08", variation: 0.06, grain: 0.2}
   casino:     {floor: "#3d1d32", pattern: tiles, tile: 2, lines: "#00000050", bevel: "#ffcc661a", variation: 0.06, grain: 0.14, accent: "#ffcc66"}
   ritual:     {floor: "#2d2537", pattern: planks, tile: 1, lines: "#00000090", bevel: "#ffffff12", variation: 0.2, grain: 0.13, streaks: true, accent: "#b14dff"}
+rooms:
+  archive: carpet  # concrete looks like the offices' carpet here; give it the office floor
