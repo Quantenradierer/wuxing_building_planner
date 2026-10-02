@@ -87,7 +87,7 @@ pick and are queued by it. Sets: `modern` (`--prompts tools/sprite_prompts_moder
 for the tiers) and `cyberpunk` (`--set cyberpunk`).
 
 Floor textures: a prompt file's `floors:` section lists `floor.<material>` entries for the
-materials of `floor_theme` (see `tools/sprite_prompts_neon2.yaml`). They show up in the studio
+materials of `floor_theme`. They show up in the studio
 after the objects. The guide is the material as the map draws it (fill colour and joints, with
 grain), changed by the entry's `guide:` if given. They render with Flux (`floor_model: dev`):
 Pony without the object LoRA fills an empty floor with people, with it the floor comes back

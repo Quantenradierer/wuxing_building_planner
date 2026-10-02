@@ -57,6 +57,16 @@ class Material(_Strict):
     tile: int = Field(default=2, gt=0)
     lines: str = Field(default="#00000030", description="Pattern line colour")
     accent: str | None = Field(default=None, description="Neon strip along the walls")
+    variation: float = Field(
+        default=0, ge=0, le=1, description="Brightness jitter between tiles or boards"
+    )
+    bevel: str | None = Field(
+        default=None, description="Highlight beside each pattern line, so joints look cut"
+    )
+    grain: float | None = Field(
+        default=None, ge=0, le=1, description="Grain strength (default: the theme's noise)"
+    )
+    streaks: bool = Field(default=False, description="Grain stretched along the boards")
     texture_cells: int = Field(
         default=8, gt=0, description="Cells one floor texture (floor.<material>.png) spans"
     )
@@ -113,6 +123,7 @@ class Theme(_Strict):
     outside_pattern: Pattern = Pattern.PLAIN
     outside_lines: str = "#ffffff08"
     noise: float = Field(default=0.05, ge=0, le=1, description="Grain strength")
+    grain_px: int = Field(default=6, gt=0, description="Size of a grain speck in pixels")
     shadow: str = "#000000a0"
     glow_radius: float = Field(default=0.3, ge=0, description="Blur radius in cells")
     label: str = "#d8dce6"

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import math
 import random
+import zlib
 from dataclasses import dataclass
 from functools import cache, cached_property
 from pathlib import Path
@@ -38,7 +39,7 @@ from roomplanner.model import (
 )
 from roomplanner.params import Wealth
 from roomplanner.render.shapes import SHAPES, Pen
-from roomplanner.render.theme import Colour, Pattern, Theme, colour
+from roomplanner.render.theme import Colour, Material, Pattern, Theme, colour
 
 DEFAULT_CELL_PX = 50
 MAX_SUPERSAMPLED_PIXELS = 48_000_000
@@ -147,33 +148,52 @@ class _Canvas:
         )
 
     def _room_floor(self, room: Room) -> None:
-        material = self.theme.material(room.type)
-        if (texture := self._floor_texture(self.theme.material_name(room.type))) is not None:
+        name = self.theme.material_name(room.type)
+        material = self.theme.materials[name]
+        if (texture := self._floor_texture(name)) is not None:
             self._textured_floor(room, texture)
             return
         fill = colour(material.floor)
+        n = material.tile
         for cell in room.cells:
-            self.draw_base.rectangle(self.cell_box(cell), fill=fill)
+            shade = fill
+            if material.variation:
+                shade = _shaded(
+                    fill, material.variation * self._jitter(name, _piece(material, cell))
+                )
+            self.draw_base.rectangle(self.cell_box(cell), fill=shade)
         if material.pattern is Pattern.PLAIN:
             return
         lines = colour(material.lines)
+        bevel = colour(material.bevel) if material.bevel else None
         width = max(1, round(self.cell * 0.03))
-        n = material.tile
+
+        def joint(x0: float, y0: float, x1: float, y1: float) -> None:
+            self.draw_base.line((x0, y0, x1, y1), fill=lines, width=width)
+            if bevel is not None:  # the lit lip on the far side of the joint
+                dx, dy = (width, 0) if x0 == x1 else (0, width)
+                self.draw_base.line((x0 + dx, y0 + dy, x1 + dx, y1 + dy), fill=bevel, width=width)
+
         for cell in room.cells:
             x0, y0, x1, y1 = self.cell_box(cell)
             match material.pattern:
                 case Pattern.TILES:
                     if cell.x % n == 0:
-                        self.draw_base.line((x0, y0, x0, y1), fill=lines, width=width)
+                        joint(x0, y0, x0, y1)
                     if cell.y % n == 0:
-                        self.draw_base.line((x0, y0, x1, y0), fill=lines, width=width)
+                        joint(x0, y0, x1, y0)
                 case Pattern.PLANKS:
                     if cell.y % n == 0:
-                        self.draw_base.line((x0, y0, x1, y0), fill=lines, width=width)
+                        joint(x0, y0, x1, y0)
                     if (cell.x + 3 * (cell.y // n)) % (4 * n) == 0:
-                        self.draw_base.line((x0, y0, x0, y1), fill=lines, width=width)
+                        joint(x0, y0, x0, y1)
                 case _:  # grate
                     self._pattern_lines((x0, y0, x1, y1), Pattern.GRATE, 1, lines, self.draw_base)
+
+    def _jitter(self, material: str, piece: tuple[int, int]) -> float:
+        """A stable value in [-1, 1] for one tile or board of a material."""
+        key = f"{self.building.seed}:{material}:{piece[0]}:{piece[1]}".encode()
+        return zlib.crc32(key) / 0x7FFFFFFF - 1
 
     def _floor_texture(self, material: str) -> Image.Image | None:
         """The material's floor texture scaled to its span, if the theme's sprites have one."""
@@ -239,19 +259,31 @@ class _Canvas:
             y += step
 
     def _grain(self) -> None:
-        strength = self.theme.noise
-        if strength <= 0:
-            return
-        rng = random.Random(f"{self.building.seed}:{self.floor.level}:grain")
-        w, h = max(1, self.size[0] // 6), max(1, self.size[1] // 6)
-        noise = Image.frombytes("L", (w, h), rng.randbytes(w * h))
-        noise = noise.resize(self.size, Image.Resampling.BICUBIC)
-        grey = Image.merge("RGB", (noise, noise, noise))
-        footprint = Image.new("L", self.size, 0)
-        mask_draw = ImageDraw.Draw(footprint)
+        """Overlay noise on the floors; boards with `streaks` get it stretched along them."""
+        fine = Image.new("L", self.size, 0)
+        streaked = Image.new("L", self.size, 0)
+        fine_draw, streaked_draw = ImageDraw.Draw(fine), ImageDraw.Draw(streaked)
         for cell in self.floor.footprint:
-            mask_draw.rectangle(self.cell_box(cell), fill=round(255 * strength))
-        self.image = Image.composite(ImageChops.overlay(self.image, grey), self.image, footprint)
+            fine_draw.rectangle(self.cell_box(cell), fill=round(255 * self.theme.noise))
+        for room in self.floor.rooms:
+            material = self.theme.material(room.type)
+            if material.grain is None and not material.streaks:
+                continue
+            strength = round(255 * (self.theme.noise if material.grain is None else material.grain))
+            for cell in room.cells:
+                fine_draw.rectangle(self.cell_box(cell), fill=0 if material.streaks else strength)
+                if material.streaks:
+                    streaked_draw.rectangle(self.cell_box(cell), fill=strength)
+        rng = random.Random(f"{self.building.seed}:{self.floor.level}:grain")
+        speck = self.theme.grain_px
+        for mask, stretch in ((fine, 1), (streaked, 24)):
+            if mask.getbbox() is None:
+                continue
+            w, h = max(1, self.size[0] // (speck * stretch)), max(1, self.size[1] // speck)
+            noise = Image.frombytes("L", (w, h), rng.randbytes(w * h))
+            noise = noise.resize(self.size, Image.Resampling.BICUBIC)
+            grey = Image.merge("RGB", (noise, noise, noise))
+            self.image = Image.composite(ImageChops.overlay(self.image, grey), self.image, mask)
         self.draw_base = ImageDraw.Draw(self.image, "RGBA")
 
     def _accents(self) -> None:
@@ -679,6 +711,24 @@ def sprite_name(sprites: dict[str, Image.Image], kind: str, tier: Wealth) -> str
         if f"{kind}.{tiers[index]}" in sprites:
             return f"{kind}.{tiers[index]}"
     return kind if kind in sprites else None
+
+
+def _piece(material: Material, cell: Cell) -> tuple[int, int]:
+    """The tile or board of a material's pattern that a cell lies on (grid-aligned)."""
+    n = material.tile
+    if material.pattern is Pattern.PLANKS:
+        row = cell.y // n
+        return row, (cell.x + 3 * row) // (4 * n)
+    return cell.x // n, cell.y // n
+
+
+def _shaded(fill: Colour, amount: float) -> Colour:
+    r, g, b, a = fill
+
+    def scale(c: int) -> int:
+        return min(255, max(0, round(c * (1 + amount))))
+
+    return scale(r), scale(g), scale(b), a
 
 
 @cache

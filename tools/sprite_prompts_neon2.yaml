@@ -35,53 +35,6 @@ derived:
         {subject}, wrecked and looted, broken, rusted, torn, patched with duct tape, dirt and
         debris, dead neon
 
-# Floor textures floor.<material> (see tools/sprites_local.py): seamless square tiles for the
-# materials of `floor_theme`, each spanning the material's texture_cells. The guide is the
-# material as the map draws it (dark fill, joints); `guide:` changes Material fields for it.
-floor_theme: neon2_sprites
-floor_model: dev
-floor_style: >-
-  seamless tileable floor texture, orthographic top-down view straight from above, flat surface
-  filling the whole image, even diffuse lighting, no objects, no people, no furniture, dark
-  cyberpunk game map style, {subject}
-floor_denoise: 0.8
-
-floors:
-  floor.concrete:
-    prompt: "dark grey poured concrete floor in large square slabs, hairline cracks, oil stains, faint scuff marks, scattered grit"
-  floor.corridor:
-    prompt: "dark gunmetal floor tiles with thin seams, worn walking path, scuffed rubber edging, faint cyan guide line reflections"
-  floor.lobby:
-    prompt: "polished black terrazzo floor tiles with grey and chrome flecks, glossy, faint magenta neon reflections"
-  floor.carpet:
-    prompt: "dark slate blue low-pile office carpet tiles, subtle woven texture, faint geometric pattern, slightly worn"
-  floor.executive:
-    prompt: "dark walnut parquet floor, long polished boards, deep glossy finish, thin gold inlay lines between boards"
-  floor.wood:
-    prompt: "dark brown laminate floorboards, worn and scratched, faded varnish, uneven plank lengths"
-  floor.wet:
-    prompt: "small dark teal ceramic tiles, wet sheen, grimy grout lines, water stains"
-  floor.sterile:
-    prompt: "smooth grey-blue vinyl hospital floor, seamless welded sheets, clean, faint reflections, tiny speckles"
-  floor.industrial:
-    prompt: "black steel diamond plate floor grating, rusted edges, oil smears, dirt in the grooves"
-  floor.tech:
-    prompt: "raised access floor panels in dark navy, square panels with thin metal frames, perforated vent panels, faint violet light in the seams"
-  floor.shop:
-    prompt: "light grey vinyl shop floor tiles, scuffed, dirt along the joints, faint pink neon reflections"
-  floor.stairs:
-    prompt: "dark grey anti-slip rubber floor with small round studs, worn, dusty"
-  floor.club:
-    prompt: "black glossy dance floor tiles with thin glowing magenta seams, sticky spills, glitter"
-  floor.pods:
-    prompt: "dark blue-grey polymer floor panels, rounded joints, thin cyan light strips in the seams, scuffed"
-  floor.lab:
-    prompt: "white epoxy laboratory floor, seamless, glossy, faint grey speckles, thin green safety line reflections"
-  floor.terrace:
-    prompt: "weathered dark composite deck boards, gaps between boards, grime and moss in the gaps"
-  floor.rooftop:
-    prompt: "dark grey rooftop pavers, large square concrete tiles, stains, puddle marks, bird droppings, cracked corners"
-
 subjects:
   desk:
     prompt: "light oak office desk with a slim computer monitor along the top edge, keyboard and mouse, no chair, dark gunmetal and matte black polymer, thin glowing cyan LED strips"

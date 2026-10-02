@@ -549,6 +549,10 @@ marker), breaches as rubble, devices, optional labels and grid, then the blurred
 is screened on top and the light map applied (unlit areas dim to `ambient`, lights tint).
 Stains and graffiti come from the theme's `condition.decals` density for the building's
 condition. Themes are YAML (`data/themes/neon.yaml`) or any file passed by path.
+Optional material fields refine a floor: `variation` shades each tile or board a little
+differently (stable per building seed, aligned to the grid), `bevel` draws a lit lip beside
+each joint, `grain` overrides the theme's `noise` strength and `streaks` stretches the grain
+along the boards; the theme's `grain_px` sets the speck size. `neon2_sprites` uses them all.
 
 A theme may `extends:` a bundled theme (mappings merge one level deep) and name a `sprites`
 directory (a bundled set under `data/sprites/` or a path relative to the theme file). An

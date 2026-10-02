@@ -197,3 +197,30 @@ def test_floor_texture_tiles_the_rooms_of_its_material(tmp_path: Path) -> None:
     pixel = image.getpixel((round((cell.x + 2.5) * 20), round((cell.y + 2.5) * 20)))
     assert isinstance(pixel, tuple)
     assert pixel[1] > 120 and pixel[1] > 3 * max(pixel[0], pixel[2])
+
+
+def test_floor_variation_shades_tiles_differently_and_stays_on_the_grid(tmp_path: Path) -> None:
+    building = generate(make_params(width=30, depth=20))
+    floor = building.floor(0)
+    room = max(floor.rooms, key=lambda r: len(r.cells))
+    theme_path = tmp_path / "varied.yaml"
+    material = load_theme("neon").material_name(room.type)
+    theme_path.write_text(
+        "extends: neon\nname: varied\nambient: 1.0\nglow_radius: 0\nnoise: 0\n"
+        f"materials: {{{material}: {{floor: '#808080', tile: 1, variation: 0.2}}}}\n"
+    )
+    theme = load_theme(str(theme_path))
+    options = RenderOptions(cell_px=10, padding=2, lighting=False)
+    image = render_floor(building, floor, theme, options)
+    again = render_floor(building, floor, theme, options)
+    assert image.tobytes() == again.tobytes()
+    taken = {(c.x, c.y) for o in floor.objects for c in o.cells}
+    free = [c for c in room.cells if (c.x, c.y) not in taken]
+    plain_path = tmp_path / "plain.yaml"
+    plain_path.write_text(theme_path.read_text().replace(", variation: 0.2", ""))
+    plain = render_floor(building, floor, load_theme(str(plain_path)), options)
+
+    def shades(picture: Image.Image) -> int:
+        return len({picture.getpixel(((c.x + 2) * 10 + 5, (c.y + 2) * 10 + 5)) for c in free})
+
+    assert shades(image) > shades(plain) + 3
