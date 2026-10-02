@@ -1,0 +1,36 @@
+# Release the Schattenakte Foundry module: push a tag `schattenakte-v<version>`.
+# Foundry installs it from the manifest URL
+#   https://github.com/<owner>/<repo>/releases/latest/download/module.json
+# (keep the module's releases the repo's only ones, or "latest" points elsewhere).
+name: Schattenakte release
+
+on:
+  push:
+    tags: ["schattenakte-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build module.json and zip
+        env:
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          version="${TAG#schattenakte-v}"
+          base="https://github.com/$REPO/releases"
+          jq --arg v "$version" --arg url "https://github.com/$REPO" \
+             --arg manifest "$base/latest/download/module.json" \
+             --arg download "$base/download/$TAG/schattenakte.zip" \
+             '.version = $v | .url = $url | .manifest = $manifest | .download = $download' \
+             foundry-module/module.json > module.json
+          cp module.json foundry-module/module.json
+          (cd foundry-module && zip -r ../schattenakte.zip module.json scripts README.md)
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" module.json schattenakte.zip --title "Schattenakte ${{ github.ref_name }}" --generate-notes

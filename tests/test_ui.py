@@ -1,9 +1,7 @@
-import io
 import json
 import threading
 import urllib.error
 import urllib.request
-import zipfile
 from collections.abc import Iterator
 from typing import Any
 
@@ -13,7 +11,7 @@ from roomplanner.errors import InfeasibleError
 from roomplanner.serialization import from_dict
 from roomplanner.ui.server import (
     RequestError,
-    dd2vtt_export,
+    foundry_export,
     generate_response,
     make_server,
     options,
@@ -50,20 +48,12 @@ def test_infeasible_buildings_raise() -> None:
         generate_response({"params": {**PARAMS, "width": 2}})
 
 
-def test_dd2vtt_export_zips_one_file_per_floor() -> None:
-    name, data, content_type = dd2vtt_export({"params": PARAMS})
-    assert (name, content_type) == ("office_5.zip", "application/zip")
-    with zipfile.ZipFile(io.BytesIO(data)) as archive:
-        assert archive.namelist() == ["office_5_F0.dd2vtt", "office_5_F1.dd2vtt"]
-        floor = json.loads(archive.read("office_5_F0.dd2vtt"))
-    assert floor["image"]
-    assert floor["line_of_sight"]
-
-
-def test_dd2vtt_export_of_one_floor_is_the_file_itself() -> None:
-    name, data, content_type = dd2vtt_export({"params": {**PARAMS, "floors_above": 1}})
-    assert (name, content_type) == ("office_5_F0.dd2vtt", "application/json")
-    assert json.loads(data)["portals"]
+def test_foundry_export_is_the_schattenakte_file() -> None:
+    name, body = foundry_export({"params": PARAMS})
+    assert name == "office_5.schattenakte.json"
+    document = json.loads(body)
+    assert document["name"] == "office_5"
+    assert len(document["scene"]["levels"]) == 2
 
 
 @pytest.fixture
@@ -98,13 +88,13 @@ def test_server_serves_page_and_api(base_url: str) -> None:
     assert "at least" in body["error"]
 
 
-def test_server_serves_the_dd2vtt_zip(base_url: str) -> None:
+def test_server_serves_the_foundry_file(base_url: str) -> None:
     request = urllib.request.Request(
-        base_url + "/api/export/dd2vtt",
+        base_url + "/api/export/foundry",
         json.dumps({"params": PARAMS}).encode(),
         {"Content-Type": "application/json"},
     )
     with urllib.request.urlopen(request) as response:
-        assert response.headers["Content-Type"] == "application/zip"
-        assert 'filename="office_5.zip"' in response.headers["Content-Disposition"]
-        assert zipfile.is_zipfile(io.BytesIO(response.read()))
+        disposition = response.headers["Content-Disposition"]
+        assert 'filename="office_5.schattenakte.json"' in disposition
+        assert json.loads(response.read())["format"] == "schattenakte"

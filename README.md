@@ -17,7 +17,7 @@ uv run roomplanner render megamart.json
 uv run roomplanner render megamart.json -f png -o maps/megamart.png   # maps/megamart_F0.png, …
 uv run roomplanner generate -t office -w 48 -d 30 -f webp --labels --grid 2
 uv run roomplanner generate -t nightclub -w 56 -d 36 -f dd2vtt -o vtt/club.dd2vtt    # Universal VTT
-uv run roomplanner generate -t corp_lab -w 60 -d 40 --floors-above 3 -f foundry -o vtt/lab
+uv run roomplanner generate -t corp_lab -w 60 -d 40 --floors-above 3 -f foundry -o vtt/lab.schattenakte.json
 ```
 
 Interactive: `uv run roomplanner ui` opens a local page (http://127.0.0.1:8000) with all
@@ -25,11 +25,10 @@ parameters, a floor switcher and toggleable layers drawn over the themed image: 
 and descriptions (type, id, m²), units, walls, doors and windows, locks and entrances,
 furniture, security devices, lights and a grid. Hover a room for its furniture and devices.
 
-Foundry: copy the `vtt/lab` folder to `<Foundry Data>/roomplanner/lab/`, create a script
-macro from `import-macro.js` and run it once. Stairs and elevators teleport tokens between
-the floor scenes (Foundry v12+ Scene Regions). The UI's Foundry button is simpler: it downloads
-`.dd2vtt` files (one per floor, zipped for several) for Foundry's Universal Battlemap Importer
-module (Scenes sidebar → Universal Battlemap import); floors are not linked there.
+Foundry VTT (v14+): install the **Schattenakte** module (`foundry-module/`, see its README),
+then *Scenes → Import building* and pick a `.schattenakte.json` (from `-f foundry` or the
+UI's Foundry button). The building becomes one scene with a level per floor; stairs and
+elevators change levels.
 
 ## Parameters
 

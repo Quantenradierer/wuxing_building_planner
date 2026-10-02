@@ -19,11 +19,11 @@ src/roomplanner/
   render/shapes.py           procedural object shapes
   cli.py                     Typer CLI
   ui/server.py               local web UI: stdlib HTTP server, /api/generate -> JSON + images,
-                             /api/export/dd2vtt -> Universal VTT file(s)
+                             /api/export/foundry -> .schattenakte.json
   ui/index.html              the UI page; overlay layers drawn in SVG from the JSON contract
   export/common.py           grid scale, wall runs, stable ids
   export/uvtt.py             Universal VTT (.dd2vtt)
-  export/foundry.py          Foundry VTT scenes + import macro
+  export/foundry.py          Foundry VTT v14 scene (levels) for the Schattenakte module
   pipeline/
     base.py                  Context, intermediate plan, stage protocols
     registry.py              strategies by name or `module:Class`
@@ -592,9 +592,13 @@ Without `baked_lighting` (default) the image has no light map and the VTT lights
 | door (broken)          | open portal            | open door                                     |
 | door (blocked)         | line of sight          | wall                                          |
 
-Foundry stairwells / elevators: an arrival region (in front of the door) and "up" /
-"down" halves of the stairs or car with Teleport Token behaviours to the arrival region of
-the same core room on the next floor. Scene, wall, light and region ids are stable hashes.
+Foundry (ADR 0013): one `.schattenakte.json` per building, `{format, version, name, scene,
+images}`; `scene` is v14 scene data with one Scene Level per floor (3 m elevation bands,
+ground floor `defaultLevel0000`, levels don't see each other), walls and lights tagged with
+their level, and per stairwell / elevator car one region over the stairs or car spanning
+its consecutive floors with the native Change Level behaviour. Level backgrounds name
+files in `images` (base64 WebP); the module (`foundry-module/`) uploads them to
+`Data/schattenakte/<name>/` and creates the scene with its id kept. Ids are stable hashes.
 
 ## ASCII debug renderer
 

@@ -41,7 +41,7 @@ class OutputFormat(StrEnum):
     PNG = "png"
     WEBP = "webp"
     DD2VTT = "dd2vtt"  # Universal VTT, one file per floor
-    FOUNDRY = "foundry"  # Foundry VTT scenes folder with an import macro
+    FOUNDRY = "foundry"  # Foundry VTT v14 scene for the Schattenakte module
 
 
 IMAGE_FORMATS = (OutputFormat.PNG, OutputFormat.WEBP)
@@ -86,9 +86,7 @@ def generate(
     output_format: Annotated[OutputFormat, typer.Option("--format", "-f")] = OutputFormat.ASCII,
     output: Annotated[
         Path | None,
-        typer.Option(
-            "--output", "-o", help="Images, dd2vtt: one file per floor, suffixed; foundry: folder"
-        ),
+        typer.Option("--output", "-o", help="Images, dd2vtt: one file per floor, suffixed"),
     ] = None,
     theme: ThemeOption = "neon",
     cell_px: CellPxOption = DEFAULT_CELL_PX,
@@ -243,10 +241,11 @@ def _export_vtt(
                 target.write_text(uvtt_json(building, floor, theme, options), encoding="utf-8")
                 typer.echo(str(target))
         else:
-            folder = output or Path(stem)
-            export = to_foundry(building, theme, options, folder.name)
-            for path in export.write(folder):
-                typer.echo(str(path))
+            target = output or Path(f"{stem}.schattenakte.json")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            export = to_foundry(building, theme, options, target.name.split(".")[0])
+            target.write_text(export.json(), encoding="utf-8")
+            typer.echo(str(target))
     except (RoomplannerError, OSError) as error:
         _fail(str(error))
     for warning in building.warnings:

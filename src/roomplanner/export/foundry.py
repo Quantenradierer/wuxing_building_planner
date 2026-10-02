@@ -1,40 +1,46 @@
-"""Foundry VTT (v12+): one scene per floor, packaged with an import macro.
+"""Foundry VTT (v14+): one scene with one Scene Level per floor, for the Schattenakte module.
 
-Output folder:
-    <name>_F0.png, <name>_F1.png, …   floor images
-    scenes.json                      scene data with stable ids
-    import-macro.js                  creates the scenes, keeping the ids
+The export is a single JSON file (`<name>.schattenakte.json`):
 
-Copy the folder into Foundry's `Data/roomplanner/` and run the macro. The ids must survive
-the import because stairs link the floors: each stairwell and elevator gets an "up" and a
-"down" region (a Scene Region with a native Teleport Token behaviour) that moves tokens to
-the arrival region of the same stairwell on the floor above or below.
+    {"format": "schattenakte", "version": 1, "name": …, "scene": {…}, "images": {file: b64}}
+
+`scene` is Foundry scene data; each level's `background.src` is a file name in `images`.
+The Schattenakte module (`foundry-module/`) uploads the images to
+`Data/schattenakte/<name>/`, points the levels at them and creates the scene.
+
+Floors are stacked levels `FLOOR_HEIGHT_M` apart (grid units are metres). Walls and lights
+belong to their floor's level; levels don't see each other (a building has solid floors).
+Every stairwell and elevator is a region spanning the levels it serves, from the bottom of
+its lowest floor to just above the bottom of its highest, with the native Change Level
+behaviour (the layout of Foundry's own Scene Levels demo).
 
 Walls: plain walls block everything; windows are see-through doors (closed: movement and
 sound blocked, can be opened to climb out); doors are doors (locked if they have a lock,
-open if broken); barricaded doors are walls; missing doors, broken windows and breaches
-are gaps.
+open if broken; elevator doors slide); barricaded doors are walls; missing doors, broken
+windows and breaches are gaps.
 """
 
 from __future__ import annotations
 
+import base64
+import io
 import json
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
+
+from PIL import Image
 
 from roomplanner.export.common import (
     ExportOptions,
     Point,
     floor_image,
     opening_segment,
-    png_bytes,
     runs,
     solid_walls,
     stable_id,
 )
 from roomplanner.geometry import CELL_SIZE_M, Cell
-from roomplanner.model import Building, Floor, OpeningKind, OpeningState, PlacedObject, Room
+from roomplanner.model import Building, Floor, OpeningKind, OpeningState, Room
 from roomplanner.render.theme import Theme
 
 # Foundry constants (CONST.WALL_SENSE_TYPES, WALL_MOVEMENT_TYPES, WALL_DOOR_TYPES/STATES).
@@ -42,89 +48,123 @@ SENSE_NONE, SENSE_LIMITED, SENSE_NORMAL = 0, 10, 20
 MOVE_NONE, MOVE_NORMAL = 0, 20
 DOOR_NONE, DOOR_DOOR = 0, 1
 DOOR_CLOSED, DOOR_OPEN, DOOR_LOCKED = 0, 1, 2
+SLIDING_DOOR = {"type": "slide", "double": True}  # WallDocument.animation: leaves part
 
 TRANSPORT = {
     "stairwell": "stairs",
     "public_stairs": "stairs",
     "elevator": "elevator_car",
 }  # room type -> object kind
-ASSET_ROOT = "roomplanner"
+FORMAT = "schattenakte"
+FORMAT_VERSION = 1
+FLOOR_HEIGHT_M = 3.0
+STAIR_OVERLAP_M = 1.0  # a shaft region reaches this far into its highest level
+GROUND_LEVEL_ID = "defaultLevel0000"  # Foundry's id for a scene's first level
 DARKNESS = 0.6  # scene darkness when the VTT does the lighting
+WEBP_QUALITY = 85
+
+type Box = tuple[float, float, float, float]
 
 
 @dataclass(frozen=True)
 class FoundryExport:
-    scenes: list[dict[str, Any]]
-    images: dict[str, bytes]  # file name -> PNG
-    macro: str
+    name: str
+    scene: dict[str, Any]
+    images: dict[str, bytes]  # file name -> WebP
 
-    def write(self, folder: Path) -> list[Path]:
-        folder.mkdir(parents=True, exist_ok=True)
-        written: list[Path] = []
-        for name, data in self.images.items():
-            (folder / name).write_bytes(data)
-            written.append(folder / name)
-        (folder / "scenes.json").write_text(json.dumps(self.scenes, indent=1), encoding="utf-8")
-        (folder / "import-macro.js").write_text(self.macro, encoding="utf-8")
-        return [*written, folder / "scenes.json", folder / "import-macro.js"]
+    def document(self) -> dict[str, Any]:
+        return {
+            "format": FORMAT,
+            "version": FORMAT_VERSION,
+            "name": self.name,
+            "scene": self.scene,
+            "images": {
+                file: base64.b64encode(data).decode("ascii") for file, data in self.images.items()
+            },
+        }
+
+    def json(self) -> str:
+        return json.dumps(self.document(), separators=(",", ":"))
 
 
 def to_foundry(
     building: Building, theme: Theme, options: ExportOptions, name: str
 ) -> FoundryExport:
-    """Scenes for all floors; `name` is the folder name under Data/roomplanner/."""
-    scene_ids = {f.level: stable_id(building.seed, name, "scene", f.level) for f in building.floors}
+    """The building as one scene; `name` names the scene and the module's upload folder."""
+    level_ids = {f.level: level_id(building, name, f.level) for f in building.floors}
     images: dict[str, bytes] = {}
-    scenes: list[dict[str, Any]] = []
-    for floor in building.floors:
+    levels: list[dict[str, Any]] = []
+    walls: list[dict[str, Any]] = []
+    lights: list[dict[str, Any]] = []
+    size = (0, 0)
+    for index, floor in enumerate(sorted(building.floors, key=lambda f: f.level)):
         image = floor_image(building, floor, theme, options)
+        size = image.size
         tag = f"F{floor.level}" if floor.level >= 0 else f"B{-floor.level}"
-        file = f"{name}_{tag}.png"
-        images[file] = png_bytes(image)
-        scene = _Scene(building, floor, options, name, scene_ids)
-        scenes.append(
+        file = f"{name}_{tag}.webp"
+        images[file] = webp_bytes(image)
+        bottom, top = elevation(floor.level)
+        levels.append(
             {
-                "_id": scene_ids[floor.level],
-                "name": f"{name} - {floor.name}",
-                "navName": floor.name,
-                "navigation": True,
-                "navOrder": floor.level,
-                "width": image.size[0],
-                "height": image.size[1],
-                "padding": 0,
-                "background": {"src": f"{ASSET_ROOT}/{name}/{file}"},
-                "grid": {
-                    "type": 1,
-                    "size": options.pixels_per_square,
-                    "distance": options.grid_m,
-                    "units": "m",
-                },
-                "tokenVision": True,
-                "fog": {"exploration": True},
-                "environment": {"darknessLevel": 0.0 if options.baked_lighting else DARKNESS},
-                "walls": scene.walls(),
-                "lights": scene.lights() if options.lights else [],
-                "regions": scene.regions(),
-                "flags": {"roomplanner": {"level": floor.level, "seed": building.seed}},
+                "_id": level_ids[floor.level],
+                "name": floor.name,
+                "elevation": {"bottom": bottom, "top": top},
+                "background": {"src": file},
+                "visibility": {"levels": []},
+                "sort": index,
             }
         )
-    return FoundryExport(scenes, images, _macro(name))
+        scene = _Level(building, floor, options, name, level_ids[floor.level])
+        walls += scene.walls()
+        if options.lights:
+            lights += scene.lights()
+    scene_data = {
+        "_id": stable_id(building.seed, name, "scene"),
+        "name": name,
+        "navigation": True,
+        "width": size[0],
+        "height": size[1],
+        "padding": 0,
+        "grid": {
+            "type": 1,
+            "size": options.pixels_per_square,
+            "distance": options.grid_m,
+            "units": "m",
+        },
+        "tokenVision": True,
+        "environment": {"darknessLevel": 0.0 if options.baked_lighting else DARKNESS},
+        "levels": levels,
+        "initialLevel": level_ids.get(0, levels[0]["_id"]),
+        "walls": walls,
+        "lights": lights,
+        "regions": _shafts(building, options, name, level_ids),
+        "flags": {"roomplanner": {"seed": building.seed, "type": building.params.building_type}},
+    }
+    return FoundryExport(name, scene_data, images)
 
 
-class _Scene:
+def level_id(building: Building, name: str, level: int) -> str:
+    return GROUND_LEVEL_ID if level == 0 else stable_id(building.seed, name, "level", level)
+
+
+def elevation(level: int) -> tuple[float, float]:
+    return level * FLOOR_HEIGHT_M, (level + 1) * FLOOR_HEIGHT_M
+
+
+def webp_bytes(image: Image.Image) -> bytes:
+    buffer = io.BytesIO()
+    image.save(buffer, format="WEBP", quality=WEBP_QUALITY)
+    return buffer.getvalue()
+
+
+class _Level:
     def __init__(
-        self,
-        building: Building,
-        floor: Floor,
-        options: ExportOptions,
-        name: str,
-        scene_ids: dict[int, str],
+        self, building: Building, floor: Floor, options: ExportOptions, name: str, level: str
     ) -> None:
         self.building = building
         self.floor = floor
-        self.options = options
         self.name = name
-        self.scene_ids = scene_ids
+        self.level = level
         self.cell = options.cell_px
         self.pad = options.render.padding
 
@@ -137,7 +177,7 @@ class _Scene:
     def walls(self) -> list[dict[str, Any]]:
         walls: list[dict[str, Any]] = []
 
-        def add(a: Point, b: Point, **kind: int) -> None:
+        def add(a: Point, b: Point, **kind: Any) -> None:
             (x1, y1), (x2, y2) = self.px(a), self.px(b)
             wall = {
                 "_id": self._id("wall", len(walls)),
@@ -148,6 +188,7 @@ class _Scene:
                 "sound": SENSE_NORMAL,
                 "door": DOOR_NONE,
                 "ds": DOOR_CLOSED,
+                "levels": [self.level],
             }
             walls.append(wall | kind)
 
@@ -170,11 +211,13 @@ class _Scene:
                     )
                 case OpeningKind.DOOR, OpeningState.BLOCKED:
                     add(a, b)
-                case OpeningKind.DOOR, OpeningState.BROKEN:
-                    add(a, b, door=DOOR_DOOR, ds=DOOR_OPEN)
-                case OpeningKind.DOOR, OpeningState.INTACT:
-                    state = DOOR_LOCKED if opening.lock else DOOR_CLOSED
-                    add(a, b, door=DOOR_DOOR, ds=state)
+                case OpeningKind.DOOR, OpeningState.BROKEN | OpeningState.INTACT:
+                    if opening.state is OpeningState.BROKEN:
+                        state = DOOR_OPEN
+                    else:
+                        state = DOOR_LOCKED if opening.lock else DOOR_CLOSED
+                    slide = {"animation": SLIDING_DOOR} if opening.sliding else {}
+                    add(a, b, door=DOOR_DOOR, ds=state, **slide)
                 case _:
                     pass  # missing doors and breaches are gaps
         return walls
@@ -194,6 +237,8 @@ class _Scene:
                     "_id": self._id("light", i),
                     "x": x,
                     "y": y,
+                    "elevation": elevation(self.floor.level)[0],
+                    "levels": [self.level],
                     "config": {
                         "dim": round(radius, 2),
                         "bright": round(radius * 0.4, 2),
@@ -206,105 +251,88 @@ class _Scene:
             )
         return lights
 
-    # --- stairs and elevators ---------------------------------------------------------
 
-    def regions(self) -> list[dict[str, Any]]:
-        regions: list[dict[str, Any]] = []
-        levels = sorted(self.scene_ids)
-        index = levels.index(self.floor.level)
-        above = levels[index + 1] if index + 1 < len(levels) else None
-        below = levels[index - 1] if index > 0 else None
-        for room in sorted(self.floor.rooms, key=lambda r: min(r.cells)):
-            kind = TRANSPORT.get(room.type)
-            if kind is None:
+# --- stairs and elevators -------------------------------------------------------------
+
+
+def _shafts(
+    building: Building, options: ExportOptions, name: str, level_ids: dict[int, str]
+) -> list[dict[str, Any]]:
+    """One Change Level region per run of consecutive floors sharing a stairwell/elevator."""
+    shafts: dict[tuple[str, Cell], list[tuple[Floor, Room]]] = {}
+    for floor in sorted(building.floors, key=lambda f: f.level):
+        for room in floor.rooms:
+            if room.type in TRANSPORT:
+                # Core rooms share their cells on all floors.
+                shafts.setdefault((room.type, min(room.cells)), []).append((floor, room))
+    regions: list[dict[str, Any]] = []
+    for key, stops in sorted(shafts.items()):
+        for run in _consecutive(stops):
+            if len(run) < 2:
                 continue
-            key = (room.type, min(room.cells))  # core rooms share their cells on all floors
-            vehicle = next(
-                (o for o in self.floor.objects if o.room == room.id and o.kind == kind), None
-            )
-            up, down = self._halves(room, vehicle)
-            label = "Elevator" if room.type == "elevator" else "Stairs"
-            regions.append(self._region(key, "arrival", f"{label} (arrive)", self._arrival(room)))
-            for target, half, direction in ((above, up, "up"), (below, down, "down")):
-                if target is None:
-                    continue
-                destination = (
-                    f"Scene.{self.scene_ids[target]}.Region."
-                    f"{stable_id(self.building.seed, self.name, target, 'region', *key, 'arrival')}"
-                )
-                region = self._region(key, direction, f"{label} {direction}", half)
-                region["behaviors"] = [
-                    {
-                        "_id": self._id("behavior", *key, direction),
-                        "name": f"Teleport {direction}",
-                        "type": "teleportToken",
-                        "system": {"destination": destination, "choice": False},
-                        "disabled": False,
-                    }
-                ]
-                regions.append(region)
-        return regions
-
-    def _region(
-        self, key: tuple[str, Cell], role: str, name: str, box: tuple[float, float, float, float]
-    ) -> dict[str, Any]:
-        x0, y0 = self.px((box[0], box[1]))
-        x1, y1 = self.px((box[2], box[3]))
-        return {
-            "_id": stable_id(self.building.seed, self.name, self.floor.level, "region", *key, role),
-            "name": name,
-            "color": "#ffb347" if role != "arrival" else "#00e5ff",
-            "shapes": [
+            levels = [f.level for f, _ in run]
+            x0, y0, x1, y1 = _footprint(run)
+            pad, cell = options.render.padding, options.cell_px
+            label = "Elevator" if key[0] == "elevator" else "Stairs"
+            region_id = stable_id(building.seed, name, "region", *key, levels[0])
+            regions.append(
                 {
-                    "type": "rectangle",
-                    "x": x0,
-                    "y": y0,
-                    "width": x1 - x0,
-                    "height": y1 - y0,
-                    "rotation": 0,
-                    "hole": False,
+                    "_id": region_id,
+                    "name": f"{label} ({run[0][0].name} - {run[-1][0].name})",
+                    "color": "#00e5ff" if key[0] == "elevator" else "#ffb347",
+                    "shapes": [
+                        {
+                            "type": "rectangle",
+                            "x": (x0 + pad) * cell,
+                            "y": (y0 + pad) * cell,
+                            "width": (x1 - x0) * cell,
+                            "height": (y1 - y0) * cell,
+                            "rotation": 0,
+                            "hole": False,
+                        }
+                    ],
+                    "levels": [level_ids[level] for level in levels],
+                    "elevation": {
+                        "bottom": elevation(levels[0])[0],
+                        "top": elevation(levels[-1])[0] + STAIR_OVERLAP_M,
+                    },
+                    "behaviors": [
+                        {
+                            "_id": stable_id(region_id, "behavior"),
+                            "name": "Change Level",
+                            "type": "changeLevel",
+                            "system": {"movementActions": []},
+                            "disabled": False,
+                        }
+                    ],
                 }
-            ],
-            "behaviors": [],
-            "visibility": 0,
-        }
+            )
+    return regions
 
-    @staticmethod
-    def _halves(
-        room: Room, vehicle: PlacedObject | None
-    ) -> tuple[tuple[float, float, float, float], tuple[float, float, float, float]]:
-        """The stairs (or the room) split along their long side: (up half, down half)."""
-        if vehicle is not None:
-            x0, y0, x1, y1 = vehicle.x, vehicle.y, vehicle.x + vehicle.w, vehicle.y + vehicle.h
+
+def _consecutive(stops: list[tuple[Floor, Room]]) -> list[list[tuple[Floor, Room]]]:
+    groups: list[list[tuple[Floor, Room]]] = []
+    for stop in stops:
+        if groups and groups[-1][-1][0].level == stop[0].level - 1:
+            groups[-1].append(stop)
         else:
-            xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
-            x0, y0, x1, y1 = min(xs), min(ys), max(xs) + 1, max(ys) + 1
-        if x1 - x0 >= y1 - y0:
-            mid = (x0 + x1) / 2
-            return (x0, y0, mid, y1), (mid, y0, x1, y1)
-        mid = (y0 + y1) / 2
-        return (x0, y0, x1, mid), (x0, mid, x1, y1)
-
-    def _arrival(self, room: Room) -> tuple[float, float, float, float]:
-        """A free spot in front of the room's door (where teleported tokens appear)."""
-        clearance = self.floor.door_clearances().get(room.id)
-        taken = {c for o in self.floor.objects if o.room == room.id for c in o.cells}
-        cells = sorted((clearance or room.cells) - taken) or sorted(room.cells)
-        cell = cells[0]
-        return (cell.x, cell.y, cell.x + 1, cell.y + 1)
+            groups.append([stop])
+    return groups
 
 
-def _macro(name: str) -> str:
-    return f"""// Roomplanner: import the floors of "{name}" as scenes (Foundry VTT v12+).
-// 1. Copy this folder to <Foundry Data>/{ASSET_ROOT}/{name}/
-// 2. Create a script macro with this code and run it once as GM.
-const base = "{ASSET_ROOT}/{name}/";
-const scenes = await (await fetch(base + "scenes.json")).json();
-const existing = scenes.filter(s => game.scenes.has(s._id));
-if (existing.length) {{
-  ui.notifications.warn(`${{existing.length}} scene(s) of {name} exist; delete them first.`);
-}} else {{
-  await Scene.createDocuments(scenes, {{keepId: true}});
-  ui.notifications.info(`Imported ${{scenes.length}} scene(s) of {name}.`);
-}}
-"""
+def _footprint(run: list[tuple[Floor, Room]]) -> Box:
+    """The stairs or car where it is the same on every floor, else the room's bounding box."""
+    boxes: set[Box | None] = set()
+    for floor, room in run:
+        kind = TRANSPORT[room.type]
+        vehicle = next((o for o in floor.objects if o.room == room.id and o.kind == kind), None)
+        boxes.add(
+            None
+            if vehicle is None
+            else (vehicle.x, vehicle.y, vehicle.x + vehicle.w, vehicle.y + vehicle.h)
+        )
+    if len(boxes) == 1 and (box := next(iter(boxes))) is not None:
+        return box
+    xs = [c.x for c in run[0][1].cells]
+    ys = [c.y for c in run[0][1].cells]
+    return min(xs), min(ys), max(xs) + 1, max(ys) + 1

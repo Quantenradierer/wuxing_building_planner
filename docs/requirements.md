@@ -27,7 +27,7 @@ Later (the model must allow them without redesign):
 - Surroundings (lot, parking, loading area, street, yard, roof, fire escapes). The canvas
   may then be larger than the footprint; cells outside the footprint are the exterior zone.
 - Basement garages and garage levels for big buildings.
-- Roll20 export, Foundry *Levels* support.
+- Roll20 export.
 - More themes (corporate white, Barrens, print) and building types (school, motel,
   DocWagon station).
 
@@ -256,11 +256,11 @@ middle, squatter → low → middle), then to the theme's stand-in.
   accents per room type), swappable themes; sprite themes draw objects and floor textures
   with painted sprites (`docs/sprites.md`). PNG or WebP, one image per floor, default
   50 px per cell. Lights appear as a subtle glow; the VTT does the real lighting.
-- VTT export: Universal VTT (`.dd2vtt`, one file per floor) and Foundry VTT (v12+, one
-  scene per floor in an adventure/compendium JSON). Grid size is a per-VTT parameter,
+- VTT export: Universal VTT (`.dd2vtt`, one file per floor) and Foundry VTT (v14+, one
+  scene with a level per floor, imported with the Schattenakte module). Grid size is a per-VTT parameter,
   default 1 m (2 × 2 cells). Walls, doors (locked if they have a lock), windows (block
   movement, not sight or light) and lights are exported; lights can be switched off.
-  Foundry stairs and elevators teleport tokens between floors via native Scene Regions.
+  Foundry stairs and elevators change levels via native Scene Regions.
 
 ## Quality
 
@@ -292,7 +292,8 @@ Building code (measured in "Building code" below), in suggested order:
    seed sweep asserting pass rates.
 
 To verify:
-- VTT exports in a real Foundry (doors, windows, lights, stair/elevator teleports) and a
+- VTT exports in a real Foundry (Schattenakte import, levels, doors, windows, lights,
+  stair/elevator level changes) and a
   Universal VTT viewer; so far only checked against the format descriptions.
 - Object kinds without a sprite are drawn with stand-ins (`sprite_fallbacks`); open sprite
   work is listed in `docs/sprites.md`. Re-render the examples once the sets are complete.
@@ -368,7 +369,8 @@ Rendering and export:
 - Elevator doors slide (`sliding` in the JSON, drawn on the landing side), but the Foundry
   export still makes them plain doors; they should get the `slide` door animation.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
-- Foundry export needs the import macro (scenes keep their ids so the stairs stay linked).
+- Foundry: v14+ only (Scene Levels); the Schattenakte module must be published (GitHub
+  release, `.github/workflows/schattenakte.yml`) before others can install it by URL.
 
 ## Building code
 

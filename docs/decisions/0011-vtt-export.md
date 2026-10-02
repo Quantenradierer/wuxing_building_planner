@@ -1,6 +1,6 @@
 # 0011: VTT export — Universal VTT first, Foundry scenes with an import macro
 
-Status: accepted (2026-09-26)
+Status: accepted (2026-09-26); Foundry part superseded by 0013
 
 ## Context
 

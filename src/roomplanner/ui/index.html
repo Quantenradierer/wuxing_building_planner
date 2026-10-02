@@ -130,7 +130,7 @@
     <button type="button" id="dl-png" disabled>Image</button>
     <button type="button" id="dl-json" disabled>JSON</button>
     <button type="button" id="dl-foundry" disabled
-      title="Universal VTT files (.dd2vtt) for Foundry's Universal Battlemap Importer, one per floor">Foundry</button>
+      title="The building for Foundry VTT v14: import it with the Schattenakte module">Foundry</button>
   </header>
   <div id="viewport">
     <div id="empty">No building yet.</div>
@@ -646,7 +646,7 @@ $("dl-foundry").addEventListener("click", async () => {
   setStatus("Exporting for Foundry…");
   try {
     // The same parameters with the seed that was used: the same building, rendered for a VTT.
-    const response = await fetch("/api/export/dd2vtt", {
+    const response = await fetch("/api/export/foundry", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(state.request),
     });
@@ -655,8 +655,7 @@ $("dl-foundry").addEventListener("click", async () => {
     const url = URL.createObjectURL(await response.blob());
     download(name, url);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setStatus(`${name}: import with Foundry's Universal Battlemap Importer ` +
-      "(Scenes sidebar), one .dd2vtt per floor.");
+    setStatus(`${name}: in Foundry, Scenes sidebar → Import building (Schattenakte module).`);
   } catch (error) {
     setStatus(error.message, true);
   } finally {
