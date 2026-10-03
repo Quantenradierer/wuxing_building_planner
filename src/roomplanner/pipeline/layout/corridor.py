@@ -1003,6 +1003,8 @@ class CorridorLayout:
         entries = {e.room: e for e in reversed(always)}
         for entry in (entries[r] for r in ctx.rules.program.service_rooms if r in entries):
             spec = ctx.rules.spec(entry.room)
+            if spec.min_side > band.depth:
+                continue
             low, high = entry.area or spec.area
             # A modest room: open-ended fill rooms (stockrooms) would take the whole strip.
             area = rng.randint(low, min(high, 2 * low))
