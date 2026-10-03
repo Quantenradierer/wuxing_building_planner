@@ -276,10 +276,8 @@ history is in git. What is left is under "Open issues".
 
 ## Open issues
 
-Building code (measured in "Building code" below), in suggested order:
-1. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
-   area as soft validator warnings (not for derelict/ruined), and a property test over a
-   seed sweep asserting pass rates.
+Building code (measured in "Building code" below): the soft warnings and their pass-rate
+sweep (`tests/test_buildingcode.py`) are done; further rules are listed there.
 
 To verify:
 - VTT exports in a real Foundry (Schattenakte import, levels, doors, windows, lights,
