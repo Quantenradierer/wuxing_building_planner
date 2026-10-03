@@ -276,9 +276,6 @@ history is in git. What is left is under "Open issues".
 
 ## Open issues
 
-Building code (measured in "Building code" below): the soft warnings and their pass-rate
-sweep (`tests/test_buildingcode.py`) are done; further rules are listed there.
-
 To verify:
 - VTT exports in a real Foundry (Schattenakte import, levels, doors, windows, lights,
   stair/elevator level changes) and a

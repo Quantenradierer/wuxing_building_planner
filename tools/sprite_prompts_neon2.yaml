@@ -128,7 +128,7 @@ subjects:
       - [ellipse, 0.25, 0.22, 0.75, 0.9, "#919aa9"]
       - [rect, 0.44, 0.02, 0.56, 0.2, "#858e9b", 0.4]
   shower:
-    denoise: 0.75
+    denoise: 0.6
     prompt: "square shower tray seen from straight above, white tiles, central round drain, rain head at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#949ca7", 0.03]
     guide:
@@ -204,7 +204,7 @@ subjects:
       - [rect, 0.1, 0.06, 0.9, 0.2, "#828b99", 0.3]
       - [ellipse, 0.3, 0.35, 0.7, 0.85, "#89929f"]
   dryer:
-    denoise: 0.55
+    denoise: 0.6
     prompt: "white tumble dryer seen from straight above, flat top with a control panel along the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#979eaa", 0.06]
     guide:
@@ -237,7 +237,7 @@ subjects:
       - [rect, 0.15, 0.15, 0.85, 0.6, "#76808f", 0.15]
       - [rect, 0.2, 0.7, 0.8, 0.9, "#6b7583", 0.2]
   mailboxes:
-    denoise: 0.75
+    denoise: 0.8
     prompt: "block of metal mailboxes seen from straight above, a grid of small square doors, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#6b7583", 0.04]
     guide:
@@ -245,7 +245,7 @@ subjects:
       - [line, 0.67, 0.0, 0.67, 1.0, "#4b515b", 0.04]
       - [line, 0.0, 0.5, 1.0, 0.5, "#4b515b", 0.04]
   vending_machine:
-    denoise: 0.55
+    denoise: 0.7
     prompt: "back flush against painted drywall wall at top edge, 1m x 0.5m stainless steel flat top, matte white steel sides, dark tempered glass product window at front bottom, recessed coin slot, rectangular dispensing chute, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#828b99", 0.05]
     guide:
@@ -442,7 +442,7 @@ subjects:
     guide:
       - [ellipse, 0.15, 0.15, 0.85, 0.85, "#6b7686"]
   tool_rack:
-    denoise: 0.7
+    denoise: 0.8
     prompt: "workshop tool rack seen from straight above, a board with hand tools laid out, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#a67945", 0.03]
     guide:
@@ -492,7 +492,7 @@ subjects:
       - [line, 0.04, 0.3, 0.04, 0.9, "#6b7686", 0.05]
       - [line, 0.96, 0.3, 0.96, 0.9, "#6b7686", 0.05]
   exam_table:
-    denoise: 0.5
+    denoise: 0.55
     prompt: "medical examination table seen from straight above, padded cream top with a paper roll, headrest at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#7e91ad", 0.06]
     guide:
@@ -575,8 +575,8 @@ subjects:
       - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
       - [rect, 0.1, 0.55, 0.9, 0.9, "#798ca8", 0.05]
   scanner:
-    denoise: 0.8
-    prompt: "medical CT scanner seen from straight above, large white ring machine with a patient bed sliding through the centre, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
+    denoise: 0.95
+    prompt: "medical CT scanner seen from straight above, large white ring machine sliding through the centre, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#889dbc", 0.06]
     guide:
       - [rect, 0.04, 0.0, 0.96, 0.04, "#00e5ff", 0.5]
@@ -591,7 +591,7 @@ subjects:
       - [rect, 0.0, 0.0, 1.0, 0.55, "#323b49", 0.0]
       - [rect, 0.0, 0.55, 1.0, 1.0, "#282e37", 0.0]
   dj_booth:
-    denoise: 0.45
+    denoise: 0.7
     prompt: "DJ booth, black desk with two turntables with black records, mixer in the middle with knobs and faders, purple light strip at the bottom edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#272a30", 0.05]
     guide:
@@ -617,7 +617,7 @@ subjects:
     guide:
       - [ellipse, 0.2, 0.2, 0.8, 0.8, "#373c44"]
   pool_table:
-    denoise: 0.5
+    denoise: 0.65
     prompt: "Pool table, short end rail with rounded pocket at top edge, olive green wool felt play surface, thick matte black rails, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#1b7842", 0.04]
     guide:
@@ -627,7 +627,7 @@ subjects:
       - [ellipse, 0.03, 0.83, 0.15, 0.97, "#1e232a"]
       - [ellipse, 0.85, 0.83, 0.97, 0.97, "#1e232a"]
   stage:
-    denoise: 0.6
+    denoise: 0.8
     prompt: "performance stage platform seen from straight above, dark wooden deck, empty, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#2c3440", 0.02]
     guide:
@@ -754,7 +754,7 @@ subjects:
       - [line, 0.06, 0.9, 0.94, 0.9, "#5a626e", 0.02]
       - [rect, 0.82, 0.74, 0.94, 0.94, "#495059", 0.1]
   condenser:
-    denoise: 0.65
+    denoise: 0.6
     prompt: "air conditioning condenser unit seen from straight above, square metal box with a large circular fan grille on top, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#77818f", 0.05]
     guide:
@@ -873,7 +873,7 @@ subjects:
       - [rect, 0.0, 0.0, 0.08, 1.0, "#6b7583", 0.0]
       - [rect, 0.92, 0.0, 1.0, 1.0, "#6b7583", 0.0]
   ambulance:
-    denoise: 0.8
+    denoise: 0.7
     prompt: "white ambulance seen from above, cab with dark windshield at the top edge, red and blue light bar behind the cab, red stripes along both sides, grey roof air conditioner, red cross on the roof, rear doors at the bottom edge, black tires, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [none]
     guide:
@@ -932,7 +932,7 @@ subjects:
     guide:
       - [rect, 0.1, 0.1, 0.9, 0.9, "#ccba8d", 0.05]
   pulpit:
-    denoise: 0.6
+    denoise: 0.8
     prompt: "wooden church pulpit lectern seen from straight above, a small raised wooden stand, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#97763f", 0.2]
     guide:
@@ -991,7 +991,7 @@ subjects:
       - [ellipse, 0.03, 0.91, 0.09, 0.97, "#27b647"]
       - [ellipse, 0.91, 0.91, 0.97, 0.97, "#27b647"]
   drone_rack:
-    denoise: 0.5
+    denoise: 0.65
     prompt: "grey metal equipment rack seen from straight above, shelves holding small devices, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#7e8795", 0.03]
     guide:
@@ -1000,13 +1000,14 @@ subjects:
       - [rect, 0.38, 0.15, 0.6, 0.6, "#5a626e", 0.1]
       - [rect, 0.68, 0.15, 0.9, 0.6, "#646d7a", 0.1]
   sim_rig:
+    denoise: 0.85
     prompt: "gaming chair with a desk seen from straight above, black reclined seat, backrest at the top edge, a monitor along the top, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#373c44", 0.15]
     guide:
       - [rect, 0.25, 0.05, 0.75, 0.15, "#282e37", 0.2]
       - [rect, 0.3, 0.4, 0.7, 0.9, "#414750", 0.2]
   cyberware_rack:
-    denoise: 0.55
+    denoise: 0.45
     prompt: "medical equipment rack seen from straight above, white and steel shelving with instruments, back against the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#798ca8", 0.03]
     guide:
@@ -1014,7 +1015,7 @@ subjects:
       - [rect, 0.08, 0.15, 0.45, 0.7, "#91acca", 0.05]
       - [rect, 0.55, 0.15, 0.92, 0.7, "#748193", 0.05]
   cryo_pod:
-    denoise: 0.55
+    denoise: 0.5
     prompt: "medical pod seen from straight above, a white capsule with a clear rounded lid over a padded bed, head at the top edge, dark gunmetal and matte black polymer, thin glowing cyan LED strips"
     base: [rect, "#8bafc8", 0.18]
     guide:
@@ -1550,12 +1551,12 @@ derived_overrides:
   autokitchen.low: {denoise: 0.6}
   dj_booth.low: {denoise: 0.65}
   dj_booth.squatter: {denoise: 0.7}
-  forklift.low: {denoise: 0.9}
-  forklift.squatter: {denoise: 0.9}
+  forklift.low: {denoise: 0.65}
+  forklift.squatter: {denoise: 0.75}
   battery_bank.low: {denoise: 0.6}
   hvac_unit.low: {denoise: 0.6}
   hvac_unit.squatter: {denoise: 0.85}
-  car_lift.low: {denoise: 0.6}
+  car_lift.low: {denoise: 0.7}
   medical_cart.low: {denoise: 0.65}
   machinery.low: {denoise: 0.8}
   machinery.squatter: {denoise: 0.75}
@@ -1563,8 +1564,8 @@ derived_overrides:
   electrical_panel.squatter: {denoise: 0.8}
   shipping_container.low: {denoise: 0.75}
   shipping_container.squatter: {denoise: 0.8}
-  safe.low: {denoise: 0.8}
-  safe.squatter: {denoise: 0.8}
+  safe.low: {denoise: 0.75}
+  safe.squatter: {denoise: 0.85}
   desk.low: {denoise: 0.85}
   chair.low: {denoise: 0.9}
   bed.low: {denoise: 0.7}
@@ -1584,6 +1585,16 @@ derived_overrides:
   hospital_bed.low: {denoise: 0.7}
   gurney.squatter: {denoise: 0.9}
   gurney.low: {denoise: 0.75}
-  capsule.low: {denoise: 0.75}
-  car.squatter: {denoise: 0.85}
+  capsule.low: {denoise: 0.45}
+  car.squatter: {denoise: 0.6}
   drone_dock.squatter: {denoise: 0.9}
+  stove.low: {denoise: 0.45}
+  conveyor.low: {denoise: 0.5}
+  medical_cabinet.low: {denoise: 0.65}
+  generator.low: {denoise: 0.75}
+  armchair.low: {denoise: 0.45}
+  armchair.squatter: {denoise: 0.85}
+  pallet.low: {denoise: 0.45}
+  pallet.squatter: {denoise: 0.3}
+  vital_monitor.squatter: {denoise: 0.8}
+  vital_monitor.low: {denoise: 0.7}
