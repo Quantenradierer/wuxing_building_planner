@@ -2,19 +2,19 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Floor 1 ==
 +--===---===--+===--+===---===---===--+===---===----+
-"ddd N bbb N a|www i|#################|ddd N bbb N a"
-"ddd   bbb   a|www i|#################|ddd   bbb   a"
-"ddd   bbb   a|www i|#################|ddd   bbb   a"
-|ddd   bbb   a|     |#################|ddd   bbb   a|
-|ddd 3 bbb   a|  4  |#################|ddd 5 bbb   a|
-|      bbb    |     |                 |      bbb    |
-"      bbb    |     |        1        |      bbb    "
-"             |     |                 |             "
-"            k|    k|                 |            k"
+"            N|     |#################|            N"
+"             |     |#################|             "
+"      bbbbbbb|  www|#################|      bbbbbbb"
+|      bbbbbbb|  www|#################|      bbbbbbb|
+|    3 bbbbbbb|4 www|#################|    5 bbbbbbb|
+|             |     |                 |             |
+"            N|    i|        1        |            N"
+"             |    i|                 |             "
+"             |    i|                 |             "
 +--DDD--------+DDD--+------DDD--------+--DDD--------+
-|~~~~~~~ ddddd     AAA                       vvv   *|
-|~~~~~~~ ddddd     AAA                              |
-"~~~~~~~ ddddd     AAA   ~~~~~~~ AAA     AAA        "
+|~~~~~~~ <<<<<     AAA                       vvv   *|
+|~~~~~~~           AAA                              |
+"~~~~~~~           AAA   ~~~~~~~ AAA     AAA        "
 "~~~~~~~                 ~~~~~~~ AAA     AAA        "
 "~~~~~~~ AAA             ~~~~~~~ AAA     AAA       }"
 |        AAA             ~~~~~~~                    |
@@ -24,21 +24,21 @@ gun_shop 26x18 cells, wealth=high, seed=3
 "ooo                                         ttt ooo"
 "ooo ttt                 2         ~~~~~     ttt ooo"
 |ooo ttt                           ~~~~~         ooo|
-|ooo ttt               c eee c     ~~~~~         ooo|
-|ooo                     eee       ~~~~~            |
-"ooo                   c eee c     ~~~~~           }"
+|ooo ttt               c ddd c     ~~~~~         ooo|
+|ooo                     ddd       ~~~~~            |
+"ooo                   c ddd c     ~~~~~           }"
 "                                  ~~~~~            "
 "}                                 ~~~~~           n"
 |                                                  n|
-|s                     ttt                         n|
-|s                     ttt                         n|
-"s             SSS     ttt                         n"
-"              SSS                                 n"
-"              SSS   ooooooo                       n"
-|              SSS   ooooooo                        |
-|sss <<<<< iii SSS } ooooooo } sss   sss   f sss sss|
+|SSSSS                 ttt                         n|
+|SSSSS                 ttt                         n|
+"SSSSS                 ttt                         n"
+"                                                  n"
+"                    ooooooo                       n"
+|                    ooooooo                        |
+|* sss sss iii     } ooooooo }   sss sss   f sss sss|
 +--===---===---===---===---===---===---===---===----+
-  objects: A armchair, b bed, k cabinet, c chair, t coffee_table, n counter, e dining_table, f fridge, d home_desk, N nightstand, * plant, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, v stove, < wall_screen, a wardrobe, w wc
+  objects: A armchair, b bed, c chair, t coffee_table, n counter, d dining_table, f fridge, N nightstand, * plant, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, v stove, < wall_screen, w wc
     1  stairwell            45 cells
     2  flat_loft           338 cells
     3  bedroom              35 cells
@@ -92,15 +92,15 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Basement B1 ==
 +-------------------+-----------------+-------------+
-|' HHHHHHH EEE HHHHH|#################|E bbbbb     E|
-|  HHHHHHH     HHHHH|#################|E           E|
-|  HHHHHHH     HHHHH|#################|E           E|
+|' HHHHHHH EEE HHHHH|#################|E EEE EEE EEE|
+|  HHHHHHH     HHHHH|#################|E            |
+|  HHHHHHH     HHHHH|#################|E            |
 |  HHHHHHH     HHHHH|#################|             |
 |  HHHHHHH 3   HHHHH|#################|E     4      |
 |              HHHHH|                 |E            |
-|              HHHHH|        1        |E           E|
-|                   |                 |            E|
-|                   |                 |'       EEE E|
+|              HHHHH|        1        |E            |
+|                   |                 |             |
+|                   |                 |'     bbbbb  |
 +--DDD--------------+------DDD--------+--DDD--------+
 |                                                   |
 |                                                   |

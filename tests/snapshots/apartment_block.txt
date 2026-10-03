@@ -2,7 +2,7 @@ apartment 54x34 cells, wealth=middle, seed=4
 
 == Floor 1 ==
 +===---===---===----+----===----+----===---===---===---===--+===---===---===--+===---===--+===---===---===--+
-"SSS     } ooooooo }|    k     a|a   N bbb N     ddddd      |}                |    k     a|    N bbb N ddddd"
+"SSS     } ooooooo }|    k k   a|a   N bbb N     ddddd      |}                |    k k   a|    N bbb N ddddd"
 "SSS       ooooooo  |          a|a     bbb       ddddd      |                 |          a|      bbb   ddddd"
 "SSS       ooooooo  D          a|a     bbb       ddddd      |ooo              D          a|      bbb   ddddd"
 |SSS                D          a|a     bbb                  |ooo              D          a|      bbb        |
@@ -12,9 +12,9 @@ apartment 54x34 cells, wealth=middle, seed=4
 "AAA                |           |                           |ooo              |           |                 "
 "AAA                |    bbbbbbb|                           |ooo              |    bbbbbbb|        16       "
 |                   |    bbbbbbb|               +-----------+                 |    bbbbbbb|                 |
-|s       AAA        |k   bbbbbbb|               |###########|}                |k   bbbbbbb|                 |
+|s       AAA        |    bbbbbbb|               |###########|}                |    bbbbbbb|                 |
 |s       AAA        |           |               |###########|                 |           |                 |
-|s       AAA       *|          N|               |###########|            sss  |          N|      k   k      |
+|s       AAA       *|          N|               |###########|            sss  |          N|      k k        |
 +--DDD--------------+-----------+--DDD----------+###########+--DDD------------+-----------+--DDD------------+
 |                                               |###########|a                                              |
 |                                               |###########|a                                              |
@@ -22,15 +22,15 @@ apartment 54x34 cells, wealth=middle, seed=4
 |                                               |###########|a                                              |
 |                      4                 aaaaa  |###########|a                     11                       |
 +--DDD------+     +--DDD--------+--DDD----------+###########+--DDD------+     +--DDD--------+--DDD----------+
-|        www|     |             |i         vvv  |###########|        www|     |             |i         vvv  |
-|        www|     |             |i              |###########|        www|     |             |i              |
-|        www|     |             |i              |###########|        www|     |             |i              |
+|        www|     |            s|i         vvv  |###########|        www|     |            s|i         vvv  |
+|        www|     |            s|i              |###########|        www|     |            s|i              |
+|        www|     |            s|i              |###########|        www|     |            s|i              |
 |           |     |             |               |###########|           |     |             |               |
 "    3      |     |      5     s|      6        |###########|    10     |     |      12    s|      13       "
 "           |     |            s|               |           |           |     |            s|               "
 "i          |     |s           s|              f|^^^ 2      |i          |     |s           s|              f"
 |i          |     |s            |               |^^^        |i          |     |s            |               |
-|i          |    (|s         sss|nnnnnnn       U|^^^        |i          |    (|s         sss|nnnnnnn       U|
+|i          |    (|s            |nnnnnnn       U|^^^        |i          |    (|s            |nnnnnnn       U|
 +-----------+DDD--+-------------+---------------+----DDD----+-----------+DDD--+-------------+---------------+
 "                                                                                                           "
 "                                                                                                           "
@@ -54,21 +54,21 @@ apartment 54x34 cells, wealth=middle, seed=4
 "                                   |                                   |                                   "
 "                                  (|                                   |                                   "
 +--DDD------+-----------+--DDD------+--DDD--------------+---------------+---------------+--DDD--------------+
-|      sss *|    ddddd  |      k    |        ooooooo   *|              N|N              |      SSS         s|
+|          *|    ddddd  |      k    |        ooooooo   *|              N|N              |      SSS         s|
 |           |    ddddd  |           |        ooooooo    |               |               |      SSS         s|
 "           D    ddddd  |N          |        ooooooo    D        bbbbbbb|bbbbbbb        D      SSS         s"
 "           D           |           |                   D        bbbbbbb|bbbbbbb        D      SSS          "
-"  ~~~~~~~  D      c    |bbbbbbb    |      ~~~~~~~      D        bbbbbbb|bbbbbbb        D      SSS          "
-|  ~~~~~~~  |           |bbbbbbb    |      ~~~~~~~      |               |               |                   |
-|  ~~~~~~~  |    21     |bbbbbbb    |      ~~~~~~~      |      27      N|N     32       |s       31         |
-|  ~~~~~~~  |           |           |      ~~~~~~~      |               |               |s                  |
-"s ~~~~~~~  |          N|N   22     |s     ~~~~~~~      |ddd            |            ddd|s           ttt    "
-"s          |           |           |s                  |ddd            |            ddd|            ttt    "
-"s   20     |a   bbbbbbb|ddd        |s       26         |ddd c          |          c ddd|            ttt    "
+"s ~~~~~~~  D      c    |bbbbbbb    |      ~~~~~~~      D        bbbbbbb|bbbbbbb        D      SSS         s"
+|s ~~~~~~~  |           |bbbbbbb    |      ~~~~~~~      |               |               |                  s|
+|s ~~~~~~~  |    21     |bbbbbbb    |      ~~~~~~~ SSSSS|      27      N|N     32       |        31        s|
+|  ~~~~~~~  |           |           |      ~~~~~~~ SSSSS|               |               |                   |
+"s ~~~~~~~  |          N|N   22     |      ~~~~~~~ SSSSS|ddd            |            ddd|            ttt    "
+"s          |           |           |                   |ddd            |            ddd|            ttt    "
+"s   20     |a   bbbbbbb|ddd        |        26         |ddd c         k|k         c ddd|            ttt    "
 |           |a   bbbbbbb|ddd        |                   |ddd            |            ddd|                   |
-|KKK ooooooo|a   bbbbbbb|ddd c      |              SSSSS|ddd           k|k           ddd|    AAA   ooooooo  |
-|KKK ooooooo|a          |ddd        |              SSSSS|               |               |    AAA   ooooooo  |
-|KKK ooooooo|a         N|ddd        |*   <<<<< sss SSSSS|k              |              k|    AAA } ooooooo }|
+|KKK ooooooo|a   bbbbbbb|ddd c      |                   |ddd           k|k           ddd|    AAA   ooooooo  |
+|KKK ooooooo|a          |ddd        |                   |               |               |    AAA   ooooooo  |
+|KKK ooooooo|a         N|ddd        |*   <<<<< sss sss  |               |               |    AAA } ooooooo }|
 +===---===--+===---===--+===---===--+===---===---===----+----===---===--+===---===---===+--===---===---===--+
   objects: A armchair, v autokitchen, b bed, k cabinet, c chair, ( coat_rack, t coffee_table, n counter, f fridge, d home_desk, K kitchen_table, N nightstand, * plant, ^ roof_hatch, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, U trash_bin, < wall_screen, a wardrobe, w wc
     1  corridor            162 cells
@@ -106,15 +106,15 @@ apartment 54x34 cells, wealth=middle, seed=4
 
 == Ground floor ==
 +===---===---===--+===---===---===----+--DDD----+===---===--+===--+-----------+===---===----+----===---===--+
-"}                |                  k|s       '|sssss      |     |EEE       E|      WWWWW k|* SSS   ooooooo"
-"                 |                   |s        |           |     |          E|             |        ooooooo"
-"ooo              D                   |s        |           D     D          E|             D      15ooooooo"
+"}                |                  k|s       '|sssss      |     |EEE       '|      WWWWW k|* SSS   ooooooo"
+"                 |                   |s        |           |     |           |             |        ooooooo"
+"ooo              D                   |s        |           D     D           |             D      15ooooooo"
 |ooo              D                   |s        |           D     D           |             D               |
 |ooo ttt          D                   |s ddd    |    34     D     D    11     |             D    ~~~~~~~   S|
 |ooo ttt          |                   |  ddd    |           D     |           |             |    ~~~~~~~   S|
 "ooo ttt 8        |N       9          |s ddd    |           D     |           |N     16     |AAA ~~~~~~~   S"
 "ooo              |                   |s        |           |     |           |             |AAA ~~~~~~~    "
-"ooo              |bbbbbbb            |s        |'          |     |EEE EEE   '|bbbbbbb      |AAA ~~~~~~~    "
+"ooo              |bbbbbbb            |s        |'          |     |EEE EEE EEE|bbbbbbb      |AAA ~~~~~~~    "
 |                 |bbbbbbb            |s        +-----------+     +-----------+bbbbbbb      |               |
 |}                |bbbbbbb            |s        |###########|     |  SSS SSS S|bbbbbbb      |        c ggg  |
 |                 |                   |         |###########|     |          S|             |          ggg  |
@@ -132,9 +132,9 @@ apartment 54x34 cells, wealth=middle, seed=4
 |             |     |                 |         |###########|     |S         S|n       ggg  |     |      www|
 "i     5      |     |v       7        |         |###########|     |S         S|n     14ggg c|     |i   12www"
 "i            |     |v                |         |           |     |           |n            |     |i        "
-"i       www  |     |v                |         |    2      |     |S          |n            |     |i     hhh"
-|        www  |     |                 |         |           |     |S          |             |     |      hhh|
-|        www  |     |U     f          |         |           |     |S   SSS SSS|iii   vvv   f|    (|      hhh|
+"i       www  |     |v                |         |    2      |     |S         S|n            |     |i     hhh"
+|        www  |     |                 |         |           |     |S         S|             |     |      hhh|
+|        www  |     |U     f          |         |           |     |S SSS SSS S|iii   vvv   f|    (|      hhh|
 +-------------+DDD--+-----------------+--DDDDD--+----DDD----+     +-----------+-------------+DDD--+---------+
 "                                a                       1                                                  D
 "                                                                                                           D
@@ -142,11 +142,11 @@ apartment 54x34 cells, wealth=middle, seed=4
 |                                                                                                           |
 |                                                                                                           |
 +-----------+DDD--+---------+---------+---------------+                 +--DDD------+---------+DDD--+-------+
-"i          |     |      SSS|SSS      |nnnnnnn       U|q                |           |f vvv iii|     |    iii"
-"i          |     |         |         |               |q                |           |         |     |       "
-"i          |     D        S|W        |              f|q                |           |  ggg   n|     D    www"
-|           |     D        S|W        |               |q                |           |  ggg   n|     D    www|
-|    17     |     D    19  S|W   20  S|      21       |q                |    27     |  ggg   n|     D  29www|
+"i          |     |  SSS SSS|        S|nnnnnnn       U|q                |           |f vvv iii|     |    iii"
+"i          |     |         |        S|               |q                |           |         |     |       "
+"i          |     D         |W       S|              f|q                |           |  ggg   n|     D    www"
+|           |     D         |W        |               |q                |           |  ggg   n|     D    www|
+|    17     |     D    19   |W   20  S|      21       |q                |    27     |  ggg   n|     D  29www|
 |           |     |         |W       S|               |q                |           |        n|     |       |
 "        www|     |S        |W       S|i              |q                |           |    31  n|     |       "
 "        www|     |S        |         |i              |                 |           |        n|     |       "
@@ -164,15 +164,15 @@ apartment 54x34 cells, wealth=middle, seed=4
 "                   D         |           |           |<          +-----------------+           D           "
 "      ~~~~~~~      D         |bbbbbbb    |bbbbbbb    |<   AAA }  |            EEE  |    c      D  ~~~~~~~  "
 |      ~~~~~~~      |         |bbbbbbb    |bbbbbbb    |<   AAA    |                 |           |  ~~~~~~~  |
-|      ~~~~~~~      |W   23   |bbbbbbb    |bbbbbbb    |<   AAA    D                 |    33     |S ~~~~~~~ S|
-|      ~~~~~~~      |W        |           |           |           D                 |           |S ~~~~~~~ S|
-"S     ~~~~~~~      |W   bbb  |N   24     |N   25     |           D        26       |N          |S ~~~~~~~ S"
-"S                  |W   bbb  |           |           |           |                 |           |           "
-"S       22         |W   bbb  |eee        |eee        |           |      HHHHHHH    |bbbbbbb   W|    32    <"
+|      ~~~~~~~ jjjjj|W   23   |bbbbbbb    |bbbbbbb    |<   AAA    D                 |    33     |S ~~~~~~~ S|
+|      ~~~~~~~ jjjjj|W        |           |           |           D                 |           |S ~~~~~~~ S|
+"      ~~~~~~~ jjjjj|W   bbb  |N   24     |N   25     |           D        26       |N          |S ~~~~~~~ S"
+"                   |W   bbb  |           |           |           |                 |           |           "
+"        22         |W   bbb  |eee        |eee        |           |      HHHHHHH    |bbbbbbb   W|    32    <"
 |                   |    bbb  |eee        |eee        |           |      HHHHHHH    |bbbbbbb   W|          <|
-|              jjjjj|    bbb  |eee c      |eee c      |U          |      HHHHHHH    |bbbbbbb   W|  ooooooo <|
-|              jjjjj|    bbb  |eee        |eee        |           |      HHHHHHH    |          W|  ooooooo <|
-|*   <<<<< SSS jjjjj|  N bbb N|eee        |eee        |*         *|      HHHHHHH   '|N         W|* ooooooo <|
+|                   |    bbb  |eee c      |eee c      |U          |      HHHHHHH    |bbbbbbb   W|  ooooooo <|
+|                   |    bbb  |eee        |eee        |           |      HHHHHHH    |          W|  ooooooo <|
+|*   <<<<< SSS SSS  |  N bbb N|eee        |eee        |*         *|      HHHHHHH   '|N         W|* ooooooo <|
 +===---===---===----+----===--+===---===--+===---===--+----DDD----+-----------------+===---===--+===---===--+
   objects: A armchair, v autokitchen, b bed, q bench, k cabinet, c chair, ( coat_rack, t coffee_table, n counter, K crate, d drone_dock, s drone_rack, E electrical_panel, a fire_alarm_panel, ' fire_extinguisher, f fridge, e home_desk, H hvac_unit, g kitchen_table, u mailboxes, N nightstand, * plant, ~ rug, S shelf, h shower, } side_table, j sim_rig, i sink, o sofa, # stairs, U trash_bin, y vending_machine, < wall_screen, W wardrobe, w wc
     1  corridor            237 cells

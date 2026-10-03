@@ -436,6 +436,8 @@ class RoomFurnisher:
             case Placement.WALL:
                 candidates = self._wall_spots(rule, spec)
                 self.rng.shuffle(candidates)
+                if spec.bank:
+                    candidates.sort(key=lambda r: not self._touches_same(rule.object, r))
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
             case Placement.BACK:
@@ -518,6 +520,19 @@ class RoomFurnisher:
                     self.clearance = self.clearance | self._approach(rect)
                 if rule.front_clear:
                     self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
+                return True
+        return False
+
+    def _touches_same(self, kind: str, rect: Rect) -> bool:
+        """Does `rect` touch, side by side, an object of this kind placed facing the same way?"""
+        x, y, w, h, facing = rect
+        for o in self.placed:
+            if o.kind != kind or o.facing != facing:
+                continue
+            if facing in (Side.N, Side.S):
+                if o.y == y and (o.x + o.w == x or x + w == o.x):
+                    return True
+            elif o.x == x and (o.y + o.h == y or y + h == o.y):
                 return True
         return False
 

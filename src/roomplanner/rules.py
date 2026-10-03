@@ -43,6 +43,11 @@ class ObjectSpec(_Strict):
     size: tuple[int, int] = Field(description="Cells along the wall / row, cells deep")
     walkable: bool = Field(default=False, description="Can be walked over (stairs)")
     glyph: str = Field(min_length=1, max_length=1, description="ASCII debug glyph")
+    bank: bool = Field(
+        default=False,
+        description="Equipment that stands in one run: a `wall` placement prefers a spot "
+        "touching an earlier object of the kind, facing the same way",
+    )
 
 
 class GroupPart(_Strict):

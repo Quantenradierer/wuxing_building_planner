@@ -8,13 +8,13 @@ objects:
   roof_hatch:      {size: [2, 2], walkable: true, glyph: "^"}
   guard_desk:      {size: [4, 2], glyph: G}
   security_gate:   {size: [1, 3], glyph: "!"}
-  weapon_locker:   {size: [2, 1], glyph: L}
+  weapon_locker:   {size: [2, 1], glyph: L, bank: true}
   debris:          {size: [2, 2], glyph: ","}
   trash_pile:      {size: [2, 1], glyph: ";"}
   rubble:          {size: [3, 2], glyph: "&"}
   rubble_heap:     {size: [4, 4], glyph: "@"}
   collapsed_ceiling: {size: [5, 3], glyph: "@"}
-  filing_cabinet:  {size: [2, 1], glyph: F}
+  filing_cabinet:  {size: [2, 1], glyph: F, bank: true}
   armchair:        {size: [2, 2], glyph: A}
   crate:           {size: [2, 2], glyph: K}
   trash_bin:       {size: [1, 1], glyph: U}
@@ -23,8 +23,8 @@ objects:
   chair:           {size: [1, 1], glyph: c}
   table:           {size: [2, 2], glyph: t}
   meeting_table:   {size: [6, 3], glyph: T}
-  shelf:           {size: [2, 1], glyph: s}
-  cabinet:         {size: [1, 1], glyph: k}
+  shelf:           {size: [2, 1], glyph: s, bank: true}
+  cabinet:         {size: [1, 1], glyph: k, bank: true}
   counter:         {size: [4, 1], glyph: n}
   reception_desk:  {size: [5, 2], glyph: R}
   bed:             {size: [2, 4], glyph: b}
@@ -34,36 +34,36 @@ objects:
   wc:              {size: [2, 2], glyph: w}   # 1 x 1 m: bigger than real, reads better
   sink:            {size: [2, 1], glyph: i}
   shower:          {size: [2, 2], glyph: h}
-  stove:           {size: [2, 1], glyph: v}
-  fridge:          {size: [1, 1], glyph: f}
-  server_rack:     {size: [2, 1], glyph: S}
+  stove:           {size: [2, 1], glyph: v, bank: true}
+  fridge:          {size: [1, 1], glyph: f, bank: true}
+  server_rack:     {size: [2, 1], glyph: S, bank: true}
   gondola:         {size: [8, 2], glyph: g}
   checkout:        {size: [2, 4], glyph: C}
-  freezer:         {size: [4, 2], glyph: z}
+  freezer:         {size: [4, 2], glyph: z, bank: true}
   pallet:          {size: [2, 2], glyph: p}
-  rack:            {size: [6, 2], glyph: r}
+  rack:            {size: [6, 2], glyph: r, bank: true}
   hospital_bed:    {size: [2, 4], glyph: H}
   exam_table:      {size: [2, 4], glyph: e}
   operating_table: {size: [2, 4], glyph: o}
-  medical_cabinet: {size: [2, 1], glyph: m}
-  morgue_drawers:  {size: [4, 2], glyph: M}
-  locker:          {size: [1, 1], glyph: l}
+  medical_cabinet: {size: [2, 1], glyph: m, bank: true}
+  morgue_drawers:  {size: [4, 2], glyph: M, bank: true}
+  locker:          {size: [1, 1], glyph: l, bank: true}
   bench:           {size: [4, 1], glyph: q}
   plant:           {size: [1, 1], glyph: "*"}
-  machinery:       {size: [3, 2], glyph: m}
-  washing_machine: {size: [1, 1], glyph: x}
-  mailboxes:       {size: [3, 1], glyph: u}
+  machinery:       {size: [3, 2], glyph: m, bank: true}
+  washing_machine: {size: [1, 1], glyph: x, bank: true}
+  mailboxes:       {size: [3, 1], glyph: u, bank: true}
   terminal:        {size: [1, 1], glyph: j}
   vending_machine: {size: [2, 1], glyph: y}
-  capsule:         {size: [2, 4], glyph: Q}   # 1 m wide, 2 m long, side by side
+  capsule:         {size: [2, 4], glyph: Q, bank: true}   # 1 m wide, 2 m long, side by side
   bar_counter:     {size: [8, 2], glyph: N}
   dj_booth:        {size: [4, 2], glyph: J}
   speaker:         {size: [1, 1], glyph: E}
   pool_table:      {size: [5, 3], glyph: Y}
   forklift:        {size: [2, 4], glyph: Z}
-  lab_bench:       {size: [6, 2], glyph: V}
-  fume_hood:       {size: [3, 1], glyph: W}
-  specimen_fridge: {size: [2, 1], glyph: I}
+  lab_bench:       {size: [6, 2], glyph: V, bank: true}
+  fume_hood:       {size: [3, 1], glyph: W, bank: true}
+  specimen_fridge: {size: [2, 1], glyph: I, bank: true}
   cubicle:         {size: [3, 3], glyph: "["}
   scanner:         {size: [4, 6], glyph: "]"}
   # Small things that go beside other objects (placement: at) or fill walls.
@@ -84,7 +84,7 @@ objects:
   atm:             {size: [1, 1], glyph: $}
   coat_rack:       {size: [1, 1], glyph: (}
   safe:            {size: [1, 1], glyph: )}
-  dryer:           {size: [1, 1], glyph: x}
+  dryer:           {size: [1, 1], glyph: x, bank: true}
   laundry_cart:    {size: [1, 2], glyph: "{"}
   arcade_machine:  {size: [2, 1], glyph: "`"}
   stage:           {size: [8, 4], walkable: true, glyph: _}
@@ -121,14 +121,14 @@ objects:
   round_table:     {size: [4, 4], glyph: T}   # round meeting table, 2 m across
 
   # Building services, security tech, Sixth World details.
-  electrical_panel: {size: [2, 1], glyph: E}    # switchboard / breaker cabinet
-  battery_bank:    {size: [3, 1], glyph: b}    # UPS batteries
+  electrical_panel: {size: [2, 1], glyph: E, bank: true}    # switchboard / breaker cabinet
+  battery_bank:    {size: [3, 1], glyph: b, bank: true}    # UPS batteries
   hvac_unit:       {size: [4, 3], glyph: H}      # air handler
   condenser:       {size: [2, 2], glyph: C}      # rooftop air-conditioning condenser, one fan
   satellite_dish:  {size: [3, 3], glyph: Q}      # uplink dish on a stand
   generator:       {size: [5, 3], glyph: G}      # backup diesel generator
   fuel_tank:       {size: [3, 2], glyph: f}
-  suppression_tanks: {size: [3, 1], glyph: "<"}  # inert gas bottles of a fire suppression system
+  suppression_tanks: {size: [3, 1], glyph: "<", bank: true}  # inert gas bottles of a fire suppression system
   fire_extinguisher: {size: [1, 1], glyph: "'"}
   fire_alarm_panel: {size: [1, 1], glyph: "a"}   # pull station: evacuation and the fire brigade
   medkit:          {size: [1, 1], glyph: "x"}    # first aid / AED wall box
