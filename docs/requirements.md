@@ -411,8 +411,8 @@ decks, where one row and its lane fill a 10 m deep deck).
 Done: desk density. Offices have a desk per 10 m² (`per: 40, scale: false`, so richer
 offices are bigger, not denser), open offices and squad rooms blocks of four desks with
 2 m aisles, consoles and shipping desks one per 10 m²; manager offices are at least 8 m².
-Later loosened for play (this is Shadowrun, not German office law): offices a desk per 6 m²
-(`per: 24`, up to 10), open offices and squad rooms 1.5 m aisles and blocks of six; the
+Later loosened for play (this is Shadowrun, not German office law): offices a desk per 4 m²
+(`per: 16`, up to 14), open offices and squad rooms 1 m aisles and blocks of six; the
 code check's workstation-area failures rise accordingly and are accepted.
 
 Not pursued: one-desk rooms under 8 m² (focus booths, security rooms, guard bubbles,
