@@ -347,8 +347,9 @@ Building types:
   counter stands on a side wall when the back wall is full of doors.
 - Prisons: a block whose slot is narrower than the block plus its sally port (rare) opens
   onto the corridor directly.
-- Data centres: the loading dock has `windows: required` only to keep it on a facade;
-  about 7 in 100 docks report a missing window.
+- Data centres: the loading dock has `windows: required` only to keep it on a facade; a
+  dock whose facade is barely wider than its roller door gets a plain door instead, so it
+  keeps its windows.
 
 Rendering and export:
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.

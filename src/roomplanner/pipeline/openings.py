@@ -528,10 +528,16 @@ def _vehicle_door(
     service, street = ctx.params.service_side, ctx.params.street_side
     sides = [service, *(s for s in Side if s not in (service, street)), street]
     centre = sorted(room.cells)[len(room.cells) // 2]
+
+    def needs_window(r: Room) -> bool:
+        return ctx.rules.spec(r.type).windows is WindowRule.REQUIRED
+
     for side in sides:
         found = _facade_spots(
-            [room], width, side, footprint, used, windows, Edge.of(centre, side), lambda _: False
+            [room], width, side, footprint, used, windows, Edge.of(centre, side), needs_window
         )
+        # A roller door that would blind the bay (its facade is barely wider): no door.
+        found = [c for c in found if not c[0]]
         if found:
             _, _, _, run, start = min(found, key=lambda c: (c[1], c[2], c[3][0], c[4]))
             door = _door(run, width, None, side, rng, start)
@@ -575,6 +581,9 @@ def _facade_spots(
                 tight = target not in edges and (
                     start < margin or start > len(run) - width - margin
                 )
+                if needs_window(room):
+                    # Daylight: a door at the wall's end costs one margin, not two.
+                    tight = start not in (0, len(run) - width)
                 spots.append((blind, tight, distance, run, start))
     return spots
 
