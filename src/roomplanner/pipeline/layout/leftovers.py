@@ -42,12 +42,75 @@ def absorb_leftovers(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom
             elif area <= spec.area[1] * ABSORB_TOLERANCE:
                 options.append((0, area / spec.area[1], other))
         if not options:
+            _split_between_neighbours(room, result, fixed, hosts, rules)
             continue
         _, _, other = min(options, key=lambda o: (o[0], o[1]))
         merged = replace(other, cells=other.cells | room.cells)
         result[result.index(other)] = merged
         result.remove(room)
     return result
+
+
+def _split_between_neighbours(
+    room: PlannedRoom,
+    result: list[PlannedRoom],
+    fixed: set[str],
+    hosts: set[int],
+    rules: Rules,
+) -> None:
+    """Cut a leftover in two and give each half to a different neighbour that can take it."""
+    box = _box(room.cells)
+    assert box is not None
+    x0, y0, x1, y1 = box
+
+    def cut(vertical: bool, at: int) -> tuple[frozenset[Cell], frozenset[Cell]]:
+        low = frozenset(c for c in room.cells if (c.x if vertical else c.y) < at)
+        return low, room.cells - low
+
+    best: tuple[float, PlannedRoom, PlannedRoom, frozenset[Cell], frozenset[Cell]] | None = None
+    for vertical, lo, hi in ((True, x0, x1), (False, y0, y1)):
+        for at in range(lo + 1, hi):
+            first, second = cut(vertical, at)
+            picks = [
+                _best_host(half, room, result, fixed, hosts, rules) for half in (first, second)
+            ]
+            (a, ra), (b, rb) = picks
+            if a is None or b is None or a is b:
+                continue
+            if best is None or max(ra, rb) < best[0]:
+                best = (max(ra, rb), a, b, first, second)
+    if best is None:
+        return
+    _, a, b, first, second = best
+    result[result.index(a)] = replace(a, cells=a.cells | first)
+    result[result.index(b)] = replace(b, cells=b.cells | second)
+    result.remove(room)
+
+
+def _best_host(
+    piece: frozenset[Cell],
+    room: PlannedRoom,
+    result: list[PlannedRoom],
+    fixed: set[str],
+    hosts: set[int],
+    rules: Rules,
+) -> tuple[PlannedRoom | None, float]:
+    """The neighbour of a rectangle that stays within its size limit, and how full it gets."""
+    best: tuple[PlannedRoom | None, float] = (None, 0.0)
+    for other in result:
+        if other is room or other.unit is not None or other.host is not None:
+            continue
+        spec = rules.spec(other.type)
+        if other.type in fixed or id(other) in hosts or spec.stalls is not None or spec.circulation:
+            continue
+        if not _joins(piece, other.cells):
+            continue
+        area = len(piece) + len(other.cells)
+        if area <= spec.area[1] * ABSORB_TOLERANCE and (
+            best[0] is None or area / spec.area[1] < best[1]
+        ):
+            best = (other, area / spec.area[1])
+    return best
 
 
 def _box(cells: frozenset[Cell]) -> tuple[int, int, int, int] | None:

@@ -96,7 +96,7 @@ Opening
   swing: Swing | None                  doors only
   state                                intact | broken | missing | blocked (doors);
                                        intact | broken (windows); blocked doors are impassable
-  material, lock, rating               doors, optional: standard | glass | security | blast;
+  material, lock, rating               doors, optional: standard | glass | security | blast | fire;
                                        none | mechanical | maglock | cardreader | biometric
   entrance                             exterior doors: main | service | emergency
   sliding                              doors, optional: the leaves slide aside (elevators,

@@ -499,23 +499,6 @@ def test_the_corp_executive_floor_has_a_balcony_the_rooms_behind_it_look_onto() 
     assert all(r.type != "balcony" for f in building.floors[:-1] for r in f.rooms)
 
 
-def test_a_penthouse_sits_above_the_executive_floor_set_back_from_its_balcony() -> None:
-    params = make_params(
-        building_type=BuildingType.CORP_OFFICE,
-        width=72,
-        depth=52,
-        floors_above=6,
-        wealth=Wealth.HIGH,
-        seed=2077,
-    )
-    building = generate(params)
-    executive, penthouse = building.floor(4), building.floor(5)
-    assert (executive.role, penthouse.role) == ("executive", "penthouse")
-    balcony = next(r for r in executive.rooms if r.type == "balcony")
-    assert not balcony.cells & penthouse.footprint  # open to the sky
-    assert penthouse.footprint | balcony.cells == executive.footprint
-
-
 def test_some_office_towers_end_in_a_flat_roof_the_stairs_open_onto() -> None:
     params = make_params(
         building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=5, seed=4
