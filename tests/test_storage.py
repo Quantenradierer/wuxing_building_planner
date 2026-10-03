@@ -54,7 +54,8 @@ def test_generic_storage_is_a_small_share_of_usable_area() -> None:
                 for room in floor.rooms:
                     if room.type not in CIRCULATION:
                         used += room.area
-                    if room.type in STORAGE:
+                    # Basements are left out: an apartment's is mostly its tenants' cellar boxes.
+                    if room.type in STORAGE and floor.level >= 0:
                         stored += room.area
         total, storage = total + used, storage + stored
         per_type[building_type] = stored / used if used else 0.0

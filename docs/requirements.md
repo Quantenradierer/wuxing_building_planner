@@ -331,7 +331,9 @@ Layout:
   World rooms (electrical, generator, fixer's room, cashier booth) get a turn, so they
   mostly appear only in bigger footprints or basements. Spider stations and drones there
   are furniture instead.
-- Basements are mostly mechanical rooms side by side.
+- Basements: apartments are mostly tenants' storage boxes, hotels and offices have storage,
+  linen and archive rooms beside the plant rooms; the other types (about 20 % mechanical
+  rooms beside their main hall) are unchanged.
 - A hall's roller door can end up on a side facade; the police station's garage exists only
   in the basement, without a ramp.
 - No fire escapes and no prison yard (they need surroundings; the gym stands in for the

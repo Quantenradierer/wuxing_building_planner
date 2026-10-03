@@ -120,5 +120,6 @@ floor_roles:
       - {room: drone_bay, count: 1, when: "level + 1 == 0", security: [corporate, aaa], priority: optional}
       - {room: archive, count: [0, 1], area: [60, 120]}
       - {room: storage, count: [0, 1], near: core}
+      - {room: archive, fill: true}
       - {room: server_room, fill: true}
       - {room: mechanical_room, fill: true}

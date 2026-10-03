@@ -88,4 +88,7 @@ floor_roles:
       - {room: storage, count: 1, near: core}
       - {room: staff_room, count: [0, 1]}
       - {room: laundry, count: [0, 1]}
+      - {room: linen_room, count: [0, 1]}
+      - {room: locker_room, count: [0, 1]}
+      - {room: storage, fill: true}
       - {room: mechanical_room, fill: true}
