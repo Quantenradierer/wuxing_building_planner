@@ -69,6 +69,7 @@ floor_roles:
       - {room: laundry, count: 1, wealth: [low, middle, high, luxury]}
       - {room: electrical_room, count: 1, when: "level + 1 == 0", priority: optional}
       - {room: mechanical_room, count: [0, 1], when: "level + 1 == 0", wealth: [middle, high, luxury], priority: optional}
+      - {room: garage, count: [1, 2], area: [100, 400], when: "level + 1 == 0 and width + depth >= 80", priority: optional}   # guests, tenants, staff
       - {room: storage, count: [1, 2], near: core}
       - {room: laundry, count: [0, 1]}
       - {room: storage, fill: true}       # tenants' cellar boxes, most of the basement
