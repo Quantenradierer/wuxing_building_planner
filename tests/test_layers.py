@@ -1,10 +1,10 @@
 """Lights, security and condition layers, and annexes (closets entered through a room)."""
 
 from roomplanner.generator import generate
-from roomplanner.geometry import Axis, Cell
+from roomplanner.geometry import Axis, Cell, Side
 from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
 from roomplanner.params import BuildingType, Condition, EntranceKind, Security
-from roomplanner.rules import rules_for
+from roomplanner.rules import ESCAPE_OUT_CELLS, rules_for
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
@@ -157,6 +157,29 @@ def test_coffin_units_are_pods_along_both_sides_of_an_aisle() -> None:
         assert door.swing is not None
         inside = next(c for c in door.edges[0].cells() if c in other.cells)
         assert inside.neighbour(door.swing.towards.opposite) in pod.cells  # the hatch opens out
+
+
+def test_big_rooms_open_their_doors_towards_the_escape_route() -> None:
+    big = 0
+    for seed in range(4):
+        for kind in (BuildingType.OFFICE, BuildingType.CASINO, BuildingType.HOTEL):
+            building = generate(make_params(building_type=kind, width=70, depth=44, seed=seed))
+            for floor in building.floors:
+                for door in doors(floor):
+                    assert door.swing is not None
+                    a, b = door.edges[0].cells()
+                    swung_into = floor.room_at(a if door.swing.towards in (Side.N, Side.W) else b)
+                    left = floor.room_at(
+                        b if swung_into is not None and a in swung_into.cells else a
+                    )
+                    if left is not None and left.area >= ESCAPE_OUT_CELLS and not door.entrance:
+                        big += 1
+                        assert (
+                            swung_into is None
+                            or swung_into.area < ESCAPE_OUT_CELLS
+                            or (rules_for(kind).spec(swung_into.type).circulation)
+                        )
+    assert big
 
 
 def _box(room: Room) -> list[int]:

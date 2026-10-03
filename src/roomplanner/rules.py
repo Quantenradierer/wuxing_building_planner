@@ -237,6 +237,9 @@ class StallRule(_Strict):
     )
 
 
+ESCAPE_OUT_CELLS = 400  # 100 m²: a room this big holds more than 10 people (ASR A2.3)
+
+
 class RoomSpec(_Strict):
     area: Range
     min_side: int = Field(gt=0)
@@ -297,6 +300,11 @@ class RoomSpec(_Strict):
     )
     furniture: list[FurnitureRule] = []
     wealth: dict[Wealth, RoomTier] = {}
+
+    def opens_out(self, area: int) -> bool:
+        """Whether the door of a room this big swings out of it: by design, or because the
+        door is on an escape route for many people and opens in the escape direction."""
+        return self.door_opens_out or area >= ESCAPE_OUT_CELLS
 
 
 class Catalog(_Strict):
@@ -579,7 +587,7 @@ def variables(params: GenerationParams, level: int = 0) -> dict[str, int]:
         "level": level,
         "width": params.width,
         "depth": params.depth,
-        # 0-99, fixed per building: for "sometimes" (a penthouse on half the towers)
+        # 0-99, fixed per building: for "sometimes" (a roof on a third of the towers)
         "roll": zlib.crc32(f"{params.seed}:roll".encode()) % 100,
     }
 

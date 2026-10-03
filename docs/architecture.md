@@ -103,7 +103,9 @@ Opening
                                        `door_slides`); the swing only gives their side
 Swing
   towards: Side                        side of the wall the leaf opens into (the door's own
-                                       room, or out of it with `door_opens_out`: pods, cells)
+                                       room, or out of it with `door_opens_out`: pods, cells, and
+                                       rooms from `ESCAPE_OUT_CELLS` (100 m²): escape direction,
+                                       ASR A2.3). Exterior doors open outwards.
   hinge: Side                          end of the run the hinge sits at
 PlacedObject
   kind, x, y, w, h                     covers cells [x, x+w) × [y, y+h)
@@ -290,7 +292,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
 7. Forced intervals (lobby slice, connectors) absorb gaps too small for a room.
 8. **Behind the core**: each rectangle takes a room that found no space (required ones
    first; a piece of its size if the rectangle is bigger), else the floor's `core_back` room (a
-   training room, the penthouse's living room), else a fill room that fits,
+   training room), else a fill room that fits,
    else it is halved while too big for the cluster filler. Between flats only (no room it
    could open into), it joins the flat room beside it where it lies along that room's whole
    wall for at least its `min_side`, else it becomes that room's closet (`front_fill`).
@@ -301,11 +303,10 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    (`outdoor: true`); the rooms behind it get a shallower segment and their windows look
    onto it. The renderer draws its facade as a railing (theme `walls.open_air`).
    Floors above a balcony floor leave its cells out of their footprint (`FloorPlan.cut`): it
-   stays open to the sky and their rows are shallower there (corp towers: a penthouse on top
-   of half of them, by the building's `roll`, with the executive floor moved one down).
+   stays open to the sky and their rows are shallower there.
 10. **Roof** (`roof:` of a floor role): the floor is the core (stair housing, lift shafts) and
    one open-air, circulation room around it (the climate plant), less a balcony's sky below.
-   Corp towers end in one a third of the time without a penthouse; plain offices in 40 %.
+   Corp towers end in one a third of the time; plain offices in 40 %.
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
 (T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),
