@@ -117,7 +117,7 @@ class DefaultOpenings:
                     continue
                 doors.append(door)
                 used |= set(door.edges)
-            if planned.level == 0:
+            if planned.level in (0, -1):  # -1: the garage's ramp up to the street
                 for room in rooms:
                     door = _vehicle_door(ctx, footprint, room, doors, used, grid, rng)
                     if door is not None:

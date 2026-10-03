@@ -335,7 +335,10 @@ Layout:
   linen and archive rooms beside the plant rooms; the other types (about 20 % mechanical
   rooms beside their main hall) are unchanged.
 - A hall's roller door can end up on a side facade; the police station's garage exists only
-  in the basement, without a ramp.
+  in the basement.
+- Basement garages (offices, hotels, apartments, hospitals; one big room at level -1) get
+  their roller door in the basement facade, standing for the ramp to the street, which is
+  outside the map. About 4 in 10 offices lose the optional garage (no suitable facade).
 - No fire escapes and no prison yard (they need surroundings; the gym stands in for the
   yard).
 
