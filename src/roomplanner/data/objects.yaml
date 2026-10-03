@@ -347,6 +347,12 @@ groups:
       - {object: iv_stand, at: [0, 0]}
       - {object: hospital_bed, at: [1, 0]}
       - {object: vital_monitor, at: [3, 0]}
+  gurney_set:           # gurney with IV stand and vital monitor at its head
+    size: [4, 4]
+    parts:
+      - {object: iv_stand, at: [0, 0]}
+      - {object: gurney, at: [1, 0]}
+      - {object: vital_monitor, at: [3, 0]}
   reception_post:       # reception desk with the receptionist's chair behind it
     size: [5, 3]
     parts:

@@ -191,6 +191,12 @@ class FurnitureRule(_Strict):
         description="Free floor stays next to its front or a flank, also after later objects "
         "(every bed of a nap room can be got into)",
     )
+    spaced: bool = Field(
+        default=False,
+        description="wall: a free cell beside it on both flanks (never in a corner or hard "
+        "against a neighbour; later objects keep the aisle) and lined up with the earlier "
+        "ones of its kind: beds in a row, each reachable from both long sides",
+    )
     wealth: list[Wealth] | None = Field(default=None, description="Only for these tiers")
     security: list[Security] | None = Field(default=None, description="Only for these levels")
 
@@ -200,6 +206,8 @@ class FurnitureRule(_Strict):
             raise ValueError(f"'{self.object}': `at` goes with placement 'at' and only with it")
         if self.toward is not None and self.placement is not Placement.ROWS:
             raise ValueError(f"'{self.object}': `toward` goes with placement 'rows' only")
+        if self.spaced and self.placement is not Placement.WALL:
+            raise ValueError(f"'{self.object}': `spaced` goes with 'wall' only")
         if (self.line or self.not_against) and self.placement is not Placement.WALL:
             raise ValueError(f"'{self.object}': `line` and `not_against` go with 'wall' only")
         if self.limit is not None and self.placement is not Placement.AT:

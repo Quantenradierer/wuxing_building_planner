@@ -139,7 +139,7 @@ rooms:
       - {object: canteen_set, placement: center}
       - {object: locker, placement: perimeter, count: [4, 8]}
       - {object: weapon_locker, placement: wall, count: [1, 2]}
-      - {object: bed, placement: wall, count: [0, 1]}             # a cot for the night shift
+      - {object: bed_set, placement: wall, spaced: true, count: [0, 1]}             # a cot for the night shift
       - {object: wall_screen, placement: wall}                    # the camera feeds
       - {object: coffee_machine, placement: corner}
       - {object: fridge, placement: wall, count: [0, 1]}

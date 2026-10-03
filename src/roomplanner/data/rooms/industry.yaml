@@ -106,7 +106,7 @@ rooms:
     windows: required
     door_width: 3
     furniture:
-      - {object: patient_bed, placement: wall, per: 24, count: [2, 8]}
+      - {object: patient_bed, placement: wall, spaced: true, per: 24, count: [2, 8]}
       - {object: machinery, placement: wall, per: 30, count: [1, 6]}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
   imaging:
@@ -147,9 +147,8 @@ rooms:
     min_side: 5
     next_to: [operating_room]
     furniture:
-      - {object: bed, placement: wall, per: 15, count: [1, 4]}
+      - {object: patient_bed, placement: wall, spaced: true, per: 15, count: [1, 4]}
       - {object: medical_cabinet, placement: wall, count: [0, 1]}
-      - {object: iv_stand, placement: at, at: bed, beside: [flanks], count: [0, 1]}
   back_room_or:         # the street doc's operating table
     area: [40, 100]
     min_side: 6
@@ -293,7 +292,7 @@ rooms:
     transit: false
     next_to: [test_chamber]
     furniture:
-      - {object: bed, placement: wall, per: 15, count: [1, 4]}
+      - {object: bed_set, placement: wall, spaced: true, per: 15, count: [1, 4]}
       - {object: wc, placement: corner}
       - {object: sink, placement: wall}
       - {object: wall_screen, placement: wall, count: [0, 1]}

@@ -12,7 +12,7 @@ rooms:
     windows: required
     access: [hallway]
     furniture:
-      - {object: double_bed_set, placement: wall}
+      - {object: double_bed_set, placement: wall, spaced: true}
       - {object: home_workstation, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [1, 2]}
       - {object: armchair, placement: scatter, count: [0, 1]}
@@ -166,7 +166,7 @@ rooms:
           - {object: bed, at: [0, 0]}
           - {object: locker, at: [2, 0]}
     furniture:                  # other shapes
-      - {object: bed, placement: wall}
+      - {object: bed_set, placement: wall, spaced: true}
       - {object: locker, placement: wall, count: [0, 1]}
   taproom:              # a dive bar's hall: bar, booths, pool table
     area: [60, 100000]

@@ -439,6 +439,13 @@ class RoomFurnisher:
                 if spec.bank is not None:
                     bank = spec.bank
                     candidates.sort(key=lambda r: self._bank_rank(bank, r))
+                if rule.spaced:
+                    candidates = [r for r in candidates if self._flanks(r) is not None]
+                    candidates.sort(
+                        key=lambda r: self._line_rank(
+                            self._main_part(rule.object) or rule.object, r
+                        ),
+                    )
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
             case Placement.BACK:
@@ -521,8 +528,52 @@ class RoomFurnisher:
                     self.clearance = self.clearance | self._approach(rect)
                 if rule.front_clear:
                     self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
+                if rule.spaced:
+                    self.clearance = self.clearance | (self._flanks(rect) or frozenset())
                 return True
         return False
+
+    def _flanks(self, rect: Rect) -> frozenset[Cell] | None:
+        """The cells beside a wall-backed object, along the wall; None unless both are free
+        room floor (not wall, corner or another object)."""
+        x, y, w, h, facing = rect
+        if facing in (Side.N, Side.S):
+            sides = [[Cell(x - 1, cy) for cy in range(y, y + h)]]
+            sides.append([Cell(x + w, cy) for cy in range(y, y + h)])
+        else:
+            sides = [[Cell(cx, y - 1) for cx in range(x, x + w)]]
+            sides.append([Cell(cx, y + h) for cx in range(x, x + w)])
+        cells = {c for side in sides for c in side}
+        if not cells <= self.cells or cells & self.blocking:
+            return None
+        return frozenset(cells)
+
+    def _line_rank(self, kind: str, rect: Rect) -> tuple[bool, bool, float]:
+        """Sort key for a spaced object: on the wall line and facing of an earlier one of its
+        kind first, then facing the same way on another wall, then the nearest spot."""
+        x, y, w, h, facing = rect
+        earlier = [o for o in self.placed if o.kind == kind]
+        same = [o for o in earlier if o.facing == facing]
+        if not same:
+            return bool(earlier), bool(earlier), 0.0
+
+        def back(px: int, py: int, pw: int, ph: int) -> int:
+            """The coordinate of the wall line behind an object."""
+            match facing:
+                case Side.S:
+                    return py
+                case Side.N:
+                    return py + ph
+                case Side.E:
+                    return px
+                case Side.W:
+                    return px + pw
+
+        mine = back(x, y, w, h)
+        aligned = any(back(o.x, o.y, o.w, o.h) == mine for o in same)
+        cx, cy = x + w / 2, y + h / 2
+        near = min(abs(o.x + o.w / 2 - cx) + abs(o.y + o.h / 2 - cy) for o in same)
+        return not aligned, False, near
 
     def _bank_rank(self, bank: str, rect: Rect) -> tuple[bool, float]:
         """Sort key for a banked object: touching the bank first, else the nearest spot (a
@@ -956,6 +1007,8 @@ class RoomFurnisher:
             range(spare + 1), key=lambda s: (sum(map(free, rects(s))), -abs(s - target), -s)
         )
         for rect in rects(shift):
+            if rule.fill < 1 and self.rng.random() >= rule.fill:
+                continue
             if self._try(rule.object, rect, spec.walkable) and rule.front_clear:
                 self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
 
@@ -1020,8 +1073,6 @@ class RoomFurnisher:
 
     # --- commit -----------------------------------------------------------------------
 
-            if rule.fill < 1 and self.rng.random() >= rule.fill:
-                continue
     def _try_group(self, kind: str, rect: Rect) -> bool:
         """Place all parts of a group or none; the group's empty cells stay free floor."""
         x, y, w, h, _ = rect

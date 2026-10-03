@@ -39,7 +39,7 @@ rooms:
     access: [living_room, hallway]
     transit: false
     furniture:
-      - {object: bed_set, placement: wall}
+      - {object: bed_set, placement: wall, spaced: true}
       - {object: home_workstation, placement: wall, count: [0, 1]}
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [0, 2]}
@@ -124,9 +124,8 @@ rooms:
     min_side: 4
     transit: false
     furniture:
-      - {object: gurney, placement: wall}
+      - {object: gurney_set, placement: wall, spaced: true}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
-      - {object: iv_stand, placement: at, at: gurney, beside: [flanks], count: [0, 1]}
       - {object: medical_cart, placement: wall, count: [0, 1]}
       - {object: sink, placement: wall, count: [0, 1]}
   stash:                # hidden stash behind the wardrobe: cash, fake SINs, spare guns

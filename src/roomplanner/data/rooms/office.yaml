@@ -160,7 +160,7 @@ rooms:
     access: [executive_office]
     next_to: [executive_office]
     furniture:
-      - {object: double_bed_set, placement: wall}
+      - {object: double_bed_set, placement: wall, spaced: true}
       - {object: shower, placement: corner}
       - {object: sink, placement: wall}
       - {object: wardrobe, placement: wall, count: [0, 1]}

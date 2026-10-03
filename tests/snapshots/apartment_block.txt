@@ -2,19 +2,19 @@ apartment 54x34 cells, wealth=middle, seed=4
 
 == Floor 1 ==
 +===---===---===----+----===----+----===---===---===---===--+===---===---===--+===---===--+===---===---===--+
-"SSS     } ooooooo }|    k k   a|a   N bbb N     ddddd      |}                |    k k   a|    N bbb N ddddd"
-"SSS       ooooooo  |          a|a     bbb       ddddd      |                 |          a|      bbb   ddddd"
-"SSS       ooooooo  D          a|a     bbb       ddddd      |ooo              D          a|      bbb   ddddd"
-|SSS                D          a|a     bbb                  |ooo              D          a|      bbb        |
-|SSS         ttt    D          a|a     bbb         c        |ooo ttt          D          a|      bbb     c  |
+"SSS     } ooooooo }|    k k    |a   N bbb N     ddddd      |}                |    k k    |    N bbb N      "
+"SSS       ooooooo  |           |a     bbb       ddddd      |                 |           |      bbb        "
+"SSS       ooooooo  D           |a     bbb       ddddd      |ooo              D           |      bbb        "
+|SSS                D           |a     bbb                  |ooo              D           |      bbb        |
+|SSS         ttt    D    8     N|a     bbb         c        |ooo ttt          D    15    N|      bbb       k|
 |            ttt    |           |      bbb                  |ooo ttt          |           |      bbb        |
-"AAA     7   ttt    |    8     N|      bbb   9              |ooo ttt 14       |    15    N|      bbb        "
-"AAA                |           |                           |ooo              |           |                 "
-"AAA                |    bbbbbbb|                           |ooo              |    bbbbbbb|        16       "
-|                   |    bbbbbbb|               +-----------+                 |    bbbbbbb|                 |
-|s       AAA        |    bbbbbbb|               |###########|}                |    bbbbbbb|                 |
-|s       AAA        |           |               |###########|                 |           |                 |
-|s       AAA       *|          N|               |###########|            sss  |          N|      k k        |
+"AAA     7   ttt    |    bbbbbbb|      bbb   9              |ooo ttt 14       |    bbbbbbb|      bbb       k"
+"AAA                |    bbbbbbb|                           |ooo              |    bbbbbbb|                 "
+"AAA                |a   bbbbbbb|                           |ooo              |a   bbbbbbb|        16    ddd"
+|                   |a          |               +-----------+                 |a          |              ddd|
+|s       AAA        |a         N|               |###########|}                |a         N|            c ddd|
+|s       AAA        |a          |               |###########|                 |a          |              ddd|
+|s       AAA       *|a          |               |###########|            sss  |a          |              ddd|
 +--DDD--------------+-----------+--DDD----------+###########+--DDD------------+-----------+--DDD------------+
 |                                               |###########|a                                              |
 |                                               |###########|a                                              |
@@ -54,21 +54,21 @@ apartment 54x34 cells, wealth=middle, seed=4
 "                                   |                                   |                                   "
 "                                  (|                                   |                                   "
 +--DDD------+-----------+--DDD------+--DDD--------------+---------------+---------------+--DDD--------------+
-|          *|    aaaaa  |k     k   a|*         sss sss *|              N|N              |      SSS         s|
-|           |           |          a|                   |               |               |      SSS         s|
-"           D           |N         a|              AAA  D        bbbbbbb|bbbbbbb        D      SSS         s"
-"           D           |          a|              AAA  D        bbbbbbb|bbbbbbb        D      SSS          "
-"s ~~~~~~~  D           |bbbbbbb   a|      ~~~~~~~ AAA  D        bbbbbbb|bbbbbbb        D      SSS         s"
-|s ~~~~~~~  |           |bbbbbbb    |      ~~~~~~~      |               |               |                  s|
-|s ~~~~~~~  |N   21     |bbbbbbb    |  c   ~~~~~~~      |      27      N|N     32       |        31        s|
-|  ~~~~~~~  |           |           |      ~~~~~~~      |               |               |                   |
-"s ~~~~~~~  |bbbbbbb    |N   22     |KKK   ~~~~~~~ SSSSS|ddd            |            ddd|            ttt    "
-"s          |bbbbbbb    |           |KKK           SSSSS|ddd            |            ddd|            ttt    "
-"s   20     |bbbbbbb    |           |KKK     26    SSSSS|ddd c         k|k         c ddd|            ttt    "
-|           |           |           |                   |ddd            |            ddd|                   |
-|KKK ooooooo|N          |           |c       ooooooo AAA|ddd           k|k           ddd|    AAA   ooooooo  |
-|KKK ooooooo|           |           |        ooooooo AAA|               |               |    AAA   ooooooo  |
-|KKK ooooooo|        k  |           |<<<<<   ooooooo AAA|               |               |    AAA } ooooooo }|
+|          *|           |           |*         sss sss *|              k|k              |      SSS         s|
+|           |           |           |                   |               |               |      SSS         s|
+"           D          k|          N|              AAA  D              k|k              D      SSS         s"
+"           D           |           |              AAA  D               |               D      SSS          "
+"s ~~~~~~~  D          k|    bbbbbbb|      ~~~~~~~ AAA  D               |               D      SSS         s"
+|s ~~~~~~~  |           |    bbbbbbb|      ~~~~~~~      |               |               |                  s|
+|s ~~~~~~~  |N   21     |    bbbbbbb|  c   ~~~~~~~      |N     27    ddd|ddd   32      N|        31        s|
+|  ~~~~~~~  |           |           |      ~~~~~~~      |            ddd|ddd            |                   |
+"s ~~~~~~~  |bbbbbbb    |    22    N|KKK   ~~~~~~~ SSSSS|bbbbbbb   c ddd|ddd c   bbbbbbb|            ttt    "
+"s          |bbbbbbb    |           |KKK           SSSSS|bbbbbbb     ddd|ddd     bbbbbbb|            ttt    "
+"s   20     |bbbbbbb   a|           |KKK     26    SSSSS|bbbbbbb     ddd|ddd     bbbbbbb|            ttt    "
+|           |          a|           |                   |               |               |                   |
+|KKK ooooooo|N         a|           |c       ooooooo AAA|N              |              N|    AAA   ooooooo  |
+|KKK ooooooo|          a|           |        ooooooo AAA|               |               |    AAA   ooooooo  |
+|KKK ooooooo|          a|    aaaaa  |<<<<<   ooooooo AAA|               |               |    AAA } ooooooo }|
 +===---===--+===---===--+===---===--+===---===---===----+----===---===--+===---===---===+--===---===---===--+
   objects: A armchair, v autokitchen, b bed, k cabinet, c chair, ( coat_rack, t coffee_table, n counter, f fridge, d home_desk, K kitchen_table, N nightstand, * plant, ^ roof_hatch, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, U trash_bin, < wall_screen, a wardrobe, w wc
     1  corridor            162 cells
@@ -106,19 +106,19 @@ apartment 54x34 cells, wealth=middle, seed=4
 
 == Ground floor ==
 +===---===---===--+===---===---===----+--DDD----+===---===--+===--+-----------+===---===----+----===---===--+
-"}                |                  k|s       '|sssss     '|     |  bbbbb   '|    N BBB N  |} ooooooo }   S"
+"}                |                  k|s       '|sssss EEE  |     |  bbbbb   '|    N BBB N  |} ooooooo }   S"
 "                 |                   |s        |           |     |           |      BBB    |  ooooooo     S"
-"ooo              D                   |s        |           D     D           |      BBB    D  ooooooo     S"
-|ooo              D                   |s        |           D     D           |      BBB    D               |
-|ooo ttt          D                   |s ddd    |    34     D     D    11    E|      BBB    D    ttt        |
-|ooo ttt          |                   |  ddd    |           D     |          E|      BBB    |    ttt        |
-"ooo ttt 8        |N       9          |s ddd    |           D     |          E|    16BBB    |    ttt 15     "
-"ooo              |                   |s        |           |     |           |             |               "
-"ooo              |BBBBBBB            |s        |        EEE|     |EEE EEE EEE|  c          |        AAA    "
-|                 |BBBBBBB            |s        +-----------+     +-----------+             |        AAA    |
-|}                |BBBBBBB            |s        |###########|     |k SSS SSS S|eeeee        |        AAA    |
-|                 |                   |         |###########|     |          S|eeeee        |               |
-|            SSS  |N                  |s ddd    |###########|     D          S|eeeee        |*             *|
+"ooo              D                   |s        |jjj        D     D           |      BBB    D  ooooooo     S"
+|ooo              D                   |s        |jjj        D     D           |      BBB    D               |
+|ooo ttt          D                   |s ddd    |jjj 34     D     D    11    E|      BBB    D    ttt        |
+|ooo ttt          |                   |  ddd    |jjj        D     |          E|      BBB    |    ttt        |
+"ooo ttt 8        |    BBB 9          |s ddd    |jjj        D     |          E|    16BBB    |    ttt 15     "
+"ooo              |    BBB            |s        |jjj        |     |           |             |               "
+"ooo              |    BBB            |s        |jjj       '|     |EEE EEE EEE|  c          |        AAA    "
+|                 |    BBB            |s        +-----------+     +-----------+             |        AAA    |
+|}                |    BBB            |s        |###########|     |k SSS SSS S|eeeee        |        AAA    |
+|                 |    BBB            |         |###########|     |          S|eeeee        |               |
+|            SSS  |  N BBB N          |s ddd    |###########|     D          S|eeeee        |*             *|
 +--DDD------------+-------------------+s ddd    |###########|     D           +-------------+--DDD----------+
 |        WWWWW                        |s ddd    |###########|     D          S|                             |
 |                                     |s        |###########|     |          S|                             |
@@ -142,39 +142,39 @@ apartment 54x34 cells, wealth=middle, seed=4
 |                                                                                                           |
 |                                                                                                           |
 +-----------+DDD--+---------+---------+---------------+                 +--DDD------+---------+DDD--+-------+
-"www iii    |     |         |S SSS    |n vvv iii      |q                |      uuuuu|v nnnnnnn|     |iii    "
-"www        |     |         |S        |n              |q                |           |v        |     |       "
-"www        |     D         |S        |n              |q                |          u|v   KKK  |     D       "
-|           |     D         |         |n              |q                |          u|    KKK  |     D       |
-|    17     |W    D    19   |S   20   |n     21       |q                |    27    u|f 31KKK  |     D  29www|
-|           |W    |         |S        |n              |q                |          u|         |     |    www|
-"           |W    |        S|S        |n              |q                |          u|i        |     |    www"
-"           |W    |        S|         |               |                 |           |i        |     |       "
-"           |W    |        S|         |f              |    AAA }        |      uuuuu|i       U|     |       "
+"www iii    |     |         |S SSS    |n vvv iii      |q                |U          |iii f vvv|     |iii www"
+"www        |     |         |S        |n              |q                |           |         |     |    www"
+"www        |     D         |S        |n              |q                |           |  KKK   n|     D    www"
+|           |     D         |         |n              |q                |           |  KKK   n|     D       |
+|    17     |W    D    19   |S   20   |n     21       |q                |    27     |  KKK   n|     D  29   |
+|           |W    |         |S        |n              |q                |           |        n|     |       |
+"           |W    |        S|S        |n              |q                |           |    31  n|     |    hhh"
+"           |W    |        S|         |               |                 |           |        n|     |    hhh"
+"           |W    |        S|         |f              |    AAA }        |uuuuu uuuuu|        n|     |k   hhh"
 +--DDD------+     +---------+--DDD----+--DDD----------+    AAA          +-----------+--DDD----+     +-------+
-|(                       18                           |    AAA           yyy yyy yyy|            30    WWWWW|
+|(                       18                           |    AAA           yyy yyy yyy|            30         |
 |                                                     |                             |                       |
-"                                                     |                            y|                       "
+"                                                     |                    U       y|                       "
 "                                                     |                            y|                       "
 "                                                     |a   3                 28    y|                       "
 +--DDD--------------+---------+--DDD------+--DDD------+                             +-----------+--DDD------+
-|*         SSS SSS *|k k      |k     k   W|k     k   W|                  U          |  WWWWW    |*       AAA|
-|                   |         |          W|          W|                             |           |        AAA|
-"              AAA  D      eee|N         W|N         W|<                 yyy yyy yyy|           D        AAA"
-"              AAA  D      eee|          W|          W|<          +-----------------+           D           "
-"      ~~~~~~~ AAA  D    c eee|BBBBBBB   W|BBBBBBB   W|<   AAA }  |'   EEE   HHHHHHH|           D  ~~~~~~~ S"
-|      ~~~~~~~      |      eee|BBBBBBB    |BBBBBBB    |<   AAA    |          HHHHHHH|           |  ~~~~~~~ S|
-|  c   ~~~~~~~      |    23eee|BBBBBBB    |BBBBBBB    |<   AAA    D          HHHHHHH|    33    N|  ~~~~~~~ S|
-|      ~~~~~~~      |         |           |           |           D          HHHHHHH|           |  ~~~~~~~  |
-"KKK   ~~~~~~~ ggggg|        N|N   24     |N   25     |           D        26HHHHHHH|    BBBBBBB|  ~~~~~~~  "
-"KKK           ggggg|         |           |           |           |                 |    BBBBBBB|           "
-"KKK     22    ggggg|  BBBBBBB|           |           |           |          HHHHHHH|    BBBBBBB|    32     "
-|                   |  BBBBBBB|           |           |           |          HHHHHHH|           |           |
-|c       ooooooo AAA|  BBBBBBB|           |           |U          |          HHHHHHH|          N|ooooooo KKK|
-|        ooooooo AAA|         |           |           |           |          HHHHHHH|           |ooooooo KKK|
-|<<<<<   ooooooo AAA|        N|           |           |*         *|          HHHHHHH|  k        |ooooooo KKK|
+|*         SSS SSS *|    eeeee|           |           |                             |           |      <<<<<|
+|                   |    eeeee|           |           |                             |           |           |
+"              AAA  D    eeeee|          N|          N|<                 yyy yyy yyy|k          D          }"
+"              AAA  D         |           |           |<          +-----------------+           D           "
+"      ~~~~~~~ AAA  D         |    BBBBBBB|    BBBBBBB|<   AAA }  |          EEE EEE|k          D        ooo"
+|      ~~~~~~~      |         |    BBBBBBB|    BBBBBBB|<   AAA    |                 |           |        ooo|
+|  c   ~~~~~~~      |    23  N|    BBBBBBB|    BBBBBBB|<   AAA    D                 |    33    N|S 32ttt ooo|
+|      ~~~~~~~      |         |           |           |           D                 |           |S   ttt ooo|
+"KKK   ~~~~~~~ ggggg|  BBBBBBB|    24    N|    25    N|           D        26       |    BBBBBBB|S   ttt ooo"
+"KKK           ggggg|  BBBBBBB|           |           |           |                 |    BBBBBBB|        ooo"
+"KKK     22    ggggg|  BBBBBBB|           |           |           |  HHHHHHH HHHHHHH|W   BBBBBBB|        ooo"
+|                   |         |           |           |           |  HHHHHHH HHHHHHH|W          |           |
+|c       ooooooo AAA|        N|           |           |U          |  HHHHHHH HHHHHHH|W         N|KKK       }|
+|        ooooooo AAA|         |           |           |           |  HHHHHHH HHHHHHH|W          |KKK        |
+|<<<<<   ooooooo AAA|         |    WWWWW  |    WWWWW  |*         *|' HHHHHHH HHHHHHH|W          |KKK SSS    |
 +===---===---===----+----===--+===---===--+===---===--+----DDD----+-----------------+===---===--+===---===--+
-  objects: A armchair, v autokitchen, b battery_bank, B bed, q bench, k cabinet, c chair, ( coat_rack, t coffee_table, n counter, d drone_dock, s drone_rack, E electrical_panel, a fire_alarm_panel, ' fire_extinguisher, f fridge, e home_desk, H hvac_unit, K kitchen_table, u mailboxes, N nightstand, * plant, ~ rug, S shelf, h shower, } side_table, g sim_rig, i sink, o sofa, # stairs, U trash_bin, y vending_machine, < wall_screen, W wardrobe, w wc
+  objects: A armchair, v autokitchen, b battery_bank, B bed, q bench, k cabinet, c chair, ( coat_rack, t coffee_table, n counter, d drone_dock, s drone_rack, E electrical_panel, a fire_alarm_panel, ' fire_extinguisher, f fridge, e home_desk, H hvac_unit, K kitchen_table, u mailboxes, N nightstand, * plant, ~ rug, S shelf, h shower, } side_table, g sim_rig, i sink, o sofa, # stairs, U trash_bin, y vending_machine, < wall_screen, W wardrobe, w wc, j workbench
     1  corridor            237 cells
     2  stairwell            60 cells
     3  lobby                96 cells

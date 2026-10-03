@@ -459,7 +459,11 @@ of those types (sinks off the stall partitions). `front_clear: N` keeps a free a
 of an object, `N` cells deep and as wide as it plus `N / 2` on each side, from everything
 placed after it except walkable objects (the dance floor before the DJ booth).
 `accessible: true` places an object only where free floor touches its front or a flank (not
-its back), and no later object may take the last such cell (the beds of a nap room). Counts are a
+its back), and no later object may take the last such cell (the beds of a nap room).
+`spaced: true` (wall) keeps a free cell beside the object on both flanks, never in a corner or
+hard against another, kept free for later objects, and prefers the wall line and facing of the
+earlier ones of its kind (beds in a row; each bed is a group with its nightstands or IV stand and
+monitor at the head). Counts are a
 range or `per: N` (one object per N cells of room, bounded by `count`), scaled by the
 tier's `furniture` factor, or `per_room: [type, N]` (one per N rooms of that type opening
 into the room, rounded up, bounded by `count`, never scaled: a sink per two stalls);

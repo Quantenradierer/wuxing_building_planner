@@ -2,23 +2,23 @@ safehouse 32x22 cells, wealth=middle, seed=5
 
 == Floor 1 ==
 +--===---===--+===---===--+===---===---===--+===---===--+-------+
-"BBB BBB      |###########|n                |aaaaa      |       |
 "BBB BBB      |###########|                 |           |       |
-"BBB BBB      |###########|bbbbbbb          |           |  6    |
-|BBB BBB      |###########|bbbbbbb          |           |       |
-|BBB BBB      |###########|bbbbbbb       ddd|           |      )|
-|BBB BBB      |###########|              ddd|           +--DDD--+
-"BBB BBB      |###########|n           c ddd|                   "
-"             |###########|              ddd|                   "
-"      3      |###########|        4     ddd|        5          "
-|             |###########|                 |                   |
-|             |###########|                 |k             bbb  |
-|             |###########|                 |              bbb  |
-"             |###########|                 |              bbb  "
-"             |           |                 |              bbb  "
-"             |    2      |                 |              bbb  "
-|             |           |                 |              bbb  |
-|        l    |           |        k k      |            n bbb n|
+"BBB BBB      |###########|                 |           |       |
+"BBB BBB      |###########|                 |           |  6    |
+|BBB BBB      |###########|                 |           |       |
+|BBB BBB      |###########|                 |           |      )|
+|BBB BBB      |###########|                 |           +--DDD--+
+"BBB BBB      |###########|ddd              |                  a"
+"             |###########|ddd              |                  a"
+"      3      |###########|ddd c   4       n|        5         a"
+|             |###########|ddd              |                  a|
+|             |###########|ddd       bbbbbbb|        bbb       a|
+|             |###########|          bbbbbbb|        bbb        |
+"             |###########|          bbbbbbb|        bbb        "
+"             |           |                 |        bbb        "
+"             |    2      |                n|        bbb        "
+|             |           |                 |        bbb        |
+|        l    |           |      k k        |      n bbb n   k  |
 +--DDD--------+----DDD----+--DDD------------+--DDD--------------+
 "                                                               "
 "                                                               "
@@ -26,27 +26,27 @@ safehouse 32x22 cells, wealth=middle, seed=5
 |                                                               |
 |                            1                                  |
 +--DDD--------+     +--DDD------+--DDD------+--DDD--------------+
-"      BBB BBB|     |      k hhh|           |      BBB BBB BBB  "
-"      BBB BBB|     |        hhh|           |      BBB BBB BBB  "
-"      BBB BBB|     |        hhh|a          |      BBB BBB BBB  "
-|      BBB BBB|     |           |a          |      BBB BBB BBB  |
-|      BBB BBB|     |    9      |a          |      BBB BBB BBB  |
-|      BBB BBB|     |           |a          |      BBB BBB BBB  |
-"      BBB BBB|     |        www|a          |      BBB BBB BBB  "
-"             |     |        www|           |                   "
-"      7      |     |    iii www|k   10     |        11         "
+"      BBB BBB|     |           |           |      BBB BBB BBB  "
+"      BBB BBB|     |           |           |      BBB BBB BBB  "
+"      BBB BBB|     |          i|n          |l     BBB BBB BBB  "
+|      BBB BBB|     |          i|           |      BBB BBB BBB  |
+|      BBB BBB|     |www 9     i|bbbbbbb    |l     BBB BBB BBB  |
+|      BBB BBB|     |www        |bbbbbbb    |      BBB BBB BBB  |
+"      BBB BBB|     |www        |bbbbbbb    |l     BBB BBB BBB  "
+"             |     |           |           |                   "
+"      7      |     |      k    |n   10     |l       11         "
 |             +DDD--+-----------+           |                   |
-|             |                n|k          |                   |
+|             |                 |           |                   |
 |             |                 |           |           +--DDD--+
-"  KKK        |          bbbbbbb|      bbb  |           |s     q|
-"  KKK        |          bbbbbbb|      bbb  |           |s     q|
-"l KKK        |ddd     8 bbbbbbb|      bbb  |  KKK      |s 12  q|
-|             |ddd              |      bbb  |  KKK      |      q|
-|             |ddd c           n|      bbb  |  KKK      |L     q|
-|             |ddd              |      bbb  |           |L     q|
-|             |ddd              |    n bbb n|  l        |L   j q|
+"  KKK        |      bbb     ddd|ddd        |           |s     q|
+"  KKK        |      bbb     ddd|ddd        |           |s     q|
+"l KKK        |a     bbb 8   ddd|ddd c      |           |s 12  q|
+|             |a     bbb     ddd|ddd        |           |      q|
+|             |a     bbb     ddd|ddd       k|           |s     q|
+|             |a     bbb        |           |           |s     q|
+|             |a   n bbb n      |          k|           |s   j q|
 +--===---===--+===---===---===--+===---===--+===---===--+-------+
-  objects: b bed, q bench, B bunk_bed, k cabinet, c chair, K crate, d home_desk, l locker, n nightstand, ) safe, s shelf, h shower, i sink, # stairs, j terminal, a wardrobe, w wc, L weapon_locker
+  objects: b bed, q bench, B bunk_bed, k cabinet, c chair, K crate, d home_desk, l locker, n nightstand, ) safe, s shelf, i sink, # stairs, j terminal, a wardrobe, w wc
     1  corridor            111 cells
     2  stairwell            54 cells
     3  bunk_room            63 cells
@@ -62,23 +62,23 @@ safehouse 32x22 cells, wealth=middle, seed=5
 
 == Ground floor ==
 +--===+--DDD--+===---===--+===--+-----------+===---===---===----+
-"     |       |###########|     |  qqqqqqq j|bbb bbb bbb        "
+"     |       |###########|     |j          |bbb bbb bbb        "
 "     |       |###########|     |           |bbb bbb bbb        "
-"s   k|      f|###########|     D          s|bbb bbb bbb        "
-|s    |       |###########|     D          s|bbb bbb bbb        |
-|s   k|      n|###########|     D    7     s|bbb bbb bbb        |
-|     |      n|###########|     |           |bbb bbb bbb        |
-"s   s|a     n|###########|     |           |bbb bbb bbb        "
-"s   s|a     n|###########|     |           |                   "
-"s 5 s|a 4   n|###########|     |  WWW <<<<<|        8          "
+"s   k|      f|###########|     D          q|bbb bbb bbb        "
+|s    |       |###########|     D          q|bbb bbb bbb        |
+|s   k|      n|###########|     D    7     q|bbb bbb bbb        |
+|     |      n|###########|     |          q|bbb bbb bbb        |
+"s   s|i     n|###########|     |          q|bbb bbb bbb        "
+"s   s|i     n|###########|     |          q|                   "
+"s 5 s|i 4   n|###########|     |      sss q|        8          "
 |     |      n|###########|     +-----------+                   |
-|s   s|      n|###########|     |ggggggg   M|                   |
-|s   s|       |###########|     |ggggggg   M|                   |
-"s   s|      v|###########|     |ggggggg   M|                   "
+|s   s|      n|###########|     |  mmm      |        KKK        |
+|s   s|       |###########|     |           |        KKK        |
+"s   s|      v|###########|     |    6      |        KKK       l"
 "     |      v|           |     |           |                   "
-"     |      v|    2      |     |i   6     m|                   "
-|     |       |           |     |          m|                   |
-|     |      U|           |     |      mmm m|            l l l  |
+"     |      v|    2      |     |           |                   "
+|     |       |           |     |           |                   |
+|     |      U|           |     |      iii  |                   |
 +DDD--+--DDD--+----DDD----+     +--DDD------+--DDD--------------+
 "                              1                                "
 "                                                               "
@@ -86,27 +86,27 @@ safehouse 32x22 cells, wealth=middle, seed=5
 |                                                               |
 |                                                               |
 +--DDD--------------------------+     +-----------+--DDD--------+
-"              SSS   AAA        |     |           |        WWW W|
-"              SSS   AAA        |     |           |            W|
-"}             SSS   AAA        |     D           |            W|
-|              SSS              |     D           |             |
-|ooo           SSS              |     D           |            L|
-|ooo                            |     |           |            L|
-"ooo ttt     ~~~~~~~            |     |           |s   KKK     L|
-"ooo ttt     ~~~~~~~            |     |           |s   KKK     L|
-"ooo ttt     ~~~~~~~            |  3  |    10     |s   KKK     L|
-|ooo         ~~~~~~~            |     |           |             |
-|ooo         ~~~~~~~            |     |www        |      11     |
-|                               |     |www        |             |
-"}             9                |     |www        |  KKK       L|
-"                               |     |           |  KKK       L|
-"                               |     |           |  KKK       L|
+"                               |     |           |             |
+"                               |     |           |             |
+"                               |     D          i|             |
+|                               |     D          i|             |
+|                               |     D          i|            L|
 |                               |     |           |            L|
-|      AAA                      |     |           |            L|
-|      AAA                      |     |           |             |
-|      AAA   sss                |     |k     aaa  |        LLLLL|
+"}           ~~~~~~~            |     |           |            L|
+"            ~~~~~~~            |     |           |            L|
+"ooo         ~~~~~~~            |  3  |    10     |    KKK 11  L|
+|ooo         ~~~~~~~            |     |           |    KKK      |
+|ooo ttt     ~~~~~~~            |     |           |L   KKK      |
+|ooo ttt                        |     |           |L            |
+"ooo ttt       9                |     |           |L            |
+"ooo                            |     |           |L            |
+"ooo                            |     |           |L           L|
+|                               |     |           |            L|
+|}                              |     |hhh     www|W           L|
+|                               |     |hhh     www|W           L|
+|    sss                        |     |hhh     www|W WWW WWW   L|
 +--===---===---===---===---===--+DDD--+===---===--+-------------+
-  objects: A armchair, v autokitchen, q bench, b bunk_bed, k cabinet, t coffee_table, n counter, K crate, f fridge, L gun_rack, g gurney, i iv_stand, l locker, m medical_cabinet, M medical_cart, ~ rug, s shelf, } side_table, S sim_rig, a sink, o sofa, # stairs, j terminal, U trash_bin, < wall_screen, w wc, W weapon_locker
+  objects: v autokitchen, q bench, b bunk_bed, k cabinet, t coffee_table, n counter, K crate, f fridge, L gun_rack, l locker, m medical_cabinet, ~ rug, s shelf, h shower, } side_table, i sink, o sofa, # stairs, j terminal, U trash_bin, w wc, W weapon_locker
     1  corridor            123 cells
     2  stairwell            54 cells
     3  entry_hall           30 cells

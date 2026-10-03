@@ -46,7 +46,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
 3. **Rooms with a focus have scattered seating/desks facing different ways** (P1): surveillance, security, spider,
    noc, control, block_control, briefing, training, nave, choir_loft, huddle, meeting. Rule: one focus object
    (monitor wall, screen, altar, whiteboard), all seats/desks face it in rows.
-4. **Beds** (P1): ward, icu, infirmary, recovery, trauma, treatment, nap, bunk, hotel/guest/bedroom, solitary cell:
+4. [DONE] **Beds** (P1): ward, icu, infirmary, recovery, trauma, treatment, nap, bunk, hotel/guest/bedroom, solitary cell:
    head to a wall, aligned rows, free on both long sides, never in a corner or mid-room, one monitor/IV/chair/
    nightstand per bed placed at its head.
 5. **Counters and desks do not face the entrance and float** (P1): reception(_lobby), lobby, police_lobby, storefront,
