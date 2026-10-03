@@ -284,6 +284,7 @@ rooms:
     windows: forbidden
     door_width: 4
     facade_door: 6         # the ramp up to the street
+    connect: [storage, electrical_room, mechanical_room, utility]   # more than the one corridor door
     furniture:
       - {object: car, placement: rows, aisle: 10, gap: 1, lanes: true, margin: 0, block: 40,
          front_clear: 10}   # 2.5 m stalls facing 5 m drive lanes

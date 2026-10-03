@@ -55,6 +55,7 @@ windows:
 default_material: concrete
 materials:
   concrete:   {floor: "#262a33", pattern: tiles, tile: 4, lines: "#00000040"}
+  granite:    {floor: "#30343a", pattern: tiles, tile: 6, lines: "#00000050"}   # street paving: big slabs
   corridor:   {floor: "#20242d", pattern: tiles, tile: 2, lines: "#00000048", accent: "#00e5ff"}
   lobby:      {floor: "#2b2733", pattern: tiles, tile: 3, lines: "#00000040", accent: "#ff3fa4"}
   carpet:     {floor: "#2b3040", pattern: plain}
@@ -211,7 +212,7 @@ rooms:
   safe_room: tech
   vending_room: shop
   garage: concrete
-  car_park: concrete
+  car_park: granite
   fixer_room: club
   cyber_surgery: sterile
   cyberware_storage: sterile
