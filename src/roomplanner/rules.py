@@ -43,10 +43,11 @@ class ObjectSpec(_Strict):
     size: tuple[int, int] = Field(description="Cells along the wall / row, cells deep")
     walkable: bool = Field(default=False, description="Can be walked over (stairs)")
     glyph: str = Field(min_length=1, max_length=1, description="ASCII debug glyph")
-    bank: bool = Field(
-        default=False,
-        description="Equipment that stands in one run: a `wall` placement prefers a spot "
-        "touching an earlier object of the kind, facing the same way",
+    bank: str | None = Field(
+        default=None,
+        description="Equipment that stands in one run with the others of this name (a "
+        "kitchen line, a laundry row): a `wall` placement prefers a spot touching an earlier "
+        "object of the same bank, backed against the same wall line, facing the same way",
     )
 
 
@@ -327,7 +328,7 @@ class RoomEntry(_Strict):
     limit: int | None = Field(
         default=None, gt=0, description="fill: at most this many picked per floor (copy rooms)"
     )
-    place: Literal["entrance", "hall"] | None = None
+    place: Literal["entrance", "hall", "end"] | None = None
     near: Literal["core", "entrance", "service"] | None = None
     priority: Priority = Priority.NORMAL
     area: Range | None = Field(default=None, description="Overrides the catalog")

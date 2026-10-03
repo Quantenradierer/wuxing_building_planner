@@ -436,8 +436,9 @@ class RoomFurnisher:
             case Placement.WALL:
                 candidates = self._wall_spots(rule, spec)
                 self.rng.shuffle(candidates)
-                if spec.bank:
-                    candidates.sort(key=lambda r: not self._touches_same(rule.object, r))
+                if spec.bank is not None:
+                    bank = spec.bank
+                    candidates.sort(key=lambda r: not self._touches_bank(bank, r))
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
             case Placement.BACK:
@@ -523,17 +524,22 @@ class RoomFurnisher:
                 return True
         return False
 
-    def _touches_same(self, kind: str, rect: Rect) -> bool:
-        """Does `rect` touch, side by side, an object of this kind placed facing the same way?"""
+    def _touches_bank(self, bank: str, rect: Rect) -> bool:
+        """Does `rect` touch, side by side on the same wall line, an object of this bank
+        placed facing the same way?"""
         x, y, w, h, facing = rect
+        objects = self.ctx.rules.objects
         for o in self.placed:
-            if o.kind != kind or o.facing != facing:
+            if o.facing != facing or (spec := objects.get(o.kind)) is None or spec.bank != bank:
                 continue
             if facing in (Side.N, Side.S):
-                if o.y == y and (o.x + o.w == x or x + w == o.x):
+                same_wall = o.y == y if facing is Side.S else o.y + o.h == y + h
+                if same_wall and (o.x + o.w == x or x + w == o.x):
                     return True
-            elif o.x == x and (o.y + o.h == y or y + h == o.y):
-                return True
+            else:
+                same_wall = o.x == x if facing is Side.E else o.x + o.w == x + w
+                if same_wall and (o.y + o.h == y or y + h == o.y):
+                    return True
         return False
 
     def _in_front(self, rect: Rect, depth: int) -> frozenset[Cell]:

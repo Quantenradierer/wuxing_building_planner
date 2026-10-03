@@ -12,33 +12,33 @@ gun_shop 26x18 cells, wealth=high, seed=3
 "             |    i|                 |             "
 "             |    i|                 |             "
 +--DDD--------+DDD--+------DDD--------+--DDD--------+
-|~~~~~~~ <<<<<     AAA                       vvv   *|
-|~~~~~~~           AAA                              |
-"~~~~~~~           AAA   ~~~~~~~ AAA     AAA        "
-"~~~~~~~                 ~~~~~~~ AAA     AAA        "
-"~~~~~~~ AAA             ~~~~~~~ AAA     AAA       }"
-|        AAA             ~~~~~~~                    |
-|}       AAA             ~~~~~~~                 ooo|
-|                                                ooo|
-"ooo                                         ttt ooo"
-"ooo                                         ttt ooo"
-"ooo ttt                 2         ~~~~~     ttt ooo"
-|ooo ttt                           ~~~~~         ooo|
-|ooo ttt               c ddd c     ~~~~~         ooo|
-|ooo                     ddd       ~~~~~            |
-"ooo                   c ddd c     ~~~~~           }"
+|*       ddddd     AAA             <<<<<         AAA|
+|        ddddd     AAA                           AAA|
+"        ddddd     AAA   ~~~~~~~ AAA             AAA"
+"                        ~~~~~~~ AAA                "
+"        AAA             ~~~~~~~ AAA       ~~~~~    "
+|        AAA             ~~~~~~~           ~~~~~    |
+|}       AAA             ~~~~~~~           ~~~~~   i|
+|                                          ~~~~~   i|
+"ooo                                       ~~~~~   i"
+"ooo                                       ~~~~~    "
+"ooo ttt                 2         ~~~~~   ~~~~~   f"
+|ooo ttt                           ~~~~~            |
+|ooo ttt               c aaa c     ~~~~~           v|
+|ooo                     aaa       ~~~~~           v|
+"ooo                   c aaa c     ~~~~~           v"
 "                                  ~~~~~            "
 "}                                 ~~~~~           n"
 |                                                  n|
-|SSSSS                 ttt                         n|
-|SSSSS                 ttt                         n|
-"SSSSS                 ttt                         n"
+|SSSSS         ttt           ttt                   n|
+|SSSSS         ttt           ttt                   n|
+"SSSSS         ttt           ttt                   n"
 "                                                  n"
-"                    ooooooo                       n"
-|                    ooooooo                        |
-|* sss sss iii     } ooooooo }   sss sss   f sss sss|
+"            ooooooo       ooooooo                 n"
+|            ooooooo       ooooooo                  |
+|* sss sss } ooooooo }   } ooooooo } sss sss sss sss|
 +--===---===---===---===---===---===---===---===----+
-  objects: A armchair, b bed, c chair, t coffee_table, n counter, d dining_table, f fridge, N nightstand, * plant, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, v stove, < wall_screen, w wc
+  objects: A armchair, b bed, c chair, t coffee_table, n counter, a dining_table, f fridge, d home_desk, N nightstand, * plant, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, v stove, < wall_screen, w wc
     1  stairwell            45 cells
     2  flat_loft           338 cells
     3  bedroom              35 cells
@@ -47,19 +47,19 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Ground floor ==
 +--===----+--DDD----+===---===---===--+-------------+
-"  www    |s       s|#################|LLL LLL LLL R|
-"  www    |s       s|#################|            R|
-"  www   i|s   KKK s|#################|    KKK KKK R|
-|        i|    KKK  |#################|    KKK KKK R|
-|    4   i|s 2 KKK s|#################|R   KKK KKK R|
-|         |s       s|                 |R            |
-"         |s       s|        1        |R     5      |
-"         |         |                 |R            |
-"         |      sss|                 |R     LLL   )|
+"i        |s       s|#################|LLL LLL LLL  |
+"i        |s       s|#################|             |
+"i     www|s       s|#################|L KKK   KKK  |
+|      www|         |#################|L KKK   KKK  |
+|    4 www|s   2   s|#################|L KKK 5 KKK  |
+|         |s       s|                 |             |
+"         |s       s|        1        |             |
+"         |         |                 |             |
+"        U|k     sss|                 |)     LLL LLL|
 +--DDD----+--DDD----+------DDD--------+--DDD--------+
-|                    RRRRR         c         RRRRR  |
+|                    RRRRR     RRRRR           $    |
 |                                                   |
-"                                nnnnnnn            "
+"                                                   "
 "                                                   "
 "R                                                  "
 |R                                                  |
@@ -67,23 +67,23 @@ gun_shop 26x18 cells, wealth=high, seed=3
 |R                                                  |
 "R         ddddd       ddddd       ddddd            |
 "                                                   |
-"                                                   D
-|                                                   D
-|                        3                          D
-|                                                   |
+"R                                                  D
+|R                                                  D
+|R                       3                          D
+|R                                                  |
+"R                                           d     R|
 "                                            d     R|
-"                                            d     R|
-"<         ddddd       ddddd       ddddd     d     R|
-|<                                           d     R|
-|<                                           d     R|
-|<                                                  |
-"<                                           d     R"
+"R         ddddd       ddddd       ddddd     d     R|
+|R                                           d     R|
+|R                                           d     R|
+|R                                                  |
+"R                                           d     R"
 "                                            d     R"
 "                                            d c   R"
 |                                            d     R|
-|' RRRRR RRRRR     RRRRR       RRRRR RRRRR   d     R|
+|' RRRRR     RRRRR             RRRRR         d     R|
 +--===---===---===-------DDD-----===---===---===----+
-  objects: n counter, K crate, d display_case, ' fire_extinguisher, ) safe, s shelf, i sink, # stairs, c stool, < wall_screen, w wc, L weapon_locker, R weapon_rack
+  objects: k cabinet, K crate, d display_case, ' fire_extinguisher, $ pay_station, ) safe, s shelf, i sink, # stairs, c stool, U trash_bin, w wc, L weapon_locker, R weapon_rack
     1  stairwell            45 cells
     2  storage              25 cells
     3  gun_shop_floor      338 cells
@@ -92,15 +92,15 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Basement B1 ==
 +-------------------+-----------------+-------------+
-|' HHHHHHH EEE HHHHH|#################|E EEE EEE EEE|
-|  HHHHHHH     HHHHH|#################|E            |
-|  HHHHHHH     HHHHH|#################|E            |
-|  HHHHHHH     HHHHH|#################|             |
-|  HHHHHHH 3   HHHHH|#################|E     4      |
-|              HHHHH|                 |E            |
-|              HHHHH|        1        |E            |
+|' HHHHHHH HHHHHHH  |#################|E EEE EEE EEE|
+|  HHHHHHH HHHHHHH  |#################|E            |
+|  HHHHHHH HHHHHHH  |#################|E            |
+|  HHHHHHH HHHHHHH  |#################|             |
+|  HHHHHHH HHHHHHH  |#################|E     4      |
+|                   |                 |E            |
+|        3          |        1        |E            |
 |                   |                 |             |
-|                   |                 |'     bbbbb  |
+|          EEE      |                 |'     bbbbb  |
 +--DDD--------------+------DDD--------+--DDD--------+
 |                                                   |
 |                                                   |

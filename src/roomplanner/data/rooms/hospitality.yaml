@@ -47,7 +47,7 @@ rooms:
     access: [staff_room]
     furniture:
       - {object: shelf, placement: wall, per: 5, count: [2, 8]}
-      - {object: laundry_cart, placement: scatter, count: [0, 2]}
+      - {object: laundry_cart, placement: wall, count: [0, 2]}
   restaurant:
     area: [80, 300]
     min_side: 8

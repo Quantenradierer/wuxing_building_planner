@@ -62,23 +62,23 @@ safehouse 32x22 cells, wealth=middle, seed=5
 
 == Ground floor ==
 +--===+--DDD--+===---===--+===--+-----------+===---===---===----+
-"k    |U      |###########|     |j     WWW s|bbb bbb         l l"
-"     |       |###########|     |          s|bbb bbb            "
-"s    |       |###########|     D          s|bbb bbb            "
-|s    |       |###########|     D           |bbb bbb            |
-|s    |f     n|###########|     D    7     s|bbb bbb            |
-|     |      n|###########|     |          s|bbb bbb            |
-"s   s|      n|###########|     |          s|bbb bbb            "
+"     |       |###########|     |  qqqqqqq j|bbb bbb bbb        "
+"     |       |###########|     |           |bbb bbb bbb        "
+"s   k|      f|###########|     D          s|bbb bbb bbb        "
+|s    |       |###########|     D          s|bbb bbb bbb        |
+|s   k|      n|###########|     D    7     s|bbb bbb bbb        |
+|     |      n|###########|     |           |bbb bbb bbb        |
+"s   s|      n|###########|     |           |bbb bbb bbb        "
 "s   s|      n|###########|     |           |                   "
-"s 5 s|  4   n|###########|     |    qqqqqqq|        8          "
+"s 5 s|  4   n|###########|     |  WWW <<<<<|        8          "
 |     |      n|###########|     +-----------+                   |
-|s   s|      n|###########|     |    ggggggg|                   |
-|s   s|       |###########|     |    ggggggg|                   |
-"s   s|       |###########|     |m   ggggggg|                   "
-"     |       |           |     |m          |                   "
-"     |i     v|    2      |     |m   6     i|                   "
-|     |i     v|           |     |          i|                   |
-|     |i     v|           |     |      MMM i|                   |
+|s   s|      n|###########|     |ggggggg   M|                   |
+|s   s|       |###########|     |ggggggg   M|                   |
+"s   s|      v|###########|     |ggggggg   M|                   "
+"     |      v|           |     |           |                   "
+"     |a     v|    2      |     |i   6     m|                   "
+|     |a      |           |     |          m|                   |
+|     |a     U|           |     |      mmm m|            l l l  |
 +DDD--+--DDD--+----DDD----+     +--DDD------+--DDD--------------+
 "                              1                                "
 "                                                               "
@@ -86,27 +86,27 @@ safehouse 32x22 cells, wealth=middle, seed=5
 |                                                               |
 |                                                               |
 +--DDD--------------------------+     +-----------+--DDD--------+
-"                            sss|     |           |      WWW WWW|
-"                               |     |           |             |
-"                      AAA      |     D           |L         KKK|
-|                      AAA      |     D           |L         KKK|
-|                      AAA      |     D           |L         KKK|
-|                               |     |           |L            |
-"            ~~~~~~~            |     |           |L            |
-"            ~~~~~~~            |     |           |             |
-"            ~~~~~~~            |  3  |    10     |      11     |
-|            ~~~~~~~            |     |           |             |
-|            ~~~~~~~            |     |i          |             |
-|                               |     |i          |             |
-"              c 9     ttt      |     |i          |    KKK      |
-"                      ttt      |     |           |    KKK      |
-"        SSS aaa       ttt      |     |        www|s   KKK     L|
-|        SSS aaa                |     |        www|s           L|
-|        SSS aaa     ooooooo    |     |        www|s   ddddddd L|
-|        SSS         ooooooo    |     |           |    ddddddd L|
-|        SSS c     } ooooooo }  |     |          k|    ddddddd L|
+"              SSS   AAA        |     |           |        WWW  |
+"              SSS   AAA        |     |           |             |
+"}             SSS   AAA        |     D           |             |
+|              SSS              |     D           |             |
+|ooo           SSS              |     D           |            L|
+|ooo                            |     |           |            L|
+"ooo ttt     ~~~~~~~            |     |           |W   KKK     L|
+"ooo ttt     ~~~~~~~            |     |           |W   KKK     L|
+"ooo ttt     ~~~~~~~            |  3  |    10     |W   KKK     L|
+|ooo         ~~~~~~~            |     |           |             |
+|ooo         ~~~~~~~            |     |www        |      11     |
+|                               |     |www        |             |
+"}             9                |     |www        |  KKK       L|
+"                               |     |           |  KKK       L|
+"                               |     |           |  KKK       L|
+|                               |     |           |            L|
+|      AAA                      |     |           |            L|
+|      AAA                      |     |           |             |
+|      AAA   sss                |     |k     aaa  |  sss   LLLLL|
 +--===---===---===---===---===--+DDD--+===---===--+-------------+
-  objects: A armchair, v autokitchen, q bench, b bunk_bed, k cabinet, c chair, t coffee_table, n counter, K crate, f fridge, L gun_rack, g gurney, a kitchen_table, l locker, m medical_cabinet, M medical_cart, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, j terminal, U trash_bin, w wc, W weapon_locker, d workbench
+  objects: A armchair, v autokitchen, q bench, b bunk_bed, k cabinet, t coffee_table, n counter, K crate, f fridge, L gun_rack, g gurney, i iv_stand, l locker, m medical_cabinet, M medical_cart, ~ rug, s shelf, } side_table, S sim_rig, a sink, o sofa, # stairs, j terminal, U trash_bin, < wall_screen, w wc, W weapon_locker
     1  corridor            123 cells
     2  stairwell            54 cells
     3  entry_hall           30 cells
