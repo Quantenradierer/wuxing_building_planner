@@ -44,7 +44,6 @@ floor_roles:
   ground:
     applies: [ground]
     rooms:
-      - {room: lobby, place: entrance, area: [40, 80], priority: required}
       - {room: mailroom, count: 1, near: entrance}
       - {room: security_room, count: 1, near: entrance, security: [aaa]}   # concierge
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
