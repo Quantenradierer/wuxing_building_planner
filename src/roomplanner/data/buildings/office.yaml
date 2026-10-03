@@ -116,6 +116,13 @@ floor_roles:
       - {room: drone_bay, count: [0, 1], when: "level + 1 == 0", security: [aaa], priority: optional}
       - {room: archive, count: [0, 1], area: [60, 120]}
       - {room: storage, count: 1, near: core}
-      - {room: archive, fill: true}
-      - {room: server_room, fill: true}
-      - {room: mechanical_room, fill: true}
+      - {room: toilet, count: 1, near: core, priority: required}
+      - {room: staff_room, count: [0, 1], near: core, priority: optional}
+      # Most of the rest is windowless office space: records clerks, accounting, call centre.
+      - {room: back_office, fill: true}
+      - {room: meeting_room, fill: true, weight: 0.3}
+      - {room: huddle_room, fill: true, weight: 0.15}
+      - {room: copy_room, fill: true, limit: 1}
+      - {room: archive, fill: true, weight: 0.3, limit: 1}
+      - {room: server_room, fill: true, weight: 0.2, limit: 1}
+      - {room: mechanical_room, fill: true, weight: 0.1, limit: 1}

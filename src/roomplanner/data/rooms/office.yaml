@@ -14,6 +14,17 @@ rooms:
       - {object: cabinet, placement: corner, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: trash_bin, placement: scatter, count: [0, 1]}
+  back_office:              # basement desks without a window: accounting, claims, call centre
+    area: [56, 160]
+    min_side: 7
+    max_aspect: 2.0
+    windows: forbidden
+    furniture:
+      - {object: desk_pair, placement: wall, per: 20, count: [1, 14], scale: false,
+         head: desk_trio, single: workstation}
+      - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
+      - {object: plant, placement: corner, count: [0, 2]}
+      - {object: trash_bin, placement: scatter, count: [0, 1]}
   open_office:
     area: [160, 1200]
     min_side: 10
