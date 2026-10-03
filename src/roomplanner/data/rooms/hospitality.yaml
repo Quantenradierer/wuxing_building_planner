@@ -135,7 +135,7 @@ rooms:
     area: [12, 36]
     min_side: 4
     furniture:
-      - {object: counter, placement: wall}
+      - {object: counter, placement: wall, faces_door: true}
       - {object: shelf, placement: wall, count: [1, 3]}
       - {object: weapon_locker, placement: wall, count: [1, 3]}   # weapons are checked here
       - {object: coat_rack, placement: scatter, count: [1, 3]}

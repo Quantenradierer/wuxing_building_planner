@@ -74,7 +74,7 @@ rooms:
     min_side: 8
     circulation: true
     furniture:
-      - {object: reception_post, placement: center}
+      - {object: reception_post, placement: facing_exit}
       - {object: security_gate, placement: near_exit, count: [2, 3]}
       - {object: plant, placement: corner, count: [2, 4]}
       - {object: bench, placement: wall, count: [1, 2]}
@@ -136,7 +136,7 @@ rooms:
     min_side: 6
     circulation: true
     furniture:
-      - {object: counter, placement: wall}
+      - {object: counter, placement: wall, faces_door: true}
       - {object: shelf, placement: wall, per: 8, count: [2, 8]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: display_case, placement: wall, count: [0, 2]}
@@ -200,9 +200,9 @@ rooms:
     min_side: 5
     next_to: [factory_floor]
     furniture:
-      - {object: console, placement: wall, per: 40, count: [1, 3], scale: false}
+      - {object: wall_screen, placement: end}
+      - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
       - {object: rigger_cocoon, placement: wall, count: [0, 1]}   # rigs the forklifts and arms
-      - {object: wall_screen, placement: wall, count: [1, 2]}
       - {object: server_rack, placement: wall, count: [0, 1]}
   paint_booth:
     area: [40, 120]

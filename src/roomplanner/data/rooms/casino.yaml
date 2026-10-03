@@ -40,7 +40,7 @@ rooms:
     min_side: 3
     windows: forbidden
     furniture:
-      - {object: counter, placement: wall, count: [2, 4]}            # teller windows
+      - {object: counter, placement: wall, count: [2, 4], faces_door: true}            # teller windows
       - {object: stool, placement: at, at: counter, beside: [front], count: [0, 1]}
       - {object: safe, placement: corner, count: [1, 2]}
       - {object: cash_cart, placement: wall, count: [1, 2]}
@@ -62,8 +62,9 @@ rooms:
     windows: forbidden
     transit: false
     furniture:
-      - {object: console, placement: wall, per: 40, count: [1, 4], scale: false}
-      - {object: wall_screen, placement: wall, count: [2, 5]}
+      - {object: wall_screen, placement: end}
+      - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
+      - {object: wall_screen, placement: wall, count: [0, 3]}
       - {object: server_rack, placement: wall, count: [0, 2]}
       - {object: rigger_cocoon, placement: wall, count: [0, 1], security: [corporate, aaa]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}

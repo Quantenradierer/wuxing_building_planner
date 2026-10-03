@@ -76,8 +76,8 @@ rooms:
     next_to: [prison_block]
     connect: [dayroom]    # a door straight into the block
     furniture:
-      - {object: console, placement: wall, per: 40, count: [1, 2], scale: false}
-      - {object: wall_screen, placement: wall, count: [1, 2]}
+      - {object: wall_screen, placement: end}
+      - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
       - {object: weapon_locker, placement: wall, count: [0, 1]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
   segregation_unit:     # solitary: single cells along one wall, a narrow walk in front
@@ -126,7 +126,7 @@ rooms:
     cluster: true
     furniture:
       - {object: shelf, placement: rows, aisle: 2, margin: 1}
-      - {object: counter, placement: wall, count: [0, 1]}
+      - {object: counter, placement: wall, count: [0, 1], faces_door: true}
   infirmary:            # beds behind a locked door, an exam table, the medicine cabinet
     area: [48, 160]
     min_side: 6

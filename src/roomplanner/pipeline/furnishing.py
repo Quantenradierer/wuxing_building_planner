@@ -50,7 +50,7 @@ class RulesFurnishing:
                 elif rules:
                     clearance = clearances.get(room.id, frozenset())
                     wealth = object_wealth(ctx, room)
-                    frame = _RoomFrame(room, clearance, solid, room is hatch)
+                    frame = _RoomFrame(room, clearance, solid, room is hatch, floor.half_cells)
                     reused = frame.reuse(layouts, kinds)
                     if reused is None:
                         furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid)
@@ -86,13 +86,18 @@ class _RoomFrame:
     """A room relative to its bounding box, for reusing the layout of an identical room."""
 
     def __init__(
-        self, room: Room, clearance: frozenset[Cell], solid: frozenset[Edge], hatch: bool
+        self,
+        room: Room,
+        clearance: frozenset[Cell],
+        solid: frozenset[Edge],
+        hatch: bool,
+        half: frozenset[Cell] = frozenset(),
     ) -> None:
         self.room = room
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.x0, self.y0 = min(xs), min(ys)
         self.w, self.h = max(xs) - self.x0 + 1, max(ys) - self.y0 + 1
-        self.cells = frozenset(Cell(c.x - self.x0, c.y - self.y0) for c in room.cells)
+        self.cells = frozenset(Cell(c.x - self.x0, c.y - self.y0) for c in room.cells - half)
         self.clearance = frozenset(Cell(c.x - self.x0, c.y - self.y0) for c in clearance)
         self.walls = frozenset(
             (Cell(c.x - self.x0, c.y - self.y0), side)
@@ -211,7 +216,9 @@ class RoomFurnisher:
         self.clearance = clearance
         self.solid = solid
         self._wall_rects: dict[tuple[int, int, bool], list[Rect]] = {}
-        self.taken: set[Cell] = set()  # covered by any object
+        # Covered by any object; the cells a diagonal cuts count as covered: floor to walk
+        # over, but nothing stands in them.
+        self.taken: set[Cell] = set(floor.half_cells & room.cells)
         self.blocking: set[Cell] = set()  # covered by objects that can't be walked over
         for obj in existing:
             self.taken |= obj.cells
@@ -448,6 +455,8 @@ class RoomFurnisher:
                     )
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
+                if rule.faces_door:
+                    candidates.sort(key=lambda r: -self._faces_door(r))
             case Placement.BACK:
                 candidates = self._against_walls(spec, corners_only=False)
                 # Equally far (a square wc in a stall): face the door's wall, then the door,

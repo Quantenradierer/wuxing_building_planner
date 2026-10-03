@@ -186,6 +186,11 @@ class FurnitureRule(_Strict):
         description="Free floor kept in front of it, this many cells deep and as wide as it "
         "plus half that on each side (the dance floor before the DJ booth)",
     )
+    faces_door: bool = Field(
+        default=False,
+        description="wall: backed against the wall that looks at the door, facing it, so the "
+        "staff side is at the back and visitors come straight to the counter",
+    )
     accessible: bool = Field(
         default=False,
         description="Free floor stays next to its front or a flank, also after later objects "

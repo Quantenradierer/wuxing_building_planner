@@ -115,10 +115,10 @@ rooms:
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: console, placement: wall}
-      - {object: terminal, placement: wall, count: [2, 4]}
+      - {object: wall_screen, placement: end}
+      - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
+      - {object: terminal, placement: wall, count: [0, 2]}
       - {object: locker, placement: wall, count: [0, 2]}
-      - {object: wall_screen, placement: wall, count: [1, 2]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
   roof:                 # a flat roof: the core rises through it, climate plant around
     area: [20, 100000]
@@ -148,7 +148,7 @@ rooms:
     area: [16, 40]
     min_side: 4
     furniture:
-      - {object: reception_post, placement: wall}
+      - {object: reception_post, placement: wall, faces_door: true}
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
   staff_room:
@@ -225,8 +225,9 @@ rooms:
     windows: forbidden
     furniture:
       - {object: rigger_cocoon, placement: wall, count: [1, 2]}
-      - {object: console, placement: wall, per: 40, count: [1, 2], scale: false}
-      - {object: wall_screen, placement: wall, count: [2, 4]}
+      - {object: wall_screen, placement: end}
+      - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
+      - {object: wall_screen, placement: wall, count: [0, 2]}
       - {object: server_rack, placement: wall, count: [0, 1]}
       - {object: weapon_locker, placement: wall, count: [0, 1]}
   drone_bay:            # security drones charging in rows, spares on the wall

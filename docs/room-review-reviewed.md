@@ -39,17 +39,17 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
    them over several walls and corners with gaps. Real rooms put them in one contiguous run (touching, same
    orientation, front to a free aisle). Typical rooms: electrical/network/mechanical/cooling/ups, locker/linen/
    storage/vault/records/armory, kitchens, laundry, shower, specimen_storage, decon, coffin/capsule.
-2. **Chairs and stools are not tied to their table/desk/counter** (P1, ~40 rooms): stool 3-6 cells from the counter
+2. [DONE] **Chairs and stools are not tied to their table/desk/counter** (P1, ~40 rooms): stool 3-6 cells from the counter
    (cash_cage, count_room, sky_lounge, lab, clean_room, control_room), two chairs diagonal at a table
    (bar_room, lounge, taproom, kitchenette), guest chairs on the same side as the owner (doctor_office, consultation,
    warden/manager/fixer office), staff chair on the room side of a counter (reception, nurse_station, police_lobby, lockup).
-3. **Rooms with a focus have scattered seating/desks facing different ways** (P1): surveillance, security, spider,
+3. [DONE] **Rooms with a focus have scattered seating/desks facing different ways** (P1): surveillance, security, spider,
    noc, control, block_control, briefing, training, nave, choir_loft, huddle, meeting. Rule: one focus object
    (monitor wall, screen, altar, whiteboard), all seats/desks face it in rows.
 4. [DONE] **Beds** (P1): ward, icu, infirmary, recovery, trauma, treatment, nap, bunk, hotel/guest/bedroom, solitary cell:
    head to a wall, aligned rows, free on both long sides, never in a corner or mid-room, one monitor/IV/chair/
    nightstand per bed placed at its head.
-5. **Counters and desks do not face the entrance and float** (P1): reception(_lobby), lobby, police_lobby, storefront,
+5. [DONE] **Counters and desks do not face the entrance and float** (P1): reception(_lobby), lobby, police_lobby, storefront,
    shop_floor, cashier/attendant booth, cloakroom, booking, property, evidence, armory, count/cash cage. A counter
    must span or anchor to a wall, face the door, with the staff side (chair, terminal) behind it.
 6. **Seating groups** (P1): sofa + armchairs + low table + rug as one cluster facing a screen/each other, the table

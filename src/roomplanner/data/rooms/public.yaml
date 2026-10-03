@@ -16,8 +16,8 @@ rooms:
     area: [60, 160]
     min_side: 7
     furniture:
-      - {object: bench, placement: rows, aisle: 2, margin: 2}
-      - {object: wall_screen, placement: wall}
+      - {object: wall_screen, placement: end}
+      - {object: bench, placement: rows, aisle: 2, margin: 2, toward: wall_screen}
       - {object: whiteboard, placement: wall, count: [0, 1]}
   interview_room:       # a table between suspect and detective, a one-way mirror wall
     area: [24, 48]
@@ -83,7 +83,7 @@ rooms:
     furniture:
       - {object: evidence_locker, placement: wall, per: 8, count: [1, 4]}
       - {object: shelf, placement: rows, aisle: 2, margin: 1}
-      - {object: counter, placement: wall, count: [0, 1]}
+      - {object: counter, placement: wall, count: [0, 1], faces_door: true}
   records_room:         # case files and paper records, the front desk's back office
     area: [24, 120]
     min_side: 4
@@ -98,7 +98,7 @@ rooms:
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: counter, placement: wall}
+      - {object: counter, placement: wall, faces_door: true}
       - {object: terminal, placement: wall, count: [1, 2]}
       - {object: bench, placement: wall}
   armory:
@@ -135,8 +135,8 @@ rooms:
     min_side: 8
     windows: required
     furniture:
-      - {object: pew, placement: rows, aisle: 2, margin: 2, block: 24}
-      - {object: organ, placement: back, count: [0, 1]}
+      - {object: organ, placement: end}
+      - {object: pew, placement: rows, aisle: 2, margin: 2, block: 24, toward: organ}
   crypt:                # under the church
     area: [60, 100000]
     min_side: 8

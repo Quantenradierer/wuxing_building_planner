@@ -76,7 +76,7 @@ rooms:
     transit: false
     next_to: [shop_floor, sales_floor]
     furniture:
-      - {object: counter, placement: wall}
+      - {object: counter, placement: wall, faces_door: true}
       - {object: safe, placement: corner}
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: stool, placement: at, at: counter, count: [0, 1]}

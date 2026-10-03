@@ -4,7 +4,8 @@
 
 ```
 src/roomplanner/
-  geometry.py                Cell, Edge (NamedTuples), Side, Axis, grid helpers, CELL_SIZE_M
+  geometry.py                Cell, Edge, Diagonal (NamedTuples), Side, Axis, Corner, grid helpers,
+                             CELL_SIZE_M
   model.py                   Room, Opening, Swing, PlacedObject, Floor, Building
   params.py                  GenerationParams (Pydantic) and parameter enums
   rules.py                   Pydantic models for the YAML, loaders, wealth, `when:` expressions
@@ -72,6 +73,16 @@ only so renderers know the physical scale; no code converts meters.
 - A building of `width × height` cells has horizontal edges `x ∈ [0, w)`, `y ∈ [0, h]` and
   vertical edges `x ∈ [0, w]`, `y ∈ [0, h)`.
 
+### Diagonal walls
+
+A 45° wall is a `Diagonal(x, y, cut)`: it crosses cell `(x, y)` from one of its corners to
+the next and cuts off the `cut` corner (`NW`, `NE`, `SW`, `SE`) as open air (ADR 0014).
+Everything else stays on the grid: the cell remains in the footprint and its room (it is
+half floor), the diagonal's cells meet only at their corners, and the two cell edges in
+the cut triangle stay in `Floor.walls` (`Floor.cut_edges`) so the "every footprint border is
+a wall" invariant holds; nothing draws, exports or opens them. Diagonals only occur as
+chamfered building corners (`chamfer` parameter).
+
 ## Data model
 
 ```
@@ -88,6 +99,7 @@ Floor
   objects: PlacedObject[]              furniture and fixtures
   devices: Device[]                    security devices
   lights: Light[]                      light sources
+  diagonals: Diagonal[]                45° walls across footprint cells, usually none
 Room
   id, type, cells: set[Cell], unit     unit: apartment etc. the room belongs to, if any
 Opening
@@ -160,6 +172,12 @@ params ─► footprint ─► feasibility check ─► layout (core, corridors,
   attempt is returned, with dropped rooms and violations as warnings. If no attempt could
   place the required rooms, generation fails with `InfeasibleError`.
 - The core is placed by the layout strategy because core and corridors depend on each other.
+- Chamfers (`params.chamfer`, `pipeline/footprint.py: chamfer`) are cut after the layout of
+  each attempt, so layouts still see the plain footprint. The cells wholly outside the
+  diagonals leave the rooms and every floor's footprint (`BuildingPlan.removed`); a corner is
+  left square if its facades are shorter than `2 * size + 2` cells or a room of any floor
+  would lose a quarter of its cells or fall in two (a tight corner gets a smaller cut, at
+  least 2 cells).
 
 ### Corridor layout
 
@@ -397,6 +415,9 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
   windows and beside doors), or gets one in its longest free stretch of facade, until it
   has a window cell per 24 floor cells (`DAYLIGHT`: 1/8 of the floor at 1.5 m tall windows).
 
+- Diagonal cells take no doors or windows (their cut edges count as used), and furnishing
+  treats them as covered floor: objects never stand in them, people can walk over them.
+
 ### Wealth
 
 `data/wealth.yaml` holds per-tier multipliers (area, corridor width, furniture density).
@@ -458,6 +479,8 @@ shower room or scrub room. `not_against: [types]` keeps `wall` objects off walls
 of those types (sinks off the stall partitions). `front_clear: N` keeps a free area in front
 of an object, `N` cells deep and as wide as it plus `N / 2` on each side, from everything
 placed after it except walkable objects (the dance floor before the DJ booth).
+`faces_door: true` (wall) puts the object on the wall that looks at the door, facing it (reception,
+booking and issue counters).
 `accessible: true` places an object only where free floor touches its front or a flank (not
 its back), and no later object may take the last such cell (the beds of a nap room).
 `spaced: true` (wall) keeps a free cell beside the object on both flanks, never in a corner or
@@ -558,6 +581,11 @@ optional fields; version 2 documents are still read.
 }
 ```
 
+A floor with chamfered corners also has `"diagonals": [[x, y, "NW" | "NE" | "SW" | "SE"], ...]`
+(the cut corner; the field is absent otherwise, so it needs no schema bump). Its `walls`
+still list the cut edges of those cells; readers draw the diagonal instead
+(`(x+1, y)-(x, y+1)` for NW and SE, `(x, y)-(x+1, y+1)` for NE and SW).
+
 Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`; cell and wall lists are sorted, the
 output as a whole is deterministic.
 
@@ -565,7 +593,8 @@ output as a whole is deterministic.
 
 `render/image.py` draws one RGB image per floor from the model alone (ADR 0009). The image
 covers the building plus `padding` cells on each side (default 2 = one 1 m VTT square), at
-`cell_px` pixels per cell (default 50). Layers: background, room floors (theme material:
+`cell_px` pixels per cell (default 25; `supersample` draws at n times the size and scales down,
+the CLI default is 1 = off, the library's `None` = 2 for small canvases). Layers: background, room floors (theme material:
 colour, pattern, optional neon accent strip along the walls), grain, blurred shadows of
 walls and blocking objects, objects (theme style → shape from `render/shapes.py`), walls
 (exterior thicker), windows, doors (leaf opened 90° towards `swing.towards` plus arc; runs
@@ -628,6 +657,7 @@ column `2x+1`, row `2y+1`; edges and vertices occupy the even positions in betwe
 |-----------|----------------------------------------------------------|
 | `-` `\|`  | wall                                                     |
 | `+`       | walls meeting at an angle                                |
+| `/` `\`   | diagonal wall, in the middle of its cell                 |
 | `D`       | door edge (`/` broken, `O` missing, `X` blocked)         |
 | `=` `"`   | window edge (horizontal, vertical); `:` broken window    |
 | `%`       | breach                                                   |
