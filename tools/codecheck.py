@@ -21,17 +21,17 @@ floors, wealth, security and shape; infeasible ones are retried 20 % bigger.
 
 from __future__ import annotations
 
-import heapq
 import json
 import math
 import random
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 
+from roomplanner.buildingcode import STAIRS, WORK_DESKS, Grid, exits
 from roomplanner.errors import RoomplannerError
 from roomplanner.generator import generate
-from roomplanner.geometry import Cell, Edge, Side, largest_rectangle
-from roomplanner.model import Building, Floor, OpeningKind
+from roomplanner.geometry import Cell, Side, largest_rectangle
+from roomplanner.model import Building, OpeningKind
 from roomplanner.params import BuildingType, GenerationParams, Security, Shape, Wealth
 from roomplanner.rules import rules_for
 
@@ -50,9 +50,6 @@ SMALL = {
     "street_doc",
     "cosmetic_clinic",
 }
-WORK_DESKS = {"desk", "office_desk", "executive_desk", "console_desk"}
-SIDES = list(Side)
-STAIRS = {"stairwell", "public_stairs"}
 
 
 def configs(n: int = 100) -> list[dict]:
@@ -87,56 +84,6 @@ def build(cfg: dict) -> Building | None:
             cfg["width"] = int(cfg["width"] * 1.2) + 2
             cfg["depth"] = int(cfg["depth"] * 1.2) + 2
     return None
-
-
-class Grid:
-    def __init__(self, floor: Floor) -> None:
-        self.floor = floor
-        self.cells = floor.footprint
-        self.walls = floor.walls
-        self.passable = floor.passable_edges()
-        self.owner = {c: r for r in floor.rooms for c in r.cells}
-
-    def open(self, a: Cell, b: Cell) -> bool:
-        if b not in self.cells:
-            return False
-        e = Edge.between(a, b)
-        return e not in self.walls or e in self.passable
-
-    def neighbours(self, c: Cell):
-        for s in SIDES:
-            n = c.neighbour(s)
-            if self.open(c, n):
-                yield n, 1.0
-        for dx, dy in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
-            h, v, d = Cell(c.x + dx, c.y), Cell(c.x, c.y + dy), Cell(c.x + dx, c.y + dy)
-            if self.open(c, h) and self.open(h, d) and self.open(c, v) and self.open(v, d):
-                yield d, math.sqrt(2)
-
-    def dist(self, sources: set[Cell]) -> dict[Cell, float]:
-        best = {s: 0.0 for s in sources}
-        heap = [(0.0, s) for s in sources]
-        while heap:
-            d, c = heapq.heappop(heap)
-            if d > best[c]:
-                continue
-            for n, w in self.neighbours(c):
-                nd = d + w
-                if nd < best.get(n, math.inf):
-                    best[n] = nd
-                    heapq.heappush(heap, (nd, n))
-        return best
-
-
-def exits(floor: Floor, grid: Grid) -> list[set[Cell]]:
-    """Ground floor: each exterior door (the cells inside it). Other floors: each stairwell."""
-    if floor.level == 0:
-        out = []
-        for o in floor.openings:
-            if o.kind is OpeningKind.DOOR and o.passable and floor.is_exterior_wall(o.edges[0]):
-                out.append({c for e in o.edges for c in e.cells() if c in floor.footprint})
-        return out
-    return [set(r.cells) for r in floor.rooms if r.type in STAIRS]
 
 
 def square_width(cells: frozenset[Cell], cap: int = 4) -> int:
@@ -189,7 +136,7 @@ def check(b: Building) -> dict:
         if any(rm.type == "roof" for rm in f.rooms):
             continue
         g = Grid(f)
-        ex = exits(f, g)
+        ex = exits(f)
         dists = [g.dist(e) for e in ex]
         exit_cells = set().union(*ex) if ex else set()
         skip = {c for rm in f.rooms if rm.type in STAIRS | {"elevator"} for c in rm.cells}

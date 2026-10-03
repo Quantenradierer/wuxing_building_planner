@@ -351,3 +351,10 @@ D                   |g          |SSS   EEE|       |                   |eeeeeeeee
    17  mantrap              36 cells
    18  data_hall           504 cells
    19  cooling_plant       180 cells
+
+Warnings:
+  - building code, level -1: 52 cells farther than 35 m from an exit, e.g. data_hall -1.8
+  - building code, level -1: dead-end corridor of 24.2 m (limit 15 m)
+  - building code, level 0: 2 rooms under 8 m² + 6 m² per further workstation, e.g. spider_room 0.12
+  - building code, level 1: 370 cells farther than 35 m from an exit, e.g. data_hall 1.6
+  - building code, level 1: dead-end corridor of 24.2 m (limit 15 m)

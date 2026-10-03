@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import cast
 
+from roomplanner.buildingcode import code_warnings
 from roomplanner.errors import InfeasibleError
 from roomplanner.model import Building
 from roomplanner.params import GenerationParams
@@ -75,4 +76,6 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
 
     if best is None:
         raise InfeasibleError(f"required rooms do not fit after {MAX_ATTEMPTS} attempts: {failure}")
-    return best[1]
+    building = best[1]
+    code = code_warnings(building, rules)
+    return Building(params, seed, width, height, building.floors, (*building.warnings, *code))
