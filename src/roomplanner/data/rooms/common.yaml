@@ -277,6 +277,18 @@ rooms:
       - {object: vending_machine, placement: perimeter, count: 40}
       - {object: vending_machine, placement: rows, paired: true, margin: 3, aisle: 2, block: 10}
       - {object: trash_bin, placement: scatter}
+  car_park:             # a building's basement parking: cars along the back wall, the rest drive lane
+    area: [300, 700]
+    min_side: 10
+    max_aspect: 6
+    windows: forbidden
+    door_width: 4
+    facade_door: 6         # the ramp up to the street
+    open: 1                # no wall to the corridor: the drive lane runs on into it
+    furniture:
+      - {object: car, placement: rows, aisle: 8, margin: 0, block: 40, gap: 1, front_clear: 9}
+      - {object: fire_extinguisher, placement: wall, per: 200, count: [1, 4]}
+      - {object: pay_station, placement: wall, count: [0, 1]}
   garage:               # vehicle bay: patrol cars, vans, the boss's limo
     area: [100, 400]
     min_side: 10
