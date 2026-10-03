@@ -7,6 +7,7 @@ from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side
 from roomplanner.model import Floor, OpeningKind, Room
 from roomplanner.params import BuildingType, EntranceKind, Shape, Wealth
+from roomplanner.pipeline.openings import DAYLIGHT
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
 
@@ -250,6 +251,27 @@ def test_window_rooms_in_deep_strips_keep_their_size() -> None:
         for room in floor.rooms:
             if room.type in ("exam_room", "ward", "doctor_office"):
                 assert len(room.cells) <= rules.spec(room.type).area[1] * 1.5, room
+
+
+def test_bedrooms_get_a_window_cell_per_six_square_metres() -> None:
+    """Narrow bedrooms widen their one grid window (MBO §47, window area >= 1/8 floor)."""
+    params = make_params(
+        building_type=BuildingType.APARTMENT,
+        width=41,
+        depth=46,
+        floors_above=5,
+        wealth=Wealth.SQUATTER,
+        seed=7104,
+    )
+    bedrooms = 0
+    for floor in generate(params).floors:
+        windows = [o for o in floor.openings if o.kind is OpeningKind.WINDOW]
+        for room in floor.rooms:
+            if room.type == "bedroom":
+                bedrooms += 1
+                cells = sum(len(w.edges) for w in windows if set(w.edges[0].cells()) & room.cells)
+                assert cells * DAYLIGHT >= room.area, room
+    assert bedrooms > 20
 
 
 def test_kitchen_opens_straight_into_the_restaurant() -> None:

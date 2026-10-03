@@ -386,7 +386,10 @@ back room's `min_side`, or deep enough to push it over its maximum, keep their h
   wide gets its own exterior door of width `w` (entrance `service`), on the service side
   if it has a facade there, else another side, the street last.
 - Windows follow one facade grid for all floors (so they line up); each floor omits the
-  windows its own walls, doors or windowless rooms collide with.
+  windows its own walls, doors or windowless rooms collide with. A room that needs windows
+  then widens its windows edge by edge (round its windows, keeping an edge of wall to other
+  windows and beside doors), or gets one in its longest free stretch of facade, until it
+  has a window cell per 24 floor cells (`DAYLIGHT`: 1/8 of the floor at 1.5 m tall windows).
 
 ### Wealth
 

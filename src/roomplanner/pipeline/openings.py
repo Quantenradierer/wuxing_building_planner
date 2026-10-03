@@ -5,7 +5,9 @@
   is already connected.
 - Exterior doors are placed where the layout asked for them and open outwards.
 - Windows sit on a facade grid shared by all floors above ground (so they line up); each
-  floor omits the windows its own walls, doors or windowless rooms collide with.
+  floor omits the windows its own walls, doors or windowless rooms collide with. Rooms that
+  need daylight then widen their windows (or get one off the grid) until they have a window
+  cell per `DAYLIGHT` cells of floor.
 """
 
 from __future__ import annotations
@@ -23,6 +25,9 @@ from roomplanner.pipeline.registry import register
 from roomplanner.rules import WindowRule
 
 type Run = list[Edge]
+# Floor cells per window cell: MBO §47 asks for window area >= 1/8 of the floor, which a
+# 1.5 m tall window meets at one 0.5 m window cell per 24 floor cells (6 m²).
+DAYLIGHT = 24
 # (rank, off the front, -length, room, first edge) and the wall run of a door candidate
 type _Choice = tuple[tuple[int, bool, int, int, Edge], Run]
 
@@ -131,7 +136,7 @@ class DefaultOpenings:
                 same = indoor == building
                 grid = candidates if same else _window_grid(ctx, indoor, plan.facade_grid)
                 fitting = [w for w, side in grid if _window_fits(ctx, indoor, d, w, side)]
-                windows = _clear_of_doors(fitting, d.doors)
+                windows = _daylight(ctx, indoor, d, _clear_of_doors(fitting, d.doors))
             floors.append(
                 Floor(d.level, d.footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)
             )
@@ -608,18 +613,97 @@ def _window_grid(
     return windows
 
 
+def _before(edge: Edge) -> Edge:
+    """The preceding edge on the same line (west for H, north for V)."""
+    if edge.axis is Axis.H:
+        return Edge(edge.x - 1, edge.y, edge.axis)
+    return Edge(edge.x, edge.y - 1, edge.axis)
+
+
+def _door_margins(doors: list[Opening]) -> set[Edge]:
+    """The doors' edges and one edge of wall on either side of each."""
+    return {e for d in doors for e in (*d.edges, _before(d.edges[0]), d.edges[-1].next_along())}
+
+
 def _clear_of_doors(windows: list[Opening], doors: list[Opening]) -> list[Opening]:
     """Windows not touching this floor's doors (with one edge of wall in between)."""
-    blocked: set[Edge] = set()
-    for door in doors:
-        first, last = door.edges[0], door.edges[-1]
-        before = (
-            Edge(first.x - 1, first.y, first.axis)
-            if first.axis is Axis.H
-            else Edge(first.x, first.y - 1, first.axis)
-        )
-        blocked |= {*door.edges, before, last.next_along()}
+    blocked = _door_margins(doors)
     return [w for w in windows if blocked.isdisjoint(w.edges)]
+
+
+def _daylight(
+    ctx: Context, footprint: frozenset[Cell], draft: _Draft, windows: list[Opening]
+) -> list[Opening]:
+    """Widen the windows of rooms needing daylight until they have a window cell per
+    `DAYLIGHT` floor cells, a few edges at a time round their windows; a room without a
+    window, or whose windows cannot grow, gets one in its longest free stretch of facade.
+    Windows keep an edge of wall between each other and beside doors."""
+    result = list(windows)
+    blocked = _door_margins(draft.doors)
+    taken = {e for w in result for e in w.edges}
+
+    def free(edge: Edge, facade: dict[Edge, Side]) -> bool:
+        return edge in facade and edge not in blocked and edge not in taken
+
+    for room in draft.rooms:
+        if ctx.rules.spec(room.type).windows is not WindowRule.REQUIRED:
+            continue
+        facade = {
+            Edge.of(c, side): side
+            for c in room.cells
+            for side in Side
+            if c.neighbour(side) not in footprint
+        }
+        own = [i for i, w in enumerate(result) if w.edges[0] in facade]
+        short = -(-room.area // DAYLIGHT) - sum(len(result[i].edges) for i in own)
+        while short > 0:
+            grown = False
+            for i in own:
+                edges = result[i].edges
+                side = facade[edges[0]]
+                # Alternate ends so the window stays centred on its module.
+                ends = [(edges[-1].next_along(), True), (_before(edges[0]), False)]
+                if len(edges) % 2:
+                    ends.reverse()
+                for edge, after in ends:
+                    beyond = edge.next_along() if after else _before(edge)
+                    joint = (edge.x, edge.y) if after else (edges[0].x, edges[0].y)
+                    if (
+                        free(edge, facade)
+                        and beyond not in taken
+                        and _inward(joint, side) not in draft.walls
+                    ):
+                        grown_edges = (*edges, edge) if after else (edge, *edges)
+                        result[i] = replace(result[i], edges=grown_edges)
+                        taken.add(edge)
+                        short -= 1
+                        grown = True
+                        break
+                if short <= 0:
+                    break
+            if grown:
+                continue
+            # A new window in the longest stretch clear of doors and other windows.
+            spots = [
+                e
+                for e in facade
+                if free(e, facade) and _before(e) not in taken and e.next_along() not in taken
+            ]
+            runs = [
+                run
+                for run in _runs(set(spots))
+                if not any(_inward((e.x, e.y), facade[e]) in draft.walls for e in run[1:])
+            ]
+            if not runs:
+                break
+            run = max(runs, key=len)
+            width = min(len(run), short, ctx.rules.program.facade.window)
+            start = (len(run) - width) // 2
+            result.append(Opening(OpeningKind.WINDOW, tuple(run[start : start + width])))
+            taken |= set(run[start : start + width])
+            own.append(len(result) - 1)
+            short -= width
+    return result
 
 
 def _window_fits(

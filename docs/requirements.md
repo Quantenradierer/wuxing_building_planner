@@ -277,17 +277,13 @@ history is in git. What is left is under "Open issues".
 ## Open issues
 
 Building code (measured in "Building code" below), in suggested order:
-1. Window area (code): one 2-cell window per facade module leaves deep rooms (mostly
-   bedrooms, offices, church choir lofts and naves) too dark. Rooms that need windows should
-   get more windows from the facade grid until window cells ≥ area / 24
-   (`pipeline/openings.py`); `facade.window: 3` is the blunt alternative.
-2. Second stairwell (layout code): the corridor layout has one core slot near the middle
+1. Second stairwell (layout code): the corridor layout has one core slot near the middle
    (`layout/corridor.py`, `_core`), so floors of big buildings have one escape route, long
    escape distances and long dead ends (21 of the 22 failures over 35 m, 45 of 48 dead-end
    failures are single-stair floors). A core entry with its own slot near the far end of the
    main corridor (`place: far`, `when: width + depth >= 90`), with its own exterior exit on
    the ground floor; long wings may need one too. Also a second way in for the runners.
-3. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
+2. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
    area as soft validator warnings (not for derelict/ruined), and a property test over a
    seed sweep asserting pass rates.
 
@@ -390,13 +386,20 @@ each rule is measured). Results (2026-10-03):
 | 1.5 × 1.5 m turning space at doors (DIN 18040)             | 0 / 100 (29 % of door sides fail) |
 | Stairwell 2.5 × 4.5 m (DIN 18065, 3 m floors)              | 81 / 81                   |
 | Lift car 1.1 × 1.4 m (DIN EN 81-70)                        | 100 / 100                 |
-| Window area ≥ 1/8 of floor area (MBO §47)                  | 47 / 65 (57 of 852 rooms) |
+| Window area ≥ 1/8 of floor area (MBO §47)                  | 55 / 65 (17 of 852 rooms) |
 | 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (42 of 546 rooms) |
 | Parking stall ≥ 2.3 m, lane 6.5 m (5.5 m at 2.5 m, MGarVO) | 3 / 3                     |
 
 Done: stairwell size. Small programs ask for 5 × 9 cells (was 5 × 8); the catalog minimum is
 45 cells and does not shrink at squatter and low tier, so a stairwell is only shortened to a
 shallow strip while it keeps 4.5 m (else it turns across the strip).
+
+Done: window area. Rooms that need windows widen their grid windows edge by edge (an edge
+of wall left between windows and beside doors) or get one off the grid until they have a
+window cell per 24 floor cells (`DAYLIGHT`, `pipeline/openings.py`); 57 failing rooms →
+17. The rest: rooms without any facade (a ward, a bedroom, data-centre loading docks; the
+validator warns), and deep rooms whose facade is glazed but for the piers (church naves
+and choir lofts, 8.5 m deep offices, a corp penthouse) — those need shallower rooms.
 
 Done: parking. Cars stand 5 cells apart (2.5 m stalls) in rows that all face a drive lane
 (`rows` with `gap: 1`, `lanes: true`): row, 5.5 m lane, two rows back to back, lane, ...
