@@ -5,6 +5,9 @@ rooms:
     area: [4, 40000]
     min_side: 3
     circulation: true
+    furniture:       # code-mandated, sparse: one of each per long stretch of corridor
+      - {object: fire_alarm_panel, placement: wall, per: 400, count: [0, 2]}
+      - {object: hydrant, placement: wall, per: 600, count: [0, 2]}
   lobby:
     area: [60, 800]
     min_side: 6
@@ -19,6 +22,8 @@ rooms:
       - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: atm, placement: wall, count: [0, 1]}
+      - {object: fire_alarm_panel, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   reception_lobby:      # lobby with the reception desk facing the entrance
     area: [60, 800]
     min_side: 8
@@ -31,6 +36,8 @@ rooms:
       - {object: trash_bin, placement: wall, count: [0, 2]}
       - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: fire_alarm_panel, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   stairwell:
     area: [45, 240]       # 2.5 x 4.5 m flight with landings (DIN 18065)
     min_side: 5
@@ -136,6 +143,7 @@ rooms:
       - {object: wall_screen, placement: wall}                    # the camera feeds
       - {object: coffee_machine, placement: corner}
       - {object: fridge, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   reception:
     area: [16, 40]
     min_side: 4

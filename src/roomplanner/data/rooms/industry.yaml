@@ -16,6 +16,8 @@ rooms:
       - {object: barrel, placement: scatter, per: 150, count: [0, 6]}
       - {object: workbench, placement: wall, count: [0, 1]}
       - {object: fire_extinguisher, placement: wall, per: 300, count: [1, 4]}
+      - {object: hydrant, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   shipping_office:
     area: [24, 60]
     min_side: 5
@@ -128,6 +130,7 @@ rooms:
       - {object: vending_machine, placement: wall, count: [1, 2]}
       - {object: trash_bin, placement: wall, count: [1, 2]}
       - {object: coffee_machine, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   storefront:           # street doc's cover business (pawn shop, noodle bar)
     area: [40, 120]
     min_side: 6
@@ -174,6 +177,7 @@ rooms:
       - {object: vending_machine, placement: wall, count: [0, 2]}
       - {object: atm, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   # --- factory ---
   factory_floor:        # the production hall
     area: [100, 100000]
@@ -190,6 +194,8 @@ rooms:
       - {object: forklift, placement: scatter, count: [0, 2]}
       - {object: drone_dock, placement: scatter, count: [1, 2], security: [corporate, aaa]}
       - {object: fire_extinguisher, placement: wall, per: 300, count: [1, 4]}
+      - {object: hydrant, placement: wall, count: [0, 1]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   control_room:         # overlooks the floor: screens and consoles
     area: [24, 70]
     min_side: 5
@@ -221,6 +227,7 @@ rooms:
       - {object: pay_station, placement: wall, count: [0, 2]}
       - {object: drone_dock, placement: scatter, count: [1, 2], security: [corporate, aaa]}
       - {object: fire_extinguisher, placement: wall, per: 400, count: [1, 4]}
+      - {object: hydrant, placement: wall, count: [0, 1]}
   attendant_booth:
     area: [9, 30]
     min_side: 3
@@ -242,6 +249,7 @@ rooms:
       - {object: barrel, placement: scatter, per: 100, count: [1, 6]}
       - {object: crate, placement: scatter, per: 150, count: [0, 4]}
       - {object: fire_extinguisher, placement: wall, count: [1, 2]}
+      - {object: medkit, placement: wall, count: [0, 1]}
   # --- Sixth World extras ---
   rigger_workshop:      # drones on the bench, a rigger chair in the corner
     area: [40, 120]

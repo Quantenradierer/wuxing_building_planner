@@ -501,6 +501,8 @@ Three more replaceable stages (`lighting`, `security`, `condition` in the progra
   accent lights against walls (neon, emergency), a light outside each entrance.
 - **Security**: exterior doors get the tier's exterior lock; interior doors the lock of the
   room they open into (`rooms`, else `interior`); a unit's front door the `unit` entry.
+  Interior doors of the room types in `fire_doors` (the stair housing) get the `fire` material
+  at every tier, unless the lock rule gave a heavier one.
   Cameras in corners of listed rooms, one per `corridor_per` corridor cells and inside
   entrances; alarm panels beside exterior doors; motion sensors; floodlights outside
   entrances; extra furniture (guard desk) through the furnisher.

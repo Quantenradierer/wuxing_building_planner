@@ -92,6 +92,9 @@ class SecurityTier(_Strict):
 
 
 class SecurityTable(_Strict):
+    fire_doors: list[str] = Field(
+        default=[], description="Room types whose interior doors are fire doors, at every tier"
+    )
     tiers: dict[Security, SecurityTier]
 
 

@@ -222,3 +222,15 @@ def test_rooms_of_a_template_size_get_the_template_layout() -> None:
             assert len(row) == 2 and not row & wc.cells
             checked += 1
     assert checked >= 4
+
+
+def test_stairwell_doors_are_fire_doors_at_every_security_level() -> None:
+    for security in Security:
+        building = generate(make_params(width=60, depth=40, floors_above=2, security=security))
+        for floor in building.floors:
+            for door in doors(floor):
+                if door.entrance is not None:
+                    continue
+                rooms = {r.type for c in door.edges[0].cells() if (r := floor.room_at(c))}
+                if "stairwell" in rooms and door.material not in ("security", "blast"):
+                    assert door.material == "fire", (security, door)

@@ -130,6 +130,9 @@ objects:
   fuel_tank:       {size: [3, 2], glyph: f}
   suppression_tanks: {size: [3, 1], glyph: "<"}  # inert gas bottles of a fire suppression system
   fire_extinguisher: {size: [1, 1], glyph: "'"}
+  fire_alarm_panel: {size: [1, 1], glyph: "a"}   # pull station: evacuation and the fire brigade
+  medkit:          {size: [1, 1], glyph: "x"}    # first aid / AED wall box
+  hydrant:         {size: [1, 1], glyph: "h"}    # hose cabinet on a standpipe
   rigger_cocoon:   {size: [2, 3], glyph: Q}      # reclined rigger / decker chair with trodes
   drone_dock:      {size: [2, 2], glyph: d}    # charging pad with a parked drone
   drone_rack:      {size: [3, 1], glyph: s}      # small drones and spare parts on a wall rack

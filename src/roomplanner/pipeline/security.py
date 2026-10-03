@@ -25,12 +25,16 @@ UNIT_DOOR = "unit"  # security.yaml key for the front doors of units (apartments
 @register("security", "rules")
 class RulesSecurity:
     def apply(self, ctx: Context, floors: list[Floor]) -> list[Floor]:
-        tier = load_security().tiers[ctx.params.security]
+        table = load_security()
+        tier = table.tiers[ctx.params.security]
         secured: list[Floor] = []
         for floor in floors:
             rng = ctx.rng(f"security:{floor.level}")
             owner = {cell: room for room in floor.rooms for cell in room.cells}
-            openings = tuple(_lock(ctx, tier, floor, door, owner) for door in floor.openings)
+            openings = tuple(
+                _fire_door(table.fire_doors, door, owner, _lock(ctx, tier, floor, door, owner))
+                for door in floor.openings
+            )
             devices = _Devices(ctx, floor, tier, owner, rng).place()
             lights: list[Light] = []
             if tier.floodlights is not None:
@@ -77,6 +81,21 @@ def _lock(
     if rule.lock == "none":
         return replace(door, material=rule.material)
     return replace(door, material=rule.material, lock=rule.lock, rating=rule.rating or tier.rating)
+
+
+def _fire_door(
+    fire_doors: list[str], door: Opening, owner: dict[Cell, Room], locked: Opening
+) -> Opening:
+    """A door between a room of a fire-door type and any other room: fire-rated leaf. The lock
+    stays; a heavier material (security, blast) is kept."""
+    if door.kind is not OpeningKind.DOOR or door.entrance is not None:
+        return locked
+    rooms = (owner.get(cell) for cell in door.edges[0].cells())
+    if locked.material in ("security", "blast") or not any(
+        room is not None and room.type in fire_doors for room in rooms
+    ):
+        return locked
+    return replace(locked, material="fire")
 
 
 class _Devices:

@@ -1,6 +1,7 @@
 # Security levels. Locks: none, mechanical, maglock, cardreader, biometric.
 # Door materials: standard, glass, security, blast. Ratings are generic 1-8 values;
 # map them to your game system's device ratings.
+fire_doors: [stairwell]   # fire-rated leaf (DIN EN 16034) on the stair housing, at every tier
 tiers:
   none:
     rating: 1

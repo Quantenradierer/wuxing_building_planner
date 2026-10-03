@@ -26,6 +26,7 @@ doors:
     glass: "#9fe8ffcc"
     security: "#aab4c6"
     blast: "#6f7a8c"
+    fire: "#c9483b"
   locks:
     mechanical: "#c9cfdb"
     maglock: "#00e5ff"
@@ -405,6 +406,9 @@ objects:
   fuel_tank:       {shape: rounded, fill: "#8a3a2c", stroke: "#1f0d0a", detail: "#d9a21b"}
   suppression_tanks: {shape: shelf, fill: "#c0392b", stroke: "#2a0d0a", detail: "#e6ebf1"}
   fire_extinguisher: {shape: circle, fill: "#e0312b", stroke: "#2a0d0a", detail: "#1a1d26"}
+  fire_alarm_panel: {shape: rounded, fill: "#d0312d", stroke: "#2a0d0a", detail: "#f2f4f7"}
+  medkit:          {shape: rounded, fill: "#e9eef2", stroke: "#5b6474", detail: "#d0312d"}
+  hydrant:         {shape: rounded, fill: "#b8322a", stroke: "#2a0d0a", detail: "#9aa6b5"}
   rigger_cocoon:   {shape: bed, fill: "#23283a", stroke: "#0b0e14", detail: "#00e5ff", glow: "#00e5ff"}
   drone_dock:      {shape: hatch, fill: "#1a1d26", stroke: "#ffb300", detail: "#00e5ff"}
   drone_rack:      {shape: shelf, fill: "#3b3f47", stroke: "#0f1117", detail: "#00e5ff"}
