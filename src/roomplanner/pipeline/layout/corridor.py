@@ -60,6 +60,7 @@ from roomplanner.rules import (
 MIN_GAP_CELLS = 3  # free space left next to reserved slots, if any: the smallest room
 BACK_ROOM_SLACK = 1.5  # a back room may be this much over its maximum area, else a stub
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
+PARK_SHARE = 0.55  # of the main part's length, at most, for a car park
 FAR_CORE_MIN = 24  # cells (12 m) at least between the core and a second stairwell
 
 
@@ -105,6 +106,8 @@ class Skeleton:
     cores: list[Core] = field(default_factory=list[Core])
     core_rooms: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
     lobby_slice: Interval | None = None  # ground-floor lobby across the main part's short end
+    # (level, room, slice): a `place: end` room (basement car park) across one short end
+    park: tuple[int, str, Interval] | None = None
     footprint: frozenset[Cell] = frozenset()
 
     @property
@@ -213,6 +216,8 @@ class CorridorLayout:
             reserved = [i for spans in main.reserved.values() for i in spans]
             skeleton.lobby_slice = _absorb_gaps(lobby_slice, reserved, frame.length, _min_gap(grid))
 
+        skeleton.park = self._park_slice(ctx, main, skeleton.lobby_slice, rng)
+
         # Parallel corridors of the main part need a cross corridor; a wing's corridors are
         # already joined through their connectors into the main part.
         for part in [main]:
@@ -220,6 +225,7 @@ class CorridorLayout:
                 length = part.frame.length
                 target = length / 2 + rng.uniform(-1, 1) * length / 8
                 blocked = [skeleton.lobby_slice] if part is main and skeleton.lobby_slice else []
+                blocked += [skeleton.park[2]] if part is main and skeleton.park else []
                 blocked += [i for spans in part.reserved.values() for i in spans]
                 # As wide as the corridors: it only crosses the interior strips, which
                 # don't follow the facade grid.
@@ -230,7 +236,8 @@ class CorridorLayout:
         core = ctx.rules.active_core(ctx.params)
         if entries := [c for c in core if c.place is None]:
             band = self._core_band(main, street, rng)
-            blocked = main.blocked(band, skeleton.lobby_slice)
+            park = skeleton.park[2] if skeleton.park else None
+            blocked = main.blocked(band, skeleton.lobby_slice, park)
             found = self._core(ctx, main, band, entries, blocked, rng, skeleton.lobby_slice)
             if found is None:
                 raise AllocationError("no space for the core")
@@ -241,6 +248,42 @@ class CorridorLayout:
         if in_hall := [c for c in core if c.place == "hall"]:
             skeleton.core_rooms += self._hall_core(ctx, main, in_hall, rng)
         return skeleton
+
+    @staticmethod
+    def _park_slice(
+        ctx: Context, main: Part, lobby: Interval | None, rng: random.Random
+    ) -> tuple[int, str, Interval] | None:
+        """The `place: end` room of a basement level (a car park) claims the whole depth of
+        one end of the main part before anything else: the cores and the cross corridor
+        keep out of it. Not at the lobby's end, not across a wing's junction."""
+        frame, grid = main.frame, main.grid
+        for level in ctx.params.levels:
+            role = ctx.rules.role_for(level, ctx.params)[1]
+            values = variables(ctx.params, level)
+            entry = next(
+                (e for e in role.rooms if e.place == "end" and evaluate(e.when, values)), None
+            )
+            if entry is not None:
+                break
+        else:
+            return None
+        spec = ctx.rules.spec(entry.room)
+        low, high = entry.area or spec.area
+        want = min(math.ceil(high / frame.depth), int(frame.length * PARK_SHARE))
+        obstacles = [i for spans in main.reserved.values() for i in spans]
+        options: list[Interval] = []
+        near = min((o.u0 for o in obstacles), default=frame.length) - MIN_GAP_CELLS
+        end = grid.floor(min(near, want))
+        if (lobby is None or lobby.u0 > 0) and end >= spec.min_side:
+            options.append(Interval(0, end))
+        far = max((o.u1 for o in obstacles), default=0) + MIN_GAP_CELLS
+        start = grid.ceil(max(far, frame.length - want))
+        if (lobby is None or lobby.u1 < frame.length) and start <= frame.length - spec.min_side:
+            options.append(Interval(start, frame.length))
+        options = [o for o in options if o.width * frame.depth >= low]
+        if not options:
+            return None
+        return level, entry.room, rng.choice(options)
 
     def _far_core(
         self, ctx: Context, skeleton: Skeleton, entries: list[CoreEntry], rng: random.Random
@@ -266,6 +309,8 @@ class CorridorLayout:
             lobby = skeleton.lobby_slice if part is skeleton.main else None
             taken = [c.slot for c in skeleton.cores if c.band is band]
             blocked = part.blocked(band, lobby, *taken)
+            if part is skeleton.main and skeleton.park:
+                blocked.append(skeleton.park[2])
             try:
                 found = self._core(ctx, part, band, entries, blocked, rng, lobby, end)
             except AllocationError:  # a strip too shallow for it
@@ -568,6 +613,9 @@ class CorridorLayout:
         extra: dict[int, list[Interval]] = {}  # this floor's reservations in the main part
         hints: list[tuple[EntranceKind, Side, Cell]] = []
         slice_ = skeleton.lobby_slice if level == 0 else None
+        park = skeleton.park if skeleton.park and skeleton.park[0] == level else None
+        if park is not None:  # claimed first: the whole depth of one end of the building
+            slice_ = park[2]
 
         for core in skeleton.cores:
             if core.part is main:
@@ -579,6 +627,8 @@ class CorridorLayout:
             if slice_
             else frozenset[Cell]()
         )
+        if park is not None:
+            rooms.append(PlannedRoom(park[1], slice_cells))
         for part in skeleton.parts:
             for connector in part.connectors:
                 if cells := connector.cells - slice_cells:

@@ -336,11 +336,12 @@ Layout:
   rooms beside their main hall) are unchanged.
 - A hall's roller door can end up on a side facade; the police station's garage exists only
   in the basement.
-- Basement car parks (`car_park`: offices, hotels, apartments, hospitals; one room at level
-  -1, up to a whole facade strip) get their roller door in the basement facade, standing for
-  the ramp to the street, which is outside the map. Cars stand along the facade wall, the
-  drive lane is open to the corridor (about 4.5 m). About 3 in 10 offices lose the optional
-  car park (no strip long enough); it never spans more than one strip.
+- Basement car parks (`car_park`, `place: end`: offices, hotels, apartments, hospitals when
+  width + depth >= 80): claimed before the cores and the cross corridor, a full-depth slice
+  at one short end of the main part (up to 55 % of its length, 900-1800 cells), two rows of
+  cars around a 5 m drive lane, and a roller door in the facade standing for the street ramp
+  (outside the map). Core, cross corridor and the wings' junctions keep out of the slice
+  on every floor. L/U shapes park in the main part only.
 - No fire escapes and no prison yard (they need surroundings; the gym stands in for the
   yard).
 

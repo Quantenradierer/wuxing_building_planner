@@ -118,7 +118,7 @@ floor_roles:
       - {room: host_room, count: 1, when: "level + 1 == 0", security: [corporate, aaa], priority: optional}
       - {room: vault, count: [0, 1], when: "level + 1 == 0", security: [corporate, aaa], priority: optional}
       - {room: drone_bay, count: 1, when: "level + 1 == 0", security: [corporate, aaa], priority: optional}
-      - {room: car_park, count: 1, when: "level + 1 == 0 and width + depth >= 80", priority: optional}   # guests, tenants, staff
+      - {room: car_park, place: end, area: [900, 1800], when: "level + 1 == 0 and width + depth >= 80"}   # guests, tenants, staff
       - {room: archive, count: [0, 1], area: [60, 120]}
       - {room: storage, count: [0, 1], near: core}
       - {room: archive, fill: true}
