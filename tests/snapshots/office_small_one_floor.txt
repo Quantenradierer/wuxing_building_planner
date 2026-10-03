@@ -16,11 +16,11 @@ D                                                               |
 |s            D                                     |   |   |   |
 "s            D                                     |5  |6  |7  |
 "             |                                     +D--+D--+D--+
-"s            |q     AAA         AAA                |           |
-|s            |q     AAA         AAA                |           |
-|s           s|q     AAA         AAA                D           |
-|            s|q                                    D           |
-"s           s|q             c                      D           "
+"s         KKK|q     AAA         AAA                |           |
+|s         KKK|q     AAA         AAA                |           |
+|s         KKK|q     AAA         AAA                D           |
+|             |q                                    D           |
+"s            |q             c                      D           "
 "s            |q                                    |           "
 "s     3     s|q         RRRRRRRRR                  |i   4      "
 |            s|          RRRRRRRRR                  |i          |
@@ -30,15 +30,15 @@ D                                                               |
 "            s|q                                    |i          "
 "s           s|q     AAA                            |i          "
 |s            |q     AAA                            +-----------+
-|s           s|q     AAA                            |        www|
-|            s|                                     |        www|
-"s           s|                                     D    8   www"
+|s           s|q     AAA                            |    iii    |
+|            s|                                     |           |
+"s           s|                                     D    8      "
 "s            |                                     D           "
-"s            |                                  ^^^D           "
-|             |                                  ^^^|           |
-|sss   sss sss|* U   U a                         ^^^|  iii      |
+"s           s|                                  ^^^D      www  "
+|            s|                                  ^^^|      www  |
+|sss sss sss s|* U   U a                         ^^^|      www  |
 +--===---===--+===-------DDDDDDD-------===---===----+----===----+
-  objects: A armchair, q bench, c chair, a fire_alarm_panel, * plant, R reception_desk, ^ roof_hatch, s shelf, i sink, U trash_bin, w wc
+  objects: A armchair, q bench, c chair, K crate, a fire_alarm_panel, * plant, R reception_desk, ^ roof_hatch, s shelf, i sink, U trash_bin, w wc
     1  corridor            184 cells
     2  reception_lobby     210 cells
     3  storage              98 cells

@@ -438,7 +438,7 @@ class RoomFurnisher:
                 self.rng.shuffle(candidates)
                 if spec.bank is not None:
                     bank = spec.bank
-                    candidates.sort(key=lambda r: not self._touches_bank(bank, r))
+                    candidates.sort(key=lambda r: self._bank_rank(bank, r))
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
             case Placement.BACK:
@@ -523,6 +523,22 @@ class RoomFurnisher:
                     self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
                 return True
         return False
+
+    def _bank_rank(self, bank: str, rect: Rect) -> tuple[bool, float]:
+        """Sort key for a banked object: touching the bank first, else the nearest spot (a
+        run that ends at a corner goes on round it)."""
+        if self._touches_bank(bank, rect):
+            return False, 0.0
+        objects = self.ctx.rules.objects
+        others = [
+            (o.x + o.w / 2, o.y + o.h / 2)
+            for o in self.placed
+            if (spec := objects.get(o.kind)) is not None and spec.bank == bank
+        ]
+        if not others:
+            return True, 0.0
+        cx, cy = rect[0] + rect[2] / 2, rect[1] + rect[3] / 2
+        return True, min(abs(cx - x) + abs(cy - y) for x, y in others)
 
     def _touches_bank(self, bank: str, rect: Rect) -> bool:
         """Does `rect` touch, side by side on the same wall line, an object of this bank

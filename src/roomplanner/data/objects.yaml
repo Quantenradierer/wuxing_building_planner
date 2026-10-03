@@ -85,7 +85,7 @@ objects:
   coat_rack:       {size: [1, 1], glyph: (}
   safe:            {size: [1, 1], glyph: )}
   dryer:           {size: [1, 1], glyph: x, bank: laundry}
-  laundry_cart:    {size: [1, 2], glyph: "{"}
+  laundry_cart:    {size: [1, 2], glyph: "{", bank: laundry_cart}
   arcade_machine:  {size: [2, 1], glyph: "`"}
   stage:           {size: [8, 4], walkable: true, glyph: _}
 
