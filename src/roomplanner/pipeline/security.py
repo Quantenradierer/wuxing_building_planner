@@ -66,7 +66,12 @@ def _lock(
         inside = a if door.swing.towards in (Side.N, Side.W) else b
         outside_cell = b if inside == a else a
         room, other = owner.get(inside), owner.get(outside_cell)
-        if other is not None and ctx.rules.spec(other.type).opens_out(other.area):
+        # Circulation never owns a door, however big it is: its neighbour's door opens into it.
+        if (
+            other is not None
+            and not ctx.rules.spec(other.type).circulation
+            and ctx.rules.spec(other.type).opens_out(other.area)
+        ):
             room, other = other, room
         if room is None:
             return door
