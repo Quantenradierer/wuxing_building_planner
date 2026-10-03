@@ -392,10 +392,12 @@ class CoreEntry(_Strict):
     room: str
     size: Range
     when: str | None = None
-    place: Literal["hall"] | None = Field(
+    place: Literal["hall", "far"] | None = Field(
         default=None,
         description="hall: in the hall against its back edge instead of the core slot "
-        "(public stairs on a sales floor; hall layout only)",
+        "(public stairs on a sales floor; hall layout only); far: a slot of their own near "
+        "the end of the main part away from the core, with an exit on the ground floor "
+        "(a second stairwell)",
     )
 
     @model_validator(mode="after")

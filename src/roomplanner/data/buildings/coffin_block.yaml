@@ -16,6 +16,7 @@ service_stub: true         # the back door gets its own corridor, not a coffin
 
 core:
   - {room: stairwell, size: [5, 9], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 9], when: "floors_total >= 2 and width + depth >= 90", place: far}   # second escape route
 
 entrances:
   main: {width: 2}

@@ -471,9 +471,8 @@ def _exterior_door(
     ]
     first = [hinted] if hinted.unit is None or request.kind is not EntranceKind.SERVICE else []
     last: list[Room] = []
-    if request.kind is EntranceKind.SERVICE and hinted.type in {
-        c.room for c in ctx.rules.program.core
-    }:
+    core = {c.room for c in ctx.rules.program.core}
+    if request.kind is EntranceKind.SERVICE and hinted.type in core:
         # Deliveries don't go through the stairwell (its stairs need that wall): only if
         # no other room on that facade can take the door.
         first, last = [], [hinted]
@@ -492,6 +491,8 @@ def _exterior_door(
     tiers = (vehicle, reserved, *service, corridor, *roomy, first, others, last)
     # A wide door (loading dock) that would blind a room needing windows: a plain door.
     widths = [width, DOOR_WIDTH] if width > DOOR_WIDTH else [width]
+    if request.kind is EntranceKind.EMERGENCY and hinted.type in core:
+        widths = [min(width, DOOR_WIDTH)]  # a stairwell's exit: on its landing, between stairs
     for candidates_from in tiers:
         # A bay gets its own wide door anyway; elsewhere the back door is a plain one.
         for size in widths if candidates_from is vehicle or not vehicle else [DOOR_WIDTH]:
@@ -569,8 +570,11 @@ def _facade_spots(
                 # A room needing windows must keep one beside the door.
                 probe = Opening(OpeningKind.BREACH, tuple(edges))  # only its edges count
                 blind = needs_window(room) and bool(own) and not _clear_of_doors(own, [probe])
-                # Off the wall's ends unless that saves the room's window.
-                tight = start < margin or start > len(run) - width - margin
+                # Off the wall's ends unless that saves the room's window or the hint is
+                # there (a stairwell's exit on its landing).
+                tight = target not in edges and (
+                    start < margin or start > len(run) - width - margin
+                )
                 spots.append((blind, tight, distance, run, start))
     return spots
 

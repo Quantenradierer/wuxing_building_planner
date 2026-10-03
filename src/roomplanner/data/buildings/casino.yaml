@@ -20,6 +20,7 @@ service_rooms: [staff_room, locker_room, storage, commercial_kitchen, security_r
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2 and width + depth >= 90", place: far}   # second escape route
   - {room: elevator, size: [4, 5], when: "floors_total >= 2"}
 
 entrances:

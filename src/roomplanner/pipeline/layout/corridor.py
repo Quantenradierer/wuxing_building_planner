@@ -60,6 +60,7 @@ from roomplanner.rules import (
 MIN_GAP_CELLS = 3  # free space left next to reserved slots, if any: the smallest room
 BACK_ROOM_SLACK = 1.5  # a back room may be this much over its maximum area, else a stub
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
+FAR_CORE_MIN = 24  # cells (12 m) at least between the core and a second stairwell
 
 
 @dataclass
@@ -83,16 +84,26 @@ class Part:
 
 
 @dataclass
+class Core:
+    """A full-depth slot holding core rooms, the same on every floor."""
+
+    part: Part
+    band: Band
+    slot: Interval
+    rooms: list[PlannedRoom]
+    # Rectangles behind the core rooms: rooms of their own on every floor
+    back: list[frozenset[Cell]]
+
+
+@dataclass
 class Skeleton:
     """Everything shared by all floors."""
 
     main: Part
     wings: list[Part]
-    core_band: Band | None = None
-    core_slot: Interval | None = None
+    # The core slot first, then the far one (`place: far`: a second stairwell)
+    cores: list[Core] = field(default_factory=list[Core])
     core_rooms: list[PlannedRoom] = field(default_factory=list[PlannedRoom])
-    # Rectangles behind the core rooms: rooms of their own on every floor
-    core_back: list[frozenset[Cell]] = field(default_factory=list[frozenset[Cell]])
     lobby_slice: Interval | None = None  # ground-floor lobby across the main part's short end
     footprint: frozenset[Cell] = frozenset()
 
@@ -217,22 +228,55 @@ class CorridorLayout:
                     raise AllocationError("no space for the cross corridor")
 
         core = ctx.rules.active_core(ctx.params)
-        core_entries = [c for c in core if c.place is None]
-        if core_entries:
+        if entries := [c for c in core if c.place is None]:
             band = self._core_band(main, street, rng)
-            skeleton.core_band = band
-            skeleton.core_slot, skeleton.core_rooms, skeleton.core_back = self._core(
-                ctx,
-                main,
-                band,
-                core_entries,
-                main.blocked(band, skeleton.lobby_slice),
-                rng,
-                skeleton.lobby_slice,
-            )
+            blocked = main.blocked(band, skeleton.lobby_slice)
+            found = self._core(ctx, main, band, entries, blocked, rng, skeleton.lobby_slice)
+            if found is None:
+                raise AllocationError("no space for the core")
+            skeleton.cores.append(found)
+            skeleton.core_rooms += found.rooms
+            if far := [c for c in core if c.place == "far"]:
+                self._far_core(ctx, skeleton, far, rng)
         if in_hall := [c for c in core if c.place == "hall"]:
             skeleton.core_rooms += self._hall_core(ctx, main, in_hall, rng)
         return skeleton
+
+    def _far_core(
+        self, ctx: Context, skeleton: Skeleton, entries: list[CoreEntry], rng: random.Random
+    ) -> None:
+        """A second core slot (stairwell) at the part end farthest from the core: an end of
+        the main part or a wing's far end. None if no end is at least `FAR_CORE_MIN` away."""
+        first = skeleton.cores[0]
+        centre = first.part.frame.cell(int(first.slot.centre), (first.band.v0 + first.band.v1) // 2)
+
+        def distance(cell: Cell) -> int:
+            return abs(cell.x - centre.x) + abs(cell.y - centre.y)
+
+        ends: list[tuple[int, Part, LocalSide]] = []
+        for part in skeleton.parts:
+            frame = part.frame
+            # A wing's u runs away from its junction: only its far end.
+            for end in [LocalSide.U0, LocalSide.U1] if part is skeleton.main else [LocalSide.U1]:
+                u = 0 if end is LocalSide.U0 else frame.length - 1
+                ends.append((distance(frame.cell(u, frame.depth // 2)), part, end))
+        street = ctx.params.street_side
+        for _, part, end in sorted(ends, key=lambda e: -e[0]):
+            band = self._core_band(part, part.frame.local(street), rng)
+            lobby = skeleton.lobby_slice if part is skeleton.main else None
+            taken = [c.slot for c in skeleton.cores if c.band is band]
+            blocked = part.blocked(band, lobby, *taken)
+            try:
+                found = self._core(ctx, part, band, entries, blocked, rng, lobby, end)
+            except AllocationError:  # a strip too shallow for it
+                continue
+            if found is None:
+                continue
+            middle = part.frame.cell(int(found.slot.centre), (band.v0 + band.v1) // 2)
+            if distance(middle) >= FAR_CORE_MIN:
+                skeleton.cores.append(found)
+                skeleton.core_rooms += found.rooms
+                return
 
     def _hall_core(
         self, ctx: Context, main: Part, entries: list[CoreEntry], rng: random.Random
@@ -372,9 +416,9 @@ class CorridorLayout:
         # Between one and two corridors: deeper facade strips.
         return [total // 2, total - total // 2]
 
-    def _core_band(self, main: Part, street: LocalSide, rng: random.Random) -> Band:
-        strips = [b for b in main.bands if b.kind is BandKind.STRIP]
-        if main.cross is not None:
+    def _core_band(self, part: Part, street: LocalSide, rng: random.Random) -> Band:
+        strips = [b for b in part.bands if b.kind is BandKind.STRIP]
+        if part.cross is not None:
             return rng.choice([b for b in strips if not b.facade])
         if len(strips) == 2 and not street.is_end:
             street_strip = strips[0] if street is LocalSide.V0 else strips[1]
@@ -384,15 +428,17 @@ class CorridorLayout:
     def _core(
         self,
         ctx: Context,
-        main: Part,
+        part: Part,
         band: Band,
         entries: list[CoreEntry],
         blocked: list[Interval],
         rng: random.Random,
         lobby: Interval | None = None,
-    ) -> tuple[Interval, list[PlannedRoom], list[frozenset[Cell]]]:
-        """The core occupies one full-depth slot: its rooms and the rectangles behind them."""
-        frame, grid = main.frame, main.grid
+        end: LocalSide | None = None,
+    ) -> Core | None:
+        """The core occupies one full-depth slot: its rooms and the rectangles behind them.
+        `end`: as close to that end of the part as it fits (the second stairwell)."""
+        frame, grid = part.frame, part.grid
         sizes: list[tuple[int, int]] = []  # (u, v) per entry
         for entry in entries:
             short, long = sorted(entry.size)
@@ -406,16 +452,19 @@ class CorridorLayout:
         if band.facade:
             width = grid.round_up(width)
 
-        if main.cross is not None:
-            left = main.cross.u0 - width / 2
-            right = main.cross.u1 + width / 2
+        if end is not None:
+            target = 0 if end is LocalSide.U0 else frame.length
+            slot = self._choose(grid, width, target, blocked, optional=lobby)
+        elif part.cross is not None:
+            left = part.cross.u0 - width / 2
+            right = part.cross.u1 + width / 2
             target = left if rng.random() < 0.5 else right
-            slot = self._choose(grid, width, target, blocked, touching=main.cross, optional=lobby)
+            slot = self._choose(grid, width, target, blocked, touching=part.cross, optional=lobby)
         else:
             target = frame.length / 2 + rng.uniform(-1, 1) * frame.length / 6
             slot = self._choose(grid, width, target, blocked, optional=lobby)
-        if slot is None:
-            raise AllocationError("no space for the core")
+        if slot is None or slot.width < width:  # a part too short for it
+            return None
 
         # Each room at its own size on the corridor side (the stairwell also takes the slot's
         # partial module); the space behind them is rooms of their own on every floor. Rests
@@ -441,7 +490,7 @@ class CorridorLayout:
         rooms.insert(0, PlannedRoom(entries[0].room, stairs))
         behind.append(self._depth_rect(frame, band, slot.u0, u1, v_stairs, depth))
         behind.append(self._depth_rect(frame, band, slot.u0, slot.u1, depth, band.depth))
-        return slot, rooms, [cells for cells in behind if cells]
+        return Core(part, band, slot, rooms, [cells for cells in behind if cells])
 
     def _depth_rect(
         self, frame: Frame, band: Band, u0: int, u1: int, d0: int, d1: int
@@ -520,8 +569,9 @@ class CorridorLayout:
         hints: list[tuple[EntranceKind, Side, Cell]] = []
         slice_ = skeleton.lobby_slice if level == 0 else None
 
-        if skeleton.core_band is not None and skeleton.core_slot is not None:
-            extra.setdefault(skeleton.core_band.index, []).append(skeleton.core_slot)
+        for core in skeleton.cores:
+            if core.part is main:
+                extra.setdefault(core.band.index, []).append(core.slot)
         if role.roof is not None:
             return self._roof(ctx, skeleton, level, role_name, role.roof, rooms, extra)
         slice_cells = (
@@ -591,7 +641,10 @@ class CorridorLayout:
                         cells = part.frame.rect(span.u0, span.u1, band.v0, band.v1)
                         rooms.append(PlannedRoom("corridor", cells))
                     continue
-                own = extra.get(band.index, []) if part is main else []
+                if part is main:
+                    own = extra.get(band.index, [])
+                else:  # a second stairwell at a wing's end
+                    own = [c.slot for c in skeleton.cores if c.part is part and c.band is band]
                 blocked = part.blocked(band, part_slice, *own)
                 if part is main and balcony_role is not None and band is balcony_band:
                     found = self._balcony(ctx, part, band, blocked, balcony_role)
@@ -609,8 +662,8 @@ class CorridorLayout:
                 segments += self._segments(part, band, blocked)
 
         core_box = None
-        if skeleton.core_band is not None and skeleton.core_slot is not None:
-            band, slot = skeleton.core_band, skeleton.core_slot
+        if skeleton.cores:
+            band, slot = skeleton.cores[0].band, skeleton.cores[0].slot
             core_box = main.frame.box(slot.u0, slot.u1, band.v0, band.v1)
         service = next((c for kind, _, c in hints if kind is EntranceKind.SERVICE), None)
         service_box = Box(service.x, service.y, service.x + 1, service.y + 1) if service else None
@@ -618,10 +671,10 @@ class CorridorLayout:
         anchors = Anchors(core_box, entrance, service_box, lobby.room if lobby else None)
         allocator = Allocator(ctx, ctx.rules, segments, anchors, ctx.rng(f"allocate:{level}"))
         behind: list[tuple[Segment, frozenset[Cell]]] = []
-        if skeleton.core_band is not None and skeleton.core_slot is not None:
-            band, slot = skeleton.core_band, skeleton.core_slot
-            segment = Segment(main.frame, band, slot, band.facade, 1, main.grid)
-            behind = [(segment, cells) for cells in skeleton.core_back]
+        for core in skeleton.cores:
+            frame, grid = core.part.frame, core.part.grid
+            segment = Segment(frame, core.band, core.slot, core.band.facade, 1, grid)
+            behind += [(segment, cells) for cells in core.back]
         existing = [r.type for r in rooms]
         rooms += allocator.allocate(role, level, level_name(level), behind, existing, reserved)
         warnings += allocator.warnings
@@ -846,7 +899,7 @@ class CorridorLayout:
                 hint = frame.cell(frame.length // 2, v)
             else:
                 width = grid.round_up(program.corridor.width)
-                target = skeleton.core_slot.centre if skeleton.core_slot else frame.length / 2
+                target = skeleton.cores[0].slot.centre if skeleton.cores else frame.length / 2
                 blocked = main.blocked(band, skeleton.lobby_slice, *extra.get(band.index, []))
                 junctions = tuple(main.no_facade.get(band.index, []))
                 # A back room through to the door, else (`service_stub`) a corridor stub.
@@ -874,12 +927,22 @@ class CorridorLayout:
         warnings: list[str],
     ) -> None:
         """An exit at a corridor end on a facade, else at a hall end (small hall buildings
-        without a corridor), else from the stairwell, far from the others."""
+        without a corridor), else from the stairwell, far from the others. A second
+        stairwell at the end of a part has an exit of its own."""
         if EntranceKind.EMERGENCY not in ctx.rules.entrances(ctx.params):
             return
         inside = frozenset[Cell]().union(
             *(p.frame.rect(0, p.frame.length, 0, p.frame.depth) for p in skeleton.parts)
         )
+        for core in skeleton.cores[1:]:
+            # On the end facade beside the corridor: the stairs' landing.
+            frame, stairs = core.part.frame, core.rooms[0]
+            end = LocalSide.U0 if core.slot.centre < frame.length / 2 else LocalSide.U1
+            u = core.slot.u0 if end is LocalSide.U0 else core.slot.u1 - 1
+            cell = frame.cell(u, self._from_corridor(core.band, 1)[0])
+            side = frame.side(end)
+            if cell in stairs.cells and cell.neighbour(side) not in inside:
+                hints.append((EntranceKind.EMERGENCY, side, cell))
         options: list[tuple[Cell, Side]] = []
         for kind in (BandKind.CORRIDOR, BandKind.HALL):
             for part in skeleton.parts:

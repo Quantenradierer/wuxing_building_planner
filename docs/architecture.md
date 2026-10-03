@@ -179,6 +179,11 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    longer than the strip is shortened while it keeps the room's minimum area, else laid
    across). Rests behind them too thin for the cluster filler make them deeper; the other
    rectangles behind the core are rooms of their own on every floor (see Allocation).
+   Core entries with `place: far` (a second stairwell on big floors, `width + depth >= 90`)
+   get a slot of their own the same way, as close as it fits to the part end farthest from
+   the core: an end of the main part or the far end of a wing (`_far_core`). The first end
+   whose slot is at least `FAR_CORE_MIN` (12 m) from the core wins; if none is, the building
+   keeps one stairwell.
 4. **Ground floor**: the lobby is a slot in the street-side strip (street on a long side) or a
    slice across the whole part (street on a short end). When no corridor touches the service
    side, the layout reserves a back room there, a full-depth slot from the corridor (or
@@ -403,7 +408,10 @@ overrides (`wealth:` in the catalog), and room entries / floor roles filtered by
 The program lists its entrance kinds (`main`, `service`, `emergency`, `roof`) with widths;
 the `entrances` parameter replaces that list (main is always built, unknown widths default
 to 2). The emergency exit goes to the corridor end on a facade farthest from the other
-entrances, else to a hall end, else to the stairwell's facade. `roof` puts a hatch object into the top floor's
+entrances, else to a hall end, else to the stairwell's facade. A second stairwell at a part's
+end has its own emergency exit in that end facade, on the stairs' landing beside the corridor
+(a plain door, as every exit out of a core room, so it stays clear of the stairs); the
+corridor-end exit then goes to the other end. `roof` puts a hatch object into the top floor's
 stairwell (or a circulation room).
 
 ### Furnishing

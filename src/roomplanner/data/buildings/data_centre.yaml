@@ -18,6 +18,7 @@ service_rooms: [loading_dock, staging_room, storage, ups_room, utility, staff_ro
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2 and width + depth >= 90", place: far}   # second escape route
   - {room: elevator, size: [5, 6], when: "floors_total >= 2"}   # freight: racks go up in it
   - {room: elevator, size: [5, 6], when: "floors_total >= 3 and width + depth >= 120"}
 

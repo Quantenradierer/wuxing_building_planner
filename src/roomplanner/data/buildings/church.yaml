@@ -21,6 +21,7 @@ service_rooms: [sacristy, kitchenette, storage, utility]   # the priest comes in
 
 core:
   - {room: stairwell, size: [5, 9], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 9], when: "floors_total >= 2 and width + depth >= 90", place: far}   # second escape route
 
 entrances:
   main: {width: 4}         # the portal

@@ -165,8 +165,8 @@ chop_shop, the shops and the flats) are separate types with their own YAML.
 
 - The building type defines which entrance kinds exist and their widths: `main`, `service`
   (loading dock, ambulance bay, back door), `emergency` (exit from a corridor end or the
-  stairwell) and `roof` (hatch or door from the top floor's stairwell; the roof itself is
-  not modelled). The `entrances` parameter overrides the type's list.
+  stairwell; a second stairwell has its own) and `roof` (hatch or door from the top floor's
+  stairwell; the roof itself is not modelled). The `entrances` parameter overrides the type's list.
 - The main entrance faces `street_side`; the service entrance faces `service_side`.
 - Vehicle and delivery bays (`facade_door`) have their own wide exterior door; they never
   go into clusters or behind the core. The service door goes into such a bay if it faces
@@ -277,13 +277,7 @@ history is in git. What is left is under "Open issues".
 ## Open issues
 
 Building code (measured in "Building code" below), in suggested order:
-1. Second stairwell (layout code): the corridor layout has one core slot near the middle
-   (`layout/corridor.py`, `_core`), so floors of big buildings have one escape route, long
-   escape distances and long dead ends (21 of the 22 failures over 35 m, 45 of 48 dead-end
-   failures are single-stair floors). A core entry with its own slot near the far end of the
-   main corridor (`place: far`, `when: width + depth >= 90`), with its own exterior exit on
-   the ground floor; long wings may need one too. Also a second way in for the runners.
-2. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
+1. Keep the numbers: escape distance, dead ends, two routes, window ratio and workstation
    area as soft validator warnings (not for derelict/ruined), and a property test over a
    seed sweep asserting pass rates.
 
@@ -362,8 +356,6 @@ Building types:
   about 7 in 100 docks report a missing window.
 
 Rendering and export:
-- Elevator doors slide (`sliding` in the JSON, drawn on the landing side), but the Foundry
-  export still makes them plain doors; they should get the `slide` door animation.
 - Universal VTT has no window type: windows are exported as (closed) portals, i.e. doors.
 - Foundry: v14+ only (Scene Levels); the Schattenakte module must be published (GitHub
   release, `.github/workflows/schattenakte.yml`) before others can install it by URL.
@@ -377,18 +369,27 @@ each rule is measured). Results (2026-10-03):
 
 | Rule (source)                                              | Pass                      |
 |------------------------------------------------------------|---------------------------|
-| Escape distance ≤ 35 m to a stairwell or exit (MBO §35)    | 79 / 100                  |
-| Two escape routes, strict (MBO §33)                        | 19 / 100                  |
+| Escape distance ≤ 35 m to a stairwell or exit (MBO §35)    | 86 / 100                  |
+| Two escape routes, strict (MBO §33)                        | 55 / 100                  |
 | Two escape routes, rescue windows on floors 1–7 count      | 98 / 100                  |
-| Dead-end corridor ≤ 15 m                                   | 51 / 100                  |
+| Dead-end corridor ≤ 15 m                                   | 66 / 100                  |
 | Corridor ≥ 1.0 m (ASR A2.3) / ≥ 1.5 m (DIN 18040)          | 100 / 100                 |
 | Doors ≥ 0.9 m (DIN 18100)                                  | 41 / 100; 100 except stalls |
 | 1.5 × 1.5 m turning space at doors (DIN 18040)             | 0 / 100 (29 % of door sides fail) |
 | Stairwell 2.5 × 4.5 m (DIN 18065, 3 m floors)              | 81 / 81                   |
 | Lift car 1.1 × 1.4 m (DIN EN 81-70)                        | 100 / 100                 |
-| Window area ≥ 1/8 of floor area (MBO §47)                  | 55 / 65 (17 of 852 rooms) |
-| 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (42 of 546 rooms) |
+| Window area ≥ 1/8 of floor area (MBO §47)                  | 56 / 65 (16 of 803 rooms) |
+| 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (33 of 496 rooms) |
 | Parking stall ≥ 2.3 m, lane 6.5 m (5.5 m at 2.5 m, MGarVO) | 3 / 3                     |
+
+Done: second stairwell. Big floors (`width + depth >= 90`, 18 programs) get a second
+stairwell (`place: far` core entry) at the part end farthest from the core, at least 12 m
+from it, with its own exit on the ground floor: two routes 19 → 55, escape distance 79 → 86,
+dead ends 51 → 66. The rest: floors under the threshold with one stair (rescue windows
+cover them) and very big floors (a 71 × 56 police station still has 52 m); long wings may
+need a stairwell of their own.
+Cost: in 200 sample buildings 12 more rooms are dropped (135 → 147), mostly ground-floor
+back rooms of factories, whose one back-of-house strip now also holds the second stairwell.
 
 Done: stairwell size. Small programs ask for 5 × 9 cells (was 5 × 8); the catalog minimum is
 45 cells and does not shrink at squatter and low tier, so a stairwell is only shortened to a

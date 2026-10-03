@@ -7,6 +7,7 @@ from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side
 from roomplanner.model import Floor, OpeningKind, Room
 from roomplanner.params import BuildingType, EntranceKind, Shape, Wealth
+from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.openings import DAYLIGHT
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
@@ -454,6 +455,32 @@ def test_a_walled_in_storeroom_opens_onto_the_stairs_not_into_the_elevator(
                 ]
                 assert len(doors) == 1, floor.name
     assert stranded
+
+
+@pytest.mark.parametrize(
+    "building_type", [BuildingType.OFFICE, BuildingType.HOTEL, BuildingType.HOSPITAL]
+)
+@pytest.mark.parametrize("seed", [1, 2, 3])
+def test_big_floors_have_a_second_stairwell_with_its_own_exit(
+    building_type: BuildingType, seed: int
+) -> None:
+    params = make_params(building_type=building_type, width=70, depth=40, floors_above=3, seed=seed)
+    building = generate(params)
+    for floor in building.floors:
+        stairs = [r for r in floor.rooms if r.type == "stairwell"]
+        assert len(stairs) == 2, floor.name
+        a, b = (min(r.cells) for r in stairs)
+        assert abs(a.x - b.x) + abs(a.y - b.y) >= FAR_CORE_MIN
+    ground = building.floor(0)
+    far = [r for r in ground.rooms if r.type == "stairwell"][1]
+    assert any(
+        o.entrance == EntranceKind.EMERGENCY
+        and any(c in far.cells for e in o.edges for c in e.cells())
+        for o in ground.openings
+    )
+    # Small floors keep one.
+    small = generate(make_params(building_type=building_type, width=44, depth=30, floors_above=3))
+    assert all(sum(r.type == "stairwell" for r in f.rooms) == 1 for f in small.floors)
 
 
 @pytest.mark.parametrize(

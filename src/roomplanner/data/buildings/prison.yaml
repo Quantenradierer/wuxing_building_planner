@@ -19,6 +19,7 @@ service_rooms: [sally_port, intake_room, prison_kitchen, storage, utility, staff
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2 and width + depth >= 90", place: far}   # second escape route
   - {room: elevator, size: [4, 5], when: "floors_total >= 3"}
   - {room: elevator, size: [4, 5], when: "floors_total >= 3 and width + depth >= 120"}   # bigger floors: more cars
 

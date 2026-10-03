@@ -16,6 +16,7 @@ core_back: training_room   # behind the core in deep strips, instead of a storer
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
+  - {room: stairwell, size: [5, 10], when: "floors_total >= 2 and width + depth >= 90", place: far}   # second escape route
   - {room: elevator, size: [4, 4], when: "floors_total >= 2"}
   - {room: elevator, size: [4, 4], when: "floors_total >= 2 and width + depth >= 100"}   # bigger floors: more cars
   - {room: elevator, size: [4, 4], when: "floors_total >= 2 and width + depth >= 150"}
