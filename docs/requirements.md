@@ -374,7 +374,7 @@ each rule is measured). Results (2026-10-03):
 | Stairwell 2.5 × 4.5 m (DIN 18065, 3 m floors)              | 81 / 81                   |
 | Lift car 1.1 × 1.4 m (DIN EN 81-70)                        | 100 / 100                 |
 | Window area ≥ 1/8 of floor area (MBO §47)                  | 56 / 65 (16 of 803 rooms) |
-| 8 m² + 6 m² per further workstation (ASR A1.2)             | 45 / 64 (33 of 496 rooms) |
+| 8 m² + 6 m² per further workstation (ASR A1.2)             | 55 / 63 (14 of 494 rooms) |
 | Parking stall ≥ 2.3 m, lane 6.5 m (5.5 m at 2.5 m, MGarVO) | 3 / 3                     |
 
 Done: second stairwell. Big floors (`width + depth >= 90`, 18 programs) get a second
@@ -385,6 +385,10 @@ cover them) and very big floors (a 71 × 56 police station still has 52 m); long
 need a stairwell of their own.
 Cost: in 200 sample buildings 12 more rooms are dropped (135 → 147), mostly ground-floor
 back rooms of factories, whose one back-of-house strip now also holds the second stairwell.
+
+Done: workstation area. Security rooms and prison block controls have a catalog minimum of
+32 cells (8 m², one desk); failing rooms 33 → 14. The rest are one-desk booths (focus room,
+attendant booth) and the odd manager's office, which are booths by design.
 
 Done: stairwell size. Small programs ask for 5 × 9 cells (was 5 × 8); the catalog minimum is
 45 cells and does not shrink at squatter and low tier, so a stairwell is only shortened to a

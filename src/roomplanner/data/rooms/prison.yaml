@@ -70,7 +70,7 @@ rooms:
       - {object: security_gate, placement: wall, count: [0, 1]}
       - {object: fire_extinguisher, placement: wall, count: [0, 1]}
   block_control:        # the guards' bubble beside a cell block: consoles and door controls
-    area: [16, 50]
+    area: [32, 60]
     min_side: 4
     windows: forbidden
     next_to: [prison_block]
