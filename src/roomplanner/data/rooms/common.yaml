@@ -287,7 +287,7 @@ rooms:
     connect: [storage, electrical_room, mechanical_room, utility]   # more than the one corridor door
     furniture:
       - {object: car, placement: rows, aisle: 10, gap: 1, lanes: true, margin: 0, block: 40,
-         front_clear: 10}   # 2.5 m stalls facing 5 m drive lanes
+         front_clear: 10, fill: 0.66}   # 2.5 m stalls facing 5 m drive lanes
       - {object: fire_extinguisher, placement: wall, per: 200, count: [1, 4]}
       - {object: pay_station, placement: wall, count: [0, 1]}
   garage:               # vehicle bay: patrol cars, vans, the boss's limo

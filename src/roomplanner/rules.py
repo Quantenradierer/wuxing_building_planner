@@ -124,6 +124,12 @@ class FurnitureRule(_Strict):
         description="rows: every row faces an aisle (row, aisle, two rows back to back, "
         "aisle, ..., a parking deck's drive lanes)",
     )
+    fill: float = Field(
+        default=1.0,
+        gt=0,
+        le=1,
+        description="rows: chance that a spot in a row is taken (parked cars leave gaps)",
+    )
     head: str | None = Field(
         default=None,
         description="`object` is a pair of desks, `count` counts desks; an odd one (or one "

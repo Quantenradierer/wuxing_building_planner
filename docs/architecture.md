@@ -441,7 +441,8 @@ it: the screen and whiteboard at the ends of a meeting table) and `rows`
 the spare width to where most fit, e.g. clear of doors along one wall, else against an open
 side, else centred; `paired: true` puts rows back to back
 with an aisle after each pair, e.g. capsules; `lanes: true` makes every row face an aisle
-(row, aisle, two rows back to back, aisle, ...: a parking deck's drive lanes); `gap` keeps
+(row, aisle, two rows back to back, aisle, ...: a parking deck's drive lanes); `fill: 0.66`
+leaves each spot of a row empty with the remaining chance (parked cars); `gap` keeps
 cells free between neighbours in a row and `front_clear` keeps the floor in front of every
 placed one free of later objects; `toward: <kind>` turns the rows across the
 direction of that object, all facing it and centred, split by a central aisle where two

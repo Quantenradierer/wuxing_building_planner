@@ -61,6 +61,7 @@ MIN_GAP_CELLS = 3  # free space left next to reserved slots, if any: the smalles
 BACK_ROOM_SLACK = 1.5  # a back room may be this much over its maximum area, else a stub
 INTERIOR_STRIP_MIN = 6  # cells; back-to-back strips between parallel corridors
 PARK_SHARE = 0.55  # of the main part's length, at most, for a car park
+PARK_ASPECT = 1.5  # a car park is at most this much longer or shorter than deep
 FAR_CORE_MIN = 24  # cells (12 m) at least between the core and a second stairwell
 
 
@@ -269,7 +270,15 @@ class CorridorLayout:
             return None
         spec = ctx.rules.spec(entry.room)
         low, high = entry.area or spec.area
-        want = min(math.ceil(high / frame.depth), int(frame.length * PARK_SHARE))
+        # Roughly square: the area asks for a length, kept within `PARK_ASPECT` of the depth
+        # (a deep building gets a bigger deck than `high`), but never below `low`.
+        shortest = math.ceil(frame.depth / PARK_ASPECT)
+        longest = math.ceil(frame.depth * PARK_ASPECT)
+        want = min(
+            max(shortest, min(longest, math.ceil(high / frame.depth))),
+            int(frame.length * PARK_SHARE),
+        )
+        want = max(want, min(math.ceil(low / frame.depth), int(frame.length * PARK_SHARE)))
         obstacles = [i for spans in main.reserved.values() for i in spans]
         options: list[Interval] = []
         near = min((o.u0 for o in obstacles), default=frame.length) - MIN_GAP_CELLS

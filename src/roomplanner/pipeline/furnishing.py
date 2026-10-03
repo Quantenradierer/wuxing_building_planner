@@ -1020,6 +1020,8 @@ class RoomFurnisher:
 
     # --- commit -----------------------------------------------------------------------
 
+            if rule.fill < 1 and self.rng.random() >= rule.fill:
+                continue
     def _try_group(self, kind: str, rect: Rect) -> bool:
         """Place all parts of a group or none; the group's empty cells stay free floor."""
         x, y, w, h, _ = rect
