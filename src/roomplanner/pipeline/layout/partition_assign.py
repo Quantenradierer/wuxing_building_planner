@@ -101,7 +101,7 @@ class Assigner:
         lows = [self._range(e)[0] for e in pool] + [n.low for n in needs]
         self.min_useful = max(8, min(lows, default=12))
         for need in sorted(needs, key=lambda n: n.rank):
-            if not self._place(need, free, rooms):
+            if not self._place_or_halve(need, free, rooms):
                 message = f"{level_name}: no space for {need.entry.room}"
                 if need.required:
                     raise AllocationError(message)
@@ -167,15 +167,42 @@ class Assigner:
         rooms.append(PlannedRoom(need.entry.room, piece))
         return True
 
+    def _place_or_halve(
+        self, need: Need, free: list[frozenset[Cell]], rooms: list[PlannedRoom]
+    ) -> bool:
+        """Place the need; if no region offers a piece, halve the biggest (a ring-shaped or
+        sprawling region has none) and try again."""
+        for _ in range(6):
+            if self._place(need, free, rooms):
+                return True
+            biggest = max(free, key=len, default=None)
+            halves = self._halve_any(biggest) if biggest is not None else []
+            if not halves:
+                return False
+            free.remove(biggest)  # type: ignore[arg-type]
+            free.extend(halves)
+        return False
+
     def _fits(self, cells: frozenset[Cell], need: Need) -> bool:
         return self._fits_spec(cells, need.spec, need.low, need.high)
 
-    def _fits_spec(self, cells: frozenset[Cell], spec: RoomSpec, low: int, high: int) -> bool:
+    def _cheap_fit(self, cells: frozenset[Cell], spec: RoomSpec, low: int, high: int) -> bool:
+        """Size, a door's width of wall on circulation, aspect: no shape walk yet."""
         if not low <= len(cells) <= high * TOLERANCE:
             return False
         if len(cells & self.border) < min(ACCESS, spec.door_width):
             return False
-        return aspect_ok(cells, spec) and shape_ok(cells, spec)
+        return aspect_ok(cells, spec)
+
+    def _fits_spec(self, cells: frozenset[Cell], spec: RoomSpec, low: int, high: int) -> bool:
+        return self._cheap_fit(cells, spec, low, high) and self._shape(cells, spec)
+
+    def _shape(self, cells: frozenset[Cell], spec: RoomSpec) -> bool:
+        """Wide enough: circulation rooms (an open office) count together with the corridor
+        beside them, as the validator does."""
+        if spec.circulation:
+            return thinnest_extent(cells, cells | self.access) >= spec.min_side
+        return shape_ok(cells, spec)
 
     def _score(self, cells: frozenset[Cell], need: Need) -> float:
         score = abs(len(cells) - need.target) / need.target
@@ -224,18 +251,29 @@ class Assigner:
                 pieces.append((slab, 0.0))
         if self.rng.random() < L_SHAPE:
             pieces += self._corners(region, (x0, y0, x1, y1), spec, target)
-        best: Choice | None = None
-        pieces.sort(key=lambda p: abs(len(p[0]) - target))
-        for piece, bonus in pieces[:14]:
-            if len(piece) == len(region) or not self._fits_spec(piece, spec, low, high):
+        # Cheap checks and a base score first; the connectivity, rests and shape checks
+        # (the expensive ones) only for the most promising few.
+        near_room = near if need is None else need.entry.near
+        scored: list[tuple[float, frozenset[Cell]]] = []
+        seen: set[frozenset[Cell]] = set()
+        for piece, bonus in pieces:
+            if piece in seen or len(piece) == len(region):
                 continue
-            parts = components(piece)
-            if len(parts) != 1:
+            seen.add(piece)
+            if not self._cheap_fit(piece, spec, low, high):
+                continue
+            base = abs(len(piece) - target) / target - bonus
+            base += self._soft(piece, spec, near_room)
+            scored.append((base, piece))
+        scored.sort(key=lambda s: (s[0], min(s[1])))
+        best: Choice | None = None
+        for base, piece in scored[:6]:
+            if not self._shape(piece, spec):
+                continue
+            if len(components(piece)) != 1:
                 continue
             rests = components(region - piece)
-            score = abs(len(piece) - target) / target - bonus
-            score += self._soft(piece, spec, near if need is None else need.entry.near)
-            score += sum(len(r) / 20 for r in rests if not self._useful(r))
+            score = base + sum(len(r) / 20 for r in rests if not self._useful(r))
             score += self._blind(region - piece) / 20
             score += self.rng.uniform(0, 0.1)
             if best is None or score < best.score:
@@ -282,6 +320,16 @@ class Assigner:
             if height > y1 - y0:
                 continue
             for x, y in ((x0, y0), (x1 - width, y0), (x0, y1 - height), (x1 - width, y1 - height)):
+                if not all(
+                    Cell(cx, cy) in region
+                    for cx, cy in (
+                        (x, y),
+                        (x + width - 1, y),
+                        (x, y + height - 1),
+                        (x + width - 1, y + height - 1),
+                    )
+                ):
+                    continue
                 piece = rectangle(x, y, width, height)
                 if piece <= region:
                     found.append((piece, 0.05))
@@ -362,6 +410,12 @@ class Assigner:
         across its long side so the halves can be tried again."""
         biggest = max((self._range(e)[1] for e in pool), default=0)
         if len(region) <= biggest * TOLERANCE * 1.5:
+            return []
+        return self._halve_any(region)
+
+    @staticmethod
+    def _halve_any(region: frozenset[Cell]) -> list[frozenset[Cell]]:
+        if len(region) < 60:
             return []
         x0, y0, x1, y1 = bbox(region)
         if x1 - x0 >= y1 - y0:

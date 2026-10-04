@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import math
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from roomplanner.geometry import Cell, Side, thinnest_extent
 from roomplanner.params import EntranceKind
@@ -42,9 +42,9 @@ from roomplanner.pipeline.layout.regions import (
 )
 from roomplanner.pipeline.layout.stalls import carve_stalls
 from roomplanner.pipeline.registry import register
-from roomplanner.rules import Priority, RoomEntry, evaluate, variables
+from roomplanner.rules import Priority, RoomEntry, Rules, evaluate, variables
 
-CORE_CANDIDATES = 30  # core positions scored per room
+CORE_CANDIDATES = 12  # core positions scored per room
 SLIVER = 16  # cells: a free piece smaller than this beside the core counts as waste
 
 
@@ -124,7 +124,7 @@ class PartitionLayout:
         else:
             hint, path = self._gate(footprint, corridor, street, width)
             corridor |= path
-        cores = self._cores(ctx, footprint, corridor | lobby, rng)
+        cores = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
         return Skeleton(
             corridor, cores, lobby, lobby_entry.room if lobby_entry else None, hint, street
         )
@@ -262,9 +262,9 @@ class PartitionLayout:
         positions = sorted({c.x if along == (1, 0) else c.y for c in edge})
         middle = (positions[0] + positions[-1]) / 2
         best: tuple[float, frozenset[Cell], Cell] | None = None
-        for first in positions:
+        for first in positions[::2]:
             base = next(c for c in edge if (c.x if along == (1, 0) else c.y) == first)
-            for wide in range(spec.min_side, 31):
+            for wide in range(spec.min_side, 31, 2):
                 # the depth at which the rectangle meets a corridor, measured mid-way
                 mid = first + wide // 2
                 col = [c for c in edge if (c.x if along == (1, 0) else c.y) == mid]
@@ -376,9 +376,11 @@ class PartitionLayout:
         ctx: Context,
         footprint: frozenset[Cell],
         circulation: frozenset[Cell],
+        lobby: frozenset[Cell],
         rng: random.Random,
     ) -> list[PlannedRoom]:
         rooms: list[PlannedRoom] = []
+        cluster: frozenset[Cell] = frozenset()  # the cores that stand together
         taken = set(circulation)
         x0, y0, x1, y1 = bbox(footprint)
         diagonal = (x1 - x0) + (y1 - y0)
@@ -389,6 +391,15 @@ class PartitionLayout:
                 continue
             free = footprint - taken
             options = self._core_options(free, circulation, entry.size)
+            if lobby:
+                # a door to the lobby on the ground floor would move upstairs
+                touch = frozenset(c.neighbour(sd) for c in lobby for sd in Side)
+                options = [o for o in options if o.isdisjoint(touch)] or options
+            if entry.place != "far" and cluster:
+                # Stairwell and lifts stand together: share a wall with the cluster if possible.
+                near = frozenset(c.neighbour(sd) for c in cluster for sd in Side)
+                beside = [o for o in options if len(o & near) >= 2]
+                options = beside or options
             rng.shuffle(options)
             scored: list[tuple[float, frozenset[Cell]]] = []
             for option in options[:CORE_CANDIDATES]:
@@ -418,6 +429,8 @@ class PartitionLayout:
                 raise AllocationError(f"no space for the {entry.room}")
             _, cells = min(scored, key=lambda s: (s[0], min(s[1])))
             taken |= cells
+            if entry.place != "far":
+                cluster |= cells
             rooms.append(PlannedRoom(entry.room, cells))
         return rooms
 
@@ -427,6 +440,7 @@ class PartitionLayout:
     ) -> list[frozenset[Cell]]:
         """Rectangles of the core's size with a long wall on the corridor."""
         found: set[frozenset[Cell]] = set()
+        beside = frozenset(c.neighbour(s) for c in circulation for s in Side)
         shapes = {size, (size[1], size[0])}
         for cell in sorted(free):
             for side in Side:
@@ -444,7 +458,7 @@ class PartitionLayout:
                             for i in range(length)
                             for j in range(depth)
                         )
-                        if cells <= free and contact(cells, circulation) >= min(length, 2):
+                        if cells <= free and len(cells & beside) >= min(length, 2):
                             found.add(cells)
         return sorted(found, key=min)
 
@@ -499,6 +513,7 @@ class PartitionLayout:
             plan.warnings += assigner.warnings
         rooms = [*fixed, *shared[key][0]]
         rooms = absorb_leftovers(rooms, ctx.rules)
+        rooms = _merge_thin(rooms, ctx.rules)
         rooms = carve_stalls(rooms, ctx.rules)
         entrances = self._entrances(ctx, footprint, skeleton, rooms) if ground else []
         return FloorPlan(level, role_name, rooms, entrances)
@@ -556,6 +571,30 @@ class PartitionLayout:
             index = next(i for i, r in enumerate(rooms) if cell in r.cells)
             result.append(EntranceRequest(kind, side, index, cell))
         return result
+
+
+def _merge_thin(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
+    """A leftover piece too thin to be a room joins the neighbour it shares most wall with
+    (a corridor only if nothing else touches it)."""
+    fixed = {e.room for e in rules.program.core}
+    result = list(rooms)
+    for room in rooms:
+        if not room.leftover or room not in result:
+            continue
+        if thinnest_extent(room.cells, room.cells) >= rules.spec(room.type).min_side:
+            continue
+        options: list[tuple[int, int, PlannedRoom]] = []
+        for other in result:
+            if other is room or other.host is not None or other.type in fixed:
+                continue
+            if shared := contact(room.cells, other.cells):
+                options.append((not rules.spec(other.type).circulation, shared, other))
+        if not options:
+            continue
+        _, _, other = max(options, key=lambda o: (o[0], o[1], -len(o[2].cells)))
+        result[result.index(other)] = replace(other, cells=other.cells | room.cells)
+        result.remove(room)
+    return result
 
 
 def _to_wall(path: list[Cell], footprint: frozenset[Cell]) -> list[Cell]:

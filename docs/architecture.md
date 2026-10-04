@@ -355,6 +355,37 @@ hall room's `min_side` of hall left at each end that isn't an end of the hall, a
 connector stubs entering from behind; the hall's minimum depth grows by their depth. The
 room type is `open: 1`, so it has no walls towards the hall (its long side and one end).
 
+### Partition layout
+
+`layout: partition` (`pipeline/layout/partition.py`, `partition_assign.py`, `regions.py`;
+ADR 0015) cuts the footprint instead of filling slots, and works on cell sets, so rooms may be
+irregular and any footprint is the same case. Programs with `units` are rejected.
+
+1. **Skeleton**, identical on every floor: parallel corridors along the long axis (as many as
+   keep each row of rooms within `strip_depth`) with cross corridors; pieces a footprint
+   splits are joined; cells farther than `strip_depth[1]` from circulation get a side corridor
+   to the outer wall; corridor bits thinner than the corridor width go (`opened`). The lobby is
+   a rectangle on the street facade with its inner side on a corridor (`_lobby_beside`; else
+   reserved first and joined by a branch). Core entries take rectangles beside a corridor,
+   scored for little waste (`far` ones as far from the first as possible).
+2. **Regions**: the footprint less corridor, core and (on the ground floor) the lobby, in
+   4-connected pieces. Floors of one role share their partition (`shared`).
+3. **Needs and mix** (`Assigner`): `count` / `share` entries become needs, required first,
+   then by size class (`data/sizes.yaml`, from the room's area range) and minimum area; an
+   open office or other elastic room is drawn from at most 3x its minimum. Each need takes the
+   free region that fits (area, width, aspect, a door's width of wall on circulation), else a
+   piece cut from a bigger one (two straight cuts off the ends; with some chance a corner
+   rectangle so the rest is an L). A cut scores the piece's size mismatch, soft windows and
+   `near`, and penalises rest pieces nothing could use and *blind* cells (no straight line to
+   circulation). `fill` entries then type what is left: the type furthest below its share of
+   the mix plus noise; too-big regions are cut, `priority: optional` types are the last
+   choice, a piece nothing fits is a `leftover` (the program's `cluster_filler`).
+4. After the assignment `absorb_leftovers` and `carve_stalls` run as in the corridor layout,
+   and the ground floor gets its main, service and emergency entrances.
+
+Not ported yet: annexes, vestibules, `next_to`, balconies, roof balcony cut-outs, units,
+service stubs, the facade grid.
+
 ### Room layout
 
 `params.room` (CLI `--room`, the UI's Room select) replaces the program's layout with
