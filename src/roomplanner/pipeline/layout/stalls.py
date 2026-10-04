@@ -12,7 +12,9 @@ instead. Stalls have real walls and doors, so they block sight in the VTT export
 
 from __future__ import annotations
 
-from roomplanner.geometry import Cell, Side, connected, largest_rectangle
+from collections.abc import Set as AbstractSet
+
+from roomplanner.geometry import Cell, Side, connected, largest_rectangle, thinnest_extent
 from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.rules import Rules, StallRule
 
@@ -185,15 +187,16 @@ def _row(
     return [cells(s0, w) for s0, w in spans]
 
 
-def door_run(cells: frozenset[Cell], circulation: set[Cell]) -> int:
+def door_run(cells: frozenset[Cell], circulation: AbstractSet[Cell]) -> int:
     """Longest straight run of walls between these cells and circulation."""
     longest = 0
     for side in Side:
-        # (line across the wall, position along it) of each wall towards circulation
+        dx, dy = side.delta
+        across_x = side in (Side.N, Side.S)
+        # (line across the wall, position along it) of each wall towards circulation; plain
+        # tuples hash like Cells, and this is the layout's hottest loop
         spots = sorted(
-            (c.y, c.x) if side in (Side.N, Side.S) else (c.x, c.y)
-            for c in cells
-            if c.neighbour(side) in circulation
+            (y, x) if across_x else (x, y) for x, y in cells if (x + dx, y + dy) in circulation
         )
         run = 0
         for k, (line, pos) in enumerate(spots):
@@ -235,14 +238,4 @@ def beyond(box: tuple[int, int, int, int], side: Side) -> list[Cell]:
 
 def thinnest(cells: frozenset[Cell], space: frozenset[Cell]) -> int:
     """Smallest straight extent of `space` through any of `cells`, across or along."""
-
-    def run(cell: Cell, side: Side) -> int:
-        n = 1
-        for direction in (side, side.opposite):
-            c = cell.neighbour(direction)
-            while c in space:
-                n += 1
-                c = c.neighbour(direction)
-        return n
-
-    return min(min(run(c, Side.E), run(c, Side.S)) for c in cells)
+    return thinnest_extent(cells, space)

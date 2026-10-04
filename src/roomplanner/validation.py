@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections import deque
-from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -14,6 +13,7 @@ from roomplanner.geometry import (
     boundary_edges,
     connected,
     largest_rectangle,
+    thinnest_extent,
 )
 from roomplanner.model import Building, Floor, OpeningKind
 from roomplanner.rules import Rules, WindowRule
@@ -217,22 +217,7 @@ def _alcoved(cells: frozenset[Cell], min_side: int) -> bool:
 
 def _thinnest(cells: frozenset[Cell], space: frozenset[Cell]) -> int:
     """Smallest extent of `space` through any of `cells`, horizontally or vertically."""
-    horizontal = _run_lengths(space, lambda c: (c.y, c.x))
-    vertical = _run_lengths(space, lambda c: (c.x, c.y))
-    return min(min(horizontal[c], vertical[c]) for c in cells)
-
-
-def _run_lengths(cells: frozenset[Cell], key: Callable[[Cell], tuple[int, int]]) -> dict[Cell, int]:
-    """Length of the straight run through each cell; `key` gives (line, position on line)."""
-    lengths: dict[Cell, int] = {}
-    run: list[Cell] = []
-    for cell in sorted(cells, key=key):
-        if run and key(run[-1]) != (key(cell)[0], key(cell)[1] - 1):
-            lengths.update(dict.fromkeys(run, len(run)))
-            run = []
-        run.append(cell)
-    lengths.update(dict.fromkeys(run, len(run)))
-    return lengths
+    return thinnest_extent(cells, space)
 
 
 def _check_core(building: Building, rules: Rules) -> list[Violation]:

@@ -3,15 +3,29 @@
 from __future__ import annotations
 
 from collections import deque
-from enum import StrEnum
+from collections.abc import Callable, Collection, Iterator
+from collections.abc import Set as AbstractSet
+from enum import EnumType, StrEnum
 from functools import lru_cache
-from typing import NamedTuple
+from typing import Any, NamedTuple, cast
 
 # Physical scale, only for renderers. Everything else (parameters, rules, output) is in cells.
 CELL_SIZE_M = 0.5
 
 
-class Side(StrEnum):
+class _FastIteration(EnumType):
+    """Iterating a Side is in the hot loops of every stage; the stock version is a generator."""
+
+    def __iter__(cls) -> Iterator[Any]:
+        try:
+            return iter(cls.__dict__["_ordered"])
+        except KeyError:
+            ordered = tuple(cls._member_map_.values())
+            cls._ordered = ordered  # pyright: ignore[reportAttributeAccessIssue]
+            return iter(ordered)
+
+
+class Side(StrEnum, metaclass=_FastIteration):
     N = "N"
     E = "E"
     S = "S"
@@ -33,6 +47,7 @@ class Side(StrEnum):
 
 _OPPOSITE = {Side.N: Side.S, Side.S: Side.N, Side.E: Side.W, Side.W: Side.E}
 _DELTA = {Side.N: (0, -1), Side.S: (0, 1), Side.E: (1, 0), Side.W: (-1, 0)}
+_new = cast(Callable[[type, tuple[Any, ...]], Any], tuple.__new__)  # pyright: ignore[reportUnknownMemberType]
 
 
 class Axis(StrEnum):
@@ -40,13 +55,23 @@ class Axis(StrEnum):
     V = "v"
 
 
+# (dx, dy, axis) of the edge on each side of a cell, relative to the cell's own vertex
+_SIDE_EDGE = {
+    Side.N: (0, 0, Axis.H),
+    Side.S: (0, 1, Axis.H),
+    Side.W: (0, 0, Axis.V),
+    Side.E: (1, 0, Axis.V),
+}
+
+
 class Cell(NamedTuple):
     x: int
     y: int
 
     def neighbour(self, side: Side) -> Cell:
-        dx, dy = side.delta
-        return Cell(self.x + dx, self.y + dy)
+        dx, dy = _DELTA[side]
+        # tuple.__new__ skips the NamedTuple's Python-level constructor; this runs millions of times
+        return _new(Cell, (self[0] + dx, self[1] + dy))
 
 
 class Edge(NamedTuple):
@@ -62,15 +87,8 @@ class Edge(NamedTuple):
 
     @staticmethod
     def of(cell: Cell, side: Side) -> Edge:
-        match side:
-            case Side.N:
-                return Edge(cell.x, cell.y, Axis.H)
-            case Side.S:
-                return Edge(cell.x, cell.y + 1, Axis.H)
-            case Side.W:
-                return Edge(cell.x, cell.y, Axis.V)
-            case Side.E:
-                return Edge(cell.x + 1, cell.y, Axis.V)
+        dx, dy, axis = _SIDE_EDGE[side]
+        return _new(Edge, (cell[0] + dx, cell[1] + dy, axis))
 
     @staticmethod
     def between(a: Cell, b: Cell) -> Edge:
@@ -139,3 +157,24 @@ def connected(cells: frozenset[Cell] | set[Cell]) -> bool:
                 seen.add(neighbour)
                 queue.append(neighbour)
     return len(seen) == len(free)
+
+
+def thinnest_extent(cells: Collection[Cell], space: AbstractSet[Cell]) -> int:
+    """Smallest straight extent of `space` through any of `cells`, across or along."""
+    # Every cell of one straight stretch of `space` has the same extent: measure it once.
+    memo: dict[tuple[int, int, int, int], int] = {}
+
+    def run(x: int, y: int, dx: int, dy: int) -> int:
+        if (x, y, dx, dy) in memo:
+            return memo[x, y, dx, dy]
+        members = [(x, y)]
+        for sign in (1, -1):
+            px, py = x + sign * dx, y + sign * dy
+            while (px, py) in space:
+                members.append((px, py))
+                px, py = px + sign * dx, py + sign * dy
+        for mx, my in members if (x, y) in space else ():
+            memo[mx, my, dx, dy] = len(members)
+        return len(members)
+
+    return min(min(run(c[0], c[1], 1, 0), run(c[0], c[1], 0, 1)) for c in cells)

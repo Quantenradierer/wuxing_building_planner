@@ -10,6 +10,7 @@ it borders. Core, unit, annex and stall rooms keep their shape.
 from __future__ import annotations
 
 from dataclasses import replace
+from functools import lru_cache
 
 from roomplanner.geometry import Cell
 from roomplanner.pipeline.base import PlannedRoom
@@ -113,6 +114,7 @@ def _best_host(
     return best
 
 
+@lru_cache(maxsize=4096)  # the same few rooms are boxed again for every candidate cut
 def _box(cells: frozenset[Cell]) -> tuple[int, int, int, int] | None:
     """(x0, y0, x1, y1) if the cells form a rectangle."""
     xs, ys = [c.x for c in cells], [c.y for c in cells]
