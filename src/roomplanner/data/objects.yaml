@@ -228,10 +228,10 @@ groups:
       - {object: dining_table, at: [0, 1]}
       - {object: chair, at: [0, 3], facing: N}
       - {object: chair, at: [1, 3], facing: N}
-  cafe_table:           # table with a chair on each of two sides
+  cafe_table:           # table with a chair on each of two sides, facing each other
     size: [2, 4]
     parts:
-      - {object: chair, at: [1, 0]}
+      - {object: chair, at: [0, 0]}
       - {object: bar_table, at: [0, 1]}
       - {object: chair, at: [0, 3], facing: N}
   meeting_set:          # meeting table, four chairs along each long side

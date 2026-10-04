@@ -26,7 +26,7 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
-from roomplanner.geometry import Axis, Cell, Edge, Side
+from roomplanner.geometry import Axis, Cell, Diagonal, Edge, Side
 from roomplanner.layer_rules import load_condition
 from roomplanner.model import (
     Building,
@@ -41,13 +41,16 @@ from roomplanner.params import Wealth
 from roomplanner.render.shapes import SHAPES, Pen
 from roomplanner.render.theme import Colour, Material, Pattern, Theme, colour
 
-DEFAULT_CELL_PX = 50
+DEFAULT_CELL_PX = 25
 MAX_SUPERSAMPLED_PIXELS = 48_000_000
 
 
 @dataclass(frozen=True)
 class RenderOptions:
     cell_px: int = DEFAULT_CELL_PX
+    # Draw at this many times the size and scale down (antialiasing, several times slower);
+    # None = 2 while the canvas stays under MAX_SUPERSAMPLED_PIXELS, else 1.
+    supersample: int | None = None
     padding: int = 2  # cells around the building; whole VTT grid squares keep alignment
     labels: bool = False
     grid: int = 0  # grid line every n cells, 0 = none
@@ -60,7 +63,11 @@ def render_floor(
     options = options or RenderOptions()
     columns = building.width + 2 * options.padding
     rows = building.height + 2 * options.padding
-    supersample = 2 if columns * rows * (options.cell_px * 2) ** 2 <= MAX_SUPERSAMPLED_PIXELS else 1
+    supersample = options.supersample
+    if supersample is None:
+        supersample = (
+            2 if columns * rows * (options.cell_px * 2) ** 2 <= MAX_SUPERSAMPLED_PIXELS else 1
+        )
     canvas = _Canvas(building, floor, theme, options, options.cell_px * supersample)
     image = canvas.draw()
     if supersample > 1:
@@ -98,6 +105,7 @@ class _Canvas:
         self.draw_shadow = ImageDraw.Draw(self.shadow)
         self.owner = {cell: room for room in floor.rooms for cell in room.cells}
         self.light: Image.Image | None = None
+        self._open_ground: Image.Image | None = None  # background, to trim the diagonals
 
     # --- coordinates ------------------------------------------------------------------
 
@@ -119,10 +127,12 @@ class _Canvas:
 
     def draw(self) -> Image.Image:
         self._outside()
+        self._open_ground = self.image.copy() if self.floor.diagonals else None
         for room in self.floor.rooms:
             self._room_floor(room)
         self._grain()
         self._decals()
+        self._trim_diagonals()
         self._accents()
         self._object_shadows()
         self._walls_shadow()
@@ -138,6 +148,30 @@ class _Canvas:
         if self.options.grid:
             self._grid()
         return self._compose()
+
+    def _diagonal_line(self, diagonal: Diagonal) -> tuple[float, float, float, float]:
+        (ax, ay), (bx, by) = diagonal.vertices()
+        x0, y0 = self.px(ax, ay)
+        x1, y1 = self.px(bx, by)
+        return x0, y0, x1, y1
+
+    def _outside_triangle(self, diagonal: Diagonal) -> list[tuple[float, float]]:
+        """The corner of the diagonal's cell that lies outside the building."""
+        x0, y0, x1, y1 = self._diagonal_line(diagonal)
+        west, north = diagonal.cut.value[1] == "W", diagonal.cut.value[0] == "N"
+        cx, cy = self.px(diagonal.x + (0 if west else 1), diagonal.y + (0 if north else 1))
+        return [(x0, y0), (x1, y1), (cx, cy)]
+
+    def _trim_diagonals(self) -> None:
+        """Give the outside of every diagonal cell back to the background."""
+        if self._open_ground is None:
+            return
+        mask = Image.new("L", self.size, 0)
+        draw = ImageDraw.Draw(mask)
+        for diagonal in self.floor.diagonals:
+            draw.polygon(self._outside_triangle(diagonal), fill=255)
+        self.image.paste(self._open_ground, (0, 0), mask)
+        self.draw_base = ImageDraw.Draw(self.image, "RGBA")
 
     def _outside(self) -> None:
         if self.theme.outside_pattern is Pattern.PLAIN:
@@ -290,7 +324,7 @@ class _Canvas:
         """Neon strips along the walls of rooms whose material has an accent."""
         offset = self.cell * (self.theme.walls.interior / 2 + 0.12)
         width = max(1, round(self.cell * 0.05))
-        for edge in self.floor.walls:
+        for edge in self.floor.walls - self.floor.cut_edges:
             for cell, sign in zip(edge.cells(), (-1, 1), strict=True):
                 room = self.owner.get(cell)
                 if room is None:
@@ -321,9 +355,17 @@ class _Canvas:
 
     def _walls_shadow(self) -> None:
         shift = self.cell * 0.15
-        for edge in self.floor.walls:
+        for edge in self.floor.walls - self.floor.cut_edges:
             x0, y0, x1, y1 = self._wall_rect(edge)
             self.draw_shadow.rectangle((x0 + shift, y0 + shift, x1 + shift, y1 + shift), fill=255)
+        for diagonal in self.floor.diagonals:
+            x0, y0, x1, y1 = self._diagonal_line(diagonal)
+            self._thick_line(
+                self.draw_shadow,
+                (x0 + shift, y0 + shift, x1 + shift, y1 + shift),
+                self.cell * self.theme.walls.exterior,
+                255,
+            )
 
     def _apply_shadow(self) -> None:
         small = self.shadow.resize(
@@ -397,13 +439,40 @@ class _Canvas:
         opened = {e for o in self.floor.openings for e in o.edges}
         body = colour(self.theme.walls.colour)
         outline = colour(self.theme.walls.edge)
-        rects = [self._wall_rect(e) for e in self.floor.walls if e not in opened]
+        rects = [
+            self._wall_rect(e) for e in self.floor.walls - self.floor.cut_edges if e not in opened
+        ]
         width = max(1, round(self.cell * 0.04))
+        thickness = self.cell * self.theme.walls.exterior
+        diagonals = [self._diagonal_line(d) for d in self.floor.diagonals]
         for rect in rects:  # outline first, the bodies then cover the inner joints
             x0, y0, x1, y1 = rect
             self.draw_base.rectangle((x0 - width, y0 - width, x1 + width, y1 + width), fill=outline)
+        for line in diagonals:
+            self._thick_line(self.draw_base, line, thickness + 2 * width, outline)
         for rect in rects:
             self.draw_base.rectangle(rect, fill=body)
+        for line in diagonals:
+            self._thick_line(self.draw_base, line, thickness, body)
+
+    @staticmethod
+    def _thick_line(
+        draw: ImageDraw.ImageDraw,
+        line: tuple[float, float, float, float],
+        thickness: float,
+        fill: int | tuple[int, ...],
+    ) -> None:
+        """A wall of the given thickness along a slanted line, ends capped like a joint."""
+        x0, y0, x1, y1 = line
+        length = math.hypot(x1 - x0, y1 - y0)
+        nx, ny = (y1 - y0) / length * thickness / 2, -(x1 - x0) / length * thickness / 2
+        draw.polygon(
+            [(x0 + nx, y0 + ny), (x1 + nx, y1 + ny), (x1 - nx, y1 - ny), (x0 - nx, y0 - ny)],
+            fill=fill,
+        )
+        r = thickness / 2
+        for x, y in ((x0, y0), (x1, y1)):
+            draw.ellipse((x - r, y - r, x + r, y + r), fill=fill)
 
     def _openings(self) -> None:
         for opening in self.floor.openings:

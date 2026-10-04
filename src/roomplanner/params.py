@@ -99,6 +99,12 @@ class GenerationParams(BaseModel):
     condition: Condition = Condition.MAINTAINED
     security: Security = Security.LOW
     shape: Shape = Shape.RECTANGLE
+    chamfer: int = Field(
+        default=0,
+        ge=0,
+        description="Cut every convex corner of the footprint with a 45 degree wall this many "
+        "cells long (0: none; corners without room are left square)",
+    )
     street_side: Side = Side.S
     # Always set after validation; None only as input meaning "opposite of street_side".
     service_side: Side = Field(default=None, validate_default=False)  # pyright: ignore[reportAssignmentType]
@@ -119,7 +125,13 @@ class GenerationParams(BaseModel):
             return data
         values = cast(dict[str, Any], data)
         if values.get("room") is not None:  # a lone room is one plain floor
-            values = {**values, "floors_above": 1, "floors_below": 0, "shape": Shape.RECTANGLE}
+            values = {
+                **values,
+                "floors_above": 1,
+                "floors_below": 0,
+                "shape": Shape.RECTANGLE,
+                "chamfer": 0,
+            }
         if values.get("service_side") is None:
             street = Side(values.get("street_side", Side.S))
             return {**values, "service_side": street.opposite}

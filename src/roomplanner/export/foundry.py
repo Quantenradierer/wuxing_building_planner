@@ -35,9 +35,8 @@ from roomplanner.export.common import (
     Point,
     floor_image,
     opening_segment,
-    runs,
-    solid_walls,
     stable_id,
+    wall_segments,
 )
 from roomplanner.geometry import CELL_SIZE_M, Cell
 from roomplanner.model import Building, Floor, OpeningKind, OpeningState, Room
@@ -192,7 +191,7 @@ class _Level:
             }
             walls.append(wall | kind)
 
-        for a, b in runs(solid_walls(self.floor)):
+        for a, b in wall_segments(self.floor):
             add(a, b)
         for opening in self.floor.openings:
             a, b = opening_segment(opening)

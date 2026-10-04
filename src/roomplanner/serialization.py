@@ -12,7 +12,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from roomplanner.errors import SchemaError
-from roomplanner.geometry import CELL_SIZE_M, Axis, Cell, Edge, Side
+from roomplanner.geometry import CELL_SIZE_M, Axis, Cell, Corner, Diagonal, Edge, Side
 from roomplanner.model import (
     READABLE_SCHEMA_VERSIONS,
     SCHEMA_VERSION,
@@ -85,6 +85,11 @@ def _floor_to_dict(floor: Floor) -> JsonObject:
         "objects": [_object_to_dict(o) for o in floor.objects],
         "devices": [_device_to_dict(d) for d in floor.devices],
         "lights": [_light_to_dict(li) for li in floor.lights],
+        **(
+            {"diagonals": [[d.x, d.y, d.cut.value] for d in sorted(floor.diagonals)]}
+            if floor.diagonals
+            else {}
+        ),
     }
 
 
@@ -101,6 +106,7 @@ def _floor_from_dict(data: JsonObject) -> Floor:
         objects=tuple(_object_from_dict(o) for o in data.get("objects", [])),
         devices=tuple(_device_from_dict(d) for d in data.get("devices", [])),
         lights=tuple(_light_from_dict(li) for li in data.get("lights", [])),
+        diagonals=frozenset(Diagonal(x, y, Corner(c)) for x, y, c in data.get("diagonals", [])),
     )
 
 

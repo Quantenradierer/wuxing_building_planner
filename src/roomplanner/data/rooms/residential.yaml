@@ -10,6 +10,11 @@ rooms:
     min_side: 7
     windows: required
     door_width: 2
+  inner_flat:           # a windowless flat in the interior rows: a den instead of a living room
+    area: [80, 200]
+    min_side: 7
+    windows: forbidden
+    door_width: 2
   hallway:              # in a deep unit it runs along the whole unit (T-shaped)
     area: [9, 90]
     min_side: 3
@@ -32,6 +37,20 @@ rooms:
       - {object: sim_rig, placement: wall, count: [0, 1], wealth: [low, middle, high, luxury]}
       - {object: mattress, placement: scatter, count: [1, 2], wealth: [squatter]}
       - {object: fire_barrel, placement: scatter, count: [0, 1], wealth: [squatter]}
+  den:                  # living and sleeping room of an inner flat, lit by lamps and the trid
+    area: [40, 140]
+    min_side: 6
+    windows: forbidden
+    access: [hallway]
+    furniture:
+      - {object: bed_set, placement: wall, spaced: true}
+      - {object: sofa_set, placement: wall}
+      - {object: rug, placement: center, count: [0, 1]}
+      - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}   # the trid
+      - {object: sim_rig, placement: wall, count: [0, 1], wealth: [low, middle, high, luxury]}
+      - {object: wardrobe, placement: wall, count: [0, 1]}
+      - {object: mattress, placement: scatter, count: [1, 2], wealth: [squatter]}
   bedroom:
     area: [40, 70]
     min_side: 5

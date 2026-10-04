@@ -1,4 +1,4 @@
-# Roomplanner
+# Wuxing Building planner
 
 Parameterized generator for Shadowrun/cyberpunk building battle maps: offices, clinics,
 hospitals, apartment and coffin blocks, hotels, corp labs, nightclubs, warehouses and shops,
@@ -40,6 +40,7 @@ elevators change levels.
 | `--floors-below`       | basements (default 0)                                  |
 | `--wealth`             | squatter, low, middle, high, luxury                    |
 | `--shape`              | rectangle, l, u, t, z, stepped, irregular              |
+| `--chamfer`            | cut convex corners with 45° walls this many cells long |
 | `--street-side`        | N, E, S, W: main entrance (default S)                  |
 | `--service-side`       | N, E, S, W: loading dock / back door (default opposite)|
 | `--condition`          | pristine … ruined: debris, broken doors, breaches, dark|
@@ -48,7 +49,8 @@ elevators change levels.
 | `--seed`               | same seed, same building                               |
 | `-f/--format`          | ascii, json (full model), png, webp, dd2vtt, foundry   |
 | `--theme`              | image theme: bundled name (neon, neon_sprites) or YAML |
-| `--cell-px`            | image pixels per cell (default 50, i.e. 100 px per m)  |
+| `--cell-px`            | image pixels per cell (default 25, i.e. 50 px per m)   |
+| `--supersample`        | draw at n times the size and scale down (default 1 = off; 2 is smoother, ~4x slower) |
 | `--labels`, `--grid N` | room names in images; grid line every N cells          |
 | `--grid-m`             | VTT grid square in metres (default 1.0, multiple of 0.5)|
 | `--no-lights`          | VTT exports without light sources                      |

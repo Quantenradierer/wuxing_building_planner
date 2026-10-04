@@ -79,7 +79,7 @@ def _post(url: str, body: dict[str, Any]) -> tuple[int, dict[str, Any]]:
 
 def test_server_serves_page_and_api(base_url: str) -> None:
     with urllib.request.urlopen(base_url + "/") as response:
-        assert b"Roomplanner" in response.read()
+        assert b"Wuxing Building planner" in response.read()
     status, body = _post(base_url + "/api/generate", {"params": PARAMS, "cell_px": 6})
     assert status == 200
     assert body["building"]["seed"] == 5

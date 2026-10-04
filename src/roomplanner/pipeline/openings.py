@@ -17,7 +17,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
-from roomplanner.geometry import Axis, Cell, Edge, Side, boundary_edges
+from roomplanner.geometry import Axis, Cell, Diagonal, Edge, Side, boundary_edges
 from roomplanner.model import Floor, Opening, OpeningKind, Room, Swing
 from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import BuildingPlan, Context, EntranceRequest
@@ -40,18 +40,23 @@ class _Draft:
     walls: frozenset[Edge]
     doors: list[Opening]
     footprint: frozenset[Cell]  # the building's, less what this floor lacks (under a balcony)
+    diagonals: frozenset[Diagonal]
+
+
+SHORT_DOOR = 0.8  # chance that an oblong core room's door goes in a short wall
 
 
 @register("openings", "default")
 class DefaultOpenings:
     def build(self, ctx: Context, building: frozenset[Cell], plan: BuildingPlan) -> list[Floor]:
         rng = ctx.rng("openings")
+        building = building - plan.removed
         drafts: list[_Draft] = []
-        core_walls = _core_walls(ctx, plan)
+        core_walls = _core_walls(ctx, plan, rng)
         for planned in plan.floors:
             footprint = building - planned.cut
             rooms = tuple(
-                Room(f"{planned.level}.{i + 1}", r.type, r.cells, r.unit)
+                Room(f"{planned.level}.{i + 1}", r.type, r.cells - plan.removed, r.unit)
                 for i, r in enumerate(planned.rooms)
             )
             entries = {i for i, r in enumerate(planned.rooms) if r.entry}
@@ -108,7 +113,9 @@ class DefaultOpenings:
                 # count as reached, so their stalls get doors.
                 set() if circulation else {e.room for e in planned.entrances},
             )
-            used: set[Edge] = set()
+            diagonals = frozenset(d for d in plan.diagonals if d.cell in footprint)
+            cut = {e for d in diagonals for e in d.edges()}
+            used: set[Edge] = set(cut)  # nothing opens in the outside of a diagonal
             grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
             for request in planned.entrances:
                 door = _exterior_door(ctx, footprint, rooms, request, used, grid, rng)
@@ -123,7 +130,9 @@ class DefaultOpenings:
                     if door is not None:
                         doors.append(door)
                         used |= set(door.edges)
-            drafts.append(_Draft(planned.level, planned.role, rooms, walls, doors, footprint))
+            drafts.append(
+                _Draft(planned.level, planned.role, rooms, walls, doors, footprint, diagonals)
+            )
 
         candidates = _window_grid(ctx, building, plan.facade_grid)
         floors: list[Floor] = []
@@ -135,18 +144,37 @@ class DefaultOpenings:
                 indoor = d.footprint - outdoor
                 same = indoor == building
                 grid = candidates if same else _window_grid(ctx, indoor, plan.facade_grid)
-                fitting = [w for w, side in grid if _window_fits(ctx, indoor, d, w, side)]
+                cut = {e for g in d.diagonals for e in g.edges()}
+                fitting = [
+                    w
+                    for w, side in grid
+                    if cut.isdisjoint(w.edges) and _window_fits(ctx, indoor, d, w, side)
+                ]
                 windows = _daylight(ctx, indoor, d, _clear_of_doors(fitting, d.doors))
             floors.append(
-                Floor(d.level, d.footprint, d.rooms, d.walls, tuple(d.doors + windows), d.role)
+                Floor(
+                    d.level,
+                    d.footprint,
+                    d.rooms,
+                    d.walls,
+                    tuple(d.doors + windows),
+                    d.role,
+                    diagonals=d.diagonals,
+                )
             )
         return floors
 
 
-def _core_walls(ctx: Context, plan: BuildingPlan) -> dict[tuple[str, Cell], set[Edge]]:
-    """Per core room (type, first cell): walls it shares with circulation on every floor."""
+def _core_walls(
+    ctx: Context, plan: BuildingPlan, rng: random.Random
+) -> dict[tuple[str, Cell], set[Edge]]:
+    """Per core room (type, first cell): walls it shares with circulation on every floor.
+
+    Most oblong core rooms keep only their short walls if they share one (`SHORT_DOOR`): a
+    stairwell is usually entered through a short landing strip, not along a long one."""
     core_types = {c.room for c in ctx.rules.program.core}
     common: dict[tuple[str, Cell], set[Edge]] = {}
+    boxes: dict[tuple[str, Cell], frozenset[Cell]] = {}
     for planned in plan.floors:
         flow = {
             c for r in planned.rooms if ctx.rules.spec(r.type).circulation or r.hub for c in r.cells
@@ -159,6 +187,16 @@ def _core_walls(ctx: Context, plan: BuildingPlan) -> dict[tuple[str, Cell], set[
             }
             key = (room.type, min(room.cells))
             common[key] = common[key] & edges if key in common else edges
+            boxes[key] = room.cells
+    for key in sorted(common):
+        cells = boxes[key]
+        w = max(c.x for c in cells) - min(c.x for c in cells)
+        h = max(c.y for c in cells) - min(c.y for c in cells)
+        if w == h or rng.random() >= SHORT_DOOR:
+            continue
+        short = {e for e in common[key] if (e.axis is Axis.H) == (w < h)}
+        if short:
+            common[key] = short
     return common
 
 
@@ -655,7 +693,7 @@ def _daylight(
     Windows keep an edge of wall between each other and beside doors."""
     result = list(windows)
     blocked = _door_margins(draft.doors)
-    taken = {e for w in result for e in w.edges}
+    taken = {e for w in result for e in w.edges} | {e for g in draft.diagonals for e in g.edges()}
 
     def free(edge: Edge, facade: dict[Edge, Side]) -> bool:
         return edge in facade and edge not in blocked and edge not in taken

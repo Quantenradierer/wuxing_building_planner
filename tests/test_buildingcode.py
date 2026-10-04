@@ -8,10 +8,12 @@ from collections import Counter
 
 import pytest
 
+from roomplanner.buildingcode import code_warnings
 from roomplanner.errors import InfeasibleError
 from roomplanner.generator import generate
 from roomplanner.model import Building
 from roomplanner.params import BuildingType, GenerationParams
+from roomplanner.rules import rules_for
 
 TYPES = [BuildingType.OFFICE, BuildingType.HOTEL, BuildingType.CLINIC, BuildingType.APARTMENT]
 SEEDS = range(4)
@@ -41,9 +43,20 @@ def sweep() -> list[Building]:
                 building_type=t, width=60, depth=40, floors_above=2, seed=seed
             )
             try:
-                out.append(generate(params))
+                b = generate(params)
             except InfeasibleError:
                 continue
+            rules = rules_for(params.building_type, params.wealth, params.security)
+            out.append(
+                Building(
+                    b.params,
+                    b.seed,
+                    b.width,
+                    b.height,
+                    b.floors,
+                    (*b.warnings, *code_warnings(b, rules)),
+                )
+            )
     return out
 
 

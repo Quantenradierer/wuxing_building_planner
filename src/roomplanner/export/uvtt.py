@@ -21,8 +21,7 @@ from roomplanner.export.common import (
     floor_image,
     opening_segment,
     png_base64,
-    runs,
-    solid_walls,
+    wall_segments,
 )
 from roomplanner.model import Building, Floor, OpeningKind, OpeningState
 from roomplanner.render.theme import Theme
@@ -42,7 +41,7 @@ def to_uvtt(
     def grid(point: Point) -> dict[str, float]:
         return {"x": (point[0] + pad) / square, "y": (point[1] + pad) / square}
 
-    walls = [[grid(a), grid(b)] for a, b in runs(solid_walls(floor))]
+    walls = [[grid(a), grid(b)] for a, b in wall_segments(floor)]
     portals: list[dict[str, Any]] = []
     for door in floor.openings:
         # Windows can be opened (or climbed through when broken): portals like doors.

@@ -1,6 +1,6 @@
 # Requirements
 
-Roomplanner generates battle maps of building interiors for Shadowrun / cyberpunk
+Wuxing Building planner generates battle maps of building interiors for Shadowrun / cyberpunk
 tabletop games. Output is a structured model (versioned JSON), a minimal ASCII debug view,
 themed images and VTT exports; a local web UI previews buildings.
 
@@ -53,13 +53,15 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 | `condition`     | pristine, maintained, run_down, derelict, ruined    | condition layer, sprite look          |
 | `security`      | none, low, corporate, aaa                           | security layer                        |
 | `shape`         | rectangle, l, u, t, z, stepped, irregular           | `irregular` picks one by seed         |
+| `chamfer`       | ≥ 0 cells (default 0: square corners)               | 45° cuts at convex corners            |
 | `entrances`     | list of entrance kinds                              | overrides the building type's list    |
 | `street_side`   | N, E, S, W (default S)                              | main entrance faces this side         |
 | `service_side`  | N, E, S, W (default: opposite of `street_side`)     | service entrances face this side      |
 | `seed`          | integer (random if omitted, always recorded)        | full determinism                      |
 
 There are no size presets and no room overrides. Shapes other than the rectangle are unions
-of rectangles (no diagonals or curves); every arm is as deep as the layout's main part
+of rectangles (curves are not supported; diagonals only as `chamfer` corner cuts, see
+ADR 0014); every arm is as deep as the layout's main part
 (e.g. corridor plus one row of rooms).
 
 Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2, …

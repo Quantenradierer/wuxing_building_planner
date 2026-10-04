@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import string
 
-from roomplanner.geometry import Axis, Cell, Edge
+from roomplanner.geometry import Axis, Cell, Corner, Edge
 from roomplanner.model import Building, Floor, Opening, OpeningKind, OpeningState, Room
 from roomplanner.rules import load_objects
 
@@ -31,7 +31,7 @@ def render_floor(
     canvas = [[" "] * (2 * width + 1) for _ in range(2 * height + 1)]
     glyphs = glyphs or {}
 
-    for edge in floor.walls:
+    for edge in floor.walls - floor.cut_edges:
         row, col = _edge_pos(edge)
         canvas[row][col] = "-" if edge.axis is Axis.H else "|"
     for opening in floor.openings:
@@ -41,6 +41,10 @@ def render_floor(
     for row in range(0, 2 * height + 1, 2):
         for col in range(0, 2 * width + 1, 2):
             canvas[row][col] = _vertex_glyph(canvas, row, col)
+
+    for diagonal in floor.diagonals:  # in the middle of the cell, along the wall
+        slope = "/" if diagonal.cut in (Corner.NW, Corner.SE) else "\\"
+        canvas[2 * diagonal.y + 1][2 * diagonal.x + 1] = slope
 
     kinds = sorted({o.kind for o in floor.objects})
     floor_glyphs = _unique_glyphs(kinds, glyphs)

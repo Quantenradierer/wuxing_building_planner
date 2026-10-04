@@ -1,5 +1,17 @@
 # Units are cells: lengths in cells, areas in number of cells.
 rooms:
+  corridor:             # long bare halls get office furniture along the walls
+    area: [4, 40000]
+    min_side: 3
+    circulation: true
+    furniture:
+      - {object: fire_alarm_panel, placement: wall, per: 400, count: [0, 2]}
+      - {object: hydrant, placement: wall, per: 600, count: [0, 2]}
+      - {object: bench, placement: wall, per: 90, count: [0, 4]}
+      - {object: plant, placement: wall, per: 60, count: [0, 6]}
+      - {object: water_cooler, placement: wall, per: 150, count: [0, 3]}
+      - {object: wall_screen, placement: wall, per: 200, count: [0, 3]}   # news and notices
+      - {object: trash_bin, placement: wall, per: 200, count: [0, 3]}
   office:
     area: [56, 110]
     min_side: 7

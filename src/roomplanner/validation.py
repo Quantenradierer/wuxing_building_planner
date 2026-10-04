@@ -96,6 +96,11 @@ def _check_walls(floor: Floor) -> list[str]:
     stray = [e for e in floor.walls if not any(c in floor.footprint for c in e.cells())]
     if stray:
         problems.append(f"wall not touching the footprint at {min(stray)}")
+    for diagonal in sorted(floor.diagonals):
+        if diagonal.cell not in floor.footprint:
+            problems.append(f"diagonal at {diagonal.cell} is outside the footprint")
+        elif not all(e in floor.walls and floor.is_exterior_wall(e) for e in diagonal.edges()):
+            problems.append(f"diagonal at {diagonal.cell} does not cut off the open air")
     return problems
 
 
@@ -109,6 +114,8 @@ def _check_openings(floor: Floor) -> list[str]:
         if edges & used:
             problems.append(f"{opening.kind} at {opening.edges[0]} overlaps another opening")
         used |= edges
+        if edges & floor.cut_edges:
+            problems.append(f"{opening.kind} at {opening.edges[0]} is inside a diagonal")
     if floor.level == 0 and not any(
         o.kind is OpeningKind.DOOR and floor.is_exterior_wall(o.edges[0]) for o in floor.openings
     ):
@@ -274,6 +281,8 @@ def _check_objects(floor: Floor) -> list[Violation]:
         if room is None or not obj.cells <= room.cells:
             problems.append(f"{obj.kind} at ({obj.x}, {obj.y}) is outside room {obj.room}")
             continue
+        if obj.cells & floor.half_cells:
+            problems.append(f"{obj.kind} at ({obj.x}, {obj.y}) stands in a cell cut by a diagonal")
         cells = taken.setdefault(obj.room, set())
         if cells & obj.cells:
             problems.append(f"{obj.kind} at ({obj.x}, {obj.y}) overlaps another object")

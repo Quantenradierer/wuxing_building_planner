@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Roomplanner</title>
+<title>Wuxing Building planner</title>
 <style>
   :root {
     --bg: #14161b; --panel: #1c1f26; --line: #2c313b; --text: #d9dde5; --muted: #8a91a0;
@@ -74,7 +74,7 @@
 </head>
 <body>
 <aside>
-  <h1>Roomplanner</h1>
+  <h1>Wuxing Building planner</h1>
   <form id="form">
     <h2>Building</h2>
     <label class="field">Type <select name="building_type"></select></label>
@@ -88,6 +88,7 @@
       <label class="field">Basements <input name="floors_below" type="number" min="0" value="0"></label>
     </div>
     <label class="field">Shape <select name="shape"></select></label>
+    <label class="field">Corner cuts (cells, 0 = square) <input name="chamfer" type="number" min="0" value="0"></label>
     <label class="field">Wealth <select name="wealth"></select></label>
     <label class="field">Condition <select name="condition"></select></label>
     <label class="field">Security <select name="security"></select></label>
@@ -224,7 +225,7 @@ function fillRooms(selected = form.elements.room.value) {
 }
 function syncRoom() {
   const lone = form.elements.room.value !== "";
-  for (const name of ["floors_above", "floors_below", "shape"]) form.elements[name].disabled = lone;
+  for (const name of ["floors_above", "floors_below", "shape", "chamfer"]) form.elements[name].disabled = lone;
 }
 form.elements.building_type.addEventListener("change", () => fillRooms());
 form.elements.room.addEventListener("change", syncRoom);
@@ -242,7 +243,7 @@ function formValues() {
     building_type: f.building_type.value,
     width: +f.width.value, depth: +f.depth.value,
     floors_above: +f.floors_above.value, floors_below: +f.floors_below.value,
-    shape: f.shape.value, wealth: f.wealth.value, condition: f.condition.value,
+    shape: f.shape.value, chamfer: +f.chamfer.value, wealth: f.wealth.value, condition: f.condition.value,
     security: f.security.value, street_side: f.street_side.value,
     service_side: f.service_side.value || null,
     room: f.room.value || null,

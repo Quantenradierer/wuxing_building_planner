@@ -32,7 +32,10 @@ from roomplanner.render.theme import load_theme
 from roomplanner.serialization import from_json, to_json
 from roomplanner.ui.server import make_server
 
-app = typer.Typer(no_args_is_help=True, help="Generate Shadowrun/cyberpunk building battle maps.")
+app = typer.Typer(
+    no_args_is_help=True,
+    help="Wuxing Building planner: generate Shadowrun/cyberpunk building battle maps.",
+)
 
 
 class OutputFormat(StrEnum):
@@ -46,6 +49,12 @@ class OutputFormat(StrEnum):
 
 IMAGE_FORMATS = (OutputFormat.PNG, OutputFormat.WEBP)
 
+SupersampleOption = Annotated[
+    int,
+    typer.Option(
+        min=1, max=4, help="Draw at n times the size and scale down: smoother, n² times slower"
+    ),
+]
 ThemeOption = Annotated[str, typer.Option(help="Bundled theme name or theme YAML file")]
 CellPxOption = Annotated[int, typer.Option(min=4, max=400, help="Image pixels per cell")]
 LabelsOption = Annotated[bool, typer.Option(help="Write room types into images")]
@@ -70,6 +79,9 @@ def generate(
     condition: Condition = Condition.MAINTAINED,
     security: Security = Security.LOW,
     shape: Shape = Shape.RECTANGLE,
+    chamfer: Annotated[
+        int, typer.Option(help="Cut convex corners with 45 degree walls this many cells long")
+    ] = 0,
     street_side: Annotated[Side, typer.Option(case_sensitive=False)] = Side.S,
     service_side: Annotated[
         Side | None, typer.Option(case_sensitive=False, help="Default: opposite of street side")
@@ -90,6 +102,7 @@ def generate(
     ] = None,
     theme: ThemeOption = "neon",
     cell_px: CellPxOption = DEFAULT_CELL_PX,
+    supersample: SupersampleOption = 1,
     labels: LabelsOption = False,
     grid: GridOption = 0,
     grid_m: GridMOption = 1.0,
@@ -108,6 +121,7 @@ def generate(
             condition=condition,
             security=security,
             shape=shape,
+            chamfer=chamfer,
             street_side=street_side,
             service_side=service_side,  # pyright: ignore[reportArgumentType]  # None = default
             entrances=_entrances(entrances),
@@ -123,7 +137,7 @@ def generate(
         building,
         output_format,
         output,
-        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights),
+        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights, supersample=supersample),
     )
 
 
@@ -134,6 +148,7 @@ def render(
     output: Annotated[Path | None, typer.Option("--output", "-o")] = None,
     theme: ThemeOption = "neon",
     cell_px: CellPxOption = DEFAULT_CELL_PX,
+    supersample: SupersampleOption = 1,
     labels: LabelsOption = False,
     grid: GridOption = 0,
     grid_m: GridMOption = 1.0,
@@ -149,7 +164,7 @@ def render(
         building,
         output_format,
         output,
-        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights),
+        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights, supersample=supersample),
     )
 
 
@@ -165,7 +180,7 @@ def ui(
     except OSError as error:
         _fail(f"cannot listen on {host}:{port}: {error.strerror}")
     url = f"http://{host}:{server.server_port}/"
-    typer.echo(f"Roomplanner UI on {url} (Ctrl+C to stop)")
+    typer.echo(f"Wuxing Building planner UI on {url} (Ctrl+C to stop)")
     if browser:
         webbrowser.open(url)
     try:
@@ -185,6 +200,7 @@ class _ImageSettings:
     grid_m: float = 1.0
     lights: bool = True
     baked_lighting: bool = False
+    supersample: int = 1
 
 
 def _emit(
@@ -212,12 +228,22 @@ def _write_images(
         theme = load_theme(settings.theme)
     except (RoomplannerError, OSError) as error:
         _fail(str(error))
-    options = RenderOptions(settings.cell_px, labels=settings.labels, grid=settings.grid)
+    options = RenderOptions(
+        settings.cell_px,
+        labels=settings.labels,
+        grid=settings.grid,
+        supersample=settings.supersample,
+    )
     base = output or Path(f"{building.params.building_type}_{building.seed}.{output_format}")
     base.parent.mkdir(parents=True, exist_ok=True)
     for level, picture in render_images(building, theme, options).items():
         target = floor_path(base, level, output_format.value)
-        picture.save(target)
+        if output_format is OutputFormat.PNG:
+            # The grain is incompressible: level 1 is 3-4x faster than the default and ~20% bigger.
+            picture.save(target, compress_level=1)
+        else:
+            # Encoder method 1: 3x faster than the default 4, ~14% bigger.
+            picture.save(target, quality=80, method=1)
         typer.echo(str(target))
     for warning in building.warnings:
         typer.echo(f"warning: {warning}", err=True)

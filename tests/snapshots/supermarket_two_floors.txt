@@ -98,17 +98,17 @@ supermarket 64x40 cells, wealth=middle, seed=6
 
 == Ground floor ==
 +===--+===---===---===--+---+---+---+===--+---+---+---+===---===--+-----------+-----------+-----------------+--DDDDDDDDDDD------+
-"sss s|                l|www|www|www|     |www|www|www|    c     k|' ddddd j  |    sss sss|                 |                   |
-"    s|                 |www|www|www|     |www|www|www|           |  ddddd    |           |                 |                   |
-"s   s|<               l|www|www|www|     |www|www|www|  aaaaa    D  ddddd    D          s|                 |    ppp     ppp    |
-|s    |<                |   |   |   |     |   |   |   |  aaaaa    D           D          s|                 |    ppp     ppp    |
-|s   s|<               l|10 |11 |12 |     |14 |15 |16 |  aaaaa    D    c      D          s|                 |KKK ppp o   ppp    |
-|    s|<                +D--+D--+D--+     +D--+D--+D--+           |           |           |                 |KKK                |
-"s   s|<             SSS|                 |           |  c 20c    |    21    <|          s|      rrr       f|KKK                |
-"s    |              SSS|                 |           |           |          <|          s|      rrr        |                   |
-"s    |      c c     SSS|i                |i          |          F|          <|          s|      rrr        D                   |
-|     |              SSS|i                |i          |          F|          <|           |      rrr        D                   |
-|s 7 k|      ttt 8   SSS|i                |i          |          F|j j   j l <|    17    s|      rrr 18     D        19         |
+"sss s|                l|www|www|www|     |www|www|www|    c     k|           |    sss sss|                 |                   |
+"    s|                 |www|www|www|     |www|www|www|           |           |           |                 |                   |
+"s   s|<               l|www|www|www|     |www|www|www|  aaaaa    D    ddd    D          s|                 |    ppp     ppp    |
+|s    |<                |   |   |   |     |   |   |   |  aaaaa    D    ddd    D          s|                 |    ppp     ppp    |
+|s   s|<               l|10 |11 |12 |     |14 |15 |16 |  aaaaa    D  c ddd    D          s|                 |KKK ppp o   ppp    |
+|    s|<                +D--+D--+D--+     +D--+D--+D--+           |    ddd    |           |                 |KKK                |
+"s   s|<             SSS|                 |           |  c 20c    |< 21ddd    |          s|      rrr       f|KKK                |
+"s    |              SSS|                 |           |           |<          |          s|      rrr        |                   |
+"s    |      c c     SSS|i                |i          |          F|<         j|          s|      rrr        D                   |
+|     |              SSS|i                |i          |          F|<          |           |      rrr        D                   |
+|s 7 k|      ttt 8   SSS|i                |i          |          F|<   j      |    17    s|      rrr 18     D        19         |
 |s    |      ttt     SSS|                 |           +-----------+-+---------+          s|      rrr        D                   |
 "s    |      ttt     SSS|i       9        |i          |eeeeeeeeeeeee|eeeeeeeee|          s|      rrr        D          ppp      |
 "     |                 |i                |i          |eeeeeeeeeeeee|eeeeeeeee|           |      rrr        |          ppp      |
@@ -298,6 +298,3 @@ D                                                              6                
    12  cold_storage         72 cells
    13  cold_storage        120 cells
    14  cold_storage         72 cells
-
-Warnings:
-  - building code, level 1: 13 cells farther than 35 m from an exit, e.g. stockroom 1.6

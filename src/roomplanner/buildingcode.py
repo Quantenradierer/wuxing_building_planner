@@ -32,6 +32,7 @@ class Grid:
         self.walls = floor.walls
         self.passable = floor.passable_edges()
         self.owner = {c: r for r in floor.rooms for c in r.cells}
+        self._adjacent: dict[Cell, list[tuple[Cell, float]]] = {}
 
     def open(self, a: Cell, b: Cell) -> bool:
         if b not in self.cells:
@@ -39,7 +40,14 @@ class Grid:
         e = Edge.between(a, b)
         return e not in self.walls or e in self.passable
 
-    def neighbours(self, c: Cell):
+    def neighbours(self, c: Cell) -> list[tuple[Cell, float]]:
+        """Open neighbours with move costs; cached, as every exit's search reuses them."""
+        out = self._adjacent.get(c)
+        if out is None:
+            out = self._adjacent[c] = list(self._neighbours(c))
+        return out
+
+    def _neighbours(self, c: Cell):
         for s in SIDES:
             n = c.neighbour(s)
             if self.open(c, n):

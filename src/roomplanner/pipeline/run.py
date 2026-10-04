@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import cast
 
-from roomplanner.buildingcode import code_warnings
 from roomplanner.errors import InfeasibleError
 from roomplanner.model import Building
 from roomplanner.params import GenerationParams
@@ -17,6 +16,7 @@ from roomplanner.pipeline.base import (
     LayoutStrategy,
     OpeningsStrategy,
 )
+from roomplanner.pipeline.footprint import chamfer
 from roomplanner.pipeline.registry import resolve
 from roomplanner.rules import Rules
 from roomplanner.validation import Severity, validate
@@ -57,6 +57,9 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
         attempt_ctx = Context(params, rules, seed, width, height, attempt)
         try:
             plan = layout.layout(attempt_ctx, footprint)
+            plan.removed, plan.diagonals = chamfer(
+                footprint, params.chamfer, (r.cells for f in plan.floors for r in f.rooms)
+            )
         except AllocationError as error:
             failure = error
             continue
@@ -76,6 +79,4 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
 
     if best is None:
         raise InfeasibleError(f"required rooms do not fit after {MAX_ATTEMPTS} attempts: {failure}")
-    building = best[1]
-    code = code_warnings(building, rules)
-    return Building(params, seed, width, height, building.floors, (*building.warnings, *code))
+    return best[1]

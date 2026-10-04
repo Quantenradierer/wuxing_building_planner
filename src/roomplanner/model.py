@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from roomplanner.geometry import Axis, Cell, Edge, Side
+from roomplanner.geometry import Axis, Cell, Diagonal, Edge, Side
 from roomplanner.params import GenerationParams, Wealth
 
 SCHEMA_VERSION = 3
@@ -172,6 +172,17 @@ class Floor:
     objects: tuple[PlacedObject, ...] = ()
     devices: tuple[Device, ...] = ()
     lights: tuple[Light, ...] = ()
+    diagonals: frozenset[Diagonal] = frozenset()  # 45 degree walls across footprint cells
+
+    @property
+    def half_cells(self) -> frozenset[Cell]:
+        """Cells a diagonal cuts in two: floor, but nothing stands in them."""
+        return frozenset(d.cell for d in self.diagonals)
+
+    @property
+    def cut_edges(self) -> frozenset[Edge]:
+        """Wall edges in the outside triangle of a diagonal cell: no door, window or drawing."""
+        return frozenset(e for d in self.diagonals for e in d.edges())
 
     @property
     def name(self) -> str:

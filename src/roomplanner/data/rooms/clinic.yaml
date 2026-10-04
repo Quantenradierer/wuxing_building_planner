@@ -86,7 +86,7 @@ rooms:
     furniture:
       - {object: counter, placement: wall, count: [1, 2]}
       - {object: terminal, placement: wall, count: [1, 2]}
-      - {object: chair, placement: at, at: counter, count: [1, 2]}
+      - {object: chair, placement: at, at: counter, beside: [front], count: [1, 2]}
       - {object: medical_cabinet, placement: wall, count: [0, 1]}
       - {object: medical_cart, placement: scatter, count: [0, 1]}
   pharmacy:

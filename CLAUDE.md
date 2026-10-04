@@ -1,4 +1,4 @@
-# Roomplanner
+# Wuxing Building planner
 
 Generator for Shadowrun/cyberpunk building battle maps. Output: versioned JSON, ASCII debug
 view, themed images (Pillow) and VTT exports (Universal VTT, Foundry scenes).

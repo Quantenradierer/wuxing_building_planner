@@ -43,7 +43,7 @@ from roomplanner.serialization import to_dict
 type JsonObject = dict[str, Any]
 
 PADDING = 2  # cells around the building in the images; the page needs it for its overlays
-DEFAULT_CELL_PX = 24  # smaller than the CLI's default: fast enough for clicking through seeds
+DEFAULT_CELL_PX = 24  # a bit smaller than the CLI's: fast enough for clicking through seeds
 MAX_CELL_PX = 100
 _DATA = resources.files("roomplanner") / "data"
 
@@ -77,7 +77,9 @@ def generate_response(request: JsonObject) -> JsonObject:
         raise RequestError(f"cell_px must be 4..{MAX_CELL_PX}")
     theme = load_theme(str(request.get("theme", "neon")))
     building = generate(params)
-    render = RenderOptions(cell_px, padding=PADDING, lighting=bool(request.get("lighting", True)))
+    render = RenderOptions(
+        cell_px, padding=PADDING, lighting=bool(request.get("lighting", True)), supersample=1
+    )
     images = {
         str(floor.level): _data_url(render_floor(building, floor, theme, render))
         for floor in building.floors

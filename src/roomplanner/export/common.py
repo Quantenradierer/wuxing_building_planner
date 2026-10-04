@@ -12,7 +12,7 @@ from PIL import Image
 from roomplanner.errors import RoomplannerError
 from roomplanner.geometry import CELL_SIZE_M, Axis, Edge
 from roomplanner.model import Building, Floor, Opening, OpeningKind
-from roomplanner.render.image import RenderOptions, render_floor
+from roomplanner.render.image import DEFAULT_CELL_PX, RenderOptions, render_floor
 from roomplanner.render.theme import Theme
 
 type Point = tuple[float, float]
@@ -22,7 +22,7 @@ type Segment = tuple[Point, Point]
 @dataclass(frozen=True)
 class ExportOptions:
     grid_m: float = 1.0  # size of one VTT grid square in metres
-    cell_px: int = 50
+    cell_px: int = DEFAULT_CELL_PX
     lights: bool = True
     baked_lighting: bool = False  # True: the image carries the light map, the VTT stays bright
 
@@ -39,7 +39,10 @@ class ExportOptions:
     def render(self) -> RenderOptions:
         # Pad by one grid square so the VTT grid stays aligned with the cells.
         return RenderOptions(
-            cell_px=self.cell_px, padding=self.cells_per_square, lighting=self.baked_lighting
+            cell_px=self.cell_px,
+            padding=self.cells_per_square,
+            lighting=self.baked_lighting,
+            supersample=1,  # same as the CLI image and the UI preview
         )
 
     @property
@@ -95,7 +98,16 @@ def opening_segment(opening: Opening) -> Segment:
 
 def solid_walls(floor: Floor) -> set[Edge]:
     """Wall edges without any opening (doors, windows and breaches are exported apart)."""
-    return set(floor.walls) - {e for o in floor.openings for e in o.edges}
+    return set(floor.walls) - floor.cut_edges - {e for o in floor.openings for e in o.edges}
+
+
+def wall_segments(floor: Floor) -> list[Segment]:
+    """Solid walls as segments: straight runs and the floor's diagonals."""
+    diagonals: list[Segment] = [
+        ((float(a[0]), float(a[1])), (float(b[0]), float(b[1])))
+        for a, b in (d.vertices() for d in sorted(floor.diagonals))
+    ]
+    return [*runs(solid_walls(floor)), *diagonals]
 
 
 def openings_of(floor: Floor, kind: OpeningKind) -> list[Opening]:

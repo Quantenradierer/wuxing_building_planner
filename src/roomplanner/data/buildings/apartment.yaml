@@ -6,7 +6,7 @@ layout: corridor
 corridor:
   width: 3
   hallway_width: 3
-strip_depth: [14, 22]      # apartments reach from the corridor to the facade
+strip_depth: [14, 26]      # apartments reach from the corridor to the facade
 facade:
   module: 3
   window: 2
@@ -39,6 +39,11 @@ units:
     front: [bathroom, kitchen]
     back: [living_room]
     front_fill: closet
+  inner_flat:
+    hall: hallway
+    front: [bathroom, kitchen]
+    back: [den]
+    front_fill: closet
 
 floor_roles:
   ground:
@@ -51,16 +56,18 @@ floor_roles:
       - {room: storage, count: [0, 1], near: core, priority: optional, when: "floors_below == 0"}
       - {room: apartment, fill: true}
       - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
-      - {room: laundry, fill: true}            # interior rows without facade
-      - {room: drone_bay, fill: true}          # parcel drones
-      - {room: mechanical_room, fill: true}
+      - {room: inner_flat, fill: true}         # interior rows without facade: windowless flats
+      - {room: laundry, count: [1, 2]}
+      - {room: drone_bay, count: [1, 2]}       # parcel drones
+      - {room: mechanical_room, count: [0, 1]}
   residential:
     applies: [upper, top]
     rooms:
       - {room: apartment, fill: true}
       - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
-      - {room: laundry, fill: true}            # interior rows without facade
-      - {room: mechanical_room, fill: true}
+      - {room: inner_flat, fill: true}         # interior rows without facade: windowless flats
+      - {room: laundry, count: [0, 1]}
+      - {room: mechanical_room, count: [0, 1]}
   basement:
     applies: [basement]
     rooms:

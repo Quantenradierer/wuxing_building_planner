@@ -32,6 +32,7 @@ from roomplanner.pipeline.base import (
     PlannedRoom,
 )
 from roomplanner.pipeline.layout.allocation import Allocator, Anchors, Segment
+from roomplanner.pipeline.layout.corridors import fill_pockets, fold_corridors
 from roomplanner.pipeline.layout.frame import (
     Band,
     BandKind,
@@ -740,6 +741,9 @@ class CorridorLayout:
 
         rooms = absorb_leftovers(rooms, ctx.rules)
         rooms = trim_hallways(rooms, ctx.rules, frozenset(hint for _, _, hint in hints))
+        doors = frozenset(hint for _, _, hint in hints)
+        rooms = fold_corridors(rooms, ctx.rules, doors)
+        rooms = fill_pockets(rooms, ctx.rules, doors)
         rooms = _merge_corridors(rooms)
         # No stall where an exterior door goes (the front office's WC beside the entrance).
         reach = max(rule.width for rule in ctx.rules.entrances(ctx.params).values())

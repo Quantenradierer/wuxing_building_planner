@@ -92,9 +92,15 @@ class Edge(NamedTuple):
 
     @staticmethod
     def between(a: Cell, b: Cell) -> Edge:
-        for side in Side:
-            if a.neighbour(side) == b:
-                return Edge.of(a, side)
+        dx, dy = b.x - a.x, b.y - a.y
+        if dx == 0 and dy == -1:
+            return Edge(a.x, a.y, Axis.H)
+        if dx == 0 and dy == 1:
+            return Edge(a.x, a.y + 1, Axis.H)
+        if dy == 0 and dx == -1:
+            return Edge(a.x, a.y, Axis.V)
+        if dy == 0 and dx == 1:
+            return Edge(a.x + 1, a.y, Axis.V)
         raise ValueError(f"cells {a} and {b} are not adjacent")
 
     def cells(self) -> tuple[Cell, Cell]:
@@ -108,6 +114,56 @@ class Edge(NamedTuple):
         if self.axis is Axis.H:
             return Edge(self.x + 1, self.y, self.axis)
         return Edge(self.x, self.y + 1, self.axis)
+
+
+class Corner(StrEnum):
+    """A corner of a cell, named by the two sides that meet there."""
+
+    NW = "NW"
+    NE = "NE"
+    SW = "SW"
+    SE = "SE"
+
+    @property
+    def sides(self) -> tuple[Side, Side]:
+        return _CORNER_SIDES[self]
+
+
+_CORNER_SIDES = {
+    Corner.NW: (Side.N, Side.W),
+    Corner.NE: (Side.N, Side.E),
+    Corner.SW: (Side.S, Side.W),
+    Corner.SE: (Side.S, Side.E),
+}
+
+
+class Diagonal(NamedTuple):
+    """A 45 degree wall across cell (x, y): the `cut` corner's triangle is outside.
+
+    The cell is half floor. Its two edges on the cut corner lie in the outside triangle: they
+    stay in `Floor.walls` (the cell borders non-footprint cells there) but are not drawn or
+    exported, the diagonal replaces them.
+    """
+
+    x: int
+    y: int
+    cut: Corner
+
+    @property
+    def cell(self) -> Cell:
+        return Cell(self.x, self.y)
+
+    def edges(self) -> tuple[Edge, Edge]:
+        """The cell's two edges on the cut corner, replaced by the diagonal."""
+        a, b = self.cut.sides
+        return Edge.of(self.cell, a), Edge.of(self.cell, b)
+
+    def vertices(self) -> tuple[tuple[int, int], tuple[int, int]]:
+        """The diagonal's end points, the cell's two corners next to the cut one."""
+        west, north = self.cut.value[1] == "W", self.cut.value[0] == "N"
+        x_cut, y_cut = self.x + (0 if west else 1), self.y + (0 if north else 1)
+        x_far, y_far = self.x + (1 if west else 0), self.y + (1 if north else 0)
+        return (x_far, y_cut), (x_cut, y_far)
 
 
 def rectangle(x: int, y: int, width: int, height: int) -> frozenset[Cell]:

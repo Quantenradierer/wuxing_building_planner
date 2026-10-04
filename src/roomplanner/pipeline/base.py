@@ -9,7 +9,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from roomplanner.geometry import Axis, Cell, Side
+from roomplanner.geometry import Axis, Cell, Diagonal, Side
 from roomplanner.model import Floor
 from roomplanner.params import EntranceKind, GenerationParams
 from roomplanner.rules import Rules
@@ -69,6 +69,9 @@ class BuildingPlan:
     # Facade grid per wall direction: (absolute offset, module). Partitions sit on grid
     # points, so windows are placed between them. Directions without a grid centre windows.
     facade_grid: dict[Axis, tuple[int, int]] = field(default_factory=dict[Axis, tuple[int, int]])
+    # Chamfered corners (set by the pipeline, not the layout): 45 degree walls across cells.
+    removed: frozenset[Cell] = frozenset()  # footprint cells outside the diagonals
+    diagonals: frozenset[Diagonal] = frozenset()
 
 
 class AllocationError(Exception):
