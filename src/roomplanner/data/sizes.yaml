@@ -1,0 +1,8 @@
+# Size classes of the partition layout: the upper area bound (cells) of each class, smallest
+# first; anything above the last bound is `huge`. A room type fits every class its area range
+# overlaps (a meeting room, 64-128 cells, is medium or large). Units are cells (0.25 m2).
+classes:
+  tiny: 16        # closets, stalls, booths
+  small: 40       # vending, huddle, kitchenette
+  medium: 90      # toilets, offices, meeting rooms
+  large: 200      # big meeting rooms, board rooms

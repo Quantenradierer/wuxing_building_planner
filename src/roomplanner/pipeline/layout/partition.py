@@ -1,0 +1,483 @@
+"""Partition layout: the floor is one big room that gets cut into smaller ones.
+
+1. The lobby is reserved at the street facade (ground floor), then a corridor spine is cut
+   out along the long axis of the footprint, joined to the lobby or the street, and
+   branched wherever some cell would be farther from circulation than a row of rooms is
+   deep.
+2. The core (stairwells, lifts) takes chunks next to the corridor.
+3. What is left splits into regions. Per floor role the regions are typed and cut further
+   (`partition_assign.py`): the rooms the floor must have first, then the role's mix.
+
+Corridor and core are the same on every floor; floors of one role share their partition.
+Any footprint works: the footprint is simply the big room. See docs/architecture.md.
+"""
+
+from __future__ import annotations
+
+import math
+import random
+from dataclasses import dataclass
+
+from roomplanner.geometry import Cell, Side, thinnest_extent
+from roomplanner.params import EntranceKind
+from roomplanner.pipeline.base import (
+    AllocationError,
+    BuildingPlan,
+    Context,
+    EntranceRequest,
+    FloorPlan,
+    PlannedRoom,
+)
+from roomplanner.pipeline.layout.leftovers import absorb_leftovers
+from roomplanner.pipeline.layout.partition_assign import Assigner
+from roomplanner.pipeline.layout.regions import (
+    bbox,
+    components,
+    contact,
+    descend,
+    distances,
+    facade,
+    opened,
+    thicken,
+)
+from roomplanner.pipeline.layout.stalls import carve_stalls
+from roomplanner.pipeline.registry import register
+from roomplanner.rules import Priority, RoomEntry, evaluate, variables
+
+CORE_CANDIDATES = 30  # core positions scored per room
+SLIVER = 16  # cells: a free piece smaller than this beside the core counts as waste
+
+
+@dataclass
+class Skeleton:
+    corridor: frozenset[Cell]
+    cores: list[PlannedRoom]
+    lobby: frozenset[Cell]  # empty without a lobby
+    lobby_type: str | None
+    main_hint: Cell  # facade cell of the main entrance
+    main_side: Side
+
+
+@register("layout", "partition")
+class PartitionLayout:
+    def main_min_depth(self, ctx: Context) -> int:
+        return ctx.rules.program.corridor.width + ctx.rules.program.strip_depth[0]
+
+    def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
+        program = ctx.rules.program
+        if program.units:
+            return [f"{program.building}: units are not supported by the partition layout yet"]
+        problems: list[str] = []
+        if min(ctx.width, ctx.height) < self.main_min_depth(ctx):
+            problems.append(
+                f"building is {min(ctx.width, ctx.height)} cells across, needs at least "
+                f"{self.main_min_depth(ctx)} for its corridor and rooms"
+            )
+        core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
+        corridor = program.corridor.width * max(ctx.width, ctx.height)
+        for level in ctx.params.levels:
+            _, role = ctx.rules.role_for(level, ctx.params)
+            needed = core + corridor
+            for entry in role.rooms:
+                if entry.priority is Priority.REQUIRED and evaluate(
+                    entry.when, variables(ctx.params, level)
+                ):
+                    low = (entry.area or ctx.rules.spec(entry.room).area)[0]
+                    needed += low * entry.count_range[0]
+            if needed > len(footprint):
+                problems.append(
+                    f"level {level}: core, corridor and required rooms need {needed} cells, "
+                    f"the floor has {len(footprint)}"
+                )
+        return problems
+
+    def layout(self, ctx: Context, footprint: frozenset[Cell]) -> BuildingPlan:
+        rng = ctx.rng("layout")
+        skeleton = self._skeleton(ctx, footprint, rng)
+        plan = BuildingPlan(floors=[])
+        shared: dict[tuple[str, bool], tuple[list[PlannedRoom], list[str]]] = {}
+        for level in ctx.params.levels:
+            plan.floors.append(self._floor(ctx, footprint, skeleton, level, shared, plan))
+        return plan
+
+    # --- skeleton ---------------------------------------------------------------------
+
+    def _skeleton(self, ctx: Context, footprint: frozenset[Cell], rng: random.Random) -> Skeleton:
+        program = ctx.rules.program
+        width = program.corridor.width
+        street = ctx.params.street_side
+        lobby_entry = _lobby_entry(ctx)
+        lobby = frozenset[Cell]()
+        hint: Cell | None = None
+        if lobby_entry is not None:
+            found = self._lobby(ctx, footprint, street, lobby_entry, rng)
+            if found is None:
+                raise AllocationError("no space for the lobby")
+            lobby, hint = found
+
+        corridor = self._spine(footprint, width, rng)
+        access = lobby if lobby_entry and _is_circulation(ctx, lobby_entry.room) else frozenset()
+        if lobby:
+            corridor = self._join(footprint, corridor, lobby, width, rng)
+        else:
+            gate, path = self._gate(footprint, corridor, street, width)
+            corridor |= path
+            hint = gate
+        assert hint is not None
+        corridor = self._branch(footprint, corridor, lobby, access, ctx)
+        corridor = self._tidy(corridor, lobby, width)
+        cores = self._cores(ctx, footprint, corridor | lobby, rng)
+        return Skeleton(
+            corridor, cores, lobby, lobby_entry.room if lobby_entry else None, hint, street
+        )
+
+    def _lobby(
+        self,
+        ctx: Context,
+        footprint: frozenset[Cell],
+        street: Side,
+        entry: RoomEntry,
+        rng: random.Random,
+    ) -> tuple[frozenset[Cell], Cell] | None:
+        """A rectangle against the street facade, in its longest straight stretch."""
+        spec = ctx.rules.spec(entry.room)
+        low, high = entry.area or spec.area
+        area = rng.randint(low, high)
+        along = (1, 0) if street in (Side.N, Side.S) else (0, 1)
+        inward = street.opposite.delta
+        runs: dict[int, list[int]] = {}
+        for cell, _ in facade(footprint, footprint):
+            if cell.neighbour(street) not in footprint:
+                key, pos = (cell.y, cell.x) if along == (1, 0) else (cell.x, cell.y)
+                runs.setdefault(key, []).append(pos)
+        stretches: list[tuple[int, int, int]] = []  # (length, key, first position)
+        for key, positions in runs.items():
+            positions.sort()
+            start = previous = positions[0]
+            for pos in [*positions[1:], None]:
+                if pos is None or pos != previous + 1:
+                    stretches.append((previous - start + 1, key, start))
+                    if pos is not None:
+                        start = pos
+                if pos is not None:
+                    previous = pos
+        if not stretches:
+            return None
+        length, key, first = max(stretches)
+        side = max(spec.min_side, round(math.sqrt(area * 1.6)))
+        wide = min(length, side)
+        start = first + (length - wide) // 2
+        start += rng.randint(-((length - wide) // 3), (length - wide) // 3)
+        for depth in range(max(spec.min_side, math.ceil(area / wide)), spec.min_side - 1, -1):
+            cells: set[Cell] = set()
+            for i in range(wide):
+                for j in range(depth):
+                    pos = start + i
+                    x = pos * along[0] + key * (1 - along[0]) + inward[0] * j
+                    y = pos * along[1] + key * (1 - along[1]) + inward[1] * j
+                    cells.add(Cell(x, y))
+            if cells <= footprint:
+                pos = start + wide // 2
+                at = Cell(
+                    pos * along[0] + key * (1 - along[0]), pos * along[1] + key * (1 - along[1])
+                )
+                return frozenset(cells), at
+        return None
+
+    @staticmethod
+    def _spine(footprint: frozenset[Cell], width: int, rng: random.Random) -> frozenset[Cell]:
+        """A band of corridor width along the long axis, near the middle."""
+        x0, y0, x1, y1 = bbox(footprint)
+        horizontal = x1 - x0 >= y1 - y0
+        lo, hi = (y0, y1) if horizontal else (x0, x1)
+        jitter = rng.randint(-((hi - lo) // 8), (hi - lo) // 8)
+        start = (lo + hi - width) // 2 + jitter
+        band = frozenset(
+            c for c in footprint if start <= (c.y if horizontal else c.x) < start + width
+        )
+        if not band:
+            centre = Cell((x0 + x1) // 2, (y0 + y1) // 2)
+            nearest = min(footprint, key=lambda c: abs(c.x - centre.x) + abs(c.y - centre.y))
+            return thicken([nearest], width, footprint)
+        return components(band)[0]
+
+    @staticmethod
+    def _join(
+        footprint: frozenset[Cell],
+        corridor: frozenset[Cell],
+        lobby: frozenset[Cell],
+        width: int,
+        rng: random.Random,
+    ) -> frozenset[Cell]:
+        """Corridor from the spine to the lobby, unless they already touch."""
+        if contact(lobby, corridor) >= 2:
+            return corridor - lobby
+        corridor -= lobby
+        dist = distances(corridor, footprint - lobby)
+        borders = [
+            c for c in footprint - lobby if c in dist and any(c.neighbour(s) in lobby for s in Side)
+        ]
+        if not borders:
+            return corridor
+        start = min(borders, key=lambda c: (dist[c], c))
+        path = descend(start, dist)
+        return corridor | (thicken([start, *path], width, footprint) - lobby)
+
+    @staticmethod
+    def _gate(
+        footprint: frozenset[Cell], corridor: frozenset[Cell], street: Side, width: int
+    ) -> tuple[Cell, frozenset[Cell]]:
+        """Without a lobby: the street facade cell near the middle that the corridor reaches
+        with the shortest branch (none needed if the corridor itself touches the street)."""
+        x0, y0, x1, y1 = bbox(footprint)
+        middle = ((x0 + x1) / 2, (y0 + y1) / 2)
+        dist = distances(corridor, footprint)
+        edge = [c for c in footprint if c.neighbour(street) not in footprint]
+        gate = min(
+            edge,
+            key=lambda c: (dist[c] + 0.3 * (abs(c.x - middle[0]) + abs(c.y - middle[1])), c),
+        )
+        path = descend(gate, dist) if dist[gate] > 0 else []
+        return gate, thicken([gate, *path], width, footprint) if path else frozenset()
+
+    @staticmethod
+    def _branch(
+        footprint: frozenset[Cell],
+        corridor: frozenset[Cell],
+        lobby: frozenset[Cell],
+        access: frozenset[Cell],
+        ctx: Context,
+    ) -> frozenset[Cell]:
+        """Side corridors toward cells farther from circulation than a row of rooms is deep."""
+        program = ctx.rules.program
+        reach = program.strip_depth[1]
+        for _ in range(16):
+            dist = distances(corridor | access, footprint - (lobby - access))
+            far = [c for c in footprint - lobby if dist.get(c, 0) > reach]
+            if not far:
+                break
+            # A stub to the middle of the largest far piece: rooms on both sides reach it.
+            piece = components(far)[0]
+            cx = sum(c.x for c in piece) / len(piece)
+            cy = sum(c.y for c in piece) / len(piece)
+            tip = min(piece, key=lambda c: (abs(c.x - cx) + abs(c.y - cy), c))
+            path = [tip, *descend(tip, dist)[1:]]
+            path = _to_wall(path, footprint)
+            corridor |= thicken(path, program.corridor.width, footprint) - lobby
+        return corridor
+
+    @staticmethod
+    def _tidy(corridor: frozenset[Cell], lobby: frozenset[Cell], width: int) -> frozenset[Cell]:
+        """Drop bits thinner than the corridor and pieces that lead nowhere."""
+        kept = opened(corridor, width)
+        pieces = [p for p in components(kept) if not lobby or contact(p, lobby) >= 2]
+        return pieces[0] if pieces else kept
+
+    def _cores(
+        self,
+        ctx: Context,
+        footprint: frozenset[Cell],
+        circulation: frozenset[Cell],
+        rng: random.Random,
+    ) -> list[PlannedRoom]:
+        rooms: list[PlannedRoom] = []
+        taken = set(circulation)
+        x0, y0, x1, y1 = bbox(footprint)
+        diagonal = (x1 - x0) + (y1 - y0)
+        cx = sum(c.x for c in circulation) / len(circulation)
+        cy = sum(c.y for c in circulation) / len(circulation)
+        for entry in ctx.rules.active_core(ctx.params):
+            if entry.place == "hall":
+                continue
+            free = footprint - taken
+            options = self._core_options(free, circulation, entry.size)
+            rng.shuffle(options)
+            scored: list[tuple[float, frozenset[Cell]]] = []
+            for option in options[:CORE_CANDIDATES]:
+                rest = free - option
+                slivers = sum(
+                    len(p) for p in components(rest) if len(p) < SLIVER or thinnest_extent(p, p) < 3
+                )
+                ox = sum(c.x for c in option) / len(option)
+                oy = sum(c.y for c in option) / len(option)
+                if rooms and entry.place == "far":
+                    first = rooms[0].cells
+                    fx = sum(c.x for c in first) / len(first)
+                    fy = sum(c.y for c in first) / len(first)
+                    away = (abs(ox - fx) + abs(oy - fy)) / diagonal
+                    score = slivers / 10 - 2 * away
+                elif rooms:
+                    first = rooms[0].cells
+                    fx = sum(c.x for c in first) / len(first)
+                    fy = sum(c.y for c in first) / len(first)
+                    score = slivers / 10 + 2 * (abs(ox - fx) + abs(oy - fy)) / diagonal
+                else:
+                    score = slivers / 10 + 0.5 * (abs(ox - cx) + abs(oy - cy)) / diagonal
+                scored.append((score + rng.uniform(0, 0.1), option))
+            if not scored:
+                if entry.place == "far":
+                    continue
+                raise AllocationError(f"no space for the {entry.room}")
+            _, cells = min(scored, key=lambda s: (s[0], min(s[1])))
+            taken |= cells
+            rooms.append(PlannedRoom(entry.room, cells))
+        return rooms
+
+    @staticmethod
+    def _core_options(
+        free: frozenset[Cell], circulation: frozenset[Cell], size: tuple[int, int]
+    ) -> list[frozenset[Cell]]:
+        """Rectangles of the core's size with a long wall on the corridor."""
+        found: set[frozenset[Cell]] = set()
+        shapes = {size, (size[1], size[0])}
+        for cell in sorted(free):
+            for side in Side:
+                if cell.neighbour(side) not in circulation:
+                    continue
+                inward = side.opposite.delta
+                along = (1, 0) if inward[0] == 0 else (0, 1)
+                for length, depth in shapes:
+                    for shift in (0, -(length - 1)):
+                        cells = frozenset(
+                            Cell(
+                                cell.x + (shift + i) * along[0] + j * inward[0],
+                                cell.y + (shift + i) * along[1] + j * inward[1],
+                            )
+                            for i in range(length)
+                            for j in range(depth)
+                        )
+                        if cells <= free and contact(cells, circulation) >= min(length, 2):
+                            found.add(cells)
+        return sorted(found, key=min)
+
+    # --- floors -----------------------------------------------------------------------
+
+    def _floor(
+        self,
+        ctx: Context,
+        footprint: frozenset[Cell],
+        skeleton: Skeleton,
+        level: int,
+        shared: dict[tuple[str, bool], tuple[list[PlannedRoom], list[str]]],
+        plan: BuildingPlan,
+    ) -> FloorPlan:
+        role_name, role = ctx.rules.role_for(level, ctx.params)
+        ground = level == 0
+        core_cells = frozenset(c for r in skeleton.cores for c in r.cells)
+        if role.roof is not None:
+            roof = footprint - core_cells
+            rooms = [*skeleton.cores, PlannedRoom(role.roof, roof)]
+            return FloorPlan(level, role_name, rooms)
+
+        circulation = [PlannedRoom("corridor", cells) for cells in components(skeleton.corridor)]
+        fixed = [*circulation, *skeleton.cores]
+        lobby_cells = skeleton.lobby if ground else frozenset[Cell]()
+        if lobby_cells and skeleton.lobby_type:
+            fixed.append(PlannedRoom(skeleton.lobby_type, lobby_cells))
+        key = (role_name, ground)
+        if key not in shared:
+            free = footprint - skeleton.corridor - core_cells - lobby_cells
+            access = skeleton.corridor | lobby_cells
+            anchors: dict[str, Cell] = {}
+            if skeleton.cores:
+                cells = skeleton.cores[0].cells
+                anchors["core"] = Cell(
+                    sum(c.x for c in cells) // len(cells), sum(c.y for c in cells) // len(cells)
+                )
+            if ground:
+                anchors["entrance"] = skeleton.main_hint
+            assigner = Assigner(
+                ctx.rules,
+                role.rooms,
+                variables(ctx.params, level),
+                footprint,
+                access,
+                anchors,
+                ctx.rules.program.cluster_filler,
+                ctx.rng(f"assign:{role_name}:{ground}"),
+            )
+            rooms = assigner.run(components(free), f"level {level}")
+            shared[key] = (rooms, assigner.warnings)
+            plan.warnings += assigner.warnings
+        rooms = [*fixed, *shared[key][0]]
+        rooms = absorb_leftovers(rooms, ctx.rules)
+        rooms = carve_stalls(rooms, ctx.rules)
+        entrances = self._entrances(ctx, footprint, skeleton, rooms) if ground else []
+        return FloorPlan(level, role_name, rooms, entrances)
+
+    def _entrances(
+        self,
+        ctx: Context,
+        footprint: frozenset[Cell],
+        skeleton: Skeleton,
+        rooms: list[PlannedRoom],
+    ) -> list[EntranceRequest]:
+        wanted = ctx.rules.entrances(ctx.params)
+        hints: list[tuple[EntranceKind, Side, Cell]] = [
+            (EntranceKind.MAIN, skeleton.main_side, skeleton.main_hint)
+        ]
+        corridor_edge = [
+            (c, s) for c, s in facade(skeleton.corridor, footprint) if c in skeleton.corridor
+        ]
+        if EntranceKind.SERVICE in wanted:
+            side = ctx.params.service_side
+            if side is skeleton.main_side:
+                hints.append((EntranceKind.SERVICE, side, skeleton.main_hint))
+            else:
+                options = [(c, s) for c, s in corridor_edge if s is side]
+                if not options:
+                    options = [
+                        (c, s)
+                        for c, s in facade(footprint, footprint)
+                        if s is side and c not in skeleton.lobby
+                    ]
+                    options.sort(
+                        key=lambda o: min(
+                            abs(o[0].x - k.x) + abs(o[0].y - k.y) for k in skeleton.corridor
+                        )
+                    )
+                if options:
+                    cell, _ = options[len(options) // 2] if corridor_edge else options[0]
+                    hints.append((EntranceKind.SERVICE, side, cell))
+        if EntranceKind.EMERGENCY in wanted:
+            options = corridor_edge or [
+                (c, s)
+                for r in rooms
+                if r.type in {e.room for e in ctx.rules.program.core}
+                for c, s in facade(r.cells, footprint)
+            ]
+            taken = [h for _, _, h in hints]
+            if options:
+                cell, side = max(
+                    options,
+                    key=lambda o: (min(abs(o[0].x - t.x) + abs(o[0].y - t.y) for t in taken), o),
+                )
+                hints.append((EntranceKind.EMERGENCY, side, cell))
+        result: list[EntranceRequest] = []
+        for kind, side, cell in hints:
+            index = next(i for i, r in enumerate(rooms) if cell in r.cells)
+            result.append(EntranceRequest(kind, side, index, cell))
+        return result
+
+
+def _to_wall(path: list[Cell], footprint: frozenset[Cell]) -> list[Cell]:
+    """Extend a path (far end first) straight on past its far end to the outer wall, so the
+    side corridor separates the rooms either side and ends at a facade."""
+    if len(path) < 2:
+        return path
+    dx, dy = path[0].x - path[1].x, path[0].y - path[1].y
+    cell = path[0]
+    extra: list[Cell] = []
+    while (cell := Cell(cell.x + dx, cell.y + dy)) in footprint:
+        extra.append(cell)
+    return [*extra, *path]
+
+
+def _lobby_entry(ctx: Context) -> RoomEntry | None:
+    _, role = ctx.rules.role_for(0, ctx.params)
+    values = variables(ctx.params, 0)
+    return next((e for e in role.rooms if e.place == "entrance" and evaluate(e.when, values)), None)
+
+
+def _is_circulation(ctx: Context, room: str) -> bool:
+    return ctx.rules.spec(room).circulation
