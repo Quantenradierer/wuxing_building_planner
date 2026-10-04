@@ -97,7 +97,7 @@ def descend(start: Cell, dist: dict[Cell, int]) -> list[Cell]:
     while dist[path[-1]] > 0:
         here = path[-1]
         options = [s for s in Side if dist.get(here.neighbour(s), 10**9) < dist[here]]
-        side = heading if heading in options else options[0]
+        side = heading if heading is not None and heading in options else options[0]
         heading = side
         path.append(here.neighbour(side))
     return path[:-1]  # without the source cell itself

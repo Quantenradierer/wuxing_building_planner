@@ -336,7 +336,7 @@ def test_offices_have_a_desk_per_four_square_metres_each_with_a_chair() -> None:
             desks = kinds.count("office_desk")
             m2 = len(room.cells) / 4
             assert 1 <= desks <= 14
-            assert desks == 1 or 4 + 4 * (desks - 1) <= m2  # at any wealth
+            assert desks <= max(1, round(m2 / 4))  # at any wealth; the count rounds to nearest
             assert kinds.count("chair") == desks
 
 

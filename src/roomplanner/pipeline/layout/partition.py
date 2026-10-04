@@ -28,6 +28,7 @@ from roomplanner.pipeline.base import (
     FloorPlan,
     PlannedRoom,
 )
+from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
 from roomplanner.pipeline.layout.partition_assign import Assigner
 from roomplanner.pipeline.layout.regions import (
@@ -56,6 +57,7 @@ class Skeleton:
     lobby_type: str | None
     main_hint: Cell  # facade cell of the main entrance
     main_side: Side
+    far: frozenset[Cell] = frozenset()  # cells of the second stairwell, which has an exit
 
 
 @register("layout", "partition")
@@ -111,6 +113,7 @@ class PartitionLayout:
         corridor = self._connect(footprint, corridor, width)
         corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
         corridor = self._tidy(corridor, frozenset(), width)
+        corridor = self._back_corridor(ctx, footprint, corridor, width)
         lobby = frozenset[Cell]()
         hint: Cell | None = None
         if lobby_entry is not None:
@@ -124,9 +127,10 @@ class PartitionLayout:
         else:
             hint, path = self._gate(footprint, corridor, street, width)
             corridor |= path
-        cores = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
+        corridor = self._tidy(corridor, lobby, width)
+        cores, far = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
         return Skeleton(
-            corridor, cores, lobby, lobby_entry.room if lobby_entry else None, hint, street
+            corridor, cores, lobby, lobby_entry.room if lobby_entry else None, hint, street, far
         )
 
     def _lobby(
@@ -365,6 +369,32 @@ class PartitionLayout:
         return corridor
 
     @staticmethod
+    def _back_corridor(
+        ctx: Context, footprint: frozenset[Cell], corridor: frozenset[Cell], width: int
+    ) -> frozenset[Cell]:
+        """The service door opens onto circulation: a branch to the service facade if no
+        corridor reaches it (the street side is the lobby's)."""
+        side = ctx.params.service_side
+        if EntranceKind.SERVICE not in ctx.rules.entrances(ctx.params):
+            return corridor
+        if side is ctx.params.street_side:
+            return corridor
+        edge = [c for c in footprint if c.neighbour(side) not in footprint]
+        if not edge or any(c in corridor for c in edge):
+            return corridor
+        dist = distances(corridor, footprint)
+        x0, y0, x1, y1 = bbox(footprint)
+        middle = ((x0 + x1) / 2, (y0 + y1) / 2)
+        gate = min(
+            (c for c in edge if c in dist),
+            key=lambda c: (dist[c] + 0.2 * (abs(c.x - middle[0]) + abs(c.y - middle[1])), c),
+            default=None,
+        )
+        if gate is None:
+            return corridor
+        return corridor | thicken([gate, *descend(gate, dist)], width, footprint)
+
+    @staticmethod
     def _tidy(corridor: frozenset[Cell], lobby: frozenset[Cell], width: int) -> frozenset[Cell]:
         """Drop bits thinner than the corridor and pieces that lead nowhere."""
         kept = opened(corridor, width)
@@ -378,8 +408,9 @@ class PartitionLayout:
         circulation: frozenset[Cell],
         lobby: frozenset[Cell],
         rng: random.Random,
-    ) -> list[PlannedRoom]:
+    ) -> tuple[list[PlannedRoom], frozenset[Cell]]:
         rooms: list[PlannedRoom] = []
+        far: frozenset[Cell] = frozenset()
         cluster: frozenset[Cell] = frozenset()  # the cores that stand together
         taken = set(circulation)
         x0, y0, x1, y1 = bbox(footprint)
@@ -400,6 +431,21 @@ class PartitionLayout:
                 near = frozenset(c.neighbour(sd) for c in cluster for sd in Side)
                 beside = [o for o in options if len(o & near) >= 2]
                 options = beside or options
+            if entry.place == "far":
+                # an exit of its own on the outer wall, far from the first stairwell
+                outside = frozenset(
+                    c for c in footprint if any(c.neighbour(sd) not in footprint for sd in Side)
+                )
+                first = min(rooms[0].cells) if rooms else None
+                options = [
+                    o
+                    for o in options
+                    if not o.isdisjoint(outside)
+                    and (
+                        first is None
+                        or abs(min(o).x - first.x) + abs(min(o).y - first.y) >= FAR_CORE_MIN
+                    )
+                ]
             rng.shuffle(options)
             scored: list[tuple[float, frozenset[Cell]]] = []
             for option in options[:CORE_CANDIDATES]:
@@ -431,8 +477,10 @@ class PartitionLayout:
             taken |= cells
             if entry.place != "far":
                 cluster |= cells
+            else:
+                far |= cells
             rooms.append(PlannedRoom(entry.room, cells))
-        return rooms
+        return rooms, far
 
     @staticmethod
     def _core_options(
@@ -441,7 +489,9 @@ class PartitionLayout:
         """Rectangles of the core's size with a long wall on the corridor."""
         found: set[frozenset[Cell]] = set()
         beside = frozenset(c.neighbour(s) for c in circulation for s in Side)
-        shapes = {size, (size[1], size[0])}
+        # `size` is (along the corridor, deep): the short wall on the corridor is where the
+        # stairs have their landing. The other way round only if that finds no place.
+        shapes = {size}
         for cell in sorted(free):
             for side in Side:
                 if cell.neighbour(side) not in circulation:
@@ -460,6 +510,8 @@ class PartitionLayout:
                         )
                         if cells <= free and len(cells & beside) >= min(length, 2):
                             found.add(cells)
+        if not found and size[0] != size[1]:
+            return PartitionLayout._core_options(free, circulation, (size[1], size[0]))
         return sorted(found, key=min)
 
     # --- floors -----------------------------------------------------------------------
@@ -539,11 +591,20 @@ class PartitionLayout:
             else:
                 options = [(c, s) for c, s in corridor_edge if s is side]
                 if not options:
+                    allowed = {
+                        i
+                        for i, r in enumerate(rooms)
+                        if ctx.rules.spec(r.type).facade_door
+                        or ctx.rules.spec(r.type).circulation
+                        or r.type in ctx.rules.program.service_rooms
+                    }
+                    owner = {c: i for i, r in enumerate(rooms) for c in r.cells}
                     options = [
                         (c, s)
                         for c, s in facade(footprint, footprint)
                         if s is side and c not in skeleton.lobby
                     ]
+                    options = [o for o in options if owner.get(o[0]) in allowed] or options
                     options.sort(
                         key=lambda o: min(
                             abs(o[0].x - k.x) + abs(o[0].y - k.y) for k in skeleton.corridor
@@ -552,7 +613,18 @@ class PartitionLayout:
                 if options:
                     cell, _ = options[len(options) // 2] if corridor_edge else options[0]
                     hints.append((EntranceKind.SERVICE, side, cell))
-        if EntranceKind.EMERGENCY in wanted:
+        if EntranceKind.EMERGENCY in wanted and skeleton.far:
+            # on the landing: the facade cell nearest the corridor the stairs are entered from
+            exits = sorted(facade(skeleton.far, footprint))
+            cell, side = min(
+                exits,
+                key=lambda e: (
+                    min(abs(e[0].x - k.x) + abs(e[0].y - k.y) for k in skeleton.corridor),
+                    e,
+                ),
+            )
+            hints.append((EntranceKind.EMERGENCY, side, cell))
+        elif EntranceKind.EMERGENCY in wanted:
             options = corridor_edge or [
                 (c, s)
                 for r in rooms
@@ -614,7 +686,3 @@ def _lobby_entry(ctx: Context) -> RoomEntry | None:
     _, role = ctx.rules.role_for(0, ctx.params)
     values = variables(ctx.params, 0)
     return next((e for e in role.rooms if e.place == "entrance" and evaluate(e.when, values)), None)
-
-
-def _is_circulation(ctx: Context, room: str) -> bool:
-    return ctx.rules.spec(room).circulation
