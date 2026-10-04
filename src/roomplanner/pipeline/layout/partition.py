@@ -107,25 +107,23 @@ class PartitionLayout:
         width = program.corridor.width
         street = ctx.params.street_side
         lobby_entry = _lobby_entry(ctx)
+        corridor = self._bands(ctx, footprint, rng)
+        corridor = self._connect(footprint, corridor, width)
+        corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
+        corridor = self._tidy(corridor, frozenset(), width)
         lobby = frozenset[Cell]()
         hint: Cell | None = None
         if lobby_entry is not None:
-            found = self._lobby(ctx, footprint, street, lobby_entry, rng)
+            found = self._lobby_beside(ctx, footprint, corridor, street, lobby_entry, rng)
             if found is None:
-                raise AllocationError("no space for the lobby")
+                found = self._lobby(ctx, footprint, street, lobby_entry, rng)
+                if found is None:
+                    raise AllocationError("no space for the lobby")
+                corridor = self._join(footprint, corridor, found[0], width, rng)
             lobby, hint = found
-
-        corridor = self._spine(footprint, width, rng)
-        access = lobby if lobby_entry and _is_circulation(ctx, lobby_entry.room) else frozenset()
-        if lobby:
-            corridor = self._join(footprint, corridor, lobby, width, rng)
         else:
-            gate, path = self._gate(footprint, corridor, street, width)
+            hint, path = self._gate(footprint, corridor, street, width)
             corridor |= path
-            hint = gate
-        assert hint is not None
-        corridor = self._branch(footprint, corridor, lobby, access, ctx)
-        corridor = self._tidy(corridor, lobby, width)
         cores = self._cores(ctx, footprint, corridor | lobby, rng)
         return Skeleton(
             corridor, cores, lobby, lobby_entry.room if lobby_entry else None, hint, street
@@ -185,21 +183,121 @@ class PartitionLayout:
         return None
 
     @staticmethod
-    def _spine(footprint: frozenset[Cell], width: int, rng: random.Random) -> frozenset[Cell]:
-        """A band of corridor width along the long axis, near the middle."""
+    def _bands(ctx: Context, footprint: frozenset[Cell], rng: random.Random) -> frozenset[Cell]:
+        """Parallel corridors along the long axis, as many as keep each row of rooms between
+        them (and the facades) within the program's strip depth, joined by cross corridors."""
+        program = ctx.rules.program
+        width = program.corridor.width
+        smin, smax = program.strip_depth
         x0, y0, x1, y1 = bbox(footprint)
         horizontal = x1 - x0 >= y1 - y0
         lo, hi = (y0, y1) if horizontal else (x0, x1)
-        jitter = rng.randint(-((hi - lo) // 8), (hi - lo) // 8)
-        start = (lo + hi - width) // 2 + jitter
-        band = frozenset(
-            c for c in footprint if start <= (c.y if horizontal else c.x) < start + width
-        )
-        if not band:
-            centre = Cell((x0 + x1) // 2, (y0 + y1) // 2)
-            nearest = min(footprint, key=lambda c: abs(c.x - centre.x) + abs(c.y - centre.y))
-            return thicken([nearest], width, footprint)
-        return components(band)[0]
+        ulo, uhi = (x0, x1) if horizontal else (y0, y1)
+        count = 1
+        while count * width + (count + 1) * smax < hi - lo:
+            count += 1
+        while count > 1 and (hi - lo - count * width) / (count + 1) < smin:
+            count -= 1
+        rows = (hi - lo - count * width) / (count + 1)
+
+        def cross(c: Cell) -> int:
+            return c.y if horizontal else c.x
+
+        def along(c: Cell) -> int:
+            return c.x if horizontal else c.y
+
+        starts: list[int] = []
+        for i in range(count):
+            shift = rng.randint(-1, 1) if rows >= smin + 2 else 0
+            starts.append(lo + round(rows * (i + 1) + width * i) + shift)
+        cells = {c for c in footprint if any(t <= cross(c) < t + width for t in starts)}
+        if count > 1:
+            length = uhi - ulo
+            ends = [ulo + round(rows), uhi - round(rows) - width]
+            spots = ends if length >= 4 * rows else [(ulo + uhi - width) // 2]
+            span = (starts[0], starts[-1] + width)
+            cells |= {
+                c
+                for c in footprint
+                if span[0] <= cross(c) < span[1] and any(u <= along(c) < u + width for u in spots)
+            }
+        return frozenset(cells)
+
+    @staticmethod
+    def _connect(
+        footprint: frozenset[Cell], corridor: frozenset[Cell], width: int
+    ) -> frozenset[Cell]:
+        """Join the pieces a non-rectangular footprint cuts the corridors into."""
+        for _ in range(8):
+            pieces = components(corridor)
+            if len(pieces) < 2:
+                break
+            main = pieces[0]
+            dist = distances(main, footprint)
+            piece = pieces[1]
+            start = min(piece, key=lambda c: (dist.get(c, 10**9), c))
+            if start not in dist:
+                break
+            corridor |= thicken(descend(start, dist), width, footprint)
+        return corridor
+
+    @staticmethod
+    def _lobby_beside(
+        ctx: Context,
+        footprint: frozenset[Cell],
+        corridor: frozenset[Cell],
+        street: Side,
+        entry: RoomEntry,
+        rng: random.Random,
+    ) -> tuple[frozenset[Cell], Cell] | None:
+        """A lobby on the street facade whose inner side lies on a corridor: as deep as the
+        row of rooms there, as wide as its area asks (centred on the facade if it can)."""
+        spec = ctx.rules.spec(entry.room)
+        low, high = entry.area or spec.area
+        along = (1, 0) if street in (Side.N, Side.S) else (0, 1)
+        inward = street.opposite.delta
+        edge = [c for c in footprint if c.neighbour(street) not in footprint]
+        if not edge:
+            return None
+        positions = sorted({c.x if along == (1, 0) else c.y for c in edge})
+        middle = (positions[0] + positions[-1]) / 2
+        best: tuple[float, frozenset[Cell], Cell] | None = None
+        for first in positions:
+            base = next(c for c in edge if (c.x if along == (1, 0) else c.y) == first)
+            for wide in range(spec.min_side, 31):
+                # the depth at which the rectangle meets a corridor, measured mid-way
+                mid = first + wide // 2
+                col = [c for c in edge if (c.x if along == (1, 0) else c.y) == mid]
+                if not col:
+                    continue
+                depth = 0
+                cell = col[0]
+                while cell in footprint and cell not in corridor:
+                    depth += 1
+                    cell = Cell(cell.x + inward[0], cell.y + inward[1])
+                if cell not in corridor or not spec.min_side <= depth <= 24:
+                    continue
+                if not low <= wide * depth <= high * 1.2:
+                    continue
+                rect = frozenset(
+                    Cell(
+                        base.x + i * along[0] + j * inward[0],
+                        base.y + i * along[1] + j * inward[1],
+                    )
+                    for i in range(wide)
+                    for j in range(depth)
+                )
+                if not rect <= footprint or not rect.isdisjoint(corridor):
+                    continue
+                if contact(rect, corridor) < min(wide, 4):
+                    continue
+                score = abs(mid - middle) + rng.uniform(0, 2)
+                if best is None or score < best[0]:
+                    hint = col[0]
+                    best = (score, rect, hint)
+        if best is None:
+            return None
+        return best[1], best[2]
 
     @staticmethod
     def _join(

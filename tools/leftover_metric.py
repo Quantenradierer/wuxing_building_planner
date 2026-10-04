@@ -87,8 +87,9 @@ def measure(layout: str, kind: BuildingType, seeds: int) -> tuple[float, float, 
                 if strategy.check_feasibility(ctx, footprint):
                     continue
                 plan = strategy.layout(ctx, footprint)
-            except AllocationError, InfeasibleError:
+            except (AllocationError, InfeasibleError) as error:
                 failed += 1
+                print(f"  failed {width}x{depth} seed {seed}: {error}")
                 continue
             floor = plan.floors[1]
             n = sum(len(r.cells) for r in floor.rooms)
