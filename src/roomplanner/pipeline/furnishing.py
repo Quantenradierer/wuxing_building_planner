@@ -1041,11 +1041,17 @@ class RoomFurnisher:
         shift = max(
             range(spare + 1), key=lambda s: (sum(map(free, rects(s))), -abs(s - target), -s)
         )
+        cap = rule.count_range[1] if rule.count is not None else None  # `count` caps the rows
+        placed = 0
         for rect in rects(shift):
+            if cap is not None and placed >= cap:
+                break
             if rule.fill < 1 and self.rng.random() >= rule.fill:
                 continue
-            if self._try(rule.object, rect, spec.walkable) and rule.front_clear:
-                self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
+            if self._try(rule.object, rect, spec.walkable):
+                placed += 1
+                if rule.front_clear:
+                    self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
 
     def _open_side(self, side: Side) -> bool:
         """True if most of the room's box edge on `side` has no wall (open to a corridor)."""

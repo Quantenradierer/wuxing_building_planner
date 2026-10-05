@@ -275,8 +275,8 @@ rooms:
     furniture:
       # Machines line the walls (the open sides stay free); big rooms get a back-to-back
       # double row in the middle; the bin takes what is left.
-      - {object: vending_machine, placement: perimeter, count: 40}
-      - {object: vending_machine, placement: rows, paired: true, margin: 3, aisle: 2, block: 10}
+      - {object: vending_machine, placement: perimeter, per: 4, count: [2, 8]}
+      - {object: vending_machine, placement: rows, paired: true, margin: 3, aisle: 2, block: 10, count: [0, 4]}
       - {object: trash_bin, placement: scatter}
   car_park:             # a building's basement parking: claims one whole end of the level first
     area: [600, 1800]

@@ -132,7 +132,7 @@ rooms:
     windows: forbidden
     furniture:
       - {object: suppression_tanks, placement: wall, count: [0, 1]}
-      - {object: server_rack, placement: rows, aisle: 2, margin: 1}
+      - {object: server_rack, placement: rows, aisle: 2, margin: 1, count: [2, 12]}   # an office's racks, not a data centre's
       - {object: fire_extinguisher, placement: corner}
   archive:
     area: [60, 240]
