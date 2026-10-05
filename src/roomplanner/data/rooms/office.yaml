@@ -52,6 +52,10 @@ rooms:
       - {object: plant, placement: corner, count: [1, 4]}
       - {object: water_cooler, placement: wall, count: [0, 1]}
       - {object: whiteboard, placement: wall, count: [0, 2]}
+      # A break corner: counter, fridge and coffee machine banked on one wall.
+      - {object: counter, placement: wall, count: 1}
+      - {object: fridge, placement: wall, count: 1}
+      - {object: coffee_machine, placement: wall, count: 1}
   meeting_room:
     area: [64, 128]
     min_side: 8               # 4 m: the table with its chairs and room to walk round them
