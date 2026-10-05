@@ -66,10 +66,13 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
    splitting are visual only and not checked.
 8. [DONE] **Loose crates/barrels/pallets/carts floating mid-floor** (P2, ~25 rooms): cluster them against a wall or on a
    pallet, never in the door line or in an aisle.
-9. [WIP] **Missing defining object** (P1 when the room cannot be read without it): treatment_room sink; exam/doctor_office
+9. [DONE] **Missing defining object** (P1 when the room cannot be read without it): treatment_room sink; exam/doctor_office
    desk or couch; surveillance/noc/spider monitor wall; paint_booth vehicle; rigger_workshop cocoon + docks;
    attendant_booth kit; storefront counter + stool; stairwell up/down arrows and landing; flat_loft/studio bed;
    crypt tombs; nave pews at middle size; prison_block/dayroom/sally_port guard post; mantrap anything.
+   Done for office/apartment/lab/hospital: treatment_room sink, exam_room desk, doctor_office couch + sink,
+   studio bed (new `studio_room`); spider_room already fixed by item 3. Not done (other building types or
+   rendering): stairwell arrows/landing, casino/chop_shop/parking/church/prison/street_doc rooms.
 10. [WIP] **Count caps by purpose** (P1/P2): vending_room up to ~100 machines (2-8), server_room 20-60 racks (office: 2-10),
     mess_hall/shelter/parking_deck follow floor area not occupancy, mailbox count vs. flats; and rooms whose
     `area` range lets them grow absurd (closet, entry_hall, cashier_booth, focus_room, bathroom). Check the actual
