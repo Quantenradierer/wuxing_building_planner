@@ -325,7 +325,7 @@ def test_bigger_buildings_get_more_elevators_whose_cars_fill_the_shaft() -> None
     assert all(car >= shaft * 0.7 for shaft, car in small + large)
 
 
-def test_offices_have_a_desk_per_four_square_metres_each_with_a_chair() -> None:
+def test_a_private_office_has_one_to_three_desks_each_with_a_chair_and_visitor_chairs() -> None:
     for wealth in (Wealth.SQUATTER, Wealth.MIDDLE, Wealth.LUXURY):
         params = make_params(width=60, depth=40, floors_above=3, wealth=wealth, seed=1)
         floor = generate(params).floor(1)
@@ -334,10 +334,8 @@ def test_offices_have_a_desk_per_four_square_metres_each_with_a_chair() -> None:
         for room in offices:
             kinds = [o.kind for o in floor.objects if o.room == room.id]
             desks = kinds.count("office_desk")
-            m2 = len(room.cells) / 4
-            assert 1 <= desks <= 14
-            assert desks <= max(1, round(m2 / 4))  # at any wealth; the count rounds to nearest
-            assert kinds.count("chair") == desks
+            assert 1 <= desks <= 3
+            assert kinds.count("chair") >= desks + 2  # the visitor chairs
 
 
 def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:
