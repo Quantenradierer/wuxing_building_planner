@@ -17,6 +17,7 @@ rooms:
     windows: required
     furniture:
       - {object: exam_table, placement: wall}
+      - {object: desk_with_visitors, placement: wall, count: [0, 1]}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
       - {object: sink, placement: wall}
       - {object: stool, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
@@ -27,7 +28,8 @@ rooms:
     furniture:
       - {object: patient_bed, placement: wall, spaced: true, count: [1, 2]}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
-      - {object: sink, placement: wall, count: [0, 1]}
+      - {object: sink, placement: wall}
+      - {object: desk_with_visitors, placement: wall, count: [0, 1]}
   trauma_bay:           # DocWagon-style emergency bay
     area: [80, 160]
     min_side: 8
@@ -132,7 +134,8 @@ rooms:
     windows: required
     furniture:
       - {object: desk_with_visitors, placement: wall}
-      - {object: exam_table, placement: wall, count: [0, 1]}
+      - {object: exam_table, placement: wall}
+      - {object: sink, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: corner, count: [0, 1]}
       - {object: shelf, placement: wall, count: [0, 1]}
   consultation_room:    # cosmetic clinic: a desk, two armchairs, a screen
