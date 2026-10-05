@@ -70,7 +70,8 @@ rooms:
   stall:                # a toilet cubicle, 1 x 1.5 m, carved out of a public toilet
     area: [4, 12]
     min_side: 2
-    door_width: 1       # a narrow cubicle door keeps its clearance off the wc
+    door_width: 2       # as wide as the pan (1 m); the leaf swings out into the passage
+    door_opens_out: true
     windows: forbidden
     transit: false
     templates:          # drawn with the door in the south wall
