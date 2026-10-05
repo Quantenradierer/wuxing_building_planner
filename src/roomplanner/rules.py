@@ -22,6 +22,9 @@ from roomplanner.params import BuildingType, EntranceKind, GenerationParams, Sec
 
 type Range = tuple[int, int]
 
+# libyaml's loader reads the rule files several times faster than the pure-Python one
+_YamlLoader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
 
 class _Strict(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -730,7 +733,7 @@ def _load[M: BaseModel](model: type[M], path: Any) -> M:
 def load_yaml[M: BaseModel](model: type[M], text: str, origin: str) -> M:
     """Validate a YAML document against a model; errors become RulesError."""
     try:
-        return model.model_validate(yaml.safe_load(text))
+        return model.model_validate(yaml.load(text, Loader=_YamlLoader))
     except (yaml.YAMLError, ValidationError) as error:
         raise RulesError(f"{origin}: {error}") from error
 

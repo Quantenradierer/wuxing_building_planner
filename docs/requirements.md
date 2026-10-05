@@ -53,14 +53,13 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 | `condition`     | pristine, maintained, run_down, derelict, ruined    | condition layer, sprite look          |
 | `security`      | none, low, corporate, aaa                           | security layer                        |
 | `shape`         | rectangle, l, u, t, z, stepped, irregular           | `irregular` picks one by seed         |
-| `chamfer`       | ≥ 0 cells (default 0: square corners)               | 45° cuts at convex corners            |
 | `entrances`     | list of entrance kinds                              | overrides the building type's list    |
 | `street_side`   | N, E, S, W (default S)                              | main entrance faces this side         |
 | `service_side`  | N, E, S, W (default: opposite of `street_side`)     | service entrances face this side      |
 | `seed`          | integer (random if omitted, always recorded)        | full determinism                      |
 
 There are no size presets and no room overrides. Shapes other than the rectangle are unions
-of rectangles (curves are not supported; diagonals only as `chamfer` corner cuts, see
+of rectangles (curves are not supported; diagonals only as corner cuts drawn from the seed, see
 ADR 0014); every arm is as deep as the layout's main part
 (e.g. corridor plus one row of rooms).
 
@@ -251,6 +250,10 @@ middle, squatter → low → middle), then to the theme's stand-in.
   saved JSON; `ui` starts the local web UI.
 - The JSON is a versioned contract (`schema_version`) for renderers and exporters.
 - The ASCII renderer is a minimal debug view and will not be polished.
+- Language (English, German): a presentation option (`--lang en|de` on `generate`/`render`,
+  a selector in the web UI, `lang` in its requests), not a generation parameter. It
+  translates image labels, VTT level/region names and the whole web UI. The building and its
+  JSON stay language-neutral (ids), the ASCII view and the warnings stay English.
 
 ## Rendering and VTT export
 

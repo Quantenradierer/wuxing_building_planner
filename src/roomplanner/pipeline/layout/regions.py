@@ -41,18 +41,20 @@ def components(cells: Iterable[Cell]) -> list[frozenset[Cell]]:
     while left:
         start = min(left)
         piece = {start}
-        queue = deque([start])
+        stack = [start]
         left.discard(start)
-        while queue:
-            cell = queue.popleft()
-            for side in Side:
-                other = cell.neighbour(side)
+        # plain tuples in the loop: this runs for every candidate cut, so it is the hot path
+        while stack:
+            x, y = stack.pop()
+            for other in ((x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)):
                 if other in left:
                     left.discard(other)
-                    piece.add(other)
-                    queue.append(other)
+                    cell = Cell(x=other[0], y=other[1])
+                    piece.add(cell)
+                    stack.append(cell)
         found.append(frozenset(piece))
-    found.sort(key=lambda piece: (-len(piece), min(piece)))
+    if len(found) > 1:
+        found.sort(key=lambda piece: (-len(piece), min(piece)))
     return found
 
 
@@ -117,13 +119,14 @@ def thicken(path: Iterable[Cell], width: int, within: frozenset[Cell]) -> frozen
 
 def shape_ok(cells: frozenset[Cell], spec: RoomSpec) -> bool:
     """The validator's width rule: thick enough everywhere, or a rectangle with alcoves."""
-    if thinnest_extent(cells, cells) >= spec.min_side:
+    if thinnest_extent(cells, cells, spec.min_side) >= spec.min_side:
         return True
     x0, y0, x1, y1 = largest_rectangle(cells)
     if min(x1 - x0, y1 - y0) < spec.min_side:
         return False
     rest = frozenset(c for c in cells if not (x0 <= c.x < x1 and y0 <= c.y < y1))
-    return not rest or thinnest_extent(rest, cells) >= min(MIN_ALCOVE, spec.min_side)
+    alcove = min(MIN_ALCOVE, spec.min_side)
+    return not rest or thinnest_extent(rest, cells, alcove) >= alcove
 
 
 def aspect_ok(cells: frozenset[Cell], spec: RoomSpec) -> bool:

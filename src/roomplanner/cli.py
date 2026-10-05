@@ -15,6 +15,7 @@ from roomplanner.export.foundry import to_foundry
 from roomplanner.export.uvtt import uvtt_json
 from roomplanner.generator import generate as generate_building
 from roomplanner.geometry import Side
+from roomplanner.i18n import Language
 from roomplanner.model import Building
 from roomplanner.params import (
     BuildingType,
@@ -58,6 +59,10 @@ SupersampleOption = Annotated[
 ThemeOption = Annotated[str, typer.Option(help="Bundled theme name or theme YAML file")]
 CellPxOption = Annotated[int, typer.Option(min=4, max=400, help="Image pixels per cell")]
 LabelsOption = Annotated[bool, typer.Option(help="Write room types into images")]
+LanguageOption = Annotated[
+    Language,
+    typer.Option("--lang", help="Language of image labels and VTT names (ids stay English)"),
+]
 GridOption = Annotated[int, typer.Option(min=0, help="Image grid line every n cells (0: none)")]
 GridMOption = Annotated[
     float, typer.Option("--grid-m", help="VTT exports: grid square size in metres")
@@ -79,9 +84,6 @@ def generate(
     condition: Condition = Condition.MAINTAINED,
     security: Security = Security.LOW,
     shape: Shape = Shape.RECTANGLE,
-    chamfer: Annotated[
-        int, typer.Option(help="Cut convex corners with 45 degree walls this many cells long")
-    ] = 0,
     street_side: Annotated[Side, typer.Option(case_sensitive=False)] = Side.S,
     service_side: Annotated[
         Side | None, typer.Option(case_sensitive=False, help="Default: opposite of street side")
@@ -108,6 +110,7 @@ def generate(
     grid_m: GridMOption = 1.0,
     lights: LightsOption = True,
     baked_lighting: BakedOption = False,
+    language: LanguageOption = Language.EN,
 ) -> None:
     """Generate a building."""
     try:
@@ -121,7 +124,6 @@ def generate(
             condition=condition,
             security=security,
             shape=shape,
-            chamfer=chamfer,
             street_side=street_side,
             service_side=service_side,  # pyright: ignore[reportArgumentType]  # None = default
             entrances=_entrances(entrances),
@@ -137,7 +139,16 @@ def generate(
         building,
         output_format,
         output,
-        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights, supersample=supersample),
+        _ImageSettings(
+            theme,
+            cell_px,
+            labels,
+            grid,
+            grid_m,
+            lights,
+            supersample=supersample,
+            language=language,
+        ),
     )
 
 
@@ -154,6 +165,7 @@ def render(
     grid_m: GridMOption = 1.0,
     lights: LightsOption = True,
     baked_lighting: BakedOption = False,
+    language: LanguageOption = Language.EN,
 ) -> None:
     """Render a saved JSON building as ASCII or images."""
     try:
@@ -164,7 +176,16 @@ def render(
         building,
         output_format,
         output,
-        _ImageSettings(theme, cell_px, labels, grid, grid_m, lights, supersample=supersample),
+        _ImageSettings(
+            theme,
+            cell_px,
+            labels,
+            grid,
+            grid_m,
+            lights,
+            supersample=supersample,
+            language=language,
+        ),
     )
 
 
@@ -201,6 +222,7 @@ class _ImageSettings:
     lights: bool = True
     baked_lighting: bool = False
     supersample: int = 1
+    language: Language = Language.EN
 
 
 def _emit(
@@ -233,6 +255,7 @@ def _write_images(
         labels=settings.labels,
         grid=settings.grid,
         supersample=settings.supersample,
+        language=settings.language,
     )
     base = output or Path(f"{building.params.building_type}_{building.seed}.{output_format}")
     base.parent.mkdir(parents=True, exist_ok=True)
@@ -255,7 +278,11 @@ def _export_vtt(
     try:
         theme = load_theme(settings.theme)
         options = ExportOptions(
-            settings.grid_m, settings.cell_px, settings.lights, settings.baked_lighting
+            settings.grid_m,
+            settings.cell_px,
+            settings.lights,
+            settings.baked_lighting,
+            settings.language,
         )
         options.cells_per_square  # noqa: B018 - validates the grid size early
         stem = f"{building.params.building_type}_{building.seed}"

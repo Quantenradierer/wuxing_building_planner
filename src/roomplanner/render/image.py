@@ -27,6 +27,7 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 from roomplanner.geometry import Axis, Cell, Diagonal, Edge, Side
+from roomplanner.i18n import Language, room_name
 from roomplanner.layer_rules import load_condition
 from roomplanner.model import (
     Building,
@@ -55,6 +56,7 @@ class RenderOptions:
     labels: bool = False
     grid: int = 0  # grid line every n cells, 0 = none
     lighting: bool = True  # bake the light map (dim unlit areas); off for VTTs that light
+    language: Language = Language.EN  # of the room labels
 
 
 def render_floor(
@@ -727,7 +729,7 @@ class _Canvas:
             cy = sum(c.y for c in room.cells) / len(room.cells)
             anchor = min(room.cells, key=lambda c: (c.x + 0.5 - cx) ** 2 + (c.y + 0.5 - cy) ** 2)
             x, y = self.px(anchor.x + 0.5, anchor.y + 0.5)
-            text = room.type.replace("_", " ")
+            text = room_name(room.type, self.options.language)
             self.draw_base.text(
                 (x, y),
                 text,

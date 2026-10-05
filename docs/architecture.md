@@ -8,6 +8,8 @@ src/roomplanner/
                              CELL_SIZE_M
   model.py                   Room, Opening, Swing, PlacedObject, Floor, Building
   params.py                  GenerationParams (Pydantic) and parameter enums
+  i18n.py                    Language (en, de), names of rooms, objects, floors and parameter
+                             values from `data/i18n/<language>.yaml`; fallback: the id
   rules.py                   Pydantic models for the YAML, loaders, wealth, `when:` expressions
   layer_rules.py             rules of the lights, security and condition layers
   generator.py               generate(params) -> Building
@@ -81,7 +83,7 @@ Everything else stays on the grid: the cell remains in the footprint and its roo
 half floor), the diagonal's cells meet only at their corners, and the two cell edges in
 the cut triangle stay in `Floor.walls` (`Floor.cut_edges`) so the "every footprint border is
 a wall" invariant holds; nothing draws, exports or opens them. Diagonals only occur as
-chamfered building corners (`chamfer` parameter).
+chamfered building corners (seed-dependent).
 
 ## Data model
 
@@ -172,7 +174,7 @@ params ─► footprint ─► feasibility check ─► layout (core, corridors,
   attempt is returned, with dropped rooms and violations as warnings. If no attempt could
   place the required rooms, generation fails with `InfeasibleError`.
 - The core is placed by the layout strategy because core and corridors depend on each other.
-- Chamfers (`params.chamfer`, `pipeline/footprint.py: chamfer`) are cut after the layout of
+- Chamfers (size drawn from the seed by `chamfer_size`: one building in three, 4 to 10 cells; `pipeline/footprint.py: chamfer`) are cut after the layout of
   each attempt, so layouts still see the plain footprint. The cells wholly outside the
   diagonals leave the rooms and every floor's footprint (`BuildingPlan.removed`); a corner is
   left square if its facades are shorter than `2 * size + 2` cells or a room of any floor
@@ -678,6 +680,19 @@ their level, and per stairwell / elevator car one region over the stairs or car 
 its consecutive floors with the native Change Level behaviour. Level backgrounds name
 files in `images` (base64 WebP); the module (`foundry-module/`) uploads them to
 `Data/schattenakte/<name>/` and creates the scene with its id kept. Ids are stable hashes.
+
+## Languages
+
+Language is a presentation option, not part of `GenerationParams`: the model and the JSON hold
+ids (`exam_room`, `desk`), so one building can be shown in any language. `i18n.py` looks names
+up in `data/i18n/<language>.yaml` (`rooms`, `objects`, `terms` for parameter values, floor
+names and VTT words, `ui` for the web page); a missing entry falls back to the id with spaces,
+the UI to English. Users: image labels (`RenderOptions.language`), the Foundry export
+(`ExportOptions.language`: level and region names), the web UI (`/api/options` ships both
+catalogues; the page translates client-side and switches without a request). A test checks
+that German covers every room, furniture kind, parameter value and UI text. Not translated:
+the ASCII view, warnings and error messages (free text from the pipeline), the CLI help.
+Add a language by adding an enum member and a YAML file.
 
 ## ASCII debug renderer
 

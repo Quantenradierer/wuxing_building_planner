@@ -451,7 +451,9 @@ class PartitionLayout:
             for option in options[:CORE_CANDIDATES]:
                 rest = free - option
                 slivers = sum(
-                    len(p) for p in components(rest) if len(p) < SLIVER or thinnest_extent(p, p) < 3
+                    len(p)
+                    for p in components(rest)
+                    if len(p) < SLIVER or thinnest_extent(p, p, 3) < 3
                 )
                 ox = sum(c.x for c in option) / len(option)
                 oy = sum(c.y for c in option) / len(option)

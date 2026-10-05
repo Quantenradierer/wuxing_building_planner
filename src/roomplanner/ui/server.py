@@ -25,6 +25,7 @@ from roomplanner.export.common import ExportOptions
 from roomplanner.export.foundry import to_foundry
 from roomplanner.generator import generate
 from roomplanner.geometry import Side
+from roomplanner.i18n import Language, web_catalogue
 from roomplanner.params import (
     BuildingType,
     Condition,
@@ -65,7 +66,9 @@ def options() -> JsonObject:
         # Room types per building type, for generating a lone room.
         "rooms": {t.value: sorted(load_rules(t).rooms) for t in BuildingType},
         "themes": sorted(f.name.removesuffix(".yaml") for f in (_DATA / "themes").iterdir()),
-        "defaults": {"theme": "neon", "cell_px": DEFAULT_CELL_PX},
+        "languages": [lang.value for lang in Language],
+        "i18n": {lang.value: web_catalogue(lang) for lang in Language},
+        "defaults": {"theme": "neon", "cell_px": DEFAULT_CELL_PX, "language": Language.EN.value},
     }
 
 
@@ -78,7 +81,11 @@ def generate_response(request: JsonObject) -> JsonObject:
     theme = load_theme(str(request.get("theme", "neon")))
     building = generate(params)
     render = RenderOptions(
-        cell_px, padding=PADDING, lighting=bool(request.get("lighting", True)), supersample=1
+        cell_px,
+        padding=PADDING,
+        lighting=bool(request.get("lighting", True)),
+        supersample=1,
+        language=_language(request),
     )
     images = {
         str(floor.level): _data_url(render_floor(building, floor, theme, render))
@@ -95,8 +102,16 @@ def foundry_export(request: JsonObject) -> tuple[str, bytes]:
     theme = load_theme(str(request.get("theme", "neon")))
     building = generate(params)
     name = f"{building.params.building_type}_{building.seed}"
-    export = to_foundry(building, theme, ExportOptions(cell_px=VTT_CELL_PX), name)
+    options = ExportOptions(cell_px=VTT_CELL_PX, language=_language(request))
+    export = to_foundry(building, theme, options, name)
     return f"{name}.schattenakte.json", export.json().encode()
+
+
+def _language(request: JsonObject) -> Language:
+    try:
+        return Language(request.get("lang", Language.EN))
+    except ValueError as error:
+        raise RequestError("lang must be one of: " + ", ".join(Language)) from error
 
 
 def _params(request: JsonObject) -> GenerationParams:

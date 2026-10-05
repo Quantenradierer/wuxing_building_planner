@@ -215,8 +215,11 @@ def connected(cells: frozenset[Cell] | set[Cell]) -> bool:
     return len(seen) == len(free)
 
 
-def thinnest_extent(cells: Collection[Cell], space: AbstractSet[Cell]) -> int:
-    """Smallest straight extent of `space` through any of `cells`, across or along."""
+def thinnest_extent(cells: Collection[Cell], space: AbstractSet[Cell], enough: int = 0) -> int:
+    """Smallest straight extent of `space` through any of `cells`, across or along.
+
+    With `enough`, may return early with any extent below it: callers that only compare
+    against a minimum skip measuring the rest."""
     # Every cell of one straight stretch of `space` has the same extent: measure it once.
     memo: dict[tuple[int, int, int, int], int] = {}
 
@@ -233,4 +236,9 @@ def thinnest_extent(cells: Collection[Cell], space: AbstractSet[Cell]) -> int:
             memo[mx, my, dx, dy] = len(members)
         return len(members)
 
-    return min(min(run(c[0], c[1], 1, 0), run(c[0], c[1], 0, 1)) for c in cells)
+    thinnest = 1 << 30
+    for c in cells:
+        thinnest = min(thinnest, run(c[0], c[1], 1, 0), run(c[0], c[1], 0, 1))
+        if thinnest < enough:
+            break
+    return thinnest

@@ -92,7 +92,7 @@ casino 52x36 cells, wealth=middle, seed=7
 
 == Floor 1 ==
 +===---===---===---===--+===---===+--===--+===--+---+---+---+---+---+---+-----------------+===---===----+
-"*               nnnnnnn|#########|       |     |www|www|www|www|www|www|<<<<< <<<<< SSS '|)   FFF     j"
+"*               nnnnnnn|#########|       |*    |www|www|www|www|www|www|<<<<< <<<<< SSS '|)   FFF     j"
 "                       |#########|       |     |www|www|www|www|www|www|                 |             "
 "                       |#########|s      D     |www|www|www|www|www|www|    c       c    |             "
 |                       |#########|s      D     |   |   |   |   |   |   |                 |             |
@@ -184,79 +184,79 @@ casino 52x36 cells, wealth=middle, seed=7
 
 == Ground floor ==
 +-------------+--DDD----+===---===+--===--+===--+---+---+---+---------+-------------+===----+----===----+
-|j   <<<<<   '|         |#########|www    |     |www|www|www|  mmm    |FFFFFFF     )|       |U         l"
-|             |         |#########|www    |     |www|www|www|         |             |       |           "
-|      c      |        f|#########|www    D     |www|www|www|         D    KKK      |       D          l"
-|             |         |#########|       D     |   |   |   |         D    KKK      |       D           |
-|L   ddddd    |        <|#########|i 16   D     |9  |10 |11 |         D    KKK      |       D          l|
-|L   ddddd    |        <|#########|i      |     +D--+D--+D--+         |             |       |           |
-|L   ddddd    |  c c   <|#########|i      |     |           |<   13  m|F     14    F|       |          l"
-|             |        <|#########|       |     |           |<       m|F           F|       |           "
-|             |  ttt   <|#########|       |     D           |<       m|F           F|       |          l"
-|             |  ttt    |#########|       |     D           |<        |F           F|       |           |
-|    7 c      |  ttt 5 l|#########|      U|  1  D           |<        |F           F|  2    |    15    l|
-|             |         |#########+-------+     |           |         |F           F|       |           |
-|    ddddd    |  c c   l|#########|eeeeeee|     |i   8      |        )|F   FFFFFFF F|       |          l"
+|j   <<<<<    |l        |#########|i      |*    |www|www|www|  mmm    |)     FFFFFFF|       |l l l l l l"
+|             |         |#########|i      |     |www|www|www|         |             |       |           "
+|      c      |l        |#########|i      D     |www|www|www|         D        KKK F|*      D          l"
+|             |         |#########|       D     |   |   |   |         D        KKK F|       D           |
+|    ddddd    |l       <|#########|  16   D     |9  |10 |11 |         D        KKK F|       D          l|
+|    ddddd    |        <|#########|       |     +D--+D--+D--+         |            F|       |           |
+|j   ddddd    |l c c   <|#########|       |     |           |    13  <|F   14KKK   F|       |          l"
+|             |        <|#########|       |     |           |        <|F     KKK   F|       |           "
+|L            |l ttt   <|#########|www    |     D           |        <|F     KKK   F|       |    15    l"
+|L            |  ttt    |#########|www    |     D           |        <|F            |       |           |
+|L   7 c      |  ttt 5  |#########|www   U|  1  D           |        <|F            |  2    |  qqqqqqq l|
+|             |         |#########+-------+     |           |         |F            |       |           |
+|    ddddd    |  c c    |#########|eeeeeee|     |i   8      |         |F     FFFFFFF|       |          l"
 |    ddddd    |         |#########|eeeeeee|     |i          +--DDD----+-------------+       |           "
-|    ddddd    |      ooo|#########|eeeeeee|     |i          |n     nnnnnnn nnnnnnn n|       |          l"
-|             |      ooo|         |eeeeeee|     |           |n                     n|       |           |
-|             |      ooo|    3    |eeeeeee|     |i          |n a     a 12        a n|       |          l|
-|             |      ooo|         |eeeeeee|     |i          |n                     n|       |           |
-|j            |      ooo|         |eeeeeee|     |i          |n                     n|       |          l"
-|             |      ooo|         |eeeeeee|     |           |n                     n|       |           "
-|        l   j|      ooo|         |eeeeeee|     |U          |n             mmm     n|       |l l l l l l"
+|    ddddd    |         |#########|eeeeeee|     |i          |)         mmm nnnnnnn n|       |          l"
+|             |         |         |eeeeeee|     |           |                      n|       |           |
+|      QQQ    |         |    3    |eeeeeee|     |i          |          12    a     n|       |          l|
+|      QQQ    |         |         |eeeeeee|     |i          |                      n|       |           |
+|j     QQQ    |'        |         |eeeeeee|     |i          |                      n|       |          l"
+|      QQQ    |         |         |eeeeeee|     |           |                      n|       |           "
+|j     QQQ   j|f        |         |eeeeeee|     |U          |)             mmm     n|       |          l"
 +--DDD--------+--DDD----+--DDD----+--DDD--+     +-----------+--DDD------------------+       +-----------+
-|S     SSS SSS       SSS       SSS       $       SSS SSS SSS       SSS SSS SSS SSS           SSS SSS SSS|
+|S     SSS SSS       SSS $     SSS               SSS SSS SSS       SSS SSS SSS SSS           SSS SSS SSS|
 |S                                                                                                      |
-"S a   a   a         a         a                 a   a   a         a   a   a   a             a   a   a $"
+"S a   a   a         a         a                 a   a   a         a   a   a   a             a   a   a  "
 "                                                                                                       "
-"S a                                   S S               S S                                            "
-|S                                     S S               S S                                            |
-|S                                   a S S a           a S S a               a   a   a   a              |
+"S a                               a   a   a   a                                                        "
+|S                                                                                                      |
+|S               a   a   a   a     SSS SSS SSS SSS                       a   a   a   a                  |
 |                                                                                                       |
-"S a                                   S S               S S                 SSS SSS SSS SSS            "
-"S                                     S S               S S                                            "
-"S                                   a S S a           a S S a               SSS SSS SSS SSS            "
+"S a             SSS SSS SSS SSS   SSS SSS SSS SSS                       SSS SSS SSS SSS               U"
+"S                                                                                                      "
+"S               SSS SSS SSS SSS   a   a   a   a                         SSS SSS SSS SSS                "
 |                                                                                                       |
-|S a                                   S S               S S                 a   a   a   a              |
-|S                                     S S               S S                                            |
-"S             c             c       a S S a           a S S a         c             c                  "
-"                                                                                                       "
-"S a         ZZZZZZZ       ZZZZZZZ     S S               S S         ZZZZZZZ       ZZZZZZZ              "
-|S           ZZZZZZZ       ZZZZZZZ     S S               S S         ZZZZZZZ       ZZZZZZZ              |
-|S           ZZZZZZZ       ZZZZZZZ   a S S a           a S S a       ZZZZZZZ       ZZZZZZZ              |
+|S a             a   a   a   a                         c                 a   a   a   a                  |
+|S                                                                                                      |
+"S             c             c                 WWWWWWWWW               c             c                  "
+"                                              WWWWWWWWW                                                "
+"S a         ZZZZZZZ       ZZZZZZZ             WWWWWWWWW             ZZZZZZZ       ZZZZZZZ              "
+|S           ZZZZZZZ       ZZZZZZZ             WWWWWWWWW             ZZZZZZZ       ZZZZZZZ              |
+|S           ZZZZZZZ       ZZZZZZZ             WWWWWWWWW             ZZZZZZZ       ZZZZZZZ              |
 |                                                                                                       |
-"S a         a a a a       a a a a                 6   c         c   a a a a       a a a a              |
+"S a         a a a a       a a a a             a a a a               a a a a       a a a a             $|
 "S                                                                                                      |
-"S                                             WWWWWWWWW WWWWWWWWW                                      D
-|                                              WWWWWWWWW WWWWWWWWW                                      D
-|S a                                           WWWWWWWWW WWWWWWWWW                               S S    D
-|S                                             WWWWWWWWW WWWWWWWWW                               S S    D
-"S                                             WWWWWWWWW WWWWWWWWW                             a S S a  D
+"S                                           YYYYYYYYYYYYY                                              D
+|                                            YYYYYYYYYYYYY                                              D
+|S a                                         YYYYYYYYYYYYY                                       S S    D
+|S                                           YYYYYYYYYYYYY                                       S S    D
+"S                                           YYYYYYYYYYYYY                                     a S S a  D
 "                                                                                                       |
-"S a           c             c                 a a a a   a a a a       c             c           S S    |
+"S a           c             c             c       6     c             c             c           S S    |
 |S                                                                                               S S    |
-|S           ZZZZZZZ       ZZZZZZZ                                   ZZZZZZZ       ZZZZZZZ     a S S a  |
-|            ZZZZZZZ       ZZZZZZZ                                   ZZZZZZZ       ZZZZZZZ              |
-"S a         ZZZZZZZ       ZZZZZZZ                                   ZZZZZZZ       ZZZZZZZ       S S    "
-"S                                                                                               S S    "
-"S           a a a a       a a a a                                   a a a a       a a a a     a S S a  "
+|S           ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ     a S S a  |
+|            ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ              |
+"            ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       ZZZZZZZ       S S    "
+"                                                                                                S S    "
+"            a a a a       a a a a       a a a a       a a a a       a a a a       a a a a     a S S a  "
 |                                                                                                       |
 |                                                                                                S S    |
 |                                                                                                S S    |
-"      a   a   a   a                                                                           a S S a  "
+"            a   a   a   a                                                                     a S S a  "
 "                                                                                                       "
-"      NNNNNNNNNNNNNNN                                                                                  "
-|      NNNNNNNNNNNNNNN                                                                                  |
-|      NNNNNNNNNNNNNNN                           c     !                                                |
-|                                                      !                                                |
-"U                                           ! GGGGGGG !                                                "
-"                                            ! GGGGGGG !                                                "
-"a                     a   a   a   a   a     ! GGGGGGG !   a   a   a   a   a   a   a   a   a   a   a    "
+"            NNNNNNNNNNNNNNN                                                                            "
+|            NNNNNNNNNNNNNNN                                                                            |
+|            NNNNNNNNNNNNNNN                     c                                                      |
+|                                                                                                       |
+"                                            ! GGGGGGG                                                  "
+"                                            ! GGGGGGG                                                  "
+"a   a   a                   a   a   a   a   ! GGGGGGG     a   a   a   a   a   a   a   a   a   a   a    "
 |                                            !                                                          |
-|SSS   sss f sss f sss SSS SSS SSS SSS SSS   !             SSS SSS SSS SSS SSS SSS SSS SSS SSS SSS SSS *|
+|SSS SSS SSS sss f sss f sss SSS SSS SSS SSS !             SSS SSS SSS SSS SSS SSS SSS SSS SSS SSS SSS *|
 +===---===---===---===---===---===---===-------DDDDDDDDDDD---===---===---===---===---===---===---===----+
-  objects: $ atm, N bar_counter, t canteen_table, Z card_table, m cash_cart, c chair, ' coffee_machine, d console_desk, n counter, K crate, F deposit_boxes, e elevator_car, f fridge, G guard_desk, l locker, * plant, W roulette_table, ) safe, ! security_gate, s shelf, i sink, S slot_machine, o sofa, # stairs, a stool, j terminal, U trash_bin, < wall_screen, w wc, L weapon_locker
+  objects: $ atm, N bar_counter, q bench, t canteen_table, Z card_table, m cash_cart, c chair, ' coffee_machine, d console_desk, n counter, Y craps_table, K crate, F deposit_boxes, e elevator_car, f fridge, G guard_desk, l locker, * plant, Q rigger_cocoon, W roulette_table, ) safe, ! security_gate, s shelf, i sink, S slot_machine, # stairs, a stool, j terminal, U trash_bin, < wall_screen, w wc, L weapon_locker
     1  corridor             33 cells
     2  corridor             44 cells
     3  stairwell            55 cells

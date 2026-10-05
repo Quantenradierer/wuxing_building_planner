@@ -74,67 +74,67 @@
 </head>
 <body>
 <aside>
-  <h1>Wuxing Building planner</h1>
+  <h1 data-i18n="title">Wuxing Building planner</h1>
+  <label class="field"><span data-i18n="language">Language</span> <select id="language"></select></label>
   <form id="form">
-    <h2>Building</h2>
-    <label class="field">Type <select name="building_type"></select></label>
-    <label class="field">Room <select name="room"></select></label>
+    <h2 data-i18n="h_building">Building</h2>
+    <label class="field"><span data-i18n="type">Type</span> <select name="building_type"></select></label>
+    <label class="field"><span data-i18n="room">Room</span> <select name="room"></select></label>
     <div class="pair">
-      <label class="field">Width (cells) <input name="width" type="number" min="1" value="48"></label>
-      <label class="field">Depth (cells) <input name="depth" type="number" min="1" value="30"></label>
+      <label class="field"><span data-i18n="width">Width (cells)</span> <input name="width" type="number" min="1" value="48"></label>
+      <label class="field"><span data-i18n="depth">Depth (cells)</span> <input name="depth" type="number" min="1" value="30"></label>
     </div>
     <div class="pair">
-      <label class="field">Floors above <input name="floors_above" type="number" min="1" value="1"></label>
-      <label class="field">Basements <input name="floors_below" type="number" min="0" value="0"></label>
+      <label class="field"><span data-i18n="floors_above">Floors above</span> <input name="floors_above" type="number" min="1" value="1"></label>
+      <label class="field"><span data-i18n="basements">Basements</span> <input name="floors_below" type="number" min="0" value="0"></label>
     </div>
-    <label class="field">Shape <select name="shape"></select></label>
-    <label class="field">Corner cuts (cells, 0 = square) <input name="chamfer" type="number" min="0" value="0"></label>
-    <label class="field">Wealth <select name="wealth"></select></label>
-    <label class="field">Condition <select name="condition"></select></label>
-    <label class="field">Security <select name="security"></select></label>
+    <label class="field"><span data-i18n="shape">Shape</span> <select name="shape"></select></label>
+    <label class="field"><span data-i18n="wealth">Wealth</span> <select name="wealth"></select></label>
+    <label class="field"><span data-i18n="condition">Condition</span> <select name="condition"></select></label>
+    <label class="field"><span data-i18n="security">Security</span> <select name="security"></select></label>
 
-    <h2>Site</h2>
-    <label class="field">Street side <select name="street_side"></select></label>
-    <label class="field">Service side <select name="service_side"></select></label>
+    <h2 data-i18n="h_site">Site</h2>
+    <label class="field"><span data-i18n="street_side">Street side</span> <select name="street_side"></select></label>
+    <label class="field"><span data-i18n="service_side">Service side</span> <select name="service_side"></select></label>
     <div class="row" style="margin:6px 0 2px">
-      <input type="checkbox" id="entrances-override"><label for="entrances-override">Override entrances</label>
+      <input type="checkbox" id="entrances-override"><label for="entrances-override" data-i18n="override_entrances">Override entrances</label>
     </div>
     <div class="checks" id="entrances"></div>
 
-    <h2>Seed</h2>
+    <h2 data-i18n="h_seed">Seed</h2>
     <div class="row">
-      <input name="seed" type="number" min="0" placeholder="random">
-      <button type="button" id="reroll" title="New random seed and generate">🎲</button>
+      <input name="seed" type="number" min="0" placeholder="random" data-i18n-placeholder="random">
+      <button type="button" id="reroll" data-i18n-title="reroll">🎲</button>
     </div>
 
-    <h2>Image</h2>
-    <label class="field">Theme <select name="theme"></select></label>
-    <label class="field">Pixels / cell <input name="cell_px" type="number" min="4" max="100"></label>
-    <div class="checks"><label><input type="checkbox" name="lighting" checked> Baked lighting</label></div>
+    <h2 data-i18n="h_image">Image</h2>
+    <label class="field"><span data-i18n="theme">Theme</span> <select name="theme"></select></label>
+    <label class="field"><span data-i18n="cell_px">Pixels / cell</span> <input name="cell_px" type="number" min="4" max="100"></label>
+    <div class="checks"><label><input type="checkbox" name="lighting" checked> <span data-i18n="lighting">Baked lighting</span></label></div>
 
-    <button class="primary" id="go" type="submit">Generate</button>
+    <button class="primary" id="go" type="submit" data-i18n="generate">Generate</button>
   </form>
 
-  <h2>Layers</h2>
+  <h2 data-i18n="h_layers">Layers</h2>
   <div class="layers" id="layers"></div>
-  <label class="field">Grid every <input id="grid-step" type="number" min="1" value="3"></label>
+  <label class="field"><span data-i18n="grid_every">Grid every</span> <input id="grid-step" type="number" min="1" value="3"></label>
 </aside>
 
 <main>
   <header>
     <div class="tabs" id="floors"></div>
     <span class="spacer"></span>
-    <span id="status">Set parameters and generate.</span>
-    <button type="button" id="zoom-out" title="Zoom out">−</button>
-    <button type="button" id="zoom-fit" title="Fit">Fit</button>
-    <button type="button" id="zoom-in" title="Zoom in">+</button>
-    <button type="button" id="dl-png" disabled>Image</button>
+    <span id="status"></span>
+    <button type="button" id="zoom-out" data-i18n-title="zoom_out">−</button>
+    <button type="button" id="zoom-fit" data-i18n="fit">Fit</button>
+    <button type="button" id="zoom-in" data-i18n-title="zoom_in">+</button>
+    <button type="button" id="dl-png" disabled data-i18n="image">Image</button>
     <button type="button" id="dl-json" disabled>JSON</button>
     <button type="button" id="dl-foundry" disabled
-      title="The building for Foundry VTT v14: import it with the Schattenakte module">Foundry</button>
+      data-i18n-title="foundry_title">Foundry</button>
   </header>
   <div id="viewport">
-    <div id="empty">No building yet.</div>
+    <div id="empty" data-i18n="empty"></div>
     <div id="stage" hidden>
       <img id="map" alt="">
       <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -149,61 +149,119 @@
 const SVG = "http://www.w3.org/2000/svg";
 const M2_PER_CELL = 0.25;
 const ROOM_LABEL_PX = 12;
-const LAYERS = [
-  ["image", "Themed map", true, "#888"],
-  ["rooms", "Room areas", false, "#6aa9ff"],
-  ["walls", "Walls", false, "#e8e8e8"],
-  ["labels", "Room descriptions", true, "#ffffff"],
-  ["units", "Units", false, "#c792ea"],
-  ["openings", "Doors & windows", false, "#f5c35b"],
-  ["locks", "Locks & entrances", false, "#ff6b6b"],
-  ["objects", "Furniture", false, "#9be37a"],
-  ["devices", "Security devices", false, "#ff8a3d"],
-  ["lights", "Lights", false, "#fff3a0"],
-  ["grid", "Grid", false, "#7a8190"],
+const LAYERS = [  // key, on by default, swatch; the title is the UI text `layer_<key>`
+  ["image", true, "#888"],
+  ["rooms", false, "#6aa9ff"],
+  ["walls", false, "#e8e8e8"],
+  ["labels", true, "#ffffff"],
+  ["units", false, "#c792ea"],
+  ["openings", false, "#f5c35b"],
+  ["locks", false, "#ff6b6b"],
+  ["objects", false, "#9be37a"],
+  ["devices", false, "#ff8a3d"],
+  ["lights", false, "#fff3a0"],
+  ["grid", false, "#7a8190"],
 ];
 const $ = (id) => document.getElementById(id);
 const form = $("form");
-const state = { data: null, request: null, level: 0, zoom: null, layers: {} };
+const state = { data: null, request: null, level: 0, zoom: null, layers: {}, lang: "en", i18n: {}, options: null, status: null };
+
+// Texts: UI strings by key, names (rooms, objects, parameter values) by id, English as the fallback.
+const humanize = (id) => String(id).replace(/_/g, " ");
+const cat = () => state.i18n[state.lang] || {};
+const t = (key) => cat().ui?.[key] ?? key;
+const roomName = (id) => cat().rooms?.[id] ?? humanize(id);
+const objectName = (id) => cat().objects?.[id] ?? humanize(id);
+const term = (group, id) => cat().terms?.[group]?.[id] ?? humanize(id);
+const levelName = (level) => {
+  const f = cat().terms?.floor ?? {};
+  return level === 0 ? f.ground : level > 0 ? f.above.replace("{n}", level) : f.basement.replace("{n}", -level);
+};
+function applyStaticTexts() {
+  document.documentElement.lang = state.lang;
+  for (const node of document.querySelectorAll("[data-i18n]")) node.textContent = t(node.dataset.i18n);
+  for (const node of document.querySelectorAll("[data-i18n-title]")) node.title = t(node.dataset.i18nTitle);
+  for (const node of document.querySelectorAll("[data-i18n-placeholder]")) node.placeholder = t(node.dataset.i18nPlaceholder);
+  document.title = t("title");
+}
 
 function store(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
 function recall(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 
-function fillSelect(name, values, selected, blank) {
+// `label` turns a value into its text in the current language.
+function fillSelect(name, values, selected, label = humanize, blank = null) {
   const select = form.elements[name];
+  select.length = 0;
   if (blank) select.add(new Option(blank, ""));
-  for (const v of values) select.add(new Option(v.replace(/_/g, " "), v));
+  for (const v of values) select.add(new Option(label(v), v));
   select.value = selected;
+}
+
+// The selects whose texts depend on the language; `keep` overrides the values they keep.
+function fillChoices(keep = {}) {
+  const o = state.options;
+  const pick = (name) => keep[name] ?? form.elements[name].value;
+  const termOf = (group) => (v) => term(group, v);
+  fillSelect("building_type", o.building_types, pick("building_type"), termOf("building_type"));
+  fillSelect("shape", o.shape, pick("shape"), termOf("shape"));
+  fillSelect("wealth", o.wealth, pick("wealth"), termOf("wealth"));
+  fillSelect("condition", o.condition, pick("condition"), termOf("condition"));
+  fillSelect("security", o.security, pick("security"), termOf("security"));
+  fillSelect("street_side", o.sides, pick("street_side"), termOf("side"));
+  fillSelect("service_side", o.sides, pick("service_side"), termOf("side"), t("opposite_of_street"));
+  fillSelect("theme", o.themes, pick("theme"));
+  fillRooms(pick("room"));
+  for (const label of $("entrances").querySelectorAll("label")) {
+    label.lastChild.textContent = ` ${term("entrance", label.querySelector("input").value)}`;
+  }
+}
+
+function renderLayerTitles() {
+  for (const [key] of LAYERS) $("layers").querySelector(`[data-layer="${key}"] .title`).textContent = t(`layer_${key}`);
+}
+
+function setLanguage(lang) {
+  state.lang = lang;
+  store("roomplanner.lang", lang);
+  $("language").value = lang;
+  applyStaticTexts();
+  if (state.options) { fillChoices(); renderLayerTitles(); }
+  showStatus();
+  if (state.data) { renderTabs(); renderWarnings(); draw(); }
 }
 
 async function init() {
   const options = await (await fetch("/api/options")).json();
-  fillSelect("building_type", options.building_types, "office");
-  fillSelect("shape", options.shape, "rectangle");
-  fillSelect("wealth", options.wealth, "middle");
-  fillSelect("condition", options.condition, "maintained");
-  fillSelect("security", options.security, "low");
-  fillSelect("street_side", options.sides, "S");
-  fillSelect("service_side", options.sides, "", "opposite of street");
-  fillSelect("theme", options.themes, options.defaults.theme);
+  state.options = options;
+  state.i18n = options.i18n;
+  for (const lang of options.languages) $("language").add(new Option(lang.toUpperCase(), lang));
+  const savedLang = recall("roomplanner.lang");
+  state.lang = options.languages.includes(savedLang) ? savedLang
+    : navigator.language.startsWith("de") && options.languages.includes("de") ? "de" : options.defaults.language;
+  $("language").value = state.lang;
+  applyStaticTexts();
   form.elements.cell_px.value = options.defaults.cell_px;
   for (const kind of options.entrances) {
     const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" value="${kind}" ${kind === "main" ? "checked" : ""}> ${kind}`;
+    label.innerHTML = `<input type="checkbox" value="${kind}" ${kind === "main" ? "checked" : ""}> `;
+    label.append(document.createTextNode(""));
     $("entrances").append(label);
   }
   rooms = options.rooms;
-  fillRooms();
+  fillChoices({ building_type: "office", shape: "rectangle", wealth: "middle", condition: "maintained",
+    security: "low", street_side: "S", service_side: "", theme: options.defaults.theme, room: "" });
   restoreForm();
   fillRooms(recall("roomplanner.form")?.room || "");
   syncEntrances();
+  showStatus();
 
   const saved = recall("roomplanner.layers") || {};
-  for (const [key, title, on, swatch] of LAYERS) {
+  for (const [key, on, swatch] of LAYERS) {
     state.layers[key] = key in saved ? saved[key] : on;
     const label = document.createElement("label");
+    label.dataset.layer = key;
     label.innerHTML = `<input type="checkbox" ${state.layers[key] ? "checked" : ""}>
-      <span class="swatch" style="background:${swatch}"></span>${title}`;
+      <span class="swatch" style="background:${swatch}"></span><span class="title"></span>`;
     label.querySelector("input").addEventListener("change", (e) => {
       state.layers[key] = e.target.checked;
       store("roomplanner.layers", state.layers);
@@ -211,21 +269,22 @@ async function init() {
     });
     $("layers").append(label);
   }
+  renderLayerTitles();
 }
+$("language").addEventListener("change", (e) => setLanguage(e.target.value));
 
 let rooms = {};
 
 // The building type's room types; one picked generates only that room, width x depth.
 function fillRooms(selected = form.elements.room.value) {
   const select = form.elements.room;
-  select.length = 0;
-  fillSelect("room", rooms[form.elements.building_type.value] || [], "", "whole building");
+  fillSelect("room", rooms[form.elements.building_type.value] || [], "", roomName, t("whole_building"));
   if ([...select.options].some((o) => o.value === selected)) select.value = selected;
   syncRoom();
 }
 function syncRoom() {
   const lone = form.elements.room.value !== "";
-  for (const name of ["floors_above", "floors_below", "shape", "chamfer"]) form.elements[name].disabled = lone;
+  for (const name of ["floors_above", "floors_below", "shape"]) form.elements[name].disabled = lone;
 }
 form.elements.building_type.addEventListener("change", () => fillRooms());
 form.elements.room.addEventListener("change", syncRoom);
@@ -243,7 +302,7 @@ function formValues() {
     building_type: f.building_type.value,
     width: +f.width.value, depth: +f.depth.value,
     floors_above: +f.floors_above.value, floors_below: +f.floors_below.value,
-    shape: f.shape.value, chamfer: +f.chamfer.value, wealth: f.wealth.value, condition: f.condition.value,
+    shape: f.shape.value, wealth: f.wealth.value, condition: f.condition.value,
     security: f.security.value, street_side: f.street_side.value,
     service_side: f.service_side.value || null,
     room: f.room.value || null,
@@ -254,6 +313,7 @@ function formValues() {
   }
   return {
     params, theme: f.theme.value, cell_px: +f.cell_px.value, lighting: f.lighting.checked,
+    lang: state.lang,
   };
 }
 
@@ -285,7 +345,7 @@ async function generate() {
   const request = formValues();
   saveForm();
   $("go").disabled = true;
-  setStatus("Generating…");
+  setStatus("generating");
   const started = performance.now();
   try {
     const response = await fetch("/api/generate", {
@@ -299,9 +359,9 @@ async function generate() {
     state.request = { ...request, params: { ...request.params, seed: body.building.seed } };
     if (!levels.includes(state.level)) state.level = levels.includes(0) ? 0 : levels[0];
     const b = body.building;
-    setStatus(`${b.params.building_type.replace(/_/g, " ")} · ${b.width}×${b.height} cells ` +
-      `(${b.width * 0.5}×${b.height * 0.5} m) · seed ${b.seed} · ` +
-      `${Math.round(performance.now() - started)} ms`);
+    const ms = Math.round(performance.now() - started);
+    setStatus(() => `${term("building_type", b.params.building_type)} · ${b.width}×${b.height} ${t("cells")} ` +
+      `(${b.width * 0.5}×${b.height * 0.5} m) · ${t("seed_word")} ${b.seed} · ${ms} ms`);
     renderTabs();
     renderWarnings();
     $("dl-png").disabled = $("dl-json").disabled = $("dl-foundry").disabled = false;
@@ -309,7 +369,7 @@ async function generate() {
     $("stage").hidden = false;
     draw();
   } catch (error) {
-    setStatus(error.message, true);
+    setStatus(() => error.message, true);
   } finally {
     $("go").disabled = false;
   }
@@ -321,8 +381,14 @@ $("reroll").addEventListener("click", () => {
   generate();
 });
 
+// `text` is a UI key or a function making the message; it is redrawn when the language changes.
 function setStatus(text, error = false) {
-  $("status").textContent = text;
+  state.status = { text, error };
+  showStatus();
+}
+function showStatus() {
+  const { text, error } = state.status || { text: "status_idle", error: false };
+  $("status").textContent = typeof text === "function" ? text() : t(text);
   $("status").classList.toggle("error", error);
 }
 
@@ -332,8 +398,8 @@ function renderTabs() {
   const floors = [...state.data.building.floors].sort((a, b) => b.level - a.level);
   for (const floor of floors) {
     const button = document.createElement("button");
-    button.textContent = floor.name;
-    button.title = floor.role ? `role: ${floor.role}` : "";
+    button.textContent = levelName(floor.level);
+    button.title = floor.role ? `${t("role")}: ${floor.role}` : "";
     button.classList.toggle("active", floor.level === state.level);
     button.addEventListener("click", () => { state.level = floor.level; renderTabs(); draw(); });
     tabs.append(button);
@@ -463,7 +529,7 @@ function draw() {
       el("circle", { cx: light.x, cy: light.y, r: .25, fill: light.colour,
         stroke: light.state === "on" ? "#000" : "#f00", "stroke-width": .08,
         "stroke-dasharray": light.state === "flicker" ? ".1 .1" : "none" }, g)
-        .append(title(`${light.kind} light · ${light.state} · r ${light.radius}`));
+        .append(title(`${humanize(light.kind)} ${t("light_word")} · ${light.state} · r ${light.radius}`));
     }
   }
   if (L.objects) {
@@ -472,15 +538,16 @@ function draw() {
       el("rect", { x: obj.x + .05, y: obj.y + .05, width: obj.w - .1, height: obj.h - .1,
         fill: obj.blocking === false ? "rgba(155,227,122,.08)" : "rgba(155,227,122,.22)",
         stroke: "#9be37a", "stroke-width": .06, rx: .1 }, g)
-        .append(title(`${obj.kind} (${obj.w}×${obj.h}, faces ${obj.facing})`));
+        .append(title(`${objectName(obj.kind)} (${obj.w}×${obj.h}, ${t("faces")} ${term("side", obj.facing)})`));
       // Front marker: a tick on the side the object faces.
       const [fx, fy] = { N: [obj.x + obj.w / 2, obj.y], S: [obj.x + obj.w / 2, obj.y + obj.h],
         E: [obj.x + obj.w, obj.y + obj.h / 2], W: [obj.x, obj.y + obj.h / 2] }[obj.facing];
       el("circle", { cx: fx, cy: fy, r: .12, fill: "#9be37a" }, g);
-      const size = Math.min(.55, (obj.w * 1.6) / Math.max(4, obj.kind.length));
+      const name = objectName(obj.kind);
+      const size = Math.min(.55, (obj.w * 1.6) / Math.max(4, name.length));
       if (size >= .22) {
         label(g, obj.x + obj.w / 2, obj.y + obj.h / 2 + size * .35,
-          [[obj.kind.replace(/_/g, " "), 1]], size, "#d8f7c6");
+          [[name, 1]], size, "#d8f7c6");
       }
     }
   }
@@ -510,7 +577,7 @@ function draw() {
       el("path", { d: `M${cx} ${cy}L${cx + dx * .7} ${cy + dy * .7}`, stroke: "#ff8a3d",
         "stroke-width": .1 }, g);
       el("circle", { cx, cy, r: .38, fill: "#2a1508", stroke: "#ff8a3d", "stroke-width": .08 }, g)
-        .append(title(`${d.kind.replace(/_/g, " ")} · rating ${d.rating} · faces ${d.facing}`));
+        .append(title(`${humanize(d.kind)} · ${t("rating")} ${d.rating} · ${t("faces")} ${term("side", d.facing)}`));
       label(g, cx, cy + .16, [[d.kind[0].toUpperCase(), 1, "bold"]], .45, "#ffb27a");
     }
   }
@@ -520,7 +587,7 @@ function draw() {
       if (o.kind !== "door" || (!o.lock && !o.entrance)) continue;
       const [x0, y0, x1, y1] = runCoords(o.edges);
       const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
-      const text = [o.entrance ? o.entrance.toUpperCase() : null,
+      const text = [o.entrance ? term("entrance", o.entrance).toUpperCase() : null,
         o.lock ? `${o.lock}${o.rating ? " " + o.rating : ""}` : null].filter(Boolean).join(" · ");
       el("circle", { cx: mx, cy: my, r: .2, fill: o.lock ? "#ff6b6b" : "#f5c35b" }, g);
       label(g, mx, my - .45, [[text, 1, "bold"]], .5, o.entrance ? "#ffe08a" : "#ffb0b0");
@@ -530,10 +597,10 @@ function draw() {
     const g = el("g", {}, svg);
     const size = ROOM_LABEL_PX / state.zoom;  // the same on screen for every room and zoom
     for (const room of floor.rooms) {
-      const name = room.type.replace(/_/g, " ");
+      const name = roomName(room.type);
       const [cx, cy] = centre(room.cells);
       const lines = [[name, 1, "600"], [`${room.id} · ${room.cells.length * M2_PER_CELL} m²`, .8]];
-      if (room.unit) lines.push([`unit ${room.unit}`, .8]);
+      if (room.unit) lines.push([`${t("unit")} ${room.unit}`, .8]);
       label(g, cx, cy, lines, size);
     }
   }
@@ -552,11 +619,11 @@ function runCoords(edges) {
 }
 
 function describeOpening(o) {
-  const parts = [`${o.kind} (${o.edges.length} cells)`];
+  const parts = [`${term("word", o.kind)} (${o.edges.length} ${t("cells")})`];
   if (o.state) parts.push(o.state);
   if (o.material) parts.push(o.material);
-  if (o.lock) parts.push(`lock: ${o.lock}${o.rating ? " " + o.rating : ""}`);
-  if (o.entrance) parts.push(`${o.entrance} entrance`);
+  if (o.lock) parts.push(`${t("lock")}: ${o.lock}${o.rating ? " " + o.rating : ""}`);
+  if (o.entrance) parts.push(`${term("entrance", o.entrance)} (${t("entrance_word")})`);
   return parts.join(" · ");
 }
 
@@ -571,14 +638,14 @@ function roomInfo(room, floor) {
   for (const obj of floor.objects) {
     if (obj.room === room.id) counts[obj.kind] = (counts[obj.kind] || 0) + 1;
   }
-  const devices = floor.devices.filter((d) => d.room === room.id).map((d) => d.kind);
+  const devices = floor.devices.filter((d) => d.room === room.id).map((d) => humanize(d.kind));
   const [x0, y0, x1, y1] = bounds(room.cells);
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-  let html = `<b>${esc(room.type.replace(/_/g, " "))}</b> <span style="color:var(--muted)">${esc(room.id)}</span><br>` +
-    `${room.cells.length} cells · ${room.cells.length * M2_PER_CELL} m² · ` +
-    `${(x1 - x0) * .5}×${(y1 - y0) * .5} m box`;
-  if (room.unit) html += `<br>unit ${esc(room.unit)}`;
-  const furniture = Object.entries(counts).map(([k, n]) => (n > 1 ? `${n}× ` : "") + k.replace(/_/g, " "));
+  let html = `<b>${esc(roomName(room.type))}</b> <span style="color:var(--muted)">${esc(room.id)}</span><br>` +
+    `${room.cells.length} ${t("cells")} · ${room.cells.length * M2_PER_CELL} m² · ` +
+    `${(x1 - x0) * .5}×${(y1 - y0) * .5} m ${t("box")}`;
+  if (room.unit) html += `<br>${esc(t("unit"))} ${esc(room.unit)}`;
+  const furniture = Object.entries(counts).map(([k, n]) => (n > 1 ? `${n}× ` : "") + objectName(k));
   if (furniture.length) html += `<br>${esc(furniture.join(", "))}`;
   if (devices.length) html += `<br><span style="color:#ff8a3d">${esc(devices.join(", "))}</span>`;
   return html;
@@ -644,27 +711,27 @@ $("dl-png").addEventListener("click", () => {
 $("dl-foundry").addEventListener("click", async () => {
   const button = $("dl-foundry");
   button.disabled = true;
-  setStatus("Exporting for Foundry…");
+  setStatus("exporting");
   try {
     // The same parameters with the seed that was used: the same building, rendered for a VTT.
     const response = await fetch("/api/export/foundry", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(state.request),
+      body: JSON.stringify({ ...state.request, lang: state.lang }),
     });
     if (!response.ok) throw new Error((await response.json()).error || response.statusText);
     const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition"))[1];
     const url = URL.createObjectURL(await response.blob());
     download(name, url);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setStatus(`${name}: in Foundry, Scenes sidebar → Import building (Schattenakte module).`);
+    setStatus(() => `${name}: ${t("exported")}`);
   } catch (error) {
-    setStatus(error.message, true);
+    setStatus(() => error.message, true);
   } finally {
     button.disabled = false;
   }
 });
 
-init().catch((error) => setStatus(`Could not load options: ${error.message}`, true));
+init().catch((error) => setStatus(() => `${t("options_failed")}: ${error.message}`, true));
 </script>
 </body>
 </html>

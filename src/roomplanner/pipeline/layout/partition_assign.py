@@ -12,12 +12,13 @@ from __future__ import annotations
 
 import math
 import random
+from collections.abc import Callable
 from dataclasses import dataclass
 
-from roomplanner.geometry import Cell, Side, rectangle, thinnest_extent
+from roomplanner.bitgrid import BitGrid
+from roomplanner.geometry import Cell, Side
 from roomplanner.pipeline.base import AllocationError, PlannedRoom
 from roomplanner.pipeline.layout.regions import (
-    aspect_ok,
     bbox,
     components,
     shape_ok,
@@ -90,6 +91,13 @@ class Assigner:
         self.warnings: list[str] = []
         self.made: dict[int, int] = {}
         self.min_useful = 12
+        x0, y0, x1, y1 = bbox(footprint)
+        self.grid = BitGrid(x0, y0, x1, y1)
+        self.border_m = self.grid.mask(self.border)
+        self.outer_m = self.grid.mask(self.outer)
+        self.access_m = self.grid.mask(access)
+        self._mask_cache: dict[frozenset[Cell], int] = {}
+        self._useful_cache: dict[int, bool] = {}
 
     # --- entry point ------------------------------------------------------------------
 
@@ -100,6 +108,7 @@ class Assigner:
         pool = [e for e in self.entries if e.fill]
         lows = [self._range(e)[0] for e in pool] + [n.low for n in needs]
         self.min_useful = max(8, min(lows, default=12))
+        self._useful_cache.clear()
         for need in sorted(needs, key=lambda n: n.rank):
             if not self._place_or_halve(need, free, rooms):
                 message = f"{level_name}: no space for {need.entry.room}"
@@ -187,22 +196,34 @@ class Assigner:
         return self._fits_spec(cells, need.spec, need.low, need.high)
 
     def _cheap_fit(self, cells: frozenset[Cell], spec: RoomSpec, low: int, high: int) -> bool:
+        return self._cheap_fit_m(self._mask(cells), len(cells), spec, low, high)
+
+    def _cheap_fit_m(self, mask: int, size: int, spec: RoomSpec, low: int, high: int) -> bool:
         """Size, a door's width of wall on circulation, aspect: no shape walk yet."""
-        if not low <= len(cells) <= high * TOLERANCE:
+        if not low <= size <= high * TOLERANCE:
             return False
-        if len(cells & self.border) < min(ACCESS, spec.door_width):
+        if (mask & self.border_m).bit_count() < min(ACCESS, spec.door_width):
             return False
-        return aspect_ok(cells, spec)
+        x0, y0, x1, y1 = self.grid.bbox(mask)
+        if (x1 - x0) * (y1 - y0) != size:  # not a rectangle: aspect does not apply
+            return True
+        long, short = max(x1 - x0, y1 - y0), min(x1 - x0, y1 - y0)
+        return long <= spec.max_aspect * short * 1.2
 
     def _fits_spec(self, cells: frozenset[Cell], spec: RoomSpec, low: int, high: int) -> bool:
         return self._cheap_fit(cells, spec, low, high) and self._shape(cells, spec)
 
     def _shape(self, cells: frozenset[Cell], spec: RoomSpec) -> bool:
+        return self._shape_m(self._mask(cells), spec)
+
+    def _shape_m(self, mask: int, spec: RoomSpec) -> bool:
         """Wide enough: circulation rooms (an open office) count together with the corridor
         beside them, as the validator does."""
         if spec.circulation:
-            return thinnest_extent(cells, cells | self.access) >= spec.min_side
-        return shape_ok(cells, spec)
+            return self.grid.thick(mask, mask | self.access_m, spec.min_side)
+        if self.grid.thick(mask, mask, spec.min_side):
+            return True
+        return shape_ok(self.grid.cells(mask), spec)  # a rectangle with alcoves may still pass
 
     def _score(self, cells: frozenset[Cell], need: Need) -> float:
         score = abs(len(cells) - need.target) / need.target
@@ -211,7 +232,18 @@ class Assigner:
 
     def _soft(self, cells: frozenset[Cell], spec: RoomSpec, near: str | None) -> float:
         """Windows and nearness are only preferences."""
-        on_facade = not self.outer.isdisjoint(cells)
+        return self._soft_with(not self.outer.isdisjoint(cells), lambda: cells, spec, near)
+
+    def _soft_m(self, mask: int, spec: RoomSpec, near: str | None) -> float:
+        return self._soft_with(bool(mask & self.outer_m), lambda: self.grid.cells(mask), spec, near)
+
+    def _soft_with(
+        self,
+        on_facade: bool,
+        cells: Callable[[], frozenset[Cell]],
+        spec: RoomSpec,
+        near: str | None,
+    ) -> float:
         score = 0.0
         if spec.windows is WindowRule.REQUIRED and not on_facade:
             score += 0.4
@@ -219,8 +251,9 @@ class Assigner:
             score += 0.25
         anchor = self.anchors.get(near) if near else None
         if anchor is not None:
-            cx = sum(c.x for c in cells) / len(cells)
-            cy = sum(c.y for c in cells) / len(cells)
+            members = cells()
+            cx = sum(c.x for c in members) / len(members)
+            cy = sum(c.y for c in members) / len(members)
             score += 0.5 * (abs(cx - anchor.x) + abs(cy - anchor.y)) / max(1, self.diagonal)
         return score
 
@@ -240,122 +273,120 @@ class Assigner:
         need: Need | None,
         near: str | None = None,
     ) -> Choice | None:
-        x0, y0, x1, y1 = bbox(region)
-        pieces: list[tuple[frozenset[Cell], float]] = []
+        grid = self.grid
+        whole = self._mask(region)
+        total = len(region)
+        pieces: list[tuple[int, float]] = []
         # Two straight cuts: a slab off one end of the region, then a piece off one end of
         # the slab across the first cut. That reaches the corners of big, deep regions.
-        for slab in [region, *self._slabs(region, low, high * TOLERANCE * 6, target * 2)]:
+        for slab in [whole, *self._slabs(whole, low, high * TOLERANCE * 6, target * 2)]:
             for piece in self._slabs(slab, low, high * TOLERANCE, target):
                 pieces.append((piece, 0.0))
-            if slab is not region and low <= len(slab) <= high * TOLERANCE:
+            if slab != whole and low <= slab.bit_count() <= high * TOLERANCE:
                 pieces.append((slab, 0.0))
         if self.rng.random() < L_SHAPE:
-            pieces += self._corners(region, (x0, y0, x1, y1), spec, target)
+            pieces += self._corners(whole, grid.bbox(whole), spec, target)
         # Cheap checks and a base score first; the connectivity, rests and shape checks
         # (the expensive ones) only for the most promising few.
         near_room = near if need is None else need.entry.near
-        scored: list[tuple[float, frozenset[Cell]]] = []
-        seen: set[frozenset[Cell]] = set()
+        scored: list[tuple[float, int]] = []
+        seen: set[int] = set()
         for piece, bonus in pieces:
-            if piece in seen or len(piece) == len(region):
+            size = piece.bit_count()
+            if piece in seen or size == total:
                 continue
             seen.add(piece)
-            if not self._cheap_fit(piece, spec, low, high):
+            if not self._cheap_fit_m(piece, size, spec, low, high):
                 continue
-            base = abs(len(piece) - target) / target - bonus
-            base += self._soft(piece, spec, near_room)
+            base = abs(size - target) / target - bonus
+            base += self._soft_m(piece, spec, near_room)
             scored.append((base, piece))
-        scored.sort(key=lambda s: (s[0], min(s[1])))
-        best: Choice | None = None
+        scored.sort(key=lambda s: (s[0], grid.min_cell(s[1])))
+        best: tuple[float, int, list[int]] | None = None
         for base, piece in scored[:6]:
-            if not self._shape(piece, spec):
+            if not self._shape_m(piece, spec):
                 continue
-            if len(components(piece)) != 1:
+            if not grid.connected(piece):
                 continue
-            rests = components(region - piece)
-            score = base + sum(len(r) / 20 for r in rests if not self._useful(r))
-            score += self._blind(region - piece) / 20
+            rest = whole & ~piece
+            rests = grid.components(rest)
+            score = base + sum(r.bit_count() / 20 for r in rests if not self._useful_m(r))
+            score += grid.blind(rest, self.border_m) / 20
             score += self.rng.uniform(0, 0.1)
-            if best is None or score < best.score:
-                best = Choice(piece, rests, score)
-        return best
+            if best is None or score < best[0]:
+                best = (score, piece, rests)
+        if best is None:
+            return None
+        score, piece, rests = best
+        return Choice(grid.cells(piece), [grid.cells(r) for r in rests], score)
 
-    def _slabs(
-        self, region: frozenset[Cell], low: int, cap: float, aim: int
-    ) -> list[frozenset[Cell]]:
+    def _slabs(self, region: int, low: int, cap: float, aim: int) -> list[int]:
         """Pieces cut off either end of `region` along either axis, of low..cap cells."""
-        found: list[frozenset[Cell]] = []
+        found: list[int] = []
         per_end = max(3, 12 // 4)
+        total = region.bit_count()
         for vertical in (True, False):
-            lines: dict[int, list[Cell]] = {}
-            for p in region:
-                lines.setdefault(p.x if vertical else p.y, []).append(p)
+            lines = self.grid.lines(region, vertical)
             for from_low in (True, False):
-                taken: set[Cell] = set()
-                end: list[frozenset[Cell]] = []
-                for key in sorted(lines, reverse=not from_low):
-                    taken.update(lines[key])
-                    if len(taken) > cap:
+                ordered = lines if from_low else lines[::-1]
+                size = 0
+                fits: list[int] = []  # how many lines make a piece of low..cap cells
+                for count, (_, _, n) in enumerate(ordered, 1):
+                    size += n
+                    if size > cap:
                         break
-                    if len(taken) >= low and len(taken) < len(region):
-                        end.append(frozenset(taken))
+                    if low <= size < total:
+                        fits.append(count)
                 # Spread over the sizes that fit, so thick pieces are among them too.
-                step = max(1, len(end) // per_end)
-                found += end[::step][:per_end]
-        found.sort(key=lambda piece: abs(len(piece) - aim))
+                step = max(1, len(fits) // per_end)
+                for count in fits[::step][:per_end]:
+                    piece = 0
+                    for _, line, _ in ordered[:count]:
+                        piece |= line
+                    found.append(piece)
+        found.sort(key=lambda piece: abs(piece.bit_count() - aim))
         return found
 
     def _corners(
         self,
-        region: frozenset[Cell],
+        region: int,
         box: tuple[int, int, int, int],
         spec: RoomSpec,
         target: int,
-    ) -> list[tuple[frozenset[Cell], float]]:
+    ) -> list[tuple[int, float]]:
         """Rectangles in the corners of the region's box: what is left is an L."""
         x0, y0, x1, y1 = box
-        found: list[tuple[frozenset[Cell], float]] = []
+        found: list[tuple[int, float]] = []
         for width in range(spec.min_side, max(spec.min_side, x1 - x0) + 1):
             height = max(spec.min_side, math.ceil(target / width))
             if height > y1 - y0:
                 continue
             for x, y in ((x0, y0), (x1 - width, y0), (x0, y1 - height), (x1 - width, y1 - height)):
-                if not all(
-                    Cell(cx, cy) in region
-                    for cx, cy in (
-                        (x, y),
-                        (x + width - 1, y),
-                        (x, y + height - 1),
-                        (x + width - 1, y + height - 1),
-                    )
-                ):
-                    continue
-                piece = rectangle(x, y, width, height)
-                if piece <= region:
+                if x < x0 or y < y0 or x + width > x1 or y + height > y1:
+                    continue  # wider than the box: cannot be inside the region
+                piece = self.grid.rect(x, y, width, height)
+                if not piece & ~region:
                     found.append((piece, 0.05))
         return found
 
-    def _blind(self, rest: frozenset[Cell]) -> int:
-        """Cells of `rest` with no straight line through `rest` to circulation: the pocket
-        behind a room cut off the frontage, which no room could be entered from."""
-        border = rest & self.border
-        seen = set(border)
-        for side in Side:
-            dx, dy = side.delta
-            reach: set[Cell] = set()
-            for cell in sorted(rest, key=lambda c: c.x * dx + c.y * dy, reverse=True):
-                if cell in border or cell.neighbour(side) in reach:
-                    reach.add(cell)
-            seen |= reach
-        return len(rest) - len(seen)
-
-    def _useful(self, cells: frozenset[Cell]) -> bool:
+    def _useful_m(self, cells: int) -> bool:
         """Could some room still be made of this piece?"""
-        return (
-            len(cells) >= self.min_useful
-            and len(cells & self.border) >= ACCESS
-            and thinnest_extent(cells, cells) >= MIN_USEFUL
-        )
+        cached = self._useful_cache.get(cells)
+        if cached is None:
+            cached = self._useful_cache[cells] = (
+                cells.bit_count() >= self.min_useful
+                and (cells & self.border_m).bit_count() >= ACCESS
+                and self.grid.thick(cells, cells, MIN_USEFUL)
+            )
+        return cached
+
+    def _mask(self, cells: frozenset[Cell]) -> int:
+        mask = self._mask_cache.get(cells)
+        if mask is None:
+            if len(self._mask_cache) > 4096:
+                self._mask_cache.clear()
+            mask = self._mask_cache[cells] = self.grid.mask(cells)
+        return mask
 
     # --- the free rest ---------------------------------------------------------------
 

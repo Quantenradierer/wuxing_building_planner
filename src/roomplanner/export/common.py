@@ -11,6 +11,7 @@ from PIL import Image
 
 from roomplanner.errors import RoomplannerError
 from roomplanner.geometry import CELL_SIZE_M, Axis, Edge
+from roomplanner.i18n import Language
 from roomplanner.model import Building, Floor, Opening, OpeningKind
 from roomplanner.render.image import DEFAULT_CELL_PX, RenderOptions, render_floor
 from roomplanner.render.theme import Theme
@@ -25,6 +26,7 @@ class ExportOptions:
     cell_px: int = DEFAULT_CELL_PX
     lights: bool = True
     baked_lighting: bool = False  # True: the image carries the light map, the VTT stays bright
+    language: Language = Language.EN  # of the names in the exported scene
 
     @property
     def cells_per_square(self) -> int:
@@ -43,6 +45,7 @@ class ExportOptions:
             padding=self.cells_per_square,
             lighting=self.baked_lighting,
             supersample=1,  # same as the CLI image and the UI preview
+            language=self.language,
         )
 
     @property

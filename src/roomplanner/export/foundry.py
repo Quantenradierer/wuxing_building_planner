@@ -39,6 +39,7 @@ from roomplanner.export.common import (
     wall_segments,
 )
 from roomplanner.geometry import CELL_SIZE_M, Cell
+from roomplanner.i18n import level_name, term
 from roomplanner.model import Building, Floor, OpeningKind, OpeningState, Room
 from roomplanner.render.theme import Theme
 
@@ -106,7 +107,7 @@ def to_foundry(
         levels.append(
             {
                 "_id": level_ids[floor.level],
-                "name": floor.name,
+                "name": level_name(floor.level, options.language),
                 "elevation": {"bottom": bottom, "top": top},
                 "background": {"src": file},
                 "visibility": {"levels": []},
@@ -272,12 +273,14 @@ def _shafts(
             levels = [f.level for f, _ in run]
             x0, y0, x1, y1 = _footprint(run)
             pad, cell = options.render.padding, options.cell_px
-            label = "Elevator" if key[0] == "elevator" else "Stairs"
+            lang = options.language
+            label = term("word", "elevator" if key[0] == "elevator" else "stairs", lang)
+            first, last = (level_name(f.level, lang) for f in (run[0][0], run[-1][0]))
             region_id = stable_id(building.seed, name, "region", *key, levels[0])
             regions.append(
                 {
                     "_id": region_id,
-                    "name": f"{label} ({run[0][0].name} - {run[-1][0].name})",
+                    "name": f"{label} ({first} - {last})",
                     "color": "#00e5ff" if key[0] == "elevator" else "#ffb347",
                     "shapes": [
                         {
@@ -298,7 +301,7 @@ def _shafts(
                     "behaviors": [
                         {
                             "_id": stable_id(region_id, "behavior"),
-                            "name": "Change Level",
+                            "name": term("word", "change_level", options.language),
                             "type": "changeLevel",
                             "system": {"movementActions": []},
                             "disabled": False,

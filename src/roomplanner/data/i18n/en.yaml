@@ -1,0 +1,80 @@
+# English is the language of the ids; this file holds only what is not derived from them
+# (floor names, UI texts). Rooms, objects and parameter values: id with spaces.
+terms:
+  floor:
+    ground: Ground floor
+    above: "Floor {n}"
+    basement: "Basement B{n}"
+  word:
+    elevator: Elevator
+    stairs: Stairs
+    change_level: Change Level
+    unit: unit
+    opening: opening
+    door: door
+    window: window
+    breach: breach
+ui:
+  title: Wuxing Building planner
+  language: Language
+  h_building: Building
+  h_site: Site
+  h_seed: Seed
+  h_image: Image
+  h_layers: Layers
+  type: Type
+  room: Room
+  whole_building: whole building
+  width: Width (cells)
+  depth: Depth (cells)
+  floors_above: Floors above
+  basements: Basements
+  shape: Shape
+  wealth: Wealth
+  condition: Condition
+  security: Security
+  street_side: Street side
+  service_side: Service side
+  opposite_of_street: opposite of street
+  override_entrances: Override entrances
+  random: random
+  reroll: New random seed and generate
+  theme: Theme
+  cell_px: Pixels / cell
+  lighting: Baked lighting
+  generate: Generate
+  grid_every: Grid every
+  fit: Fit
+  zoom_in: Zoom in
+  zoom_out: Zoom out
+  image: Image
+  json: JSON
+  foundry: Foundry
+  foundry_title: "The building for Foundry VTT v14: import it with the Schattenakte module"
+  status_idle: Set parameters and generate.
+  empty: No building yet.
+  generating: Generating…
+  exporting: Exporting for Foundry…
+  exported: "in Foundry, Scenes sidebar → Import building (Schattenakte module)."
+  options_failed: Could not load options
+  cells: cells
+  seed_word: seed
+  role: role
+  layer_image: Themed map
+  layer_rooms: Room areas
+  layer_walls: Walls
+  layer_labels: Room descriptions
+  layer_units: Units
+  layer_openings: Doors & windows
+  layer_locks: Locks & entrances
+  layer_objects: Furniture
+  layer_devices: Security devices
+  layer_lights: Lights
+  layer_grid: Grid
+  unit: unit
+  rating: rating
+  faces: faces
+  box: box
+  lock: lock
+  entrance_word: entrance
+  light_word: light

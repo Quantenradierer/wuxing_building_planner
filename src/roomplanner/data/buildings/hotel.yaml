@@ -55,6 +55,7 @@ floor_roles:
       - {room: spider_room, count: 1, security: [aaa], priority: optional}
       - {room: capsule_dorm, fill: true, wealth: [squatter, low]}
       - {room: hotel_room, fill: true, wealth: [middle, high, luxury]}
+      - {room: guest_room, fill: true, priority: optional, wealth: [middle, high, luxury]}
       - {room: staff_room, fill: true}         # interior rows without facade
       - {room: laundry, fill: true, priority: optional}  # leftovers
       - {room: mechanical_room, fill: true, priority: optional}
@@ -74,6 +75,7 @@ floor_roles:
       - {room: linen_room, count: 1, near: core}
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: hotel_room, fill: true}
+      - {room: guest_room, fill: true, priority: optional}   # widths too narrow for a suite
       - {room: staff_room, fill: true}         # interior rows without facade
       - {room: laundry, fill: true, priority: optional}  # leftovers
       - {room: mechanical_room, fill: true, priority: optional}

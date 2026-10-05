@@ -217,6 +217,9 @@ def _fits(
     if around and len(_reach(around, around)) != len(around):
         return False
     corridor = floor.corridor - piece
+    # The lobby is no way round: the corridor must stay as connected as it was.
+    if len(_parts(corridor)) > len(_parts(floor.corridor)):
+        return False
     near = frozenset(n for c in piece for s in Side if (n := c.neighbour(s)) in corridor)
     if near and thinnest(near, frozenset(corridor)) < rules.spec("corridor").min_side:
         return False

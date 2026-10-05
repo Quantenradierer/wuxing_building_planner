@@ -37,7 +37,7 @@ condition:
   rubble: "#5f5a52"
   stain: "#140c0660"
   graffiti: ["#ff3fa4", "#00e5ff", "#c6ff00", "#ffb347"]
-  decals: {maintained: 0.02, run_down: 0.3, derelict: 0.6, ruined: 0.9}
+  decals: {maintained: 0, run_down: 0.3, derelict: 0.6, ruined: 0.9}
 
 devices:
   camera: "#ff3b30"
@@ -139,6 +139,8 @@ rooms:
   guest_room: wood
   apartment: wood          # units are subdivided; mapped for completeness
   studio: wood
+  inner_flat: wood
+  den: wood
   hotel_room: wood
   capsule_dorm: pods
   shower_room: wet
