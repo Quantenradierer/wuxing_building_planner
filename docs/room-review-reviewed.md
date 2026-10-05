@@ -83,7 +83,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
 12. **Door zone not free** (P2): objects right beside the door jamb (shelves, lockers, benches, freezers). In buildings the
     door position is layout-driven, so this is a rule for the placer ("keep the first 1-2 cells beside any door free"),
     not per room.
-13. **Building level** (reviewed in whole buildings, so valid): corridors have almost no fixtures and uneven extinguisher
+13. [WIP] **Building level** (reviewed in whole buildings, so valid): corridors have almost no fixtures and uneven extinguisher
     spacing (check against the recent stair-housing fire-equipment commit first), hotel/hospital halls 6-8 cells wide,
     lift door flush on the corridor with no lobby and 2-car banks drawn as two boxes, 4-storey apartments without a lift
     (MBO), reception/lobby desks floating without relation to the door.
