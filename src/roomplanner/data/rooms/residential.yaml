@@ -142,7 +142,7 @@ rooms:
     min_side: 4
     transit: false
     furniture:
-      - {object: gurney_set, placement: wall, spaced: true}
+      - {object: gurney_set, placement: wall, count: [1, 2], spaced: true}
       - {object: medical_cabinet, placement: wall, count: [1, 2]}
       - {object: medical_cart, placement: wall, count: [0, 1]}
       - {object: sink, placement: wall, count: [0, 1]}

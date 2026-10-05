@@ -329,7 +329,7 @@ def _interior_doors(
         if i in hosts:
             return j == hosts[i]
         if j in hosts:
-            return False
+            return stranded  # an annex only as a way out, before a core room
         unit_i, unit_j = rooms[i].unit, rooms[j].unit
         if j in opened_rooms:
             return stranded
@@ -367,7 +367,10 @@ def _interior_doors(
                 rank = -2 if rooms[j].type in spec.access else -1
             elif rooms[j].type in core_types:
                 # Stairs before an elevator: a door onto a landing, not into the car.
-                rank = len(spec.access) + 1 + core_types.index(rooms[j].type)
+                # Last of all rooms: others get their doors first and may open the way.
+                rank = CORE_RANK + core_types.index(rooms[j].type)
+            elif j in hosts:
+                rank = CORE_RANK - 1
             elif rooms[j].type in spec.access:
                 rank = spec.access.index(rooms[j].type)
             else:
@@ -476,6 +479,8 @@ def _interior_doors(
         linked |= {(i, j), (j, i)}
     return doors
 
+
+CORE_RANK = 1000  # a door into a core room ranks after every other choice, in every room
 
 DOOR_WIDTH = 2  # a plain door, cells
 ROOMY = 40  # cells (10 m²): smaller rooms get an exterior door only if nothing else can

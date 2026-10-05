@@ -74,7 +74,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
     mess_hall/shelter/parking_deck follow floor area not occupancy, mailbox count vs. flats; and rooms whose
     `area` range lets them grow absurd (closet, entry_hall, cashier_booth, focus_room, bathroom). Check the actual
     `area:` limits in YAML before acting.
-11. [WIP] **Wrong content for the room name** (P1): `utility` (only plant machinery, no janitor sink), `shipping_office`
+11. [DONE] **Wrong content for the room name** (P1): `utility` (only plant machinery, no janitor sink), `shipping_office`
     (a bed in 8 of 12 rooms), `corp_lobby` and `narthex` (roof hatch), `balcony` (indoor furniture), `med_room`
     (a single block of seven gurneys). Fix in the YAML object lists.
 12. **Door zone not free** (P2): objects right beside the door jamb (shelves, lockers, benches, freezers). In buildings the

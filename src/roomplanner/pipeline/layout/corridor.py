@@ -218,29 +218,42 @@ class CorridorLayout:
             reserved = [i for spans in main.reserved.values() for i in spans]
             skeleton.lobby_slice = _absorb_gaps(lobby_slice, reserved, frame.length, _min_gap(grid))
 
-        skeleton.park = self._park_slice(ctx, main, skeleton.lobby_slice, rng)
-
-        # Parallel corridors of the main part need a cross corridor; a wing's corridors are
-        # already joined through their connectors into the main part.
-        for part in [main]:
-            if sum(b.kind is BandKind.CORRIDOR for b in part.bands) > 1:
-                length = part.frame.length
-                target = length / 2 + rng.uniform(-1, 1) * length / 8
-                blocked = [skeleton.lobby_slice] if part is main and skeleton.lobby_slice else []
-                blocked += [skeleton.park[2]] if part is main and skeleton.park else []
-                blocked += [i for spans in part.reserved.values() for i in spans]
-                # As wide as the corridors: it only crosses the interior strips, which
-                # don't follow the facade grid.
-                part.cross = self._choose(part.grid, corridor_width, target, blocked)
-                if part.cross is None:
-                    raise AllocationError("no space for the cross corridor")
-
         core = ctx.rules.active_core(ctx.params)
-        if entries := [c for c in core if c.place is None]:
+        entries = [c for c in core if c.place is None]
+        found: Core | None = None
+        # A car park that leaves the cross corridor and the core too little room gives up
+        # some of its length, and they are chosen again.
+        squeeze = 0
+        while True:
+            skeleton.park = self._park_slice(ctx, main, skeleton.lobby_slice, rng, squeeze)
+
+            # Parallel corridors of the main part need a cross corridor; a wing's corridors
+            # are already joined through their connectors into the main part.
+            for part in [main]:
+                if sum(b.kind is BandKind.CORRIDOR for b in part.bands) > 1:
+                    length = part.frame.length
+                    target = length / 2 + rng.uniform(-1, 1) * length / 8
+                    blocked = (
+                        [skeleton.lobby_slice] if part is main and skeleton.lobby_slice else []
+                    )
+                    blocked += [skeleton.park[2]] if part is main and skeleton.park else []
+                    blocked += [i for spans in part.reserved.values() for i in spans]
+                    # As wide as the corridors: it only crosses the interior strips, which
+                    # don't follow the facade grid.
+                    part.cross = self._choose(part.grid, corridor_width, target, blocked)
+                    if part.cross is None:
+                        raise AllocationError("no space for the cross corridor")
+
+            if not entries:
+                break
             band = self._core_band(main, street, rng)
             park = skeleton.park[2] if skeleton.park else None
             blocked = main.blocked(band, skeleton.lobby_slice, park)
             found = self._core(ctx, main, band, entries, blocked, rng, skeleton.lobby_slice)
+            if found is not None or skeleton.park is None or squeeze > frame.length:
+                break
+            squeeze += MIN_GAP_CELLS
+        if entries:
             if found is None:
                 raise AllocationError("no space for the core")
             skeleton.cores.append(found)
@@ -253,7 +266,7 @@ class CorridorLayout:
 
     @staticmethod
     def _park_slice(
-        ctx: Context, main: Part, lobby: Interval | None, rng: random.Random
+        ctx: Context, main: Part, lobby: Interval | None, rng: random.Random, squeeze: int = 0
     ) -> tuple[int, str, Interval] | None:
         """The `place: end` room of a basement level (a car park) claims the whole depth of
         one end of the main part before anything else: the cores and the cross corridor
@@ -279,7 +292,9 @@ class CorridorLayout:
             max(shortest, min(longest, math.ceil(high / frame.depth))),
             int(frame.length * PARK_SHARE),
         )
-        want = max(want, min(math.ceil(low / frame.depth), int(frame.length * PARK_SHARE)))
+        want = max(
+            want - squeeze, min(math.ceil(low / frame.depth), int(frame.length * PARK_SHARE))
+        )
         obstacles = [i for spans in main.reserved.values() for i in spans]
         options: list[Interval] = []
         near = min((o.u0 for o in obstacles), default=frame.length) - MIN_GAP_CELLS

@@ -64,7 +64,7 @@ class RulesFurnishing:
 
     @staticmethod
     def _roof_hatch_room(ctx: Context, floor: Floor) -> Room | None:
-        """Top floor: the stairwell (or a circulation room) gets the roof hatch."""
+        """Top floor: the stairwell (or else a corridor) gets the roof hatch, no foyer or lobby."""
         if EntranceKind.ROOF not in ctx.rules.entrances(ctx.params):
             return None
         if floor.level != ctx.params.floors_above - 1:
@@ -72,7 +72,7 @@ class RulesFurnishing:
         if ctx.rules.program.floor_roles[floor.role].roof is not None:
             return None  # the stairs come out onto the roof
         order = [r for r in floor.rooms if r.type == "stairwell"]
-        order += [r for r in floor.rooms if ctx.rules.spec(r.type).circulation]
+        order += [r for r in floor.rooms if r.type == "corridor"]
         return order[0] if order else None
 
 
