@@ -698,15 +698,31 @@ class RoomFurnisher:
             deep = min(deep, rule.reach)
         if deep < 1:
             return []
-        match side:
-            case Side.N:
-                return [(x0, y1 - deep, x1 - x0, deep, side)]
-            case Side.S:
-                return [(x0, y0, x1 - x0, deep, side)]
-            case Side.W:
-                return [(x1 - deep, y0, deep, y1 - y0, side)]
-            case Side.E:
-                return [(x0, y0, deep, y1 - y0, side)]
+        landing = rule.landing
+
+        def spot(length: int, from_door: bool) -> Rect:
+            # Backed against the far wall, or (from_door) just past the landing at the door.
+            match side:
+                case Side.N:
+                    return (x0, y0 + landing if from_door else y1 - length, x1 - x0, length, side)
+                case Side.S:
+                    return (x0, y1 - landing - length if from_door else y0, x1 - x0, length, side)
+                case Side.W:
+                    return (x0 + landing if from_door else x1 - length, y0, length, y1 - y0, side)
+                case Side.E:
+                    return (x1 - landing - length if from_door else x0, y0, length, y1 - y0, side)
+
+        def cells_of(rect: Rect) -> set[Cell]:
+            x, y, w, h, _ = rect
+            return {Cell(cx, cy) for cx in range(x, x + w) for cy in range(y, y + h)}
+
+        far = spot(deep, False)
+        if not cells_of(far) & self.clearance:
+            return [far]
+        # Another door (a storeroom's way out through the stairwell) opens onto the flight:
+        # shorter, from the landing on, until it keeps off that door.
+        shorter = [spot(length, True) for length in range(deep - 1, 0, -1)]
+        return [r for r in shorter if not cells_of(r) & self.clearance] + [far]
 
     def _doors(self) -> list[tuple[Cell, Side]]:
         """(cell inside, side of the room) of each door cell, doors into circulation first."""

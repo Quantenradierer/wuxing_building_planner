@@ -649,26 +649,67 @@ class PartitionLayout:
 
 def _merge_thin(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
     """A leftover piece too thin to be a room joins the neighbour it shares most wall with
-    (a corridor only if nothing else touches it)."""
+    (a corridor only if nothing else touches it). Thin arms that no neighbour makes thick
+    in one go (an L with two-cell arms) go to the neighbours they run along first."""
     fixed = {e.room for e in rules.program.core}
     result = list(rooms)
     for room in rooms:
         if not room.leftover or room not in result:
             continue
-        if thinnest_extent(room.cells, room.cells) >= rules.spec(room.type).min_side:
+        min_side = rules.spec(room.type).min_side
+        if thinnest_extent(room.cells, room.cells) >= min_side:
             continue
-        options: list[tuple[int, int, PlannedRoom]] = []
-        for other in result:
-            if other is room or other.host is not None or other.type in fixed:
-                continue
-            if shared := contact(room.cells, other.cells):
-                options.append((not rules.spec(other.type).circulation, shared, other))
-        if not options:
+        best = _thin_host(room.cells, room, result, rules, fixed)
+        if best is None or not best[0]:
+            trimmed = _shed_arms(room, result, rules, fixed, min_side)
+            result[result.index(room)] = room = trimmed
+            best = _thin_host(room.cells, room, result, rules, fixed)
+        if best is None:
             continue
-        _, _, other = max(options, key=lambda o: (o[0], o[1], -len(o[2].cells)))
+        other = best[1]
         result[result.index(other)] = replace(other, cells=other.cells | room.cells)
         result.remove(room)
     return result
+
+
+def _thin_host(
+    piece: frozenset[Cell],
+    room: PlannedRoom,
+    rooms: list[PlannedRoom],
+    rules: Rules,
+    fixed: set[str],
+) -> tuple[bool, PlannedRoom] | None:
+    """The neighbour a thin piece joins and whether the joined piece is thick enough there:
+    thick first, then a room before a corridor, then the longest shared wall."""
+    options: list[tuple[bool, bool, int, int, PlannedRoom]] = []
+    for other in rooms:
+        if other is room or other.host is not None or other.type in fixed:
+            continue
+        if shared := contact(piece, other.cells):
+            spec = rules.spec(other.type)
+            thick = thinnest_extent(piece, piece | other.cells) >= spec.min_side
+            options.append((thick, not spec.circulation, shared, -len(other.cells), other))
+    if not options:
+        return None
+    thick, *_, other = max(options, key=lambda o: o[:4])
+    return thick, other
+
+
+def _shed_arms(
+    room: PlannedRoom, rooms: list[PlannedRoom], rules: Rules, fixed: set[str], min_side: int
+) -> PlannedRoom:
+    """Give the arms of a leftover that are thinner than `min_side` to neighbours that make
+    them thick (edited in `rooms`); the room is what remains."""
+    arms = frozenset(c for c in room.cells if thinnest_extent([c], room.cells, min_side) < min_side)
+    if arms == room.cells:
+        return room
+    for arm in components(arms):
+        host = _thin_host(arm, room, rooms, rules, fixed)
+        if host is not None and host[0]:
+            other = host[1]
+            rooms[rooms.index(other)] = replace(other, cells=other.cells | arm)
+            room = replace(room, cells=room.cells - arm)
+    return room
 
 
 def _to_wall(path: list[Cell], footprint: frozenset[Cell]) -> list[Cell]:
