@@ -52,7 +52,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
 5. [DONE] **Counters and desks do not face the entrance and float** (P1): reception(_lobby), lobby, police_lobby, storefront,
    shop_floor, cashier/attendant booth, cloakroom, booking, property, evidence, armory, count/cash cage. A counter
    must span or anchor to a wall, face the door, with the staff side (chair, terminal) behind it.
-6. **Seating groups** (P1): sofa + armchairs + low table + rug as one cluster facing a screen/each other, the table
+6. [DONE] **Seating groups** (P1): sofa + armchairs + low table + rug as one cluster facing a screen/each other, the table
    touching the seating; today singles on a grid or against the wall (lobby, lounge, vip_room, library, recovery,
    exec office, living room, studio, flat_loft, balcony).
 7. **Objects overlapping walls / each other** (P1, bugs to verify first): operating_room machinery clipped by the west

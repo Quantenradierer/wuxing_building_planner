@@ -1,6 +1,8 @@
 """Chamfered corners: 45 degree walls across the cells at the footprint's convex corners."""
 
 import json
+import random
+import sys
 
 import pytest
 
@@ -9,7 +11,7 @@ from roomplanner.export.uvtt import to_uvtt
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Corner, Diagonal, rectangle
 from roomplanner.model import Building
-from roomplanner.pipeline.footprint import chamfer
+from roomplanner.pipeline.footprint import chamfer, chamfer_size
 from roomplanner.render.ascii import render_floor
 from roomplanner.render.image import RenderOptions
 from roomplanner.render.image import render_floor as render_image
@@ -20,12 +22,27 @@ from roomplanner.validation import hard_violations
 from .conftest import make_params
 
 
+def none(rng: random.Random) -> int:
+    return 0
+
+
+@pytest.fixture(autouse=True)
+def cut_four(monkeypatch: pytest.MonkeyPatch) -> None:
+    def four(rng: random.Random) -> int:
+        return 4
+
+    monkeypatch.setattr(sys.modules["roomplanner.pipeline.run"], "chamfer_size", four)
+
+
 def chamfered(**overrides: object) -> Building:
-    return generate(make_params(width=40, depth=26, chamfer=4, **overrides))
+    return generate(make_params(width=40, depth=26, **overrides))
 
 
-def test_square_corners_by_default() -> None:
-    assert not any(f.diagonals for f in generate(make_params()).floors)
+def test_the_seed_decides_whether_and_how_much_to_cut() -> None:
+    sizes = [chamfer_size(random.Random(seed)) for seed in range(300)]
+    assert 60 <= sum(s > 0 for s in sizes) <= 140  # about a third
+    assert {s for s in sizes if s} <= set(range(4, 11))
+    assert chamfer_size(random.Random(5)) == chamfer_size(random.Random(5))
 
 
 def test_every_corner_of_a_rectangle_is_cut() -> None:
@@ -81,11 +98,12 @@ def test_ascii_draws_the_diagonals_instead_of_steps() -> None:
     assert "+-+" not in text.splitlines()[1]
 
 
-def test_json_round_trip_keeps_diagonals() -> None:
+def test_json_round_trip_keeps_diagonals(monkeypatch: pytest.MonkeyPatch) -> None:
     building = chamfered()
     document = json.loads(to_json(building))
     assert document["floors"][0]["diagonals"][0][2] in {c.value for c in Corner}
     assert from_json(to_json(building)) == building
+    monkeypatch.setattr(sys.modules["roomplanner.pipeline.run"], "chamfer_size", none)
     plain = json.loads(to_json(generate(make_params())))
     assert "diagonals" not in plain["floors"][0]
 
@@ -112,5 +130,5 @@ def test_image_renders_the_outside_of_a_diagonal_as_background() -> None:
 
 @pytest.mark.parametrize("shape", ["l", "u", "stepped"])
 def test_other_shapes_can_be_chamfered(shape: str) -> None:
-    building = generate(make_params(width=56, depth=40, chamfer=4, shape=shape))
+    building = generate(make_params(width=56, depth=40, shape=shape))
     assert hard_violations(building) == []

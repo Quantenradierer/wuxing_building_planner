@@ -191,6 +191,17 @@ class IrregularFootprint:
         )
 
 
+CHAMFER_CHANCE = 1 / 3  # of buildings with cut corners
+CHAMFER_SIZES = (4, 10)  # cells, inclusive
+
+
+def chamfer_size(rng: random.Random) -> int:
+    """The seed's corner cut: none for two buildings in three, else a size in `CHAMFER_SIZES`."""
+    if rng.random() >= CHAMFER_CHANCE:
+        return 0
+    return rng.randint(*CHAMFER_SIZES)
+
+
 MIN_CHAMFER = 2  # cells; a shorter cut is no diagonal
 CHAMFER_MARGIN = 2  # cells of straight facade kept between two cuts and at their ends
 

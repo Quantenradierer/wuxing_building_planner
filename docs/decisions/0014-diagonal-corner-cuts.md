@@ -15,7 +15,7 @@ layout, doors, furniture and the validator are built on (ADR 0001).
   footprint and objects stay sets of cells; a diagonal cell is half floor.
 - The cut cell edges stay in `Floor.walls` and the validator's border invariant is
   unchanged. They are hidden (`Floor.cut_edges`): not drawn, exported, or used for openings.
-- Diagonals come from one parameter, `chamfer` (cells, default 0): the pipeline cuts the
+- Diagonals come from the seed (no parameter: one building in three gets cuts of 4 to 10 cells): the pipeline cuts the
   convex footprint corners after the layout, so layouts are unchanged. Corners that are too
   tight, or whose cut would damage a room, stay square.
 - Furnishing treats half cells as covered floor. The serialization adds an optional

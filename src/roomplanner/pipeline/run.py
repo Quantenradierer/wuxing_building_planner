@@ -16,7 +16,7 @@ from roomplanner.pipeline.base import (
     LayoutStrategy,
     OpeningsStrategy,
 )
-from roomplanner.pipeline.footprint import chamfer
+from roomplanner.pipeline.footprint import chamfer, chamfer_size
 from roomplanner.pipeline.registry import resolve
 from roomplanner.rules import Rules
 from roomplanner.validation import Severity, validate
@@ -58,7 +58,9 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
         try:
             plan = layout.layout(attempt_ctx, footprint)
             plan.removed, plan.diagonals = chamfer(
-                footprint, params.chamfer, (r.cells for f in plan.floors for r in f.rooms)
+                footprint,
+                0 if params.room else chamfer_size(attempt_ctx.rng("chamfer")),
+                (r.cells for f in plan.floors for r in f.rooms),
             )
         except AllocationError as error:
             failure = error

@@ -106,7 +106,7 @@ rooms:
     door_width: 3
     furniture:
       - {object: bar_set, placement: wall}
-      - {object: sofa_set, placement: wall, per: 60, count: [1, 6]}
+      - {object: lounge_set, placement: wall, per: 90, count: [1, 5]}
       - {object: cafe_table, placement: grid, per: 60, count: [0, 4]}
       - {object: pool_table, placement: center, count: [0, 2]}
       - {object: arcade_machine, placement: wall, count: [0, 1]}
@@ -116,8 +116,7 @@ rooms:
     area: [30, 90]
     min_side: 5
     furniture:
-      - {object: sofa, placement: wall, count: [1, 3]}
-      - {object: sofa_set, placement: wall}
+      - {object: lounge_set, placement: wall}
       - {object: rug, placement: center, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: counter, placement: wall, count: [0, 1]}

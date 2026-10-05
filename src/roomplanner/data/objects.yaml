@@ -329,6 +329,13 @@ groups:
       - {object: sofa, at: [1, 0]}
       - {object: side_table, at: [5, 0]}
       - {object: coffee_table, at: [2, 2]}
+  lounge_set:           # sofa, an armchair at each end turned towards the coffee table
+    size: [8, 4]
+    parts:
+      - {object: sofa, at: [2, 0]}
+      - {object: armchair, at: [0, 1], facing: E}
+      - {object: armchair, at: [6, 1], facing: W}
+      - {object: coffee_table, at: [3, 2]}
   bed_set:              # single bed between two nightstands
     size: [4, 4]
     parts:
