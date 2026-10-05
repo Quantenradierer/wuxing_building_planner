@@ -125,9 +125,29 @@ def bed_shape(pen: Pen, box: Box, facing: Side) -> None:
     pen.base.rectangle(inset(blanket, pen.line), fill=pen.stroke)
 
 
+def _arrow(pen: Pen, tail: tuple[float, float], head: tuple[float, float]) -> None:
+    """A direction arrow from `tail` to `head` (a shaft and a filled head)."""
+    dx, dy = head[0] - tail[0], head[1] - tail[1]
+    length = math.hypot(dx, dy) or 1.0
+    ux, uy = dx / length, dy / length
+    size = min(pen.cell * 0.45, length / 2)
+    base = (head[0] - ux * size, head[1] - uy * size)
+    pen.base.line((*tail, *base), fill=pen.stroke, width=pen.line * 2)
+    wing = size * 0.5
+    pen.base.polygon(
+        [
+            head,
+            (base[0] - uy * wing, base[1] + ux * wing),
+            (base[0] + uy * wing, base[1] - ux * wing),
+        ],
+        fill=pen.stroke,
+    )
+
+
 def stairs_shape(pen: Pen, box: Box, facing: Side) -> None:
-    """Two flights side by side; the landing between them lies at the wall behind (away
-    from `facing`) when they run towards it, else at the far end."""
+    """Two flights side by side with a rail between them; the landing lies at the wall
+    behind (away from `facing`) when they run towards it, else at the far end. The left
+    flight (seen from the landing) has an up arrow, the right one a down arrow."""
     x0, y0, x1, y1 = box
     pen.base.rectangle(box, fill=pen.fill, outline=pen.stroke, width=pen.line)
     along_x = (x1 - x0) >= (y1 - y0)
@@ -136,19 +156,38 @@ def stairs_shape(pen: Pen, box: Box, facing: Side) -> None:
     if along_x:
         start, end = (x0 + landing, x1) if facing is Side.E else (x0, x1 - landing)
         mid = (y0 + y1) / 2
-        pen.base.line((start, mid, end, mid), fill=pen.stroke, width=pen.line * 2)
+        flat = (x0, y0, start, y1) if facing is Side.E else (end, y0, x1, y1)
+        pen.base.rectangle(flat, fill=pen.detail, outline=pen.stroke, width=pen.line)
         x = start + step
         while x < end:
             pen.base.line((x, y0, x, y1), fill=pen.detail, width=pen.line)
             x += step
+        gap = pen.line * 2
+        pen.base.rectangle((start, mid - gap, end, mid + gap), fill=pen.fill, outline=pen.stroke)
+        # the landing is at `towards`: up runs away from it, down towards it
+        far, near = (end, start) if facing is Side.E else (start, end)
+        lanes = ((y0 + mid) / 2, (mid + y1) / 2)
+        margin = pen.cell * 0.4
+        away = -margin if far > near else margin
+        _arrow(pen, (near - away, lanes[0]), (far + away, lanes[0]))
+        _arrow(pen, (far + away, lanes[1]), (near - away, lanes[1]))
     else:
         start, end = (y0 + landing, y1) if facing is Side.S else (y0, y1 - landing)
         mid = (x0 + x1) / 2
-        pen.base.line((mid, start, mid, end), fill=pen.stroke, width=pen.line * 2)
+        flat = (x0, y0, x1, start) if facing is Side.S else (x0, end, x1, y1)
+        pen.base.rectangle(flat, fill=pen.detail, outline=pen.stroke, width=pen.line)
         y = start + step
         while y < end:
             pen.base.line((x0, y, x1, y), fill=pen.detail, width=pen.line)
             y += step
+        gap = pen.line * 2
+        pen.base.rectangle((mid - gap, start, mid + gap, end), fill=pen.fill, outline=pen.stroke)
+        far, near = (end, start) if facing is Side.S else (start, end)
+        lanes = ((x0 + mid) / 2, (mid + x1) / 2)
+        margin = pen.cell * 0.4
+        away = -margin if far > near else margin
+        _arrow(pen, (lanes[0], near - away), (lanes[0], far + away))
+        _arrow(pen, (lanes[1], far + away), (lanes[1], near - away))
 
 
 def elevator_shape(pen: Pen, box: Box, facing: Side) -> None:
