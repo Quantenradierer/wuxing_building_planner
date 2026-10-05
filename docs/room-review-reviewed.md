@@ -64,7 +64,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
    overlapping another object or in a diagonal cell, so the object claims are stale. The only real bug was the doubled
    door of lone rooms (entered room also got a stranded door; fixed in `_interior_doors`). Door-arc overlap and rug
    splitting are visual only and not checked.
-8. [WIP] **Loose crates/barrels/pallets/carts floating mid-floor** (P2, ~25 rooms): cluster them against a wall or on a
+8. [DONE] **Loose crates/barrels/pallets/carts floating mid-floor** (P2, ~25 rooms): cluster them against a wall or on a
    pallet, never in the door line or in an aisle.
 9. [WIP] **Missing defining object** (P1 when the room cannot be read without it): treatment_room sink; exam/doctor_office
    desk or couch; surveillance/noc/spider monitor wall; paint_booth vehicle; rigger_workshop cocoon + docks;

@@ -453,6 +453,8 @@ class RoomFurnisher:
                             self._main_part(rule.object) or rule.object, r
                         ),
                     )
+                if spec.loose:
+                    candidates.sort(key=self._loose_rank)
                 if rule.near_room is not None:
                     candidates.sort(key=lambda r: self._room_distance(r, rule.near_room or ""))
                 if rule.faces_door:
@@ -509,7 +511,12 @@ class RoomFurnisher:
                 candidates = self._anywhere(spec)
                 candidates.sort(key=lambda r: abs(r[0] + r[2] / 2 - cx) + abs(r[1] + r[3] / 2 - cy))
             case Placement.SCATTER:
-                candidates = self._sample(spec, SCATTER_TRIES)
+                if spec.loose:
+                    candidates = self._against_walls(spec, corners_only=False)
+                    self.rng.shuffle(candidates)
+                    candidates.sort(key=self._loose_rank)
+                else:
+                    candidates = self._sample(spec, SCATTER_TRIES)
             case Placement.GRID:
                 candidates = self._grid(spec, rule.aisle, rule.margin)
             case Placement.FACING_EXIT:
@@ -599,6 +606,25 @@ class RoomFurnisher:
             return True, 0.0
         cx, cy = rect[0] + rect[2] / 2, rect[1] + rect[3] / 2
         return True, min(abs(cx - x) + abs(cy - y) for x, y in others)
+
+    def _loose_rank(self, rect: Rect) -> tuple[bool, bool, bool]:
+        """Sort key for movable goods: off the door's zone, touching goods already there,
+        in a corner (the first of a cluster)."""
+        x, y, w, h, _ = rect
+        door_zone = any(
+            x - 2 < c.x < x + w + 1 and y - 2 < c.y < y + h + 1 for c, _ in self._doors()
+        )
+        objects = self.ctx.rules.objects
+        touching = any(
+            (spec := objects.get(o.kind)) is not None
+            and spec.loose
+            and o.x <= x + w
+            and x <= o.x + o.w
+            and o.y <= y + h
+            and y <= o.y + o.h
+            for o in self.placed
+        )
+        return door_zone, not touching, not self._in_corner(_back_row(rect), rect[4])
 
     def _touches_bank(self, bank: str, rect: Rect) -> bool:
         """Does `rect` touch, side by side on the same wall line, an object of this bank
