@@ -1,5 +1,6 @@
 """Invariants that must hold for any parameters: impossible input is rejected, never broken."""
 
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -86,3 +87,23 @@ def test_reasonably_sized_rectangular_buildings_are_always_feasible(
     params: GenerationParams,
 ) -> None:
     assert generate(params) is not None
+
+
+@pytest.mark.parametrize(
+    ("building_type", "room"),
+    [
+        ("hotel", "hotel_room"),
+        ("apartment", "studio"),
+        ("apartment", "inner_flat"),
+        ("casino", "cage_complex"),
+    ],
+)
+def test_lone_room_has_no_doubled_door(building_type: str, room: str) -> None:
+    """A room entered from the street gets no second door from its own stalls' logic."""
+    for seed in range(4):
+        params = GenerationParams(
+            building_type=BuildingType(building_type), width=14, depth=10, room=room, seed=seed
+        )  # pyright: ignore[reportArgumentType]
+        assert (
+            hard_violations(generate(params), rules_for(params.building_type, params.wealth)) == []
+        )

@@ -421,7 +421,8 @@ def _interior_doors(
     door_edges: dict[int, list[Edge]] = defaultdict(list)
     linked: set[tuple[int, int]] = set()
     connected = set(circulation) | (entered or set())
-    pending = {i for i in range(len(rooms)) if i not in circulation}
+    # Entered rooms are reached from outside: they need no door of their own.
+    pending = {i for i in range(len(rooms)) if i not in connected}
     while pending:
         options = [(option, i) for i in sorted(pending) if (option := best(i)) is not None]
         if not options and not stranded:

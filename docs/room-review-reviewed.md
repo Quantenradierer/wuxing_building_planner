@@ -55,11 +55,15 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
 6. [DONE] **Seating groups** (P1): sofa + armchairs + low table + rug as one cluster facing a screen/each other, the table
    touching the seating; today singles on a grid or against the wall (lobby, lounge, vip_room, library, recovery,
    exec office, living room, studio, flat_loft, balcony).
-7. [WIP] **Objects overlapping walls / each other** (P1, bugs to verify first): operating_room machinery clipped by the west
+7. [DONE] **Objects overlapping walls / each other** (P1, bugs to verify first): operating_room machinery clipped by the west
    wall; roof units clipped by the parapet; capsule_dorm pods cut at the room edge; test_chamber pad half cut by the
    wall; fitting_room units half hidden in the wall; dance_floor bar cut by the north wall with the first stool outside;
    pharmacy shelves running through the counter; cage_complex "door overlaps another opening" (5 of 10 seeds);
    stall doors overlapping neighbours; coffin_hall door arcs overlapping across the aisle; high_roller rug split in two.
+   Result: a sweep of every room type in every building type (4 sizes x 4 seeds) finds no object outside its room,
+   overlapping another object or in a diagonal cell, so the object claims are stale. The only real bug was the doubled
+   door of lone rooms (entered room also got a stranded door; fixed in `_interior_doors`). Door-arc overlap and rug
+   splitting are visual only and not checked.
 8. [WIP] **Loose crates/barrels/pallets/carts floating mid-floor** (P2, ~25 rooms): cluster them against a wall or on a
    pallet, never in the door line or in an aisle.
 9. [WIP] **Missing defining object** (P1 when the room cannot be read without it): treatment_room sink; exam/doctor_office
