@@ -6,8 +6,11 @@ rooms:
     min_side: 3
     circulation: true
     furniture:       # code-mandated, sparse: one of each per long stretch of corridor
-      - {object: fire_alarm_panel, placement: wall, per: 400, count: [0, 2]}
-      - {object: hydrant, placement: wall, per: 600, count: [0, 2]}
+      - {object: fire_extinguisher, placement: wall, even: true, per: 150, count: [1, 12]}
+      - {object: fire_alarm_panel, placement: wall, even: true, per: 400, count: [0, 2]}
+      - {object: hydrant, placement: wall, even: true, per: 600, count: [0, 2]}
+      - {object: medkit, placement: wall, even: true, per: 500, count: [0, 3]}
+      - {object: trash_bin, placement: wall, even: true, per: 400, count: [0, 3]}
   lobby:
     area: [60, 800]
     min_side: 6

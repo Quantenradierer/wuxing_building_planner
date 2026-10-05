@@ -2,43 +2,43 @@ office 32x18 cells, wealth=middle, seed=1
 
 == Ground floor ==
 +--===---===----+----===---===--+===---DDD---===+---------------+
-"              *|s              |sss k     k sss|QQQQQQQ   l QQQ|
-"               |s              |               |QQQQQQQ     QQQ|
+"               |s sss PPP sss P|s sss     sss s|QQQQQQQ     QQQ|
+"               |s             P|s             s|QQQQQQQ     QQQ|
 "<     c c      |s             P|s             s|QQQQQQQ     QQQ|
-|<              |              P|s             s|            QQQ|
-|<     ttt      |s             P|s             s|      14    QQQ|
-|<     ttt      |s              |               |            QQQ|
-"<   12ttt      |s     13       |s     11      s|            QQQ|
-"               |               |s             s+--DDD----+-----+
-"      c c      |s             P|s             s|         D8 www|
-|               |s             P|               |         |  www|
-|               |s             P|s             s|    7    |  www|
-|               |               |s             s|         +-----+
-|               |               |s     sss sss s|    U    D     |
+|<              |               |               |            QQQ|
+|<     ttt      |               |s             s|      14    QQQ|
+|<     ttt      |               |s             s|            QQQ|
+"<   12ttt      |n     13       |s     11      s|            QQQ|
+"               |n              |               +--DDD----+-----+
+"      c c      |n              |s             s|         D8 www|
+|               |n              |s             s|         |  www|
+|               |n              |s             s|    7    |  www|
+|               |n              |               |         +-----+
+|               |n              |k     k sss sss|    U    D     |
 +--DDD----------+--DDD----------+--DDD----------+DDD+     |     |
-D            *         qqqqqqq                      |i    |9 www|
+D            '                 U                    |i    |9 www|
 D                                                   |i    |  www|
-D      1                                           a|i    |  www|
+D      1                                            |i    |  www|
 |                                                   +-----+-----+
-|^^^                             c                 U|'     SSS b|
-|^^^                                                |          b|
-|^^^                         RRRRRRRRR              D          b|
-+---+---+-------+            RRRRRRRRR              D          b|
-|www|www|    www|            RRRRRRRRR              D          b|
-|www|www|    www|                                   |           |
-|www|www|  6 www|<               2                  |E         b|
-|   |   |       |<                                  |E         b|
-|4  |5  |       |<                                  |E   10    b|
-+D--+D--+D------+<                                  |          b|
-|               |<                               ooo|E         b|
-|               |                                ooo|E          |
-"      3        D                                ooo|E          |
-"               D                                ooo|           |
-"               D                                ooo|E         E|
-|               |                                ooo|E         E|
-|      U iii iii|* qqqqqqq x                     ooo|E EEE EEE E|
+|                                c                  |'     bbbbb|
+|                                                   |           |
+|*                           RRRRRRRRR              D           |
++---+---+-------+            RRRRRRRRR              D           |
+|www|www|    www|ooo         RRRRRRRRR              D          b|
+|www|www|    www|ooo                                |          b|
+|www|www|  6 www|ooo             2                  |E         b|
+|   |   |       |ooo                                |E         b|
+|4  |5  |       |ooo                               q|E   10    b|
++D--+D--+D------+ooo                               q|           |
+|               |ooo                               q|E          |
+|               |                                  q|E          |
+"      3        D                                  q|E          |
+"               D                                  q|           |
+"               D                                  q|E         E|
+|               |                                   |E         E|
+|      U iii iii|* U qqqqqqq             qqqqqqq   *|E EEE EEE E|
 +--===---===----+----===-------DDDDDDD-------===----+-----------+
-  objects: b battery_bank, q bench, k cabinet, Q capsule, c chair, P copier, E electrical_panel, a fire_alarm_panel, ' fire_extinguisher, t huddle_table, l locker, x medkit, * plant, R reception_desk, ^ roof_hatch, S server_rack, s shelf, i sink, o sofa, U trash_bin, < wall_screen, w wc
+  objects: b battery_bank, q bench, k cabinet, Q capsule, c chair, P copier, n counter, E electrical_panel, ' fire_extinguisher, t huddle_table, * plant, R reception_desk, s shelf, i sink, o sofa, U trash_bin, < wall_screen, w wc
     1  corridor             32 cells
     2  reception_lobby     198 cells
     3  toilet               32 cells

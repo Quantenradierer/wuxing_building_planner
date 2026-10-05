@@ -453,6 +453,8 @@ class RoomFurnisher:
                             self._main_part(rule.object) or rule.object, r
                         ),
                     )
+                if rule.even:
+                    candidates.sort(key=lambda r: -self._nearest_of_kind(rule.object, r))
                 if spec.loose:
                     candidates.sort(key=self._loose_rank)
                 if rule.near_room is not None:
@@ -563,6 +565,13 @@ class RoomFurnisher:
         if not cells <= self.cells or cells & self.blocking:
             return None
         return frozenset(cells)
+
+    def _nearest_of_kind(self, kind: str, rect: Rect) -> int:
+        """Distance (cells, Manhattan) from the spot to the nearest earlier object of its kind;
+        a huge one if there is none."""
+        x, y = rect[0], rect[1]
+        others = [o for o in self.placed if o.kind == kind]
+        return min((abs(o.x - x) + abs(o.y - y) for o in others), default=10**6)
 
     def _line_rank(self, kind: str, rect: Rect) -> tuple[bool, bool, float]:
         """Sort key for a spaced object: on the wall line and facing of an earlier one of its
