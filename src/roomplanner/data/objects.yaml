@@ -275,7 +275,7 @@ groups:
       - {object: chair, at: [6, 4], facing: N}
       - {object: chair, at: [8, 4], facing: N}
       - {object: chair, at: [10, 4], facing: N}
-  u_meeting_set:        # three tables in a U open towards the front, chairs outside
+  u_meeting_set:        # three tables in a U open towards the front, chairs outside and inside
     size: [14, 8]
     parts:
       - {object: meeting_table, at: [1, 1], facing: E}
@@ -291,6 +291,12 @@ groups:
       - {object: chair, at: [13, 2], facing: W}
       - {object: chair, at: [13, 4], facing: W}
       - {object: chair, at: [13, 6], facing: W}
+      - {object: chair, at: [6, 4], facing: N}   # inside the U
+      - {object: chair, at: [7, 4], facing: N}
+      - {object: chair, at: [4, 5], facing: W}
+      - {object: chair, at: [4, 6], facing: W}
+      - {object: chair, at: [9, 5], facing: E}
+      - {object: chair, at: [9, 6], facing: E}
   board_set:            # boardroom table: six chairs per side and one at each head
     size: [8, 5]
     parts:
