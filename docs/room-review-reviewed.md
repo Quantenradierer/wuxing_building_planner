@@ -60,7 +60,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
    wall; fitting_room units half hidden in the wall; dance_floor bar cut by the north wall with the first stool outside;
    pharmacy shelves running through the counter; cage_complex "door overlaps another opening" (5 of 10 seeds);
    stall doors overlapping neighbours; coffin_hall door arcs overlapping across the aisle; high_roller rug split in two.
-8. **Loose crates/barrels/pallets/carts floating mid-floor** (P2, ~25 rooms): cluster them against a wall or on a
+8. [WIP] **Loose crates/barrels/pallets/carts floating mid-floor** (P2, ~25 rooms): cluster them against a wall or on a
    pallet, never in the door line or in an aisle.
 9. **Missing defining object** (P1 when the room cannot be read without it): treatment_room sink; exam/doctor_office
    desk or couch; surveillance/noc/spider monitor wall; paint_booth vehicle; rigger_workshop cocoon + docks;
