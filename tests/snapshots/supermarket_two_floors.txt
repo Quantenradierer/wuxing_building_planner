@@ -203,29 +203,29 @@ D                                                              6                
 
 == Basement B1 ==
 +-----------+-----------+-----------+-----------------+-----------------------+-----+-----------+-----------+-------------------+
-|sss sss sss|sss sss sss|sss sss sss|mmmmm mmmmm mmmmm|                       |     |EEE EEE EEE|           |sss sss            |
-|           |           |           |mmmmm mmmmm mmmmm|                       |     |           |           |                   |
-|          s|          s|          s|mmmmm mmmmm mmmmm|                       D     D          E|           D                   |
-|          s|          s|          s|                 |                       D     D          E|           D                   |
-|          s|          s|          s|mmm              |          14           D     D          E|           D                   |
-|           |           |           |mmm              |                       |     |           |           |                   |
-|          s|          s|          s|mmm             '|                       |     |          E|           |s                  |
-|          s|          s|          s|mmm              |                       |     |          E|           |s                  |
-|          s|          s|          s|mmm              |                       |     |    11    E|           |s                  |
+|sss sss sss|sss sss sss|sss sss sss|sss sss       U  |                       |     |  SSS     '|           |                   |
 |           |           |           |                 |                       |     |           |           |                   |
-|    6      |    7      |    8      |        9        |        sss sss sss sss|  1  |          E|    12     |s       13         |
-|           |           |           |                 +-------------+---------+     |          E|           |s                  |
-|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |          E|           |s                  |
+|          s|          s|          s|                 |                       D     D           |s          D                   |
+|          s|          s|          s|                 |                       D     D           |s          D                   |
+|          s|          s|          s|i             {{{|          14           D     D          E|s          D                   |
+|           |           |           |i                |                       |     |          E|           |                   |
+|          s|          s|          s|i             {{{|                       |     |          E|s          |                  s|
+|          s|          s|          s|                 |                       |     |           |s          |                  s|
+|          s|          s|          s|              mmm|                       |     |    11    E|s          |                  s|
+|           |           |           |              mmm|                       |     |          E|           |                   |
+|    6      |    7      |    8      |        9     mmm|sss sss sss sss sss sss|  1  |b         E|s   12     |        13        s|
+|           |           |           |              mmm+-------------+---------+     |b          |s          |                  s|
+|           |           |           |              mmm|eeeeeeeeeeeee|eeeeeeeee|     |b         E|s          |                  s|
+|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |b         E|           |                   |
+|           |           |           |              mmm|eeeeeeeeeeeee|eeeeeeeee|     |b         E|s          |                  s|
+|           |           |           |              mmm|eeeeeeeeeeeee|eeeeeeeee|     |           |s          |                  s|
+|           |           |           |              mmm|eeeeeeeeeeeee|eeeeeeeee|     |EEE EEE EEE|s          |                  s|
+|           |           |           |              mmm|eeeeeeeeeeeee|eeeeeeeee|     +-----------+           |                   |
+|           |           |           |U             mmm|eeeeeeeeeeeee|eeeeeeeee|     |  sss sss s|           |                  s|
+|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |          s|           |                  s|
+|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |    10    s|           |                  s|
 |           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |           |           |                   |
-|           |           |           |                o|eeeeeeeeeeeee|eeeeeeeee|     |           |           |s                  |
-|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |           |           |s                  |
-|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |'          |          s|s                  |
-|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     +-----------+          s|                   |
-|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |sss sss sss|          s|s                  |
-|           |           |           |                 |eeeeeeeeeeeee|eeeeeeeee|     |           |           |s                  |
-|           |           |           |          KKK KKK|eeeeeeeeeeeee|eeeeeeeee|     |    10     |          s|s                  |
-|           |           |           |          KKK KKK|eeeeeeeeeeeee|eeeeeeeee|     |           |          s|                   |
-|           |           |           |          KKK KKK|eeeeeeeeeeeee|eeeeeeeee|     |        sss|  sss sss s|                   |
+|           |           |           |                '|eeeeeeeeeeeee|eeeeeeeee|     |      k sss|           |                   |
 +--DDD------+--DDD------+--DDD------+--DDD------------+----DDD------+--DDD----+     +DDD+-------+-----------+--DDD--------------+
 |                                                                                       |###############                        |
 |                                                                                       |###############                        |
@@ -283,7 +283,7 @@ D                                                              6                
 |                                                                                                                               |
 |                                                                                                                               |
 +-------------------------------------------------------------------------------------------------------------------------------+
-  objects: o barrel, K crate, E electrical_panel, e elevator_car, ' fire_extinguisher, m machinery, p pallet, r rack, s shelf, # stairs
+  objects: b battery_bank, k cabinet, E electrical_panel, e elevator_car, ' fire_extinguisher, { laundry_cart, m machinery, p pallet, r rack, S server_rack, s shelf, i sink, # stairs, U trash_bin
     1  corridor             36 cells
     2  elevator             42 cells
     3  elevator             30 cells

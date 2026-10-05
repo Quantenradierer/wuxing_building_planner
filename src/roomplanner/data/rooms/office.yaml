@@ -86,7 +86,8 @@ rooms:
     access: [board_room, executive_office, meeting_room, kitchenette]
     furniture:
       - {object: plant, placement: wall, count: [3, 6]}
-      - {object: lounge_set, placement: wall, count: [0, 2]}
+      - {object: bench, placement: wall, count: [1, 2]}
+      - {object: cafe_table, placement: wall, count: [0, 2]}
   training_room:            # seminars and mandatory corporate loyalty briefings
     area: [100, 320]
     min_side: 8

@@ -102,11 +102,13 @@ rooms:
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: machinery, placement: wall, per: 25, count: [1, 5]}
+      - {object: sink, placement: wall}                      # the janitor's mop sink
+      - {object: shelf, placement: wall, count: [1, 3]}      # cleaning supplies
+      - {object: laundry_cart, placement: wall, count: [1, 2]}   # the janitor's cart
+      - {object: trash_bin, placement: wall, count: [1, 2]}
+      - {object: machinery, placement: wall, per: 60, count: [0, 2]}
       - {object: crate, placement: wall, count: [0, 2]}
-      - {object: barrel, placement: scatter, count: [0, 2]}
       - {object: workbench, placement: wall, count: [0, 1]}
-      - {object: shelf, placement: wall, count: [0, 2]}
       - {object: fire_extinguisher, placement: wall}
   security_room:
     area: [32, 50]            # 8 m2: a guard at a desk (ASR A1.2)

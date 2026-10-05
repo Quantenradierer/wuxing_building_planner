@@ -25,7 +25,6 @@ rooms:
       - {object: workstation, placement: wall, per: 40, count: [1, 2], scale: false}
       - {object: filing_cabinet, placement: wall, count: [1, 3]}
       - {object: terminal, placement: corner}
-      - {object: rigger_cocoon, placement: wall, count: [0, 1]}   # rigs the forklifts and drones
       - {object: coffee_machine, placement: corner, count: [0, 1]}
   clean_room:
     area: [60, 200]
