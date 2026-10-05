@@ -77,7 +77,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
 11. [DONE] **Wrong content for the room name** (P1): `utility` (only plant machinery, no janitor sink), `shipping_office`
     (a bed in 8 of 12 rooms), `corp_lobby` and `narthex` (roof hatch), `balcony` (indoor furniture), `med_room`
     (a single block of seven gurneys). Fix in the YAML object lists.
-12. [WIP] **Door zone not free** (P2): objects right beside the door jamb (shelves, lockers, benches, freezers). In buildings the
+12. [DONE] **Door zone not free** (P2): objects right beside the door jamb (shelves, lockers, benches, freezers). In buildings the
     door position is layout-driven, so this is a rule for the placer ("keep the first 1-2 cells beside any door free"),
     not per room.
 13. **Building level** (reviewed in whole buildings, so valid): corridors have almost no fixtures and uneven extinguisher

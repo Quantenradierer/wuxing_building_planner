@@ -2,32 +2,32 @@ ramen_bar 24x18 cells, wealth=middle, seed=4
 
 == Ground floor ==
 +===--+-----------+--DDD--+----===---===---===--+
-"i www|    hhhhhhh|       |nnnnnnn nnnnnnn aaa f"
-"i www|           |       |                     "
-"i www|h         s|s     s|n                   f"
-|     |h         s|s     s|n                    |
-|  3  |h   4     s|s 1   s|n         5         i|
-|     |h          |       |n                   i|
-"     |h         s|s     s|n                   i"
-"     |h         s|s     s|n                    "
-"     |h         s|s     s|n                   '"
+"www i|h hhhhhhh s|       |aaa nnnnnnn nnnnnnn n"
+"www i|h         s|       |                    n"
+"www i|h         s|s     s|a                   n"
+|     |h          |s     s|a                   n|
+|  3  |h   4     s|s 1   s|a         5         n|
+|     |h         s|       |                    n|
+"     |h         s|k      |f                   n"
+"     |           |       |                     "
+"     |        sss|       |                  iii"
 +DDD--+--DDD------+--DDD--+--DDD----------------+
-|    yyy                         aaa v v iii f f|
-|                                               |
-"                                               "
-"                                               "
-"                                               "
-|                                               |
-|                                NNNNNNNNNNNNNNN|
-|                                NNNNNNNNNNNNNNN|
-|      c       c       c         NNNNNNNNNNNNNNN"
+|                                    S NNN     a|
+|                                      NNN     a|
+"                                      NNN     a"
+"                                      NNN      "
+"                                    S NNN     v"
+|                                      NNN      |
+|                                      NNN     v|
+|                                      NNN      |
+|      c       c       c       c     S NNN     i"
+|                                      NNN     i"
+D      ttt     ttt     ttt     ttt     NNN     i"
+D      ttt     ttt     ttt     ttt     NNN      |
+D      ttt     ttt     ttt     ttt   S NNN     f|
+|                                      NNN      |
+|      c       c       c 2     c       NNN     f"
 |                                               "
-D      ttt     ttt     ttt       S   S   S   S  "
-D      ttt     ttt     ttt                      |
-D      ttt     ttt     ttt                      |
-|                                               |
-|      c       c       c 2                      "
-|                                               "
 |                                               "
 |                                               |
 |                                               |
@@ -36,9 +36,9 @@ D      ttt     ttt     ttt                      |
 "                                               "
 "                                               "
 |                                               |
-|*                                              |
+|                            yyy               *|
 +===---===---===-------DDD-----===---===---===--+
-  objects: t bar_table, c chair, ' coffee_machine, n counter, f fridge, h meat_rail, * plant, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, y vending_machine, w wc
+  objects: t bar_table, k cabinet, c chair, n counter, f fridge, h meat_rail, * plant, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, y vending_machine, w wc
     1  storage              20 cells
     2  ramen_bar_room      312 cells
     3  wc                   15 cells

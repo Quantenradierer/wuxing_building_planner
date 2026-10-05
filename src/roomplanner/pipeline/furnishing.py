@@ -13,7 +13,7 @@ from collections.abc import Iterable
 from dataclasses import replace
 from functools import cached_property
 
-from roomplanner.geometry import Cell, Edge, Side, connected
+from roomplanner.geometry import Axis, Cell, Edge, Side, connected
 from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
 from roomplanner.params import EntranceKind, Wealth
 from roomplanner.pipeline.base import Context
@@ -36,7 +36,7 @@ class RulesFurnishing:
         for floor in floors:
             rng = ctx.rng(f"furnish:{floor.level}")
             objects: list[PlacedObject] = []
-            clearances = floor.door_clearances()
+            clearances = _with_jambs(floor, floor.door_clearances())
             solid = solid_walls(floor)
             hatch = self._roof_hatch_room(ctx, floor)
             for room in floor.rooms:
@@ -193,6 +193,27 @@ def ring_is_one_run(free: frozenset[Cell] | set[Cell], x: int, y: int, w: int, h
         return True
     runs = sum(1 for i, flag in enumerate(flags) if flag and not flags[i - 1])
     return runs <= 1
+
+
+def _with_jambs(floor: Floor, clearances: dict[str, frozenset[Cell]]) -> dict[str, frozenset[Cell]]:
+    """Door clearances plus the wall cell beside each jamb, so shelves, lockers and benches
+    don't crowd the door frame."""
+    owner = {cell: room for room in floor.rooms for cell in room.cells}
+    found = {room_id: set(cells) for room_id, cells in clearances.items()}
+    for door in floor.openings:
+        if door.kind is not OpeningKind.DOOR:
+            continue
+        step = (1, 0) if door.edges[0].axis is Axis.H else (0, 1)
+        leaf = {c for e in door.edges for c in e.cells()}
+        for cell in leaf:
+            room = owner.get(cell)
+            if room is None:
+                continue
+            for sign in (-1, 1):
+                beside = Cell(cell.x + step[0] * sign, cell.y + step[1] * sign)
+                if beside in room.cells and beside not in leaf:
+                    found.setdefault(room.id, set()).add(beside)
+    return {room_id: frozenset(cells) for room_id, cells in found.items()}
 
 
 class RoomFurnisher:

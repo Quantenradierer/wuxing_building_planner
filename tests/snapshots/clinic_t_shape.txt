@@ -2,9 +2,9 @@ clinic 72x60 cells, wealth=middle, seed=5
 
 == Ground floor ==
                             +----===---===----+----===---===+--===----+----===----+-----------+DDDDDDD--+===---===---===---===---===----+
-                            "    eee   mmm mmm|    i HHH v  |^^^      |  nnnnnnn n|FFFFF      |         |            eee                "
-                            "    eee          |      HHH    |^^^      |          n|FFFFF      |         |            eee                "
-                            "d   eee          |      HHH    |^^^      D          n|FFFFF      D         D          l eee                "
+                            "U   eee   mmm mmm|    i HHH v  |  h      |  nnnnnnn n|FFFFF      |         |            eee                "
+                            "    eee          |      HHH    |         |          n|FFFFF      |         |            eee                "
+                            "d   eee          |      HHH    |         D          n|FFFFF      D         D          l eee                "
                             |d   eee          |      HHH    |         D          n|           D         D            eee                |
                             |d   eee          |    3 HHH    |         D          n|           D         D            eee                |
                             |    eee          |      HHH    |         |          n|           |         |            eee                |
@@ -12,7 +12,7 @@ clinic 72x60 cells, wealth=middle, seed=5
                             "                 |             |         |           |           |         |                               "
                             "                 |            m|         |          n|GGGGGGGGG  |         |              26               "
                             |                 |            m|         |          n|GGGGGGGGG  |         |                               |
-                            |                U|        mmm m|         |        l n|GGGGGGGGG  |         |                               |
+                            |                 |        mmm m|         |        l n|GGGGGGGGG  |         |                               |
                             |         +--DDD--+--DDD--------+         |          n|GGGGGGGGG  |         |                               |
                             "         |                               |    11    n|GGGGGGGGG  |         |                               "
                             "         |                               |          n|           |         |                               "
@@ -30,13 +30,13 @@ clinic 72x60 cells, wealth=middle, seed=5
                             "                 |      HHH    |         |           |d          |         |                               "
                             "                 |      HHH    |         |           |d          D         |              27              v"
                             |                 |      HHH    |         +-----------+           D         |                               |
-                            |U       ddd   mmm|    i HHH v  |         |j          |           D         |                               |
+                            |U       ddd   mmm|    i HHH v  |         |           |           D         |                               |
                             +-----------------+-------------+         |           |           |         |                               |
-                            "                eee            |h        D          d|v          |         |                               "
+                            "                eee            |         D          d|v          |         |                               "
                             "                eee            |         D          d|           |         |                               "
-                            "                eee l          D         D          d|HHHHHHH    |         |d                              "
-                            |                eee            D         |           |HHHHHHH    |         |d                              |
-                            |                eee            D         |          f|HHHHHHH    |         |d                   mmm mmm    |
+                            "                eee l          D         D          d|HHHHHHH    |         |                               "
+                            |                eee            D         |           |HHHHHHH    |         |                               |
+                            |                eee            D         |          f|HHHHHHH    |         |                ddd mmm mmm    |
                             |                eee            |         |           |           |         +--DDDDDDD------------+---------+
                             "                eee            |         |          n|i          |                               |         "
                             "                               |         |          n|           |                               |         "
@@ -44,7 +44,7 @@ clinic 72x60 cells, wealth=middle, seed=5
                             |                               |         |          n|           |                               |         |
                             |                               |         |    12    n|          m|                               |         |
                             |                               |         |          n|          m|         +--DDD--------+--DDD--+         |
-                            "                               |         |          n|          m|         |        mmm m|U                "
+                            "                               |         |          n|          m|         |        mmm m|                 "
                             "                               |         |           |           |         |            m|                 "
                             "d                              |         |          n|          m|         |            m|                 "
                             |d                              |         |          n|          m|         |             |                 |
@@ -54,17 +54,17 @@ clinic 72x60 cells, wealth=middle, seed=5
                             "                               |         |          n|           |         |      HHH    |          eee   d"
                             "                               D         |          n|           |         |      HHH    |          eee   d"
                             |                               D         |           |           |         |      HHH    |          eee    |
-                            |                               D         |           |           |         |    i HHH v  |mmm mmm   eee    |
+                            |                               D         |    j      |           |         |    i HHH v  |mmm mmm   eee   U|
                             |                               |         +-----------+-----------+         +-------------+-----+-----------+
                             "q                              |                                           |                   |s sss sss s"
                             "q                              |                                           |                   |s         s"
                             "q                              |                                           D                   |s         s"
                             |q                              |                                           D                   |           |
-                            |q                              |                                           D                   |    31    s|
+                            |q                              |                                           D                   |k   31    s|
                             |q                              |                                           |                   |          s|
                             "q             8                |              1                            |                   |k         s"
                             "                               |                                           |                   |           "
-                            "                               |                                           |                   |k       sss"
+                            "                               |                                           |                   |        sss"
                             |                               |         +-----------+-----------+         |                   +--DDD------+
                             |                              q|         |  i HHH v  |n nnnnnnn  |         |                               |
                             |                              q|         |    HHH    |n          |         |                               |
@@ -72,17 +72,17 @@ clinic 72x60 cells, wealth=middle, seed=5
                             "                              q|         D    HHH    |n          D         |                               "
                             "                              q|         D    HHH    |n          D         |HHHHHHH                        "
                             |                              q|         |    HHH    |n          |         |HHHHHHH                        |
-                            |                              q|         |    HHH    |n         f|         |HHHHHHH                        |
+                            |                              q|         |    HHH    |n          |         |HHHHHHH                        |
                             |                               |         |           |           |         |                               |
                             |                               |         |    13     |n         n|         |i                              |
                             |                               |         |           |n         n|         |                               |
                             |  yyy             qqqqqqq      |         |          i|n   21    n|         |              mmm mmm          |
 +--===---===--+===---===----+-----------+-------------------+         |           |n         n|         +-------------------------------+-------+
-|eee         d|eee         d|          n|                   |         |    HHHHHHH|n         n|         |ddd     i HHH v   i HHH v   i ggg v   M|
+|eee         d|eee         d|      ddd n|                   |         |    HHHHHHH|n         n|        a|ddd     i HHH v   i HHH v   i ggg v   M|
 |eee         d|eee         d|          n|                   |         |    HHHHHHH|n         n|         |          HHH       HHH       ggg     M|
 "eee l       d|eee l       d|          n|                   |         |    HHHHHHH|n         n|         |m         HHH       HHH       ggg     M"
 "eee          |eee          |          n|                   |         |           |           |         |m         HHH       HHH       ggg      "
-"eee          |eee          |          n|  sss sss sss sss  |         |          v|          f|         |m         HHH       HHH       ggg      "
+"eee          |eee          |          n|  sss sss sss sss  |         |          v|f         f|         |m         HHH       HHH       ggg      "
 |eee          |eee          |          n|                   |         |           |           |         |          HHH       HHH       ggg      |
 |eee   34    m|eee   33    m|    9     n|        10         |         |mmm        |          d|         |m         HHH     32HHH       ggg      |
 |            m|            m|           |                   |         +---+---+---+          d|         |m                                      |
@@ -92,35 +92,35 @@ clinic 72x60 cells, wealth=middle, seed=5
 |             |             |          n|                  n|         |   |   |   |www|www|www|         |                                       |
 |             |             |j         n|                l n|         |15 |16 |17 |www|www|www|         |                                       |
 |             |             |          n|                  n|         +D--+D--+D--+   |   |   |         |                                       |
-|U            |U            |      ddd n|                  n|         |           |23 |24 |25 |         |                                       |
+|            U|            U|          n|                  n|         |           |23 |24 |25 |         |                                       |
 +--DDD--------+--DDD--------+--DDD------+--DDD--------------+         |           +D--+D--+D--+         +--DDDDDDD--------------+---------------+
-|                                                                     D           |           |          a                      |E EEE EEE EEE b|
-|                                                                     D           |           |                                 |E             b|
-D                                                                     D    14     |d          |                                 |E             b|
-D                                                                     |           |d          |                                 |              b|
-D                                                                     |           |d   22     |                                 |E     19      b|
+|                                                                     D           |           |                              ^^^|E EEE EEE EEE b|
+|                                                                     D           |           |                              ^^^|E             b|
+D                                                                     D    14     |          d|                              ^^^|E             b|
+D                                                                     |           |          d|                                 |              b|
+D                                                                     |           |    22    d|                                 |E     19      b|
 D                                                                     |           |           |                                 |E              |
-D                                                                     |           |d          |                                 |E              |
-|                                                                     |           |d          |                                 |               |
-|                                                                     |ddd ddd U  |d          |                                 |'           SSS|
+D                                                                     |           |          d|                                 |E              |
+|                                                                     |           |          d|                                 |               |
+|                                                                     |ddd ddd U  |          d|                                 |            SSS|
 +--DDD--------+-------------+                                         +-----------+--DDD------+                                 +--DDD----------+
-"            U|d     mmm mmm|                                                    c                                                             *"
+"            U|d            |                                                    c                                                             *"
 "             |d            |                                                                                                                   "
 "             |d            D                                                RRRRRRRRR                                                          "
 |             |             D                                                RRRRRRRRR                                                          |
 |             |             D                                                RRRRRRRRR                                                          |
 |             |             |                                                                                                                   |
-"             |             |<                                                                                                                  "
-"             |             |<                                                                                                                  "
-"d     36     |      35     |<                                                       2                                                          "
-|d            |             |<                                                                                                                  |
-|d l         m|eee          |<           ttt                                                 ttt                               ttt              |
+"             |             |                                                                                                                   "
+"             |             |                                                                                                                   "
+"d     36     |      35    m|                                                        2                                                          "
+|d            |            m|                                                                                                                   |
+|d l         m|eee         m|            ttt                                                 ttt                               ttt              |
 |            m|eee          |            ttt                                                 ttt                               ttt              |
-"eeeeeee     m|eee l        |      AAA   ttt   AAA                                     AAA   ttt   AAA                   AAA   ttt   AAA        "
-"eeeeeee      |eee          |      AAA         AAA                                     AAA         AAA                   AAA         AAA        "
-"eeeeeee     m|eee          |      AAA ooooooo AAA                                     AAA ooooooo AAA                   AAA ooooooo AAA        "
+"eeeeeee     m|eee l       m|      AAA   ttt   AAA                                     AAA   ttt   AAA                   AAA   ttt   AAA        "
+"eeeeeee      |eee         m|      AAA         AAA                                     AAA         AAA                   AAA         AAA        "
+"eeeeeee     m|eee         m|      AAA ooooooo AAA                                     AAA ooooooo AAA                   AAA ooooooo AAA        "
 |            m|eee          |          ooooooo                                             ooooooo                           ooooooo            |
-|            m|eee         U|          ooooooo               qqqqqqq                       ooooooo                           ooooooo           *|
+|            m|eee         U|          ooooooo               qqqqqqq                       ooooooo       <<<<<               ooooooo           *|
 +--===---===--+===---===----+----===---===---===---===---===---===---===-------DDDDDDD-------===---===---===---===---===---===---===---===------+
   objects: A armchair, b battery_bank, q bench, k cabinet, c chair, t coffee_table, n counter, E electrical_panel, e exam_table, a fire_alarm_panel, ' fire_extinguisher, f fridge, F fuel_tank, G generator, g gurney, H hospital_bed, h hydrant, i iv_stand, m medical_cabinet, M medical_cart, * plant, R reception_desk, ^ roof_hatch, S server_rack, s shelf, d sink, o sofa, l stool, j terminal, U trash_bin, y vending_machine, v vital_monitor, < wall_screen, w wc
     1  corridor            846 cells
