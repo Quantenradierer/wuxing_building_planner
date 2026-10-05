@@ -52,6 +52,11 @@ class ObjectSpec(_Strict):
         "kitchen line, a laundry row): a `wall` placement prefers a spot touching an earlier "
         "object of the same bank, backed against the same wall line, facing the same way",
     )
+    loose: bool = Field(
+        default=False,
+        description="Movable goods (a crate, a pallet, a cart): `scatter` and `wall` stand "
+        "them against a wall in one cluster, clear of the door, not mid-floor",
+    )
 
 
 class GroupPart(_Strict):

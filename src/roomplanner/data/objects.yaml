@@ -16,7 +16,7 @@ objects:
   collapsed_ceiling: {size: [5, 3], glyph: "@"}
   filing_cabinet:  {size: [2, 1], glyph: F, bank: shelving}
   armchair:        {size: [2, 2], glyph: A}
-  crate:           {size: [2, 2], glyph: K, bank: crate}
+  crate:           {size: [2, 2], glyph: K, bank: crate, loose: true}
   trash_bin:       {size: [1, 1], glyph: U}
   copier:          {size: [2, 1], glyph: P}
   desk:            {size: [3, 2], glyph: d}
@@ -40,7 +40,7 @@ objects:
   gondola:         {size: [8, 2], glyph: g}
   checkout:        {size: [2, 4], glyph: C}
   freezer:         {size: [4, 2], glyph: z, bank: freezer}
-  pallet:          {size: [2, 2], glyph: p}
+  pallet:          {size: [2, 2], glyph: p, loose: true}
   rack:            {size: [6, 2], glyph: r, bank: rack}
   hospital_bed:    {size: [2, 4], glyph: H}
   exam_table:      {size: [2, 4], glyph: e}
@@ -76,9 +76,9 @@ objects:
   water_cooler:    {size: [1, 1], glyph: w}
   iv_stand:        {size: [1, 1], glyph: i}
   vital_monitor:   {size: [1, 1], glyph: v}
-  medical_cart:    {size: [2, 1], glyph: m}
+  medical_cart:    {size: [2, 1], glyph: m, loose: true}
   gurney:          {size: [2, 4], glyph: g}
-  barrel:          {size: [1, 1], glyph: o}
+  barrel:          {size: [1, 1], glyph: o, loose: true}
   workbench:       {size: [4, 2], glyph: b, bank: workbench}
   display_case:    {size: [3, 1], glyph: d}
   atm:             {size: [1, 1], glyph: $}
@@ -140,7 +140,7 @@ objects:
   sim_rig:         {size: [2, 3], glyph: A}      # simsense recliner (BTL chips in the Barrens)
   autokitchen:     {size: [2, 1], glyph: v, bank: kitchen_line}      # nuke-it autokitchen
   mattress:        {size: [2, 4], glyph: b}      # on the floor
-  fire_barrel:     {size: [1, 1], glyph: f}
+  fire_barrel:     {size: [1, 1], glyph: f, loose: true}
   cyberware_rack:  {size: [3, 1], glyph: m}      # cyberlimbs and implants on hooks
   cryo_pod:        {size: [2, 4], glyph: H}
   ambulance:       {size: [4, 10], glyph: a}   # DocWagon armoured ambulance, nose to the wall
@@ -154,7 +154,7 @@ objects:
   roulette_table:  {size: [5, 3], glyph: W}   # wheel at one end, betting layout
   craps_table:     {size: [7, 3], glyph: Y}   # players stand round it
   slot_machine:    {size: [2, 1], glyph: $}
-  cash_cart:       {size: [2, 1], glyph: m}   # locked trolley for cash boxes and chips
+  cash_cart:       {size: [2, 1], glyph: m, loose: true}   # locked trolley for cash boxes and chips
   count_table:     {size: [6, 2], glyph: T}   # long table with bill counters and scales
 
   # Small street shops (gun shop, talismonger, ramen bar, boutique, deli).
