@@ -66,7 +66,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
    desk or couch; surveillance/noc/spider monitor wall; paint_booth vehicle; rigger_workshop cocoon + docks;
    attendant_booth kit; storefront counter + stool; stairwell up/down arrows and landing; flat_loft/studio bed;
    crypt tombs; nave pews at middle size; prison_block/dayroom/sally_port guard post; mantrap anything.
-10. **Count caps by purpose** (P1/P2): vending_room up to ~100 machines (2-8), server_room 20-60 racks (office: 2-10),
+10. [WIP] **Count caps by purpose** (P1/P2): vending_room up to ~100 machines (2-8), server_room 20-60 racks (office: 2-10),
     mess_hall/shelter/parking_deck follow floor area not occupancy, mailbox count vs. flats; and rooms whose
     `area` range lets them grow absurd (closet, entry_hall, cashier_booth, focus_room, bathroom). Check the actual
     `area:` limits in YAML before acting.
