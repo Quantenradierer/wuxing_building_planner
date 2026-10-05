@@ -106,5 +106,7 @@ def test_small_apartment_segments_become_studios_not_storerooms() -> None:
     building = generate(
         make_params(building_type=BuildingType.APARTMENT, width=40, depth=24, floors_above=2)
     )
-    types = [r.type for f in building.floors for r in f.rooms]
+    # The ground floor is a service floor (drones, laundry, cellar-like storerooms): only the
+    # flat floors matter here.
+    types = [r.type for f in building.floors if f.level > 0 for r in f.rooms]
     assert types.count("storage") <= 1
