@@ -55,7 +55,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
 6. [DONE] **Seating groups** (P1): sofa + armchairs + low table + rug as one cluster facing a screen/each other, the table
    touching the seating; today singles on a grid or against the wall (lobby, lounge, vip_room, library, recovery,
    exec office, living room, studio, flat_loft, balcony).
-7. **Objects overlapping walls / each other** (P1, bugs to verify first): operating_room machinery clipped by the west
+7. [WIP] **Objects overlapping walls / each other** (P1, bugs to verify first): operating_room machinery clipped by the west
    wall; roof units clipped by the parapet; capsule_dorm pods cut at the room edge; test_chamber pad half cut by the
    wall; fitting_room units half hidden in the wall; dance_floor bar cut by the north wall with the first stool outside;
    pharmacy shelves running through the counter; cage_complex "door overlaps another opening" (5 of 10 seeds);
