@@ -35,7 +35,7 @@ office 64x52 cells, wealth=middle, seed=2
                                           "     D         |                               |^^^ 2    |       |WWW|     |         "
                                           "     D         |                               |         |       |   |     |         "
                                           "     D         |      c   c   c c   c   c      |#########|       |10 |     |         "
-                                          |     |         |                               |#########|       +D--+     |         |
+                                          |     |         |                               |#########|       +DDD+     |         |
                                           |     |  c c    |>   TTTTTTTTTTT TTTTTTTTTTT    |#########|       D    9    |  c c    |
                                           |     |         |>   TTTTTTTTTTT TTTTTTTTTTT    |#########|       D         |         |
                                           "     |  ttt 17 |>   TTTTTTTTTTT TTTTTTTTTTT    |#########|       D         |  HHH    "
@@ -62,10 +62,10 @@ office 64x52 cells, wealth=middle, seed=2
 "i      |s         s|       |           |                   |                                       |       |                   |
 "i 11   |s         s|       D           |k                  |                                       |      <|k                  |
 |       |           |       D           |                   |                                       |      <|                   |
-|U      |s         s|       D           |        c c        |      c   c   c c   c   c              |      <|        c c        "
+|       |s         s|       D           |        c c        |      c   c   c c   c   c              |      <|        c c        "
 |       |s         s|       |           |                   |                           +-----------+      <|                   "
 |       |s         s|       |    c c   <|    16rrrrrrr      |>   TTTTTTTTTTT TTTTTTTTTTT|nnnnnnn f '       <|    8 rrrrrrr      "
-+D--+D--+           |       |          <|      rrrrrrr      |>   TTTTTTTTTTT TTTTTTTTTTT|                   |      rrrrrrr      |
++DDD+DDD+           |       |          <|      rrrrrrr      |>   TTTTTTTTTTT TTTTTTTTTTT|                   |      rrrrrrr      |
 |12 |13 |s         s|       |  24HHH   <|    c rrrrrrr c    |>   TTTTTTTTTTT TTTTTTTTTTT|                   |    c rrrrrrr c    |
 |   |   |s         s|       |    HHH   <|      rrrrrrr      |>   TTTTTTTTTTT TTTTTTTTTTT|                   |      rrrrrrr      |
 |WWW|WWW|s   22    s|       |    HHH   <|    c rrrrrrr c    |>   TTTTTTTTTTT TTTTTTTTTTT|y                  |    c rrrrrrr c    "
@@ -163,12 +163,12 @@ office 64x52 cells, wealth=middle, seed=2
                                           "                                                                                     "
                                           "              w                                                           *         h"
                                           |     +-------+--DDD----------------------------+--DDD----+       +---+---+-----+-----+
-                                          |     |    QQQ|*                                |         |       |WWW|WWW|  WWW|QQQ  |
-                                          |     |    QQQ|                                 |         |       |WWW|WWW|  WWW|QQQ  |
-                                          "     D    QQQ|                                 |    2    |      a|WWW|WWW|8 WWW|QQQ  |
+                                          |     |    QQQ|*                                |         |       |WWW|WWW|WWW  |QQQ  |
+                                          |     |    QQQ|                                 |         |       |WWW|WWW|WWW  |QQQ  |
+                                          "     D    QQQ|                                 |    2    |      a|WWW|WWW|WWW  |QQQ  |
                                           "     D    QQQ|                                 |         |       |   |   |     |QQQ  |
-                                          "     D    QQQ|      c   c   c c   c   c        |#########|       |6  |7  |     |QQQ  |
-                                          |     |    QQQ|                                 |#########|       +D--+D--+D----+QQQ  |
+                                          "     D    QQQ|      c   c   c c   c   c        |#########|       |6  |7  |  8  |QQQ  |
+                                          |     |    QQQ|                                 |#########|       +DDD+DDD+DDD--+QQQ  |
                                           |    *|    QQQ|>   TTTTTTTTTTT TTTTTTTTTTT      |#########|       |             |QQQ  |
                                           |     |       |>   TTTTTTTTTTT TTTTTTTTTTT      |#########|       |             |     |
                                           "     |  17  l|>   TTTTTTTTTTT TTTTTTTTTTT      |#########|       D      5      |     |
@@ -232,12 +232,12 @@ office 64x52 cells, wealth=middle, seed=2
 "ooo       c ddd  |#########|<   HHH    |<                                          |s           s|y 27y|    s|         |       |
 |            ddd  |#########|           |<                                          |s            |     |     |         |       |
 |}           ddd c|#########|    c c    |<                                         a|s sss sss sss|    y|    s|         |       "
-|            ddd  |#########|           |                                           +-----------+-+    y|    s+D--+D----+       "
-"ddd       c ddd  |#########|           |                                           D    sss sss|y     y|    s|10 |     |  c    "
+|            ddd  |#########|           |                                           +-----------+-+    y|    s+DDD+DDD--+       "
+"ddd       c ddd  |#########|           |                                           D    sss sss|y     y|    s|10 |  11 |  c    "
 "ddd              |#########|           |                                           D           |y      |     |   |     |       |
-"ddd c            |#########|           |                                           D    33    s|y U    |s   s|WWW|11WWW|ddddd  |
-|ddd              |         |           |                                           |          s|       |s   s|WWW|  WWW|ddddd  |
-|ddd             k|         |           |  U qqqqqqq                       qqqqqqq *|      sss s|yyy yyy|s   s|WWW|  WWW|ddddd  |
+"ddd c            |#########|           |                                           D    33    s|y U    |s   s|WWW|WWW  |ddddd  |
+|ddd              |         |           |                                           |          s|       |s   s|WWW|WWW  |ddddd  |
+|ddd             k|         |           |  U qqqqqqq                       qqqqqqq *|      sss s|yyy yyy|s   s|WWW|WWW  |ddddd  |
 +===---===---===--+DDD---===+--===---===+--===---===-------DDDDDDD-------===---===--+===---===--+===----+-----+---+-----+===----+
   objects: b battery_bank, q bench, k cabinet, t canteen_table, Q capsule, c chair, C coffee_table, P copier, n counter, K crate, E electrical_panel, F filing_cabinet, a fire_alarm_panel, ' fire_extinguisher, H huddle_table, h hydrant, l locker, T meeting_table, d office_desk, * plant, R reception_desk, r round_table, s shelf, } side_table, i sink, o sofa, # stairs, U trash_bin, y vending_machine, < wall_screen, w water_cooler, W wc, > whiteboard
     1  corridor            876 cells

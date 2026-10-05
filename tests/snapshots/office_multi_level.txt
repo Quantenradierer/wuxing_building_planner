@@ -2,12 +2,12 @@ office 48x28 cells, wealth=middle, seed=7
 
 == Floor 1 ==
 +===---===---===--+===---===+--===--+---+-----+--===--+===---===---===---===---===+-------------+
-"                 |         |n      |WWW|  WWW|<      D    sss sss sss sss sss sss|QQQQQQQ l QQQ|
-"                 |         |n      |WWW|  WWW|<      D                           |QQQQQQQ   QQQ|
-"                 |         |n      |WWW|6 WWW|<      D              17          s|QQQQQQQ   QQQ|
+"                 |         |n      |WWW|WWW  |<      D    sss sss sss sss sss sss|QQQQQQQ l QQQ|
+"                 |         |n      |WWW|WWW  |<      D                           |QQQQQQQ   QQQ|
+"                 |         |n      |WWW|WWW  |<      D              17          s|QQQQQQQ   QQQ|
 |                 |         |n      |   |     |<      |                          s|          QQQ|
-|                 |         |n      |5  |     |<      |          k               s|      21  QQQ|
-|                 |         |n      +D--+D----+       +-------------------+       |          QQQ|
+|                 |         |n      |5  |  6  |<      |          k               s|      21  QQQ|
+|                 |         |n      +DDD+DDD--+       +-------------------+       |          QQQ|
 "                 |         |n      |         |       |^^^ ###############|sss sss|      l l QQQ|
 "                 |         |       |         |       |^^^ ###############+-------+--DDD--------+
 "    c c c c 8    |  c c    |f      |         D       D^^^ ###############|                     |
@@ -41,7 +41,7 @@ office 48x28 cells, wealth=middle, seed=7
 "n      |WWW|WWW|>     ddddd ddddd ddddd ddddd     ddddd ddddd ddddd      D     |               "
 "n      |   |   |>     ddddd ddddd ddddd ddddd     ddddd ddddd ddddd      D     |               "
 "n      |10 |11 |>     ddddd ddddd ddddd ddddd     ddddd ddddd ddddd      D     |          U    "
-|n      +D--+D--+                                                         |     |               |
+|n      +DDD+DDD+                                                         |     |               |
 |n     s|       |      ddddd ddddd ddddd ddddd     ddddd ddddd ddddd     w|  14 |  ddd c        |
 |n     s|       |      ddddd ddddd ddddd ddddd     ddddd ddddd ddddd      |     |  ddd          |
 "n     s|       D      ddddd ddddd ddddd ddddd     ddddd ddddd ddddd     F|    E|c ddd       ddd"
@@ -103,11 +103,11 @@ office 48x28 cells, wealth=middle, seed=7
 |                       |                     |       |eeeeeee|           |ddd                  |
 "                       |                  k  |q      Deeeeeee|  c ttt c  |ddd c             ooo"
 "                       +---+-----------+-----+q      Deeeeeee|    ttt    |ddd               ooo"
-"                          k|U          D     |q      Deeeeeee|l c ttt c  |ddd               ooo"
-|                           |           |     |q      |eeeeeee|           |                  ooo|
-|                          k|i   9      |10WWW|q      |eeeeeee|l   20     |                  ooo|
-|                           |i          |  WWW|q      +-------+           |                  ooo|
-|                           |i          |  WWW|q              |l       f '|*       FFF FFF   ooo|
+"                          k|U          D  WWW|q      Deeeeeee|l c ttt c  |ddd               ooo"
+|                           |           D  WWW|q      |eeeeeee|           |                  ooo|
+|                          k|i   9      D10WWW|q      |eeeeeee|l   20     |                  ooo|
+|                           |i          |     |q      +-------+           |                  ooo|
+|                           |i          |     |q              |l       f '|*       FFF FFF   ooo|
 +--DDD----------------------+--DDD------+-----+               +--DDD------+--DDD----------------+
 |      w * *   <<<<<                         *   1                                 U            D
 |                                                                                               D
@@ -118,12 +118,12 @@ office 48x28 cells, wealth=middle, seed=7
 "                  qqqqqqq   a                                         w   qqqqqqq         *    |
 +--DDD--------------------------+                           +--DDD--------+-----+--DDD----------+
 |                               |                          q|i            D6 WWW|U     sss PPP  |
-|                               |                          q|i            |  WWW|               |
-"                               |U                         q|i     5      |  WWW|      14       "
+|                               |                          q|i            D  WWW|               |
+"                               |U                         q|i     5      D  WWW|      14       "
 "                               |                          q|             +-----+               "
 "                               |q           c             q|U            D7 WWW|              P"
-|                               |q                         q|             |  WWW|              P|
-|      c   c 12c c   c   c      |q       RRRRRRRRR         q|             |  WWW|      sss     P|
+|                               |q                         q|             D  WWW|              P|
+|      c   c 12c c   c   c      |q       RRRRRRRRR         q|             D  WWW|      sss     P|
 |                               |q       RRRRRRRRR          +-------------+-+---+--DDD----------+
 "    TTTTTTTTTTT TTTTTTTTTTT    |q       RRRRRRRRR          D        QQQQQQQ|QQQ       QQQ QQQ l|
 "    TTTTTTTTTTT TTTTTTTTTTT    |q                          D        QQQQQQQ|QQQ       QQQ QQQ  |
@@ -163,11 +163,11 @@ office 48x28 cells, wealth=middle, seed=7
 
 == Basement B1 ==
 +---------------------------+-----+-----------+-------+---------+---------------------+---------+
-|                           |  6  D           D       D    l l l|                     |    PPP  |
-|                           |     |           D       D         |                     |         |
-|                           |ggg  |    5      D       D    18   |s     s     s     s  |         |
-|                           |ggg  |           |       |         |s     s     s     s  |         |
-|                           |ggg  |      U iii|       |         |s     s     s     s  |         |
+|                           |ggg  D           D       D    l l l|                     |    PPP  |
+|                           |ggg  D           D       D         |                     |         |
+|                           |ggg  D    5      D       D    18   |s     s     s     s  |         |
+|                           |     |           |       |         |s     s     s     s  |         |
+|                           |  6  |      U iii|       |         |s     s     s     s  |         |
 |                           +-----+-----------+       +---------+---------+           |         |
 |k       c c 16             |i     mmmmm     '|       |    ###############|  s     s  |         |
 |               +-----------+i     mmmmm      |       |    ###############|  s     s  |         |
