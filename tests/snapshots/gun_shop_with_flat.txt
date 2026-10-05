@@ -2,43 +2,43 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Floor 1 ==
 +--===---===--+===--+===---===---===--+===---===----+
-"    N bbb N  |     |#################|    N bbb N  "
-"      bbb    |     |#################|      bbb    "
-"      bbb    |  www|#################|      bbb    "
-|      bbb    |  www|#################|      bbb    |
-|    3 bbb    |4 www|#################|    5 bbb    |
+"a   N bbb N  |www i|#################|a   N bbb N  "
+"a     bbb    |www i|#################|a     bbb    "
+"a     bbb    |www i|#################|a     bbb    "
+|a     bbb    |     |#################|a     bbb    |
+|a   3 bbb    |  4 k|#################|a   5 bbb    |
 |      bbb    |     |                 |      bbb    |
-"      bbb    |    i|        1        |      bbb    "
-"             |    i|                 |             "
-"             |    i|                 |             "
+"k     bbb    |     |        1        |k     bbb    "
+"             |     |                 |             "
+"k            |     |                 |k            "
 +--DDD--------+DDD--+------DDD--------+--DDD--------+
-|*       ddddd     AAA               sss     sss AAA|
-|        ddddd     AAA                           AAA|
-"        ddddd     AAA   ~~~~~~~ AAA             AAA"
-"                        ~~~~~~~ AAA                "
-"        AAA             ~~~~~~~ AAA       ~~~~~    "
-|        AAA             ~~~~~~~           ~~~~~    |
-|}       AAA             ~~~~~~~           ~~~~~   i|
-|                                          ~~~~~   i|
-"ooo                                       ~~~~~   i"
-"ooo                                       ~~~~~    "
-"ooo ttt                 2         ~~~~~   ~~~~~   f"
-|ooo ttt                           ~~~~~            |
-|ooo ttt               c aaa c     ~~~~~           v|
-|ooo                     aaa       ~~~~~           v|
-"ooo                   c aaa c     ~~~~~           v"
-"                                  ~~~~~            "
-"}                                 ~~~~~           n"
+|          sss     sss sss     sss sss       sss   *|
+|                                                   |
+"  AAA               ~~~~~~~                        "
+"  AAA               ~~~~~~~                        "
+"  AAA               ~~~~~~~ ~~~~~~~                "
+|                    ~~~~~~~ ~~~~~~~                |
+|ooo                 ~~~~~~~ ~~~~~~~               i|
+|ooo                         ~~~~~~~               i|
+"ooo ttt                     ~~~~~~~               i"
+"ooo ttt                                            "
+"ooo ttt                 2     ~~~~~               f"
+|ooo                           ~~~~~                |
+|ooo                   c ddd c ~~~~~               v|
+|                        ddd   ~~~~~               v|
+"  AAA                 c ddd c ~~~~~               v"
+"  AAA                         ~~~~~                "
+"  AAA                         ~~~~~               n"
 |                                                  n|
-|SSSSS         ttt           ttt                   n|
-|SSSSS         ttt           ttt                   n|
-"SSSSS         ttt           ttt                   n"
-"                                                  n"
-"            ooooooo       ooooooo                 n"
-|            ooooooo       ooooooo                  |
-|*   <<<<< } ooooooo }   } ooooooo } sss sss sss sss|
+|                    ttt               ttt         n|
+|                    ttt               ttt         n|
+"              AAA   ttt   AAA   AAA   ttt   AAA   n"
+"              AAA         AAA   AAA         AAA   n"
+"              AAA ooooooo AAA   AAA ooooooo AAA   n"
+|                  ooooooo           ooooooo        |
+|*   <<<<<         ooooooo           ooooooo       *|
 +--===---===---===---===---===---===---===---===----+
-  objects: A armchair, b bed, c chair, t coffee_table, n counter, a dining_table, f fridge, d home_desk, N nightstand, * plant, ~ rug, s shelf, } side_table, S sim_rig, i sink, o sofa, # stairs, v stove, < wall_screen, w wc
+  objects: A armchair, b bed, k cabinet, c chair, t coffee_table, n counter, d dining_table, f fridge, N nightstand, * plant, ~ rug, s shelf, i sink, o sofa, # stairs, v stove, < wall_screen, a wardrobe, w wc
     1  stairwell            45 cells
     2  flat_loft           338 cells
     3  bedroom              35 cells

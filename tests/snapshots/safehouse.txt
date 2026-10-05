@@ -1,120 +1,119 @@
 safehouse 32x22 cells, wealth=middle, seed=5
 
 == Floor 1 ==
-+--===---===--+===---===--+===---===---===--+===---===--+-------+
-"BBB BBB      |###########|                 |           |       |
-"BBB BBB      |###########|                 |           |       |
-"BBB BBB      |###########|                 |           |  6    |
-|BBB BBB      |###########|                 |           |       |
-|BBB BBB      |###########|                 |           |      )|
-|BBB BBB      |###########|                 |           +--DDD--+
-"BBB BBB      |###########|ddd              |                  a"
-"             |###########|ddd              |                  a"
-"      3      |###########|ddd c   4       n|        5         a"
-|             |###########|ddd              |                  a|
-|             |###########|ddd       bbbbbbb|        bbb       a|
-|             |###########|          bbbbbbb|        bbb        |
-"             |###########|          bbbbbbb|        bbb        "
-"             |           |                 |        bbb        "
-"             |    2      |                n|        bbb        "
-|             |           |                 |        bbb        |
-|        l    |           |      k k        |      n bbb n   k  |
-+--DDD--------+----DDD----+--DDD------------+--DDD--------------+
++--===---===--+===---===--+===---===--+===---===--+===---===----+
+"BBB BBB BBB l|           |###########|BBB BBB BBB|BBB BBB BBB l"
+"BBB BBB BBB  |           |###########|BBB BBB BBB|BBB BBB BBB  "
+"BBB BBB BBB l|           |###########|BBB BBB BBB|BBB BBB BBB l"
+|BBB BBB BBB  |           |###########|BBB BBB BBB|BBB BBB BBB  |
+|BBB BBB BBB l|           |###########|BBB BBB BBB|BBB BBB BBB l|
+|BBB BBB BBB  |           |###########|BBB BBB BBB|BBB BBB BBB  |
+"BBB BBB BBB l|           |###########|BBB BBB BBB|BBB BBB BBB l"
+"             |           |###########|           |             "
+"      3      |n   4      |###########|    5      |      6      "
+|             |           |###########|           |             |
+|             |bbbbbbb   a|###########|           |             |
+|             |bbbbbbb   a|###########|           |             |
+"             |bbbbbbb   a|###########|           |             "
+"             |          a|           |           |             "
+"             |n         a|    2      |          l|             "
+|             |           |           |           |             |
+|             |           |           |          l|             |
++--DDD--------+--DDD------+----DDD----+--DDD------+--DDD--------+
 "                                                               "
 "                                                               "
 "                                                               "
 |                                                               |
 |                            1                                  |
-+--DDD--------+     +--DDD------+--DDD------+--DDD--------------+
-"      BBB BBB|     |           |           |      BBB BBB BBB  "
-"      BBB BBB|     |           |           |      BBB BBB BBB  "
-"      BBB BBB|     |          i|n          |l     BBB BBB BBB  "
-|      BBB BBB|     |          i|           |      BBB BBB BBB  |
-|      BBB BBB|     |www 9     i|bbbbbbb    |l     BBB BBB BBB  |
-|      BBB BBB|     |www        |bbbbbbb    |      BBB BBB BBB  |
-"      BBB BBB|     |www        |bbbbbbb    |l     BBB BBB BBB  "
-"             |     |           |           |                   "
-"      7      |     |      k    |n   10     |l       11         "
-|             +DDD--+-----------+           |                   |
-|             |                 |           |                   |
-|             |                 |           |           +--DDD--+
-"  KKK        |      bbb     ddd|ddd        |           |s     q|
-"  KKK        |      bbb     ddd|ddd        |           |s     q|
-"l KKK        |a     bbb 8   ddd|ddd c      |           |s 12  q|
-|             |a     bbb     ddd|ddd        |           |      q|
-|             |a     bbb     ddd|ddd       k|           |s     q|
-|             |a     bbb        |           |           |s     q|
-|             |a   n bbb n      |          k|           |s   j q|
-+--===---===--+===---===---===--+===---===--+===---===--+-------+
-  objects: b bed, q bench, B bunk_bed, k cabinet, c chair, K crate, d home_desk, l locker, n nightstand, ) safe, s shelf, i sink, # stairs, j terminal, a wardrobe, w wc
++--DDD--------+     +--DDD------+--DDD------------+--DDD--------+
+"             |     |           |                 |             "
+"             |     |           |                 |             "
+"             |     |           |                n|             "
+|             |     |           |                 |             |
+|             |     |    9      |          bbbbbbb|             |
+|             |     |           |          bbbbbbb|             |
+"n            |     |i       www|          bbbbbbb|n            "
+"             |     |i       www|                 |             "
+"bbbbbbb 7    |     |i   k   www|        10      n|bbbbbbb 11   "
+|bbbbbbb      +DDD--+-----------+                 |bbbbbbb      |
+|bbbbbbb      |    n bbb n      |                 |bbbbbbb      |
+|             |      bbb        |                 |             |
+"n            |      bbb        |                 |n            "
+"             |      bbb        |                 |             "
+"             |      bbb 8     k|k                |             "
+|             |      bbb        |                 |             |
+|k            |      bbb       k|                 |k            |
+|             |                 |                 |             |
+|k            |                 |  aaaaa          |k            |
++--===---===--+===---===---===--+===---===---===--+===---===----+
+  objects: b bed, B bunk_bed, k cabinet, l locker, n nightstand, i sink, # stairs, a wardrobe, w wc
     1  corridor            111 cells
     2  stairwell            54 cells
     3  bunk_room            63 cells
-    4  bedroom              81 cells
-    5  bedroom              78 cells
-    6  stash                12 cells
-    7  bunk_room            70 cells
+    4  bedroom              54 cells
+    5  bunk_room            54 cells
+    6  bunk_room            63 cells
+    7  bedroom              70 cells
     8  bedroom              45 cells
     9  bathroom             30 cells
-   10  bedroom              60 cells
-   11  bunk_room            84 cells
-   12  safe_room            16 cells
+   10  bedroom              90 cells
+   11  bedroom              70 cells
 
 == Ground floor ==
-+--===+--DDD--+===---===--+===--+-----------+===---===---===----+
-"     |       |###########|     |j          |bbb bbb bbb        "
-"     |       |###########|     |           |bbb bbb bbb        "
-"s   k|      f|###########|     D          q|bbb bbb bbb        "
-|s    |       |###########|     D          q|bbb bbb bbb        |
-|s   k|      n|###########|     D    7     q|bbb bbb bbb        |
-|     |      n|###########|     |          q|bbb bbb bbb        |
-"s   s|i     n|###########|     |          q|bbb bbb bbb        "
-"s   s|i     n|###########|     |          q|                   "
-"s 5 s|i 4   n|###########|     |      sss q|        8          "
-|     |      n|###########|     +-----------+                   |
-|s   s|      n|###########|     |  mmm      |        KKK        |
-|s   s|       |###########|     |           |        KKK        |
-"s   s|      v|###########|     |    6      |        KKK       l"
-"     |      v|           |     |           |                   "
-"     |      v|    2      |     |           |                   "
-|     |       |           |     |           |                   |
-|     |      U|           |     |      iii  |                   |
-+DDD--+--DDD--+----DDD----+     +--DDD------+--DDD--------------+
++--===---===---===+--DDD--+===---===--+===---===---===---===----+
+"BBB BBB BBB BBB  |n      |###########|              ooooooo   *"
+"BBB BBB BBB BBB  |n      |###########|              ooooooo    "
+"BBB BBB BBB BBB  |n      |###########|              ooooooo   s"
+|BBB BBB BBB BBB  |n      |###########|                        s|
+|BBB BBB BBB BBB  |n      |###########|            6           s|
+|BBB BBB BBB BBB  |n      |###########|                         |
+"BBB BBB BBB BBB  |n 4 c  |###########|        ~~~~~~~         s"
+"                 |       |###########|        ~~~~~~~         s"
+"        5        |v ttt  |###########|        ~~~~~~~         s"
+|                 |v ttt  |###########|        ~~~~~~~          |
+|                 |v ttt  |###########|        ~~~~~~~          |
+|                 |       |###########|                         |
+"                 |f c    |###########|              AAA        "
+"                 |       |           |              AAA        "
+"                 |       |    2      |              AAA        "
+|                 |       |           |              AAA        |
+|          l      |       |           |      <<<<<   AAA       *|
++--DDD------------+--DDD--+----DDD----+--DDD--------------------+
+"                                                               "
+"                                                               "
 "                              1                                "
-"                                                               "
-"                                                               "
 |                                                               |
 |                                                               |
-+--DDD--------------------------+     +-----------+--DDD--------+
-"                               |     |           |             |
-"                               |     |           |             |
-"                               |     D          i|             |
-|                               |     D          i|             |
-|                               |     D          i|            L|
-|                               |     |           |            L|
-"}           ~~~~~~~            |     |           |            L|
-"            ~~~~~~~            |     |           |            L|
-"ooo         ~~~~~~~            |  3  |    10     |    KKK 11  L|
-|ooo         ~~~~~~~            |     |           |    KKK      |
-|ooo ttt     ~~~~~~~            |     |           |L   KKK      |
-|ooo ttt                        |     |           |L            |
-"ooo ttt       9                |     |           |L            |
-"ooo                            |     |           |L            |
-"ooo                            |     |           |L           L|
-|                               |     |           |            L|
-|}                              |     |hhh     www|W           L|
-|                               |     |hhh     www|W           L|
-|    sss                        |     |hhh     www|W WWW WWW   L|
-+--===---===---===---===---===--+DDD--+===---===--+-------------+
-  objects: v autokitchen, q bench, b bunk_bed, k cabinet, t coffee_table, n counter, K crate, f fridge, L gun_rack, l locker, m medical_cabinet, ~ rug, s shelf, h shower, } side_table, i sink, o sofa, # stairs, j terminal, U trash_bin, w wc, W weapon_locker
-    1  corridor            123 cells
++-------+--DDD------+     +-----------+--DDD------+--DDD--------+
+"BBB BBB|           |     |    mmm   S|           |            W|
+"BBB BBB|           |     |          S|           |            W|
+"BBB BBB|           |     D          S|           |            W|
+|BBB BBB|           |     D           |           |             |
+|BBB BBB|    8      |     D          M|           |             |
+|BBB BBB|           |     |          M|           |             |
+"BBB BBB|S       www|     |          M|N   10    a|             |
+"       |S       www|     |           |          a|             |
+"       |S   k   www|  3  |    9      |bbbbbbb   a|      11     |
+|       +-----------+     |           |bbbbbbb   a|             |
+|    KKK BBB       l|     |           |bbbbbbb   a|             |
+|    KKK BBB        |     |           |           |             |
+"    KKK BBB        D    a|    ggg    |N          |            L|
+"        BBB        D    a|    ggg    |           |            L|
+"      7 BBB        D    a|    ggg    |        c  |            L|
+|        BBB        |    a|    ggg    |           |            L|
+|        BBB        |    a|    ggg    |      ddddd|            L|
+|                   |     |    ggg    |      ddddd|             |
+|                   |     |  V ggg i  |      ddddd|      sss sss|
++--===---===---===--+DDD--+===---===--+===---===--+-------------+
+  objects: v autokitchen, b bed, B bunk_bed, k cabinet, c chair, n counter, K crate, f fridge, L gun_rack, g gurney, d home_desk, i iv_stand, t kitchen_table, l locker, m medical_cabinet, M medical_cart, N nightstand, * plant, ~ rug, s shelf, A sim_rig, S sink, o sofa, # stairs, V vital_monitor, < wall_screen, a wardrobe, w wc, W weapon_locker
+    1  corridor             96 cells
     2  stairwell            54 cells
     3  entry_hall           30 cells
     4  kitchen              36 cells
-    5  storage              27 cells
-    6  med_room             24 cells
-    7  safe_room            30 cells
-    8  bunk_room            90 cells
-    9  living_room         160 cells
-   10  bathroom             60 cells
+    5  bunk_room            81 cells
+    6  living_room         117 cells
+    7  bunk_room            70 cells
+    8  bathroom             30 cells
+    9  med_room             60 cells
+   10  bedroom              60 cells
    11  gear_room            70 cells

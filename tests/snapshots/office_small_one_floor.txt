@@ -1,54 +1,58 @@
 office 32x18 cells, wealth=middle, seed=1
 
 == Ground floor ==
-+-----------------+---+---+--DDD----+--===---===---===---===----+
-|  EEE EEE EEE EEE|www|www|s       s|F         ddd ddd          "
-|                 |www|www|s       s|F         ddd ddd          "
-|                E|www|www|s       s|F       c ddd ddd c     c  "
-|                E|   |   |         |          ddd ddd          |
-|                E|8  |9  |s       s|F         ddd ddd     ddddd|
-|                 +D--+D--+s       s|F                     ddddd|
-|        10      E|       |s   11  s|F         ddddd       ddddd"
-|                E|       |         |          ddddd            "
-|S               E|U 7    |s       s|F         ddddd       ddddd"
-|S                |       |s       s|F                     ddddd|
-|S                |i      |s       s|F           c   13    ddddd|
-|                 |i      |         |                           |
-|'                |i      |      sss|k                       c  "
-+--DDD------------+--DDD--+--DDD----+--DDD--------+             "
-|                          U               x     U|             "
-|                                                 |             |
-D      1                                         q|             |
-D                                                q|             |
-D^^^                             c               q|             "
-|^^^                                             q|             "
-|^^^                         RRRRRRRRR           q|             "
-+---+---+-----+              RRRRRRRRR           q|             |
-|www|www|  www|q   AAA }     RRRRRRRRR     AAA } q|             |
-|www|www|  www|q   AAA                     AAA    |             |
-|www|www|6 www|q   AAA         2           AAA    |k           *|
-|   |   |     |q                                  +-------------+
-|4  |5  |     |q                                  |*   c c     <|
-+D--+D--+D----+q                                  |            <|
-|             |q                                  D    ttt     <|
-|             |                                   D    ttt     <|
-"      3      D                                   D    ttt 12  <"
-"             D                                   |             "
-"             D                                   |    c c      "
-|             |                                   |             |
-|    U iii iii|*                                  |             |
-+--===---===--+===---===-----DDDDDDD---===---===--+===---===----+
-  objects: A armchair, q bench, k cabinet, c chair, E electrical_panel, F filing_cabinet, ' fire_extinguisher, t huddle_table, x medkit, d office_desk, * plant, R reception_desk, ^ roof_hatch, S server_rack, s shelf, } side_table, i sink, U trash_bin, < wall_screen, w wc
-    1  corridor             28 cells
++--===---===----+----===---===--+===---DDD---===+---------------+
+"              *|s              |sss k     k sss|QQQQQQQ   l QQQ|
+"               |s              |               |QQQQQQQ     QQQ|
+"<     c c      |s             P|s             s|QQQQQQQ     QQQ|
+|<              |              P|s             s|            QQQ|
+|<     ttt      |s             P|s             s|      14    QQQ|
+|<     ttt      |s              |               |            QQQ|
+"<   12ttt      |s     13       |s     11      s|            QQQ|
+"               |               |s             s+--DDD----+-----+
+"      c c      |s             P|s             s|         D8 www|
+|               |s             P|               |         |  www|
+|               |s             P|s             s|    7    |  www|
+|               |               |s             s|         +-----+
+|               |               |s     sss sss s|    U    D     |
++--DDD----------+--DDD----------+--DDD----------+DDD+     |     |
+D            *         qqqqqqq                      |i    |9 www|
+D                                                   |i    |  www|
+D      1                                           a|i    |  www|
+|                                                   +-----+-----+
+|^^^                             c                 U|'     SSS b|
+|^^^                                                |          b|
+|^^^                         RRRRRRRRR              D          b|
++---+---+-------+            RRRRRRRRR              D          b|
+|www|www|    www|            RRRRRRRRR              D          b|
+|www|www|    www|                                   |           |
+|www|www|  6 www|<               2                  |E         b|
+|   |   |       |<                                  |E         b|
+|4  |5  |       |<                                  |E   10    b|
++D--+D--+D------+<                                  |          b|
+|               |<                               ooo|E         b|
+|               |                                ooo|E          |
+"      3        D                                ooo|E          |
+"               D                                ooo|           |
+"               D                                ooo|E         E|
+|               |                                ooo|E         E|
+|      U iii iii|* qqqqqqq x                     ooo|E EEE EEE E|
++--===---===----+----===-------DDDDDDD-------===----+-----------+
+  objects: b battery_bank, q bench, k cabinet, Q capsule, c chair, P copier, E electrical_panel, a fire_alarm_panel, ' fire_extinguisher, t huddle_table, l locker, x medkit, * plant, R reception_desk, ^ roof_hatch, S server_rack, s shelf, i sink, o sofa, U trash_bin, < wall_screen, w wc
+    1  corridor             32 cells
     2  reception_lobby     198 cells
-    3  toilet               28 cells
+    3  toilet               32 cells
     4  stall                 6 cells
     5  stall                 6 cells
-    6  stall                 9 cells
-    7  toilet               16 cells
+    6  stall                12 cells
+    7  toilet               21 cells
     8  stall                 6 cells
-    9  stall                 6 cells
-   10  electrical_room      63 cells
-   11  storage              35 cells
-   12  huddle_room          35 cells
-   13  office              140 cells
+    9  stall                 9 cells
+   10  electrical_room      54 cells
+   11  storage              56 cells
+   12  huddle_room          56 cells
+   13  copy_room            56 cells
+   14  nap_room             32 cells
+
+Warnings:
+  - level 0: no space for meeting_room
