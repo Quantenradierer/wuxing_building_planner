@@ -2,27 +2,27 @@ casino 52x36 cells, wealth=middle, seed=7
 
 == Floor 2 ==
 +===---===--+-----+===---===--+-----+===---===+--===--+===---===--+===---===---===---===---===---===----+
-"           D5 www|           D11www|#########|sss sss|           |nnnnnnn nnnnnnn nnnnnnn f f iii      "
-"           |  www|           |  www|#########|       |           |                                     "
-"           |  www|           |  www|#########|s      D           |n                                    "
+"           D5 www|           D11www|#########|       |           |nnnnnnn nnnnnnn nnnnnnn f f iii      "
+"           D  www|           D  www|#########|       |           |                                     "
+"           D  www|           D  www|#########|s      D           |n                                    "
 |           +-----+           +-----+#########|s      D           |n                                    |
 |           D6 www|           D12www|#########|s 18   D           |n                                    |
-|           |  www|           |  www|#########|       |           |n                                    |
-"           |  www|           |  www|#########|s     k|    c ddd  |n                                    "
-"           +-----+           +-----+#########|s      |      ddd  |n                                    "
-"U          D7 www|U          D13www|#########|s   KKK|    16ddd c|n                                    "
-|           |  www|           |  www|#########|    KKK|      ddd  |                                     |
-|i   4      |  www|i   10     |  www|#########|sss KKK|    c ddd  |v                 17                 |
+|           D  www|           D  www|#########|       |           |n                                    |
+"           D  www|           D  www|#########|s     s|    c ddd  |n                                    "
+"           +-----+           +-----+#########|s     s|      ddd  |n                                    "
+"U          D7 www|U          D13www|#########|s     s|    16ddd c|n                                    "
+|           D  www|           D  www|#########|       |      ddd  |                                     |
+|i   4      D  www|i   10     D  www|#########|sss sss|    c ddd  |v                 17                 |
 |i          +-----+i          +-----+#########+-------+           |v                                    |
 "i          D8 www|i          D14www|#########|eeeeeee|           |v                                    "
-"           |  www|           |  www|#########|eeeeeee|           |                                     "
-"i          |  www|i          |  www|#########|eeeeeee|           |v                                    "
+"           D  www|           D  www|#########|eeeeeee|           |                                     "
+"i          D  www|i          D  www|#########|eeeeeee|           |v                                    "
 |i          +-----+i          +-----+         |eeeeeee|           |v                                    |
-|i          D     |i          D     |    1    |eeeeeee|           |v                                    |
-|           |     |           |     |         |eeeeeee|           |                                     |
-"i          |9 www|i          |15www|      ^^^|eeeeeee|           |v                                    "
-"i          |  www|i          |  www|      ^^^|eeeeeee|           |v                                    "
-"i          |  www|i          |  www|      ^^^|eeeeeee|k         k|v                       ' sss sss    "
+|i          D  www|i          D  www|    1    |eeeeeee|           |v                                    |
+|           D  www|           D  www|         |eeeeeee|           |                                     |
+"i          D9 www|i          D15www|      ^^^|eeeeeee|           |v                                    "
+"i          |     |i          |     |      ^^^|eeeeeee|           |v                                    "
+"i          |     |i          |     |      ^^^|eeeeeee|k         k|v                       ' sss sss    "
 +--DDD------+-----+--DDD------+-----+--DDD----+--DDD--+--DDD------+--DDD--------------------------------+
 |}                       <<<<<                                             } ooooooo }       } ooooooo }|
 |                                                                            ooooooo           ooooooo  |
@@ -74,7 +74,7 @@ casino 52x36 cells, wealth=middle, seed=7
 |                                                  ooooooo                                   ooooooo    |
 |*                       sss f sss f sss         } ooooooo }                               } ooooooo } *|
 +===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===----+
-  objects: N bar_counter, k cabinet, c chair, t coffee_table, n counter, K crate, a dining_table, e elevator_car, ' fire_extinguisher, f fridge, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, o sofa, # stairs, S stool, v stove, U trash_bin, < wall_screen, w wc
+  objects: N bar_counter, k cabinet, c chair, t coffee_table, n counter, a dining_table, e elevator_car, ' fire_extinguisher, f fridge, d office_desk, * plant, ^ roof_hatch, s shelf, } side_table, i sink, o sofa, # stairs, S stool, v stove, U trash_bin, < wall_screen, w wc
     1  stairwell            55 cells
     2  elevator             20 cells
     3  sky_lounge         1300 cells
@@ -96,27 +96,27 @@ casino 52x36 cells, wealth=middle, seed=7
 
 == Floor 1 ==
 +-----------------+===---===---===--+===---===+--===--+===--+===---===--+-----+===--+-----+===---===----+
-|'     <<<<<      |n       <<<<< ooo|#########|sss sss|     |           D8 www|iii  D14www|k       c    "
-|                 |n             ooo|#########|       |     |           |  www|     |  www|             "
-|    c       c    |n             ooo|#########|s      D     D           |  www|     |  www|F     bbbbb  "
-|                 |n             ooo|#########|s      D     D           +-----+     +-----+F     bbbbb  |
-|  ddddd   ddddd  |n             ooo|#########|s 20   D     D           D9 www|     D15www|F     bbbbb  |
-|  ddddd   ddddd  |n             ooo|#########|       |     |           |  www|     |  www|             |
-|  ddddd   ddddd  |n     c 6     ooo|#########|s     k|     |i          |  www|     |  www|      c   c  "
-|                 |                 |#########|s      |     |i          +-----+     +-----+             "
-|                 |    ZZZZZZZ      |#########|s   KKK|     |i          D10www|     D16www|             "
-|                 |    ZZZZZZZ      |#########|    KKK|     |           |  www|     |  www|             |
-|    c   5   c    |    ZZZZZZZ      |#########|sss KKK|  1  |i   7      |  www|  13 |  www|      19     |
-|                 |                 |#########+-------+     |i          +-----+     +-----+             |
-|< ddddd   ddddd  |    h h h h WWWWW|#########|eeeeeee|    *|i          D11www|     D17www|             "
-|< ddddd   ddddd  |            WWWWW|#########|eeeeeee|     |           |  www|     |  www|             "
-|< ddddd   ddddd <|    ~~~~~~~ WWWWW|#########|eeeeeee|    a|i          |  www|     |  www|             "
+|'     <<<<<      |n       <<<<< ooo|#########|       |     |           D8 www|     D14www|k       c    "
+|                 |n             ooo|#########|       |     |           D  www|     D  www|             "
+|    c       c    |n             ooo|#########|s      D     D           D  www|     D  www|      bbbbb  "
+|                 |n             ooo|#########|s      D     D           +-----+     +-----+      bbbbb  |
+|  ddddd   ddddd  |n             ooo|#########|s 20   D     D           D9 www|     D15www|      bbbbb  |
+|  ddddd   ddddd  |n             ooo|#########|       |     |           D  www|     D  www|             |
+|  ddddd   ddddd  |n     c 6     ooo|#########|s     s|     |i          D  www|     D  www|      c   c  "
+|                 |                 |#########|s     s|     |i          +-----+     +-----+             "
+|                 |    ZZZZZZZ      |#########|s     s|     |i          D10www|     D16www|             "
+|                 |    ZZZZZZZ      |#########|       |     |           D  www|     D  www|             |
+|    c   5   c    |    ZZZZZZZ      |#########|sss sss|  1  |i   7      D  www|  13 D  www|      19    F|
+|                 |                 |#########+-------+     |i          +-----+     +-----+            F|
+|< ddddd   ddddd  |    h h h h WWWWW|#########|eeeeeee|    *|i          D11www|     D17www|            F"
+|< ddddd   ddddd  |            WWWWW|#########|eeeeeee|     |           D  www|     D  www|             "
+|< ddddd   ddddd <|    ~~~~~~~ WWWWW|#########|eeeeeee|    a|i          D  www|     D  www|             "
 |<               <|    ~~~~~~~ WWWWW|         |eeeeeee|     |i          +-----+     +-----+             |
-|<               <|    ~~~~~~~ WWWWW|    2    |eeeeeee|     |i          D     |     D     |             |
-|                <|    ~~~~~~~ WWWWW|         |eeeeeee|     |           |     |     |     |             |
-|S               <|    ~~~~~~~ WWWWW|         |eeeeeee|     |U          |12www|     |18www|             "
-|S                |            WWWWW|         |eeeeeee|     |           |  www|     |  www|             "
-|S           <<<<<|*           WWWWW|         |eeeeeee|     |           |  www|     |  www|k           j"
+|<               <|    ~~~~~~~ WWWWW|    2    |eeeeeee|     |i          D  www|     D  www|             |
+|                <|    ~~~~~~~ WWWWW|         |eeeeeee|     |           D  www|     D  www|             |
+|S               <|    ~~~~~~~ WWWWW|         |eeeeeee|     |U          D12www|     D18www|             "
+|S                |            WWWWW|         |eeeeeee|     |           |     |     |     |             "
+|S           <<<<<|*           WWWWW|         |eeeeeee|     |           |     |     |     |)            "
 +--DDD------------+--DDD------------+--DDD----+--DDD--+     +-----------+-----+DDD--+-----+--DDD--------+
 |g     ggg ggg ggg       ggg ggg ggg       ggg       $       ggg ggg ggg ggg       ggg ggg       ggg ggg|
 |g                                                                                                      |
@@ -168,7 +168,7 @@ casino 52x36 cells, wealth=middle, seed=7
 |                                                                                                       |
 |ggg ggg ggg ggg ggg ggg ggg ggg ggg sss f sss f sss ggg ggg ggg ggg ggg ggg ggg ggg ggg ggg ggg ggg ggg|
 +===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===----+
-  objects: $ atm, N bar_counter, k cabinet, Z card_table, c chair, ' coffee_machine, d console_desk, n counter, K crate, e elevator_car, F filing_cabinet, a fire_extinguisher, f fridge, b office_desk, * plant, W roulette_table, ~ rug, S server_rack, s shelf, i sink, g slot_machine, o sofa, # stairs, h stool, j terminal, U trash_bin, < wall_screen, w wc
+  objects: $ atm, N bar_counter, k cabinet, Z card_table, c chair, ' coffee_machine, d console_desk, n counter, e elevator_car, F filing_cabinet, a fire_extinguisher, f fridge, b office_desk, * plant, W roulette_table, ~ rug, ) safe, S server_rack, s shelf, i sink, g slot_machine, o sofa, # stairs, h stool, U trash_bin, < wall_screen, w wc
     1  corridor             33 cells
     2  stairwell            55 cells
     3  elevator             20 cells
@@ -192,15 +192,15 @@ casino 52x36 cells, wealth=middle, seed=7
 
 == Ground floor ==
 +---------+---------------+--DDD----+===---===+--===--+===--+-----------+===--+===--+-----+-------------+
-|mmm     )|    FFFFFFF   F|f        |#########|U   iii|     |EEE EEE EEE|    a|iii  D13www|l l l l LLL L|
-|         |              F|         |#########|       |     |           |     |     |  www|            L|
-|m        D              F|         |#########|       D     D          E|     D     |  www|            L|
+|mmm     )|    FFFFFFF   F|f        |#########|U   iii|     |EEE EEE EEE|    a|     D13www|l l l l LLL L|
+|         |              F|         |#########|       |     |           |     |     D  www|            L|
+|m        D              F|         |#########|       D     D          E|     D     D  www|            L|
 |m        D              F|         |#########|       D     D          E|     D     +-----+             |
 |m        D              F|         |#########|  15   D     D          E|     D    12     |             |
 |         |              F|         |#########|       |     |           |     |           |             |
-|    8    |F     9       F|  c c    |#########|       |     |          E|     |           |    c c      |
-|         |F              |         |#########|       |     |          E|     |           |             |
-|         |F              |  ttt    |#########|    www|     |          E|    *|           |    ttt      |
+|    8    |F     9       F|  c c    |#########|       |     |          E|     |i          |    c c      |
+|         |F              |         |#########|       |     |          E|     |i          |             |
+|         |F              |  ttt    |#########|    www|     |          E|    *|i          |    ttt      |
 |         |F              |  ttt    |#########|    www|     |           |     +-----------+    ttt      |
 |         |F              |  ttt 5  |#########|    www|  1  |    10    E|  2  |j         j|    ttt 14   |
 |         |F              |         |#########+-------+     |          E|     |           |             |
