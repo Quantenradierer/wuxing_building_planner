@@ -218,13 +218,12 @@ def test_rooms_of_a_template_size_get_the_template_layout() -> None:
         for stall in (r for r in floor.rooms if r.type == "stall" and sorted(_box(r)) == [2, 3]):
             (door,) = [d for d in doors(floor) if any(c in stall.cells for c in d.edges[0].cells())]
             front = {c for e in door.edges for c in e.cells() if c in stall.cells}
-            assert len(front) == 1
             (wc,) = [o for o in floor.objects if o.room == stall.id]
             assert wc.kind == "wc" and (wc.w, wc.h) == (2, 2)
-            (inside,) = front
+            inside = next(iter(front))
             across_y = door.edges[0].axis is Axis.H  # a door in a north or south wall
             row = {c for c in stall.cells if (c.y == inside.y if across_y else c.x == inside.x)}
-            assert len(row) == 2 and not row & wc.cells
+            assert len(row) == 2 and row == front and not row & wc.cells  # door as wide as the row
             checked += 1
     assert checked >= 4
 

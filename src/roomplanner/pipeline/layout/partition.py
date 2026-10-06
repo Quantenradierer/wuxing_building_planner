@@ -680,18 +680,29 @@ def _thin_host(
     fixed: set[str],
 ) -> tuple[bool, PlannedRoom] | None:
     """The neighbour a thin piece joins and whether the joined piece is thick enough there:
-    thick first, then a room before a corridor, then the longest shared wall."""
-    options: list[tuple[bool, bool, int, int, PlannedRoom]] = []
+    thick first (else the thickest), then a room before a corridor, then the longest shared
+    wall."""
+    options: list[tuple[bool, int, bool, int, int, PlannedRoom]] = []
     for other in rooms:
         if other is room or other.host is not None or other.type in fixed:
             continue
         if shared := contact(piece, other.cells):
             spec = rules.spec(other.type)
-            thick = thinnest_extent(piece, piece | other.cells) >= spec.min_side
-            options.append((thick, not spec.circulation, shared, -len(other.cells), other))
+            extent = thinnest_extent(piece, piece | other.cells)
+            thick = extent >= spec.min_side
+            options.append(
+                (
+                    thick,
+                    0 if thick else extent,
+                    not spec.circulation,
+                    shared,
+                    -len(other.cells),
+                    other,
+                )
+            )
     if not options:
         return None
-    thick, *_, other = max(options, key=lambda o: o[:4])
+    thick, *_, other = max(options, key=lambda o: o[:5])
     return thick, other
 
 
