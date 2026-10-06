@@ -2,15 +2,15 @@ ramen_bar 24x18 cells, wealth=middle, seed=4
 
 == Ground floor ==
 +===--+-----------+--DDD--+----===---===---===--+
-"www i|h hhhhhhh s|       |aaa nnnnnnn nnnnnnn n"
-"www i|h         s|       |                    n"
-"www i|h         s|s     s|a                   n"
-|     |h          |s     s|a                   n|
-|  3  |h   4     s|s 1   s|a         5         n|
-|     |h         s|       |                    n|
-"     |h         s|k      |f                   n"
-"     |           |       |                     "
-"     |        sss|       |                  iii"
+"www U|sss sss sss|       |aaa nnnnnnn nnnnnnn n"
+"www  |           |       |                    n"
+"www  |          s|s     s|a                   n"
+|     |          s|s     s|a                   n|
+|iii  |    4     s|s 1   s|a         5         n|
+|     |           |       |                    n|
+"  3  |          s|k      |f                   n"
+"     |          s|       |                     "
+"     |          s|       |                  iii"
 +DDD--+--DDD------+--DDD--+--DDD----------------+
 |                                    S NNN     a|
 |                                      NNN     a|
@@ -38,7 +38,7 @@ D      ttt     ttt     ttt     ttt   S NNN     f|
 |                                               |
 |                            yyy               *|
 +===---===---===-------DDD-----===---===---===--+
-  objects: t bar_table, k cabinet, c chair, n counter, f fridge, h meat_rail, * plant, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, y vending_machine, w wc
+  objects: t bar_table, k cabinet, c chair, n counter, f fridge, * plant, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, U trash_bin, y vending_machine, w wc
     1  storage              20 cells
     2  ramen_bar_room      312 cells
     3  wc                   15 cells
