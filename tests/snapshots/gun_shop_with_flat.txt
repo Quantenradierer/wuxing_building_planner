@@ -47,15 +47,15 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Ground floor ==
 +--===----+--DDD----+===---===---===--+-------------+
-"i        |s       s|#################|LLL LLL LLL  |
-"i        |s       s|#################|             |
-"i     www|s       s|#################|L            |
-|      www|         |#################|L            |
-|    4 www|s   2   s|#################|L     5   KKK|
-|         |s       s|                 |          KKK|
-"         |s       s|        1        |          KKK|
-"         |         |                 |             |
-"        U|k     sss|                 |)     LLL LLL|
+"      iii|s       s|#################|LLL LLL LLL )|
+"         |s       s|#################|             |
+"      www|s       s|#################|R            |
+|      www|         |#################|R            |
+|    4 www|s   2   s|#################|R     5     R|
+|         |s       s|                 |R           R|
+"         |s       s|        1        |R           R|
+"         |         |                 |            R|
+"         |k     sss|                 |      LLL   R|
 +--DDD----+--DDD----+------DDD--------+--DDD--------+
 |                    RRRRR     RRRRR           $    |
 |                                                   |
@@ -83,7 +83,7 @@ gun_shop 26x18 cells, wealth=high, seed=3
 |                                            d     R|
 |' RRRRR     RRRRR             RRRRR         d     R|
 +--===---===---===-------DDD-----===---===---===----+
-  objects: k cabinet, K crate, d display_case, ' fire_extinguisher, $ pay_station, ) safe, s shelf, i sink, # stairs, c stool, U trash_bin, w wc, L weapon_locker, R weapon_rack
+  objects: k cabinet, d display_case, ' fire_extinguisher, $ pay_station, ) safe, s shelf, i sink, # stairs, c stool, w wc, L weapon_locker, R weapon_rack
     1  stairwell            45 cells
     2  storage              25 cells
     3  gun_shop_floor      338 cells
