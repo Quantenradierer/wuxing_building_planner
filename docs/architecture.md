@@ -529,7 +529,10 @@ checkout from low security up); `rules_for` drops the others.
 With `head:` the rule places desk pairs (`count` counts desks): two desks joined on their
 long side, the pair's short side against a wall; an odd desk, or one left over when no wall
 takes another pair, turns a pair into the `head` group (a third desk across its end, facing
-the wall); with `single:` a lone desk is that group. Offices have a desk per 4 m² this way (`per: 16`).
+the wall); with `grow:` leftover desks first turn pairs into that four-desk group (two more
+desks behind the pair), and `grow_head:` is its group with the head desk (1, 2, 2+1, 4, 4+1);
+with `single:` a lone desk is that group. Offices are filled with such groups as far as they fit.
+`connect_chance:` makes the doors `connect` adds rare (offices into offices: 0.1).
 `scale: false` keeps a count off the tier's `furniture` factor: desks follow the floor
 area, so richer offices are bigger, not denser.
 On a `grid` a group that doesn't fit is left out rather than placed as its main part

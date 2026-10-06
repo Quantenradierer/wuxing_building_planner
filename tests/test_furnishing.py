@@ -325,7 +325,7 @@ def test_bigger_buildings_get_more_elevators_whose_cars_fill_the_shaft() -> None
     assert all(car >= shaft * 0.7 for shaft, car in small + large)
 
 
-def test_a_private_office_has_one_to_three_desks_each_with_a_chair_and_visitor_chairs() -> None:
+def test_an_office_is_filled_with_desks_each_with_its_own_chair() -> None:
     for wealth in (Wealth.SQUATTER, Wealth.MIDDLE, Wealth.LUXURY):
         # The mix of rooms varies: the first seed whose floor has a private office at all.
         floors = (
@@ -339,8 +339,8 @@ def test_a_private_office_has_one_to_three_desks_each_with_a_chair_and_visitor_c
         for room in offices:
             kinds = [o.kind for o in floor.objects if o.room == room.id]
             desks = kinds.count("office_desk")
-            assert 1 <= desks <= 3
-            assert kinds.count("chair") >= desks + 2  # the visitor chairs
+            assert desks >= 1
+            assert kinds.count("chair") == desks  # one chair per desk, no visitor chairs
 
 
 def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:

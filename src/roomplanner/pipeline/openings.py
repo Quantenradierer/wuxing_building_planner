@@ -466,6 +466,9 @@ def _interior_doors(
             continue
         if i in hosts or j in hosts or rooms[i].unit != rooms[j].unit:
             continue
+        if spec.connect_chance < 1 and rng.random() >= spec.connect_chance:
+            linked |= {(i, j), (j, i)}  # decided: no door
+            continue
         width = min(spec.door_width, ctx.rules.spec(rooms[j].type).door_width)
         fitting = [r for r in runs if len(r) >= width]
         if not fitting:

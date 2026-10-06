@@ -18,12 +18,13 @@ rooms:
     min_side: 7
     max_aspect: 1.6           # roughly square, not a corridor of desks
     windows: required
+    connect: [office]         # now and then a door into the next office,
+    connect_chance: 0.1       # but usually each has its own door to the corridor
     furniture:
-      # A private office: the lead's desk with visitor chairs, one or two more workstations
-      # (the bullpen is open_office), and a seat for a short talk.
-      - {object: desk_with_visitors, placement: wall, count: [1, 1], scale: false}
-      - {object: workstation, placement: wall, count: [1, 2], scale: false}
-      - {object: sofa_set, placement: wall, count: [0, 1]}
+      # As many desk groups as fit: 2 against a wall, then 4, then a desk across the end
+      # (a desk with three chairs would be a consultant's office, its own type).
+      - {object: desk_pair, placement: wall, per: 4, count: [2, 40], scale: false,
+         grow: desk_quad, head: desk_trio, grow_head: desk_quad_trio, single: workstation}
       - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
       - {object: cabinet, placement: corner, count: [0, 2]}
       - {object: plant, placement: corner, count: [0, 2]}

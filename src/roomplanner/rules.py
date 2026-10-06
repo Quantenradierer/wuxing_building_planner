@@ -143,6 +143,14 @@ class FurnitureRule(_Strict):
         description="`object` is a pair of desks, `count` counts desks; an odd one (or one "
         "left over when no wall takes another pair) turns a pair into this group",
     )
+    grow: str | None = Field(
+        default=None,
+        description="head: a group of two pairs (four desks) a pair grows into before it gets "
+        "a head desk",
+    )
+    grow_head: str | None = Field(
+        default=None, description="grow: the grown pair with a desk across its end"
+    )
     single: str | None = Field(
         default=None, description="head: a lone desk with no pair to join is this group"
     )
@@ -315,6 +323,12 @@ class RoomSpec(_Strict):
     next_to: list[str] = Field(default=[], description="Placed next to these room types")
     connect: list[str] = Field(
         default=[], description="Also a direct door to adjacent rooms of these types"
+    )
+    connect_chance: float = Field(
+        default=1.0,
+        ge=0,
+        le=1,
+        description="Chance of each door `connect` adds (1: always; offices into offices: rare)",
     )
     stalls: StallRule | None = None
     wealth_shift: int = Field(

@@ -305,23 +305,31 @@ class RoomFurnisher:
     def _pairs(
         self, rule: FurnitureRule, spec: ObjectSpec, head: str, desks: int, single: str | None
     ) -> None:
-        """`desks` desks as pairs (`rule.object`) against the walls; a desk left over (odd
-        count, or no wall for another pair) goes across the end of a pair (`head`), a lone
-        desk as `single`."""
-        pairs: list[tuple[Rect, list[PlacedObject]]] = []
+        """`desks` desks as pairs (`rule.object`) against the walls; a lone desk as `single`.
+        What is left over grows the pairs: first two more desks behind each (`rule.grow`),
+        then a desk across the end of each (`head`, or `rule.grow_head` on a grown pair)."""
+        pairs: list[tuple[Rect, list[PlacedObject], bool]] = []
         for _ in range(desks // 2):
             before = len(self.placed)
             if not self._place_one(rule, spec) or self.last_group is None:
                 break
-            pairs.append((self.last_group, self.placed[before:]))
+            pairs.append((self.last_group, self.placed[before:], False))
         left = desks - 2 * len(pairs)
         if not pairs and left > 0 and single is not None:
             self._place_one(rule.model_copy(update={"object": single}), self._spec(single))
             return
-        for rect, parts in pairs:
+        if rule.grow is not None:
+            for i, (rect, parts, _) in enumerate(pairs):
+                if left < 2:
+                    break
+                if grown := self._extend(rect, parts, rule.grow):
+                    pairs[i] = (*grown, True)
+                    left -= 2
+        for rect, parts, is_grown in pairs:
             if left <= 0:
                 break
-            if self._extend(rect, parts, head):
+            kind = rule.grow_head if is_grown and rule.grow_head else head
+            if self._extend(rect, parts, kind):
                 left -= 1
 
     def _side_by_side(self, rule: FurnitureRule, spec: ObjectSpec, count: int) -> None:
@@ -404,8 +412,11 @@ class RoomFurnisher:
         cx, cy = x + w / 2, y + h / 2
         return min((abs(c.x + 0.5 - cx) + abs(c.y + 0.5 - cy) for c in cells), default=0.0)
 
-    def _extend(self, rect: Rect, parts: list[PlacedObject], kind: str) -> bool:
-        """Replace the group at `rect` by the bigger group `kind` with the same back wall."""
+    def _extend(
+        self, rect: Rect, parts: list[PlacedObject], kind: str
+    ) -> tuple[Rect, list[PlacedObject]] | None:
+        """Replace the group at `rect` by the bigger group `kind` with the same back wall;
+        its new place and parts, or None (nothing changes) if it doesn't fit."""
         x, y, w, h, facing = rect
         along, deep = self.ctx.rules.groups[kind].size
         match facing:
@@ -422,12 +433,13 @@ class RoomFurnisher:
         self.placed = [o for o in self.placed if o not in parts]
         self.taken -= box
         self.blocking -= solid
+        before = len(self.placed)
         if self._try(kind, bigger):
-            return True
+            return bigger, self.placed[before:]
         self.placed += parts
         self.taken |= box
         self.blocking |= solid
-        return False
+        return None
 
     def _choices(self, rule: FurnitureRule) -> list[str]:
         """`object` and `choose` in the order to try: largest first among those that fit the
