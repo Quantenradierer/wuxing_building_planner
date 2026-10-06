@@ -87,7 +87,7 @@ rooms:
     transit: false
     furniture:
       - {object: wc, placement: wall}
-      - {object: sink, placement: wall}
+      - {object: sink, placement: at, at: wc, beside: [flanks]}   # the basin next to the pan
       - {object: trash_bin, placement: corner, count: [0, 1]}
   storage:
     area: [12, 80]
