@@ -89,9 +89,10 @@ chamfered building corners (seed-dependent) and as the sides of a diagonal corri
 belong to one other room, whose floor the cut triangle is (`Floor.is_inner_diagonal`).
 A door in one is an `Opening` with `diagonal: true` whose `edges` are the horizontal cut
 edge of each diagonal cell it spans (not a contiguous run); `Floor.diagonal_door_line`
-gives its slanted run. The partition layout makes them: `corridor.diagonal` is the chance
-of a 45° band between two parallel corridors, planned as a staircase of cells and bevelled
-into diagonals once the rooms are typed (`FloorPlan.diagonals`).
+gives its slanted run. Only the `partition_diagonal` layout
+makes them: it links the parallel corridors by 45° bands instead of straight cross corridors,
+planned as a staircase of cells and bevelled into diagonals once the rooms are typed
+(`FloorPlan.diagonals`).
 
 ## Data model
 
@@ -368,6 +369,12 @@ connector stubs entering from behind; the hall's minimum depth grows by their de
 room type is `open: 1`, so it has no walls towards the hall (its long side and one end).
 
 ### Partition layout
+
+`layout: partition_diagonal` is the same layout with diagonal links: no straight cross
+corridors; every corridor is joined to the next by a 45° band (and by more of them, 50–70 cells apart,
+along long corridors), flanked by rooms whose walls follow it
+(leftovers beside the band go to those rooms, `thinnest_slanted` measures widths without counting runs a slanted wall cuts short). Choose it with `--layout partition_diagonal` (`GenerationParams.layout`
+overrides the building type's layout).
 
 `layout: partition` (`pipeline/layout/partition.py`, `partition_assign.py`, `regions.py`;
 ADR 0015) cuts the footprint instead of filling slots, and works on cell sets, so rooms may be

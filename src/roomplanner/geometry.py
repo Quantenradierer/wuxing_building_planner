@@ -242,3 +242,30 @@ def thinnest_extent(cells: Collection[Cell], space: AbstractSet[Cell], enough: i
         if thinnest < enough:
             break
     return thinnest
+
+
+def thinnest_slanted(
+    cells: Collection[Cell], space: AbstractSet[Cell], slanted: AbstractSet[Cell]
+) -> int:
+    """`thinnest_extent`, but a stretch that ends at a diagonal cell (`slanted`) is cut short
+    by the slanted wall, not by the room being thin, so only the other direction counts. A cell
+    pinned by the slanted wall in both directions is the tip of a triangle and counts as
+    thick: a 45 degree tip is thin by nature."""
+    if not slanted & space:
+        return thinnest_extent(cells, space)
+
+    def stretch(c: Cell, dx: int, dy: int) -> tuple[int, bool]:
+        length, ends = 1, c in slanted
+        for sign in (1, -1):
+            x, y = c.x + sign * dx, c.y + sign * dy
+            while Cell(x, y) in space:
+                length += 1
+                ends = ends or Cell(x, y) in slanted
+                x, y = x + sign * dx, y + sign * dy
+        return length, ends
+
+    thinnest = 1 << 30
+    for c in cells:
+        (h, hs), (v, vs) = stretch(c, 1, 0), stretch(c, 0, 1)
+        thinnest = min(thinnest, 1 << 29 if hs and vs else v if hs else h if vs else min(h, v))
+    return thinnest

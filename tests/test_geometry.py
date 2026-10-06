@@ -9,6 +9,8 @@ from roomplanner.geometry import (
     Side,
     boundary_edges,
     rectangle,
+    thinnest_extent,
+    thinnest_slanted,
 )
 
 
@@ -51,3 +53,14 @@ def test_diagonal_edges_are_the_cells_sides_on_the_cut_corner() -> None:
         Edge.of(Cell(4, 5), Side.N),
         Edge.of(Cell(4, 5), Side.E),
     }
+
+
+def test_a_slanted_wall_does_not_make_a_room_thin() -> None:
+    # a right triangle, legs of 6 cells, the slanted wall along its hypotenuse
+    room = frozenset(Cell(x, y) for y in range(6) for x in range(6 - y))
+    slanted = frozenset(Cell(5 - y, y) for y in range(6))
+    assert thinnest_extent(room, room) == 1
+    assert thinnest_slanted(room, room, slanted) >= 6
+    # a one cell wide strip stays thin, slanted wall or not
+    strip = frozenset(Cell(0, y) for y in range(6))
+    assert thinnest_slanted(strip, strip, frozenset({Cell(0, 5)})) == 1

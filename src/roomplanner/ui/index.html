@@ -88,6 +88,7 @@
       <label class="field"><span data-i18n="floors_above">Floors above</span> <input name="floors_above" type="number" min="1" value="1"></label>
       <label class="field"><span data-i18n="basements">Basements</span> <input name="floors_below" type="number" min="0" value="0"></label>
     </div>
+    <label class="field"><span data-i18n="layout">Layout</span> <select name="layout"></select></label>
     <label class="field"><span data-i18n="shape">Shape</span> <select name="shape"></select></label>
     <label class="field"><span data-i18n="wealth">Wealth</span> <select name="wealth"></select></label>
     <label class="field"><span data-i18n="condition">Condition</span> <select name="condition"></select></label>
@@ -210,6 +211,7 @@ function fillChoices(keep = {}) {
   fillSelect("street_side", o.sides, pick("street_side"), termOf("side"));
   fillSelect("service_side", o.sides, pick("service_side"), termOf("side"), t("opposite_of_street"));
   fillSelect("theme", o.themes, pick("theme"));
+  fillSelect("layout", o.layouts, pick("layout"), (v) => t(`layout_${v}`), t("layout_default"));
   fillRooms(pick("room"));
   for (const label of $("entrances").querySelectorAll("label")) {
     label.lastChild.textContent = ` ${term("entrance", label.querySelector("input").value)}`;
@@ -249,7 +251,7 @@ async function init() {
   }
   rooms = options.rooms;
   fillChoices({ building_type: "office", shape: "rectangle", wealth: "middle", condition: "maintained",
-    security: "low", street_side: "S", service_side: "", theme: options.defaults.theme, room: "" });
+    security: "low", street_side: "S", service_side: "", theme: options.defaults.theme, room: "", layout: "" });
   restoreForm();
   fillRooms(recall("roomplanner.form")?.room || "");
   syncEntrances();
@@ -306,6 +308,7 @@ function formValues() {
     security: f.security.value, street_side: f.street_side.value,
     service_side: f.service_side.value || null,
     room: f.room.value || null,
+    layout: f.layout.value || null,
     seed: f.seed.value === "" ? null : +f.seed.value,
   };
   if ($("entrances-override").checked) {

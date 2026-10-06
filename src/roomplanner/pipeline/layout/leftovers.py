@@ -15,12 +15,16 @@ from functools import lru_cache
 from roomplanner.geometry import Cell
 from roomplanner.pipeline.base import PlannedRoom
 from roomplanner.pipeline.layout.allocation import ABSORB_TOLERANCE
+from roomplanner.pipeline.layout.regions import contact
 from roomplanner.rules import Rules
 
 MAX_ALCOVE = 8  # cells: slivers up to this wide may widen a corridor
 
 
-def absorb_leftovers(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
+def absorb_leftovers(
+    rooms: list[PlannedRoom], rules: Rules, keep_out: frozenset[Cell] = frozenset()
+) -> list[PlannedRoom]:
+    """`keep_out`: cells of a diagonal corridor, which no leftover beside it may widen."""
     fixed = {e.room for e in rules.program.core}
     result = list(rooms)
     for room in rooms:
@@ -38,7 +42,7 @@ def absorb_leftovers(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom
                 continue
             area = len(room.cells) + len(other.cells)
             if spec.circulation:
-                if _thickness(room.cells) <= MAX_ALCOVE:
+                if _thickness(room.cells) <= MAX_ALCOVE and not contact(room.cells, keep_out):
                     options.append((1, 0.0, other))
             elif area <= spec.area[1] * ABSORB_TOLERANCE:
                 options.append((0, area / spec.area[1], other))

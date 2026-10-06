@@ -251,12 +251,12 @@ class PartitionLayout:
     ) -> frozenset[Cell]:
         """The diagonal layout's links (ADR 0016): 45 degree corridors between the parallel
         ones instead of the straight cross corridors. Each is a staircase band whose steps
-        `_bevels` turns into walls. They join every corridor to the next (a spanning set),
-        and a second link goes between two that are far enough apart along the corridors."""
+        `_bevels` turns into walls. One joins each corridor to the next."""
         if not self.diagonal_links:
             return frozenset()
         program = ctx.rules.program
         thick = program.corridor.width - 1  # a band this thick is as wide as a corridor
+        wide = program.corridor.width + 2  # cells per row: 45 degrees makes it 1.4 times thinner
         longest = 2 * program.strip_depth[1]
         candidates: list[tuple[Cell, Cell, frozenset[Cell]]] = []
         for start in sorted(corridor):
@@ -275,16 +275,18 @@ class PartitionLayout:
                     continue
                 if any(c in corridor for c in path[1:-1]):
                     continue
-                room = frozenset(
-                    Cell(x, y)
-                    for x in range(min(c.x for c in path) - thick, max(c.x for c in path) + thick)
-                    for y in range(min(c.y for c in path) - thick, max(c.y for c in path) + thick)
-                )
-                band = thicken(path, thick, footprint)
-                if band != thicken(path, thick, room) or any(
-                    thicken([c], thick, footprint) & corridor for c in path[3:-3]
+                # a parallelogram, one row of the staircase per path cell, so that it meets
+                # the corridors at either end square (no rounded caps for the bevels to miss)
+                rows = [
+                    Cell(c.x + k, c.y) for c in path[1:-1] for k in range(-wide // 2, wide // 2)
+                ]
+                if not set(rows) <= footprint or any(
+                    Cell(c.x + k, c.y) in corridor
+                    for c in path[3:-3]
+                    for k in range(-wide // 2, wide // 2)
                 ):
                     continue  # clipped by the footprint, or brushing another corridor
+                band = frozenset(rows)
                 side = thick + 2  # rooms must flank the band: free floor a few cells either side
                 if any(
                     Cell(c.x + dx, c.y) not in footprint or Cell(c.x + dx, c.y) in corridor
@@ -296,29 +298,32 @@ class PartitionLayout:
         pieces = components(corridor)
         piece_of = {c: i for i, piece in enumerate(pieces) for c in piece}
         rng.shuffle(candidates)
-        links: dict[frozenset[int], int] = {}
-        chosen: list[tuple[Cell, frozenset[Cell]]] = []
+        x0, y0, x1, y1 = bbox(footprint)
+        horizontal = x1 - x0 >= y1 - y0
+
+        def along(c: Cell) -> int:
+            return c.x if horizontal else c.y
+
+        chosen: list[tuple[frozenset[int], int, frozenset[Cell]]] = []  # (pair, position, band)
         linked = [{i} for i in range(len(pieces))]  # union-find by merging sets
         for first, last, band in candidates:
             a, b = piece_of[first], piece_of[last]
-            if a == b or any(band & other for _, other in chosen):
+            if linked[a] is linked[b] or any(band & other for _, _, other in chosen):
                 continue
-            pair = frozenset((a, b))
-            if linked[a] is linked[b]:  # already connected: only a second link, far from the first
-                gap = max(2 * longest, 3 * program.strip_depth[1])
-                if links[pair] >= 2 or any(
-                    abs(first.x - at.x) + abs(first.y - at.y) < gap
-                    for at, _ in chosen
-                    if piece_of[at] in pair
-                ):
-                    continue
-            else:
-                merged = linked[a] | linked[b]
-                for i in merged:
-                    linked[i] = merged
-            links[pair] = links.get(pair, 0) + 1
-            chosen.append((first, band))
-        return frozenset(c for _, band in chosen for c in band) - corridor
+            merged = linked[a] | linked[b]
+            for i in merged:
+                linked[i] = merged
+            chosen.append((frozenset((a, b)), along(first), band))
+        # More of them along long corridors: one every `link_gap` cells or so
+        for first, last, band in candidates:
+            pair = frozenset((piece_of[first], piece_of[last]))
+            gap = rng.randint(*LINK_GAP)
+            if any(band & other for _, _, other in chosen) or any(
+                p == pair and abs(at - along(first)) < gap for p, at, _ in chosen
+            ):
+                continue
+            chosen.append((pair, along(first), band))
+        return frozenset(c for _, _, band in chosen for c in band) - corridor
 
     @staticmethod
     def _connect(
@@ -665,8 +670,8 @@ class PartitionLayout:
             shared[key] = (rooms, assigner.warnings)
             plan.warnings += assigner.warnings
         rooms = [*fixed, *shared[key][0]]
-        rooms = absorb_leftovers(rooms, ctx.rules)
-        rooms = _merge_thin(rooms, ctx.rules)
+        rooms = absorb_leftovers(rooms, ctx.rules, skeleton.band)
+        rooms = _merge_thin(rooms, ctx.rules, skeleton.band)
         rooms = carve_stalls(rooms, ctx.rules)
         entrances = self._entrances(ctx, footprint, skeleton, rooms) if ground else []
         bevels = _bevels(skeleton.band, skeleton.corridor, rooms, ctx.rules)
@@ -754,6 +759,7 @@ class DiagonalPartitionLayout(PartitionLayout):
     diagonal_links = True
 
 
+LINK_GAP = (50, 70)  # cells between diagonal corridors joining the same two corridors
 _CORNERS = (
     (Side.N, Side.E, Corner.NE),
     (Side.N, Side.W, Corner.NW),
@@ -791,7 +797,7 @@ def _bevels(
             behind = (cell.neighbour(a.opposite), cell.neighbour(b.opposite))
             if not (na in corridor and nb in corridor and diag in corridor):
                 continue
-            if any(c in corridor for c in behind) or not ({na, nb, diag} & band):
+            if any(c in band for c in behind) or not ({na, nb, diag} & band):
                 continue
             if owner.get(na) is not owner.get(nb) or owner.get(na) is None:
                 continue
@@ -822,60 +828,13 @@ def _to_outer_wall(
     return cells
 
 
-def _trim_tips(
-    rooms: list[PlannedRoom], band: frozenset[Cell], rules: Rules
-) -> tuple[list[PlannedRoom], frozenset[Cell]]:
-    """A room beside a diagonal corridor ends in a 45 degree tip too thin to use: the cells
-    thinner than the room's `min_side` go to the corridor they touch (where the room stays
-    thick without them). Returns the rooms and the cells moved."""
-    if not band:
-        return rooms, frozenset()
-    fixed = {e.room for e in rules.program.core}
-    result = list(rooms)
-    moved: set[Cell] = set()
-
-    def near(c: Cell) -> bool:  # a cell the slanted wall may run through
-        return any(Cell(c.x + dx, c.y + dy) in band for dx in (-1, 0, 1) for dy in (-1, 0, 1))
-
-    for room in rooms:
-        spec = rules.spec(room.type)
-        if spec.circulation or room.host is not None or room.type in fixed or room.unit:
-            continue
-        if not contact(room.cells, band):
-            continue
-        cells = room.cells
-        for _ in range(4):
-            slanted = frozenset(c for c in cells if near(c))
-            tips = frozenset(
-                c for c in cells if thinnest_slanted([c], cells, slanted) < spec.min_side
-            )
-            if not tips or tips == cells:
-                break
-            kept = cells - tips
-            if len(components(kept)) != 1:
-                break
-            cells = kept
-        gone = room.cells - cells
-        if not gone:
-            continue
-        # only tips on the corridor, the rest of a thin piece stays with the room
-        corridors = [r for r in result if r.type == "corridor"]
-        target = max(corridors, key=lambda r: contact(gone, r.cells), default=None)
-        if target is None or not contact(gone, target.cells):
-            continue
-        movable = frozenset(c for c in gone if contact([c], target.cells | moved))
-        if not movable:
-            continue
-        result[result.index(room)] = replace(room, cells=room.cells - movable)
-        result[result.index(target)] = replace(target, cells=target.cells | movable)
-        moved |= movable
-    return result, frozenset(moved)
-
-
-def _merge_thin(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
+def _merge_thin(
+    rooms: list[PlannedRoom], rules: Rules, band: frozenset[Cell] = frozenset()
+) -> list[PlannedRoom]:
     """A leftover piece too thin to be a room joins the neighbour it shares most wall with
     (a corridor only if nothing else touches it). Thin arms that no neighbour makes thick
-    in one go (an L with two-cell arms) go to the neighbours they run along first."""
+    in one go (an L with two-cell arms) go to the neighbours they run along first. Beside a
+    diagonal corridor (`band`) they never join a corridor: its rooms keep the diagonal wall."""
     fixed = {e.room for e in rules.program.core}
     result = list(rooms)
     for room in rooms:
@@ -884,11 +843,11 @@ def _merge_thin(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
         min_side = rules.spec(room.type).min_side
         if thinnest_extent(room.cells, room.cells) >= min_side:
             continue
-        best = _thin_host(room.cells, room, result, rules, fixed)
+        best = _thin_host(room.cells, room, result, rules, fixed, band)
         if best is None or not best[0]:
-            trimmed = _shed_arms(room, result, rules, fixed, min_side)
+            trimmed = _shed_arms(room, result, rules, fixed, min_side, band)
             result[result.index(room)] = room = trimmed
-            best = _thin_host(room.cells, room, result, rules, fixed)
+            best = _thin_host(room.cells, room, result, rules, fixed, band)
         if best is None:
             continue
         other = best[1]
@@ -903,6 +862,7 @@ def _thin_host(
     rooms: list[PlannedRoom],
     rules: Rules,
     fixed: set[str],
+    band: frozenset[Cell] = frozenset(),
 ) -> tuple[bool, PlannedRoom] | None:
     """The neighbour a thin piece joins and whether the joined piece is thick enough there:
     thick first (else the thickest), then a room before a corridor, then the longest shared
@@ -925,6 +885,8 @@ def _thin_host(
                     other,
                 )
             )
+    if band and contact(piece, band) and any(o[2] for o in options):
+        options = [o for o in options if o[2]]
     if not options:
         return None
     thick, *_, other = max(options, key=lambda o: o[:5])
@@ -932,7 +894,12 @@ def _thin_host(
 
 
 def _shed_arms(
-    room: PlannedRoom, rooms: list[PlannedRoom], rules: Rules, fixed: set[str], min_side: int
+    room: PlannedRoom,
+    rooms: list[PlannedRoom],
+    rules: Rules,
+    fixed: set[str],
+    min_side: int,
+    band: frozenset[Cell] = frozenset(),
 ) -> PlannedRoom:
     """Give the arms of a leftover that are thinner than `min_side` to neighbours that make
     them thick (edited in `rooms`); the room is what remains."""
@@ -940,7 +907,7 @@ def _shed_arms(
     if arms == room.cells:
         return room
     for arm in components(arms):
-        host = _thin_host(arm, room, rooms, rules, fixed)
+        host = _thin_host(arm, room, rooms, rules, fixed, band)
         if host is not None and host[0]:
             other = host[1]
             rooms[rooms.index(other)] = replace(other, cells=other.cells | arm)

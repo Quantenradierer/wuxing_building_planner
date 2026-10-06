@@ -15,6 +15,7 @@ from roomplanner.geometry import (
     connected,
     largest_rectangle,
     thinnest_extent,
+    thinnest_slanted,
 )
 from roomplanner.model import Building, Floor, OpeningKind
 from roomplanner.rules import Rules, WindowRule
@@ -209,6 +210,7 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
         if r.type in rules.rooms and rules.spec(r.type).circulation
         for c in r.cells
     )
+    slanted = frozenset(d.cell for d in floor.diagonals if floor.is_inner_diagonal(d))
     for room in floor.rooms:
         if room.type not in rules.rooms:
             violations.append(
@@ -217,7 +219,7 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
             continue
         spec = rules.spec(room.type)
         space = open_space if spec.circulation else room.cells
-        thinnest = _thinnest(room.cells, space)
+        thinnest = thinnest_slanted(room.cells, space, slanted)
         if thinnest < spec.min_side and not (
             not spec.circulation and _alcoved(room.cells, spec.min_side)
         ):
@@ -242,12 +244,7 @@ def _alcoved(cells: frozenset[Cell], min_side: int) -> bool:
     if min(x1 - x0, y1 - y0) < min_side:
         return False
     rest = frozenset(c for c in cells if not (x0 <= c.x < x1 and y0 <= c.y < y1))
-    return not rest or _thinnest(rest, cells) >= min(MIN_ALCOVE, min_side)
-
-
-def _thinnest(cells: frozenset[Cell], space: frozenset[Cell]) -> int:
-    """Smallest extent of `space` through any of `cells`, horizontally or vertically."""
-    return thinnest_extent(cells, space)
+    return not rest or thinnest_extent(rest, cells) >= min(MIN_ALCOVE, min_side)
 
 
 def _check_core(building: Building, rules: Rules) -> list[Violation]:
