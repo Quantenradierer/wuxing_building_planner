@@ -21,7 +21,7 @@ rooms:
     furniture:
       # A private office: the lead's desk with visitor chairs, one or two more workstations
       # (the bullpen is open_office), and a seat for a short talk.
-      - {object: desk_with_visitors, placement: wall, count: [1, 1]}
+      - {object: desk_with_visitors, placement: wall, count: [1, 1], scale: false}
       - {object: workstation, placement: wall, count: [1, 2], scale: false}
       - {object: sofa_set, placement: wall, count: [0, 1]}
       - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
@@ -99,7 +99,8 @@ rooms:
     min_side: 8
     furniture:
       - {object: wall_screen, placement: end}
-      - {object: chair, placement: rows, aisle: 1, margin: 2, block: 10, toward: wall_screen}
+      - {object: class_desk, placement: rows, aisle: 1, margin: 2, block: 8, toward: wall_screen}   # desks in rows facing the front
+      - {object: whiteboard, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 2]}
   nap_room:                 # sleep pods, so nobody has to go home
     area: [12, 80]
@@ -107,14 +108,13 @@ rooms:
     cluster: true
     windows: forbidden
     furniture:
-      - {object: capsule, placement: perimeter, count: 20, sideways: true, accessible: true}
+      - {object: capsule, placement: perimeter, count: [2, 4], sideways: true, accessible: true}
       - {object: locker, placement: wall, count: [0, 3]}
   copy_room:                # printers, paper, mail
     area: [20, 48]
     min_side: 4
     furniture:
-      - {object: copier, placement: wall, count: [1, 2]}
-      - {object: counter, placement: wall, count: [0, 1]}
+      - {object: copy_station, placement: wall, count: [1, 2]}   # copiers with the collating table
       - {object: shelf, placement: wall, count: [1, 3]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   kitchenette:
@@ -137,22 +137,25 @@ rooms:
     windows: forbidden
     furniture:
       - {object: suppression_tanks, placement: wall, count: [0, 1]}
-      - {object: server_rack, placement: rows, aisle: 2, margin: 1, count: [2, 12]}   # an office's racks, not a data centre's
+      - {object: server_rack, placement: rows, aisle: 2, margin: 1, count: [2, 12], paired: true}   # an office's racks, fronts to a shared cold aisle
+      - {object: workstation, placement: wall, count: [0, 1]}   # the admin console
       - {object: fire_extinguisher, placement: corner}
   archive:
     area: [60, 240]
     min_side: 6
     windows: forbidden
     furniture:
-      - {object: shelf, placement: rows, aisle: 2, margin: 1}
+      - {object: shelf, placement: rows, aisle: 2, margin: 1, paired: true}   # back to back
+      - {object: shelf, placement: wall, per: 30, count: [2, 8]}   # along the walls
+      - {object: workstation, placement: wall, count: [0, 1]}   # the clerk's desk
   executive_office:
     wealth_shift: +1          # fancier than the rest of the building
     area: [80, 160]
     min_side: 8
     windows: required
     furniture:
-      - {object: executive_desk_set, placement: center}
-      - {object: sofa_set, placement: wall}
+      - {object: executive_desk_set, placement: back}
+      - {object: lounge_set, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}
       - {object: plant, placement: corner, count: [1, 2]}
       - {object: safe, placement: corner, count: [0, 1]}
@@ -178,7 +181,6 @@ rooms:
     next_to: [executive_office]
     furniture:
       - {object: double_bed_set, placement: wall, spaced: true}
-      - {object: shower, placement: corner}
-      - {object: sink, placement: wall}
+      - {object: ensuite_corner, placement: corner}
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
