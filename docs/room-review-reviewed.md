@@ -73,7 +73,7 @@ Ordered by how many rooms are affected and how visible it is. The per-room list 
    Done for office/apartment/lab/hospital: treatment_room sink, exam_room desk, doctor_office couch + sink,
    studio bed (new `studio_room`); spider_room already fixed by item 3. Not done (other building types or
    rendering): stairwell arrows/landing, casino/chop_shop/parking/church/prison/street_doc rooms.
-10. [WIP] **Count caps by purpose** (P1/P2): vending_room up to ~100 machines (2-8), server_room 20-60 racks (office: 2-10),
+10. [DONE] **Count caps by purpose** (P1/P2): vending_room up to ~100 machines (2-8), server_room 20-60 racks (office: 2-10),
     mess_hall/shelter/parking_deck follow floor area not occupancy, mailbox count vs. flats; and rooms whose
     `area` range lets them grow absurd (closet, entry_hall, cashier_booth, focus_room, bathroom). Check the actual
     `area:` limits in YAML before acting.
