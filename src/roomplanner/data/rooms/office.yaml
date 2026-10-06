@@ -22,7 +22,7 @@ rooms:
       # A private office: the lead's desk with visitor chairs, one or two more workstations
       # (the bullpen is open_office), and a seat for a short talk.
       - {object: desk_with_visitors, placement: wall, count: [1, 1]}
-      - {object: workstation, placement: wall, count: [1, 2]}
+      - {object: workstation, placement: wall, count: [1, 2], scale: false}
       - {object: sofa_set, placement: wall, count: [0, 1]}
       - {object: filing_cabinet, placement: wall, per: 40, count: [1, 3]}
       - {object: cabinet, placement: corner, count: [0, 2]}
