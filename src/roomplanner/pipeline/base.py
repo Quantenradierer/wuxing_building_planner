@@ -24,6 +24,10 @@ class Context:
     height: int
     attempt: int = 0
 
+    @property
+    def layout_name(self) -> str:
+        return self.params.layout or self.rules.program.layout
+
     def rng(self, stage: str) -> random.Random:
         """Independent, reproducible random stream per stage and attempt."""
         return random.Random(f"{self.seed}:{self.attempt}:{stage}")
@@ -60,6 +64,9 @@ class FloorPlan:
     rooms: list[PlannedRoom]
     entrances: list[EntranceRequest] = field(default_factory=list[EntranceRequest])
     cut: frozenset[Cell] = frozenset()  # footprint cells this floor lacks (under a balcony's sky)
+    # 45 degree walls between rooms (a diagonal corridor's sides): the cell is one room's, the
+    # cut triangle the neighbouring room's
+    diagonals: frozenset[Diagonal] = frozenset()
 
 
 @dataclass

@@ -110,6 +110,10 @@ class GenerationParams(BaseModel):
         description="Only this room type of the building type, width x depth, no building "
         "around it (one floor, rectangle, main entrance on the street side)",
     )
+    layout: str | None = Field(
+        default=None,
+        description="Overrides the building type's layout strategy (e.g. partition_diagonal)",
+    )
     seed: int | None = None
 
     @model_validator(mode="before")

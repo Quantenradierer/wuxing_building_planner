@@ -82,8 +82,16 @@ the next and cuts off the `cut` corner (`NW`, `NE`, `SW`, `SE`) as open air (ADR
 Everything else stays on the grid: the cell remains in the footprint and its room (it is
 half floor), the diagonal's cells meet only at their corners, and the two cell edges in
 the cut triangle stay in `Floor.walls` (`Floor.cut_edges`) so the "every footprint border is
-a wall" invariant holds; nothing draws, exports or opens them. Diagonals only occur as
-chamfered building corners (seed-dependent).
+a wall" invariant holds; nothing draws, exports or opens them. Diagonals occur as
+chamfered building corners (seed-dependent) and as the sides of a diagonal corridor.
+
+*Inner diagonals* (ADR 0016) are walls between two rooms: both cells across the cut edges
+belong to one other room, whose floor the cut triangle is (`Floor.is_inner_diagonal`).
+A door in one is an `Opening` with `diagonal: true` whose `edges` are the horizontal cut
+edge of each diagonal cell it spans (not a contiguous run); `Floor.diagonal_door_line`
+gives its slanted run. The partition layout makes them: `corridor.diagonal` is the chance
+of a 45° band between two parallel corridors, planned as a staircase of cells and bevelled
+into diagonals once the rooms are typed (`FloorPlan.diagonals`).
 
 ## Data model
 
@@ -115,6 +123,8 @@ Opening
   entrance                             exterior doors: main | service | emergency
   sliding                              doors, optional: the leaves slide aside (elevators,
                                        `door_slides`); the swing only gives their side
+  diagonal                             doors, optional: the door is in a diagonal wall between rooms;
+                                       `edges` are the horizontal cut edges of the cells it spans
 Swing
   towards: Side                        side of the wall the leaf opens into (the door's own
                                        room, or out of it with `door_opens_out`: pods, cells, and
@@ -621,6 +631,10 @@ A floor with chamfered corners also has `"diagonals": [[x, y, "NW" | "NE" | "SW"
 (the cut corner; the field is absent otherwise, so it needs no schema bump). Its `walls`
 still list the cut edges of those cells; readers draw the diagonal instead
 (`(x+1, y)-(x, y+1)` for NW and SE, `(x, y)-(x+1, y+1)` for NE and SW).
+A diagonal between two rooms (a diagonal corridor's wall) is listed the same way; its cut
+triangle is floor, not open air. A door in it has `"diagonal": true` and, as `edges`, the
+horizontal cut edge of each diagonal cell it spans: draw it along the diagonal from the first
+cell's far vertex to the last's.
 
 Cells are `[x, y]`, edges are `[x, y, "h" | "v"]`; cell and wall lists are sorted, the
 output as a whole is deterministic.

@@ -17,7 +17,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
-from roomplanner.geometry import Axis, Cell, Diagonal, Edge, Side, boundary_edges
+from roomplanner.geometry import Axis, Cell, Corner, Diagonal, Edge, Side, boundary_edges
 from roomplanner.model import Floor, Opening, OpeningKind, Room, Swing
 from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import BuildingPlan, Context, EntranceRequest
@@ -29,7 +29,7 @@ type Run = list[Edge]
 # 1.5 m tall window meets at one 0.5 m window cell per 24 floor cells (6 m²).
 DAYLIGHT = 24
 # (rank, off the front, -length, room, first edge) and the wall run of a door candidate
-type _Choice = tuple[tuple[int, bool, int, int, Edge], Run]
+type _Choice = tuple[tuple[int, bool, bool, int, int, Edge], Run]
 
 
 @dataclass
@@ -97,6 +97,8 @@ class DefaultOpenings:
                 for i, r in enumerate(planned.rooms)
                 if r.front is not None
             }
+            chamfers = frozenset(d for d in plan.diagonals if d.cell in footprint)
+            diagonals = chamfers | _inner_diagonals(planned.diagonals, footprint, chamfers, owner)
             doors = _interior_doors(
                 ctx,
                 rooms,
@@ -112,8 +114,8 @@ class DefaultOpenings:
                 # Without circulation (a lone room) the street is it: the entered rooms
                 # count as reached, so their stalls get doors.
                 set() if circulation else {e.room for e in planned.entrances},
+                diagonals - chamfers,
             )
-            diagonals = frozenset(d for d in plan.diagonals if d.cell in footprint)
             cut = {e for d in diagonals for e in d.edges()}
             used: set[Edge] = set(cut)  # nothing opens in the outside of a diagonal
             grid = [w for w, _ in _window_grid(ctx, footprint, plan.facade_grid)]
@@ -262,8 +264,61 @@ def _runs(edges: set[Edge]) -> list[Run]:
     return runs
 
 
+def _inner_diagonals(
+    planned: frozenset[Diagonal],
+    footprint: frozenset[Cell],
+    chamfers: frozenset[Diagonal],
+    owner: dict[Cell, int],
+) -> frozenset[Diagonal]:
+    """The planned diagonals between rooms that still stand: on this floor's footprint, not
+    in a chamfered cell, the triangle's cells across both cut edges one other room's."""
+    taken = {d.cell for d in chamfers}
+    kept: set[Diagonal] = set()
+    for d in planned:
+        if d.cell not in footprint or d.cell in taken or d.cell not in owner:
+            continue
+        across = {owner.get(next(c for c in e.cells() if c != d.cell)) for e in d.edges()}
+        if len(across) == 1 and None not in across and owner[d.cell] not in across:
+            kept.add(d)
+    return frozenset(kept)
+
+
+def _diagonal_runs(
+    diagonals: frozenset[Diagonal], owner: dict[Cell, int]
+) -> dict[tuple[int, int], list[Run]]:
+    """Door candidates along diagonal walls: per pair of rooms (the cell's, the triangle's),
+    the runs of neighbouring diagonal cells on one line, each as the cells' horizontal cut
+    edges."""
+    lines: dict[tuple[int, int, int, int], list[Edge]] = defaultdict(list)
+    for d in diagonals:
+        edge = Edge.of(d.cell, Side.N if d.cut in (Corner.NE, Corner.NW) else Side.S)
+        across = next(c for c in edge.cells() if c != d.cell)
+        i, j = owner.get(d.cell), owner.get(across)
+        if i is None or j is None or i == j:
+            continue
+        slope = 1 if d.cut in (Corner.NE, Corner.SW) else -1
+        lines[(i, j, slope, d.x - d.y if slope == 1 else d.x + d.y)].append(edge)
+    found: dict[tuple[int, int], list[Run]] = defaultdict(list)
+    for (i, j, _, _), edges in sorted(lines.items()):
+        runs: list[Run] = []
+        for edge in sorted(edges):
+            if runs and runs[-1][-1].x + 1 == edge.x:
+                runs[-1].append(edge)
+            else:
+                runs.append([edge])
+        found[(i, j)] += runs
+        found[(j, i)] += runs
+    return dict(found)
+
+
 def _door(
-    run: Run, width: int, into: Cell | None, outwards: Side | None, rng: random.Random, start: int
+    run: Run,
+    width: int,
+    into: Cell | None,
+    outwards: Side | None,
+    rng: random.Random,
+    start: int,
+    diagonal: bool = False,
 ) -> Opening:
     edges = tuple(run[start : start + width])
     axis = run[0].axis
@@ -277,7 +332,7 @@ def _door(
         else:
             towards = Side.W if first.x == into.x else Side.E
     hinges = (Side.W, Side.E) if axis is Axis.H else (Side.N, Side.S)
-    return Opening(OpeningKind.DOOR, edges, Swing(towards, rng.choice(hinges)))
+    return Opening(OpeningKind.DOOR, edges, Swing(towards, rng.choice(hinges)), diagonal=diagonal)
 
 
 def _interior_doors(
@@ -293,6 +348,7 @@ def _interior_doors(
     fronts: dict[int, set[Edge]] | None = None,
     opened: set[int] | None = None,
     entered: set[int] | None = None,
+    diagonals: frozenset[Diagonal] = frozenset(),
 ) -> list[Opening]:
     """One door per room, committed greedily: the best-ranked door of all pending rooms first.
 
@@ -314,15 +370,18 @@ def _interior_doors(
     """
     shared: dict[tuple[int, int], list[Run]] = {}
     pairs: dict[tuple[int, int], set[Edge]] = defaultdict(set)
-    for edge in walls:
+    slanted = {e for d in diagonals for e in d.edges()}  # doors there go in the diagonal
+    for edge in walls - slanted:
         a, b = edge.cells()
         if a in owner and b in owner:
             i, j = owner[a], owner[b]
             pairs[(i, j)].add(edge)
             pairs[(j, i)].add(edge)
+    diagonal_runs = _diagonal_runs(diagonals, owner)
+    diagonal_edges = {e for runs in diagonal_runs.values() for run in runs for e in run}
     neighbours: dict[int, list[int]] = defaultdict(list)
-    for (i, j), edges in pairs.items():
-        shared[(i, j)] = _runs(edges)
+    for i, j in sorted(pairs.keys() | diagonal_runs.keys()):
+        shared[(i, j)] = [*_runs(pairs.get((i, j), set())), *diagonal_runs.get((i, j), [])]
         neighbours[i].append(j)
 
     def allowed(i: int, j: int) -> bool:
@@ -378,7 +437,14 @@ def _interior_doors(
             front = fronts.get(i, set())
             for run in runs:
                 if len(run) >= width:
-                    key = (rank, bool(front) and run[0] not in front, -len(run), i, run[0])
+                    key = (
+                        rank,
+                        bool(front) and run[0] not in front,
+                        run[0] not in diagonal_edges,  # a door in the slanted wall first
+                        -len(run),
+                        i,
+                        run[0],
+                    )
                     if found is None or key < found[0]:
                         found = (key, run)
         return found
@@ -448,7 +514,13 @@ def _interior_doors(
         if spots:
             start = min(spots, key=lambda s: (abs(s - start), s))
         door = _door(
-            run, width, outside if spec.opens_out(rooms[i].area) else inside, None, rng, start
+            run,
+            width,
+            outside if spec.opens_out(rooms[i].area) else inside,
+            None,
+            rng,
+            start,
+            run[0] in diagonal_edges,
         )
         if spec.door_slides:
             door = replace(door, sliding=True)
@@ -475,7 +547,17 @@ def _interior_doors(
             continue
         run = max(fitting, key=len)
         inside = next(c for c in run[0].cells() if owner.get(c) == i)
-        doors.append(_door(run, width, inside, None, rng, (len(run) - width) // 2))
+        doors.append(
+            _door(
+                run,
+                width,
+                inside,
+                None,
+                rng,
+                (len(run) - width) // 2,
+                run[0] in diagonal_edges,
+            )
+        )
         linked |= {(i, j), (j, i)}
     return doors
 

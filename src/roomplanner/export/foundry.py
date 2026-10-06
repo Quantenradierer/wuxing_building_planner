@@ -195,7 +195,7 @@ class _Level:
         for a, b in wall_segments(self.floor):
             add(a, b)
         for opening in self.floor.openings:
-            a, b = opening_segment(opening)
+            a, b = opening_segment(opening, self.floor)
             match opening.kind, opening.state:
                 case OpeningKind.WINDOW, OpeningState.BROKEN:
                     pass  # a hole: nothing stops anyone

@@ -55,15 +55,25 @@ class Opening:
     # Doors only: the leaves slide aside (elevator doors) instead of swinging; the swing
     # then only says which side of the wall they run on.
     sliding: bool = False
+    # Doors only: the door is in a diagonal wall between two rooms (ADR 0016). `edges` then
+    # hold, for each diagonal cell it spans, one of the cell's two cut edges (the horizontal
+    # one): they join the cell to the room across the diagonal, and need not be contiguous.
+    diagonal: bool = False
 
     def __post_init__(self) -> None:
         if not self.edges:
             raise ValueError("opening needs at least one edge")
         if list(self.edges) != sorted(self.edges):
             raise ValueError("opening edges must be sorted")
-        for current, following in zip(self.edges, self.edges[1:], strict=False):
-            if current.next_along() != following:
-                raise ValueError("opening edges must be a straight, contiguous run")
+        if self.diagonal:
+            if self.kind is not OpeningKind.DOOR:
+                raise ValueError("only doors go in diagonal walls")
+            if any(e.axis is not Axis.H for e in self.edges):
+                raise ValueError("a diagonal door is given by horizontal cut edges")
+        else:
+            for current, following in zip(self.edges, self.edges[1:], strict=False):
+                if current.next_along() != following:
+                    raise ValueError("opening edges must be a straight, contiguous run")
         if self.kind is OpeningKind.DOOR:
             if self.swing is None:
                 raise ValueError("doors need a swing")
@@ -183,6 +193,16 @@ class Floor:
     def cut_edges(self) -> frozenset[Edge]:
         """Wall edges in the outside triangle of a diagonal cell: no door, window or drawing."""
         return frozenset(e for d in self.diagonals for e in d.edges())
+
+    def is_inner_diagonal(self, diagonal: Diagonal) -> bool:
+        """The diagonal is a wall between two rooms (its cut triangle is floor, not open air)."""
+        return all(not self.is_exterior_wall(e) for e in diagonal.edges())
+
+    def diagonal_door_line(self, door: Opening) -> tuple[tuple[int, int], tuple[int, int]]:
+        """The end points (grid vertices) of a diagonal door along its diagonal wall."""
+        spanned = {e for e in door.edges}
+        points = [v for d in self.diagonals if spanned & set(d.edges()) for v in d.vertices()]
+        return min(points), max(points)
 
     @property
     def name(self) -> str:

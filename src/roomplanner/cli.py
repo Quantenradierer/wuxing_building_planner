@@ -96,6 +96,10 @@ def generate(
         str | None,
         typer.Option(help="Only this room type, width x depth cells, without the building"),
     ] = None,
+    layout: Annotated[
+        str | None,
+        typer.Option(help="Layout strategy instead of the type's (e.g. partition_diagonal)"),
+    ] = None,
     seed: Annotated[int | None, typer.Option(help="Random if omitted")] = None,
     output_format: Annotated[OutputFormat, typer.Option("--format", "-f")] = OutputFormat.ASCII,
     output: Annotated[
@@ -128,6 +132,7 @@ def generate(
             service_side=service_side,  # pyright: ignore[reportArgumentType]  # None = default
             entrances=_entrances(entrances),
             room=room,
+            layout=layout,
             seed=seed,
         )
         building = generate_building(params)

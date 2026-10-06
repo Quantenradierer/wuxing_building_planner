@@ -95,7 +95,10 @@ def segment(first: Edge, last: Edge) -> Segment:
     return (float(first.x), float(first.y)), (float(end[0]), float(end[1]))
 
 
-def opening_segment(opening: Opening) -> Segment:
+def opening_segment(opening: Opening, floor: Floor) -> Segment:
+    if opening.diagonal:
+        a, b = floor.diagonal_door_line(opening)
+        return (float(a[0]), float(a[1])), (float(b[0]), float(b[1]))
     return segment(opening.edges[0], opening.edges[-1])
 
 
@@ -106,9 +109,10 @@ def solid_walls(floor: Floor) -> set[Edge]:
 
 def wall_segments(floor: Floor) -> list[Segment]:
     """Solid walls as segments: straight runs and the floor's diagonals."""
+    doored = {e for o in floor.openings if o.diagonal for e in o.edges}
     diagonals: list[Segment] = [
         ((float(a[0]), float(a[1])), (float(b[0]), float(b[1])))
-        for a, b in (d.vertices() for d in sorted(floor.diagonals))
+        for a, b in (d.vertices() for d in sorted(floor.diagonals) if doored.isdisjoint(d.edges()))
     ]
     return [*runs(solid_walls(floor)), *diagonals]
 

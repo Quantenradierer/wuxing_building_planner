@@ -171,7 +171,8 @@ class _Canvas:
         mask = Image.new("L", self.size, 0)
         draw = ImageDraw.Draw(mask)
         for diagonal in self.floor.diagonals:
-            draw.polygon(self._outside_triangle(diagonal), fill=255)
+            if not self.floor.is_inner_diagonal(diagonal):
+                draw.polygon(self._outside_triangle(diagonal), fill=255)
         self.image.paste(self._open_ground, (0, 0), mask)
         self.draw_base = ImageDraw.Draw(self.image, "RGBA")
 
@@ -360,12 +361,12 @@ class _Canvas:
         for edge in self.floor.walls - self.floor.cut_edges:
             x0, y0, x1, y1 = self._wall_rect(edge)
             self.draw_shadow.rectangle((x0 + shift, y0 + shift, x1 + shift, y1 + shift), fill=255)
-        for diagonal in self.floor.diagonals:
+        for diagonal in self._wall_diagonals():
             x0, y0, x1, y1 = self._diagonal_line(diagonal)
             self._thick_line(
                 self.draw_shadow,
                 (x0 + shift, y0 + shift, x1 + shift, y1 + shift),
-                self.cell * self.theme.walls.exterior,
+                self._diagonal_thickness(diagonal),
                 255,
             )
 
@@ -445,17 +446,27 @@ class _Canvas:
             self._wall_rect(e) for e in self.floor.walls - self.floor.cut_edges if e not in opened
         ]
         width = max(1, round(self.cell * 0.04))
-        thickness = self.cell * self.theme.walls.exterior
-        diagonals = [self._diagonal_line(d) for d in self.floor.diagonals]
+        diagonals = [
+            (self._diagonal_line(d), self._diagonal_thickness(d)) for d in self._wall_diagonals()
+        ]
         for rect in rects:  # outline first, the bodies then cover the inner joints
             x0, y0, x1, y1 = rect
             self.draw_base.rectangle((x0 - width, y0 - width, x1 + width, y1 + width), fill=outline)
-        for line in diagonals:
+        for line, thickness in diagonals:
             self._thick_line(self.draw_base, line, thickness + 2 * width, outline)
         for rect in rects:
             self.draw_base.rectangle(rect, fill=body)
-        for line in diagonals:
+        for line, thickness in diagonals:
             self._thick_line(self.draw_base, line, thickness, body)
+
+    def _wall_diagonals(self) -> list[Diagonal]:
+        """The diagonals with a wall: all but those a diagonal door stands in."""
+        doored = {e for o in self.floor.openings if o.diagonal for e in o.edges}
+        return [d for d in sorted(self.floor.diagonals) if doored.isdisjoint(d.edges())]
+
+    def _diagonal_thickness(self, diagonal: Diagonal) -> float:
+        inner = self.floor.is_inner_diagonal(diagonal)
+        return self.cell * (self.theme.walls.interior if inner else self.theme.walls.exterior)
 
     @staticmethod
     def _thick_line(
@@ -545,6 +556,9 @@ class _Canvas:
         swing = opening.swing
         if swing is None:
             return
+        if opening.diagonal:
+            self._diagonal_door(opening)
+            return
         exterior = self._is_exterior(opening.edges[0])
         leaf = style.exterior_leaf if exterior and style.exterior_leaf else style.leaf
         if opening.material is not None and opening.material in style.materials:
@@ -594,6 +608,53 @@ class _Canvas:
             self.draw_base.line(
                 (hx, hy, hx + tx * size, hy + ty * size), fill=leaf_colour, width=width
             )
+
+    def _diagonal_door(self, opening: Opening) -> None:
+        """A door in a slanted wall: jambs, and a leaf hinged at one end that swings to the
+        side of the wall `swing.towards` names, square to the wall when open."""
+        assert opening.swing is not None
+        style = self.theme.doors
+        swing = opening.swing
+        (ax, ay), (bx, by) = (self.px(*v) for v in self.floor.diagonal_door_line(opening))
+        if opening.state is OpeningState.MISSING:
+            return
+        leaf = colour(
+            style.materials.get(opening.material or "", style.leaf)
+            if opening.material in style.materials
+            else style.leaf
+        )
+        length = math.hypot(bx - ax, by - ay)
+        ux, uy = (bx - ax) / length, (by - ay) / length
+        nx, ny = -uy, ux
+        tx, ty = swing.towards.delta
+        if nx * tx + ny * ty < 0:
+            nx, ny = -nx, -ny
+        width = max(2, round(self.cell * 0.09))
+        if opening.state is OpeningState.BLOCKED:
+            plank = colour(style.barricade)
+            for line in ((ax, ay, bx, by),):
+                self.draw_base.line(line, fill=(0, 0, 0, 255), width=width + 4)
+                self.draw_base.line(line, fill=plank, width=width + 2)
+            return
+        west_end = (ax, ay) if ax <= bx else (bx, by)
+        east_end = (bx, by) if ax <= bx else (ax, ay)
+        (hx, hy), (ox, oy) = (west_end, east_end) if swing.hinge is Side.W else (east_end, west_end)
+        sx, sy = (ox - hx) / length, (oy - hy) / length
+        if opening.state is OpeningState.BROKEN:
+            mx, my = (
+                hx + sx * length * 0.5 + nx * length * 0.35,
+                hy + sy * length * 0.5 + ny * length * 0.35,
+            )
+            self.draw_base.line((hx, hy, mx, my), fill=leaf, width=width)
+            return
+        closed = math.degrees(math.atan2(sy, sx)) % 360
+        opened = math.degrees(math.atan2(ny, nx)) % 360
+        start = closed if (opened - closed) % 360 == 90 else opened
+        box = (hx - length, hy - length, hx + length, hy + length)
+        self.draw_base.arc(
+            box, start, start + 90, fill=colour(style.swing), width=max(1, width // 2)
+        )
+        self.draw_base.line((hx, hy, hx + nx * length, hy + ny * length), fill=leaf, width=width)
 
     def _sliding_door(self, opening: Opening, leaf_colour: Colour, width: int) -> None:
         """Two leaves parallel to the wall, meeting in the middle, on the side away from the

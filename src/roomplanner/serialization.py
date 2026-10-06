@@ -207,6 +207,8 @@ def _opening_to_dict(opening: Opening) -> JsonObject:
             result[key] = value
     if opening.sliding:
         result["sliding"] = True
+    if opening.diagonal:
+        result["diagonal"] = True
     return result
 
 
@@ -222,6 +224,7 @@ def _opening_from_dict(data: JsonObject) -> Opening:
         rating=data.get("rating"),
         entrance=data.get("entrance"),
         sliding=data.get("sliding", False),
+        diagonal=data.get("diagonal", False),
     )
 
 

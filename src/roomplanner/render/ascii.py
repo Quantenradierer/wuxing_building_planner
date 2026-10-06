@@ -35,7 +35,7 @@ def render_floor(
         row, col = _edge_pos(edge)
         canvas[row][col] = "-" if edge.axis is Axis.H else "|"
     for opening in floor.openings:
-        for edge in opening.edges:
+        for edge in () if opening.diagonal else opening.edges:
             row, col = _edge_pos(edge)
             canvas[row][col] = _opening_glyph(opening, edge.axis)
     for row in range(0, 2 * height + 1, 2):
@@ -45,6 +45,11 @@ def render_floor(
     for diagonal in floor.diagonals:  # in the middle of the cell, along the wall
         slope = "/" if diagonal.cut in (Corner.NW, Corner.SE) else "\\"
         canvas[2 * diagonal.y + 1][2 * diagonal.x + 1] = slope
+    for opening in floor.openings:  # a door in a diagonal wall replaces the slope
+        if opening.diagonal:
+            for diagonal in floor.diagonals:
+                if set(diagonal.edges()) & set(opening.edges):
+                    canvas[2 * diagonal.y + 1][2 * diagonal.x + 1] = _DOOR_GLYPHS[opening.state]
 
     kinds = sorted({o.kind for o in floor.objects})
     floor_glyphs = _unique_glyphs(kinds, glyphs)

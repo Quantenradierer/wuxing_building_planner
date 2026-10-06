@@ -8,6 +8,7 @@ from enum import StrEnum
 
 from roomplanner.geometry import (
     Cell,
+    Diagonal,
     Edge,
     Side,
     boundary_edges,
@@ -99,9 +100,28 @@ def _check_walls(floor: Floor) -> list[str]:
     for diagonal in sorted(floor.diagonals):
         if diagonal.cell not in floor.footprint:
             problems.append(f"diagonal at {diagonal.cell} is outside the footprint")
-        elif not all(e in floor.walls and floor.is_exterior_wall(e) for e in diagonal.edges()):
+        elif not all(e in floor.walls for e in diagonal.edges()):
+            problems.append(f"diagonal at {diagonal.cell} is not on walls")
+        elif floor.is_inner_diagonal(diagonal):
+            problems.extend(_check_inner_diagonal(floor, diagonal))
+        elif not all(floor.is_exterior_wall(e) for e in diagonal.edges()):
             problems.append(f"diagonal at {diagonal.cell} does not cut off the open air")
     return problems
+
+
+def _check_inner_diagonal(floor: Floor, diagonal: Diagonal) -> list[str]:
+    """A diagonal between rooms: the cell is one room's, both cells across its cut edges the
+    same other room's (the triangle's)."""
+    owner = {c: r.id for r in floor.rooms for c in r.cells}
+    across = {
+        next(c for c in e.cells() if c != diagonal.cell): owner.get(
+            next(c for c in e.cells() if c != diagonal.cell)
+        )
+        for e in diagonal.edges()
+    }
+    if len(set(across.values())) != 1 or owner.get(diagonal.cell) in across.values():
+        return [f"diagonal at {diagonal.cell} does not separate two rooms"]
+    return []
 
 
 def _check_openings(floor: Floor) -> list[str]:
@@ -114,7 +134,10 @@ def _check_openings(floor: Floor) -> list[str]:
         if edges & used:
             problems.append(f"{opening.kind} at {opening.edges[0]} overlaps another opening")
         used |= edges
-        if edges & floor.cut_edges:
+        if opening.diagonal:
+            if not edges <= floor.cut_edges:
+                problems.append(f"diagonal door at {opening.edges[0]} is not in a diagonal")
+        elif edges & floor.cut_edges:
             problems.append(f"{opening.kind} at {opening.edges[0]} is inside a diagonal")
     if floor.level == 0 and not any(
         o.kind is OpeningKind.DOOR and floor.is_exterior_wall(o.edges[0]) for o in floor.openings

@@ -23,7 +23,7 @@ class RectangleFootprint:
 
 
 def arm_depth(ctx: Context) -> int:
-    layout = cast(LayoutStrategy, resolve("layout", ctx.rules.program.layout))
+    layout = cast(LayoutStrategy, resolve("layout", ctx.layout_name))
     return layout.main_min_depth(ctx)
 
 

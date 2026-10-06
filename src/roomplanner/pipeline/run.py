@@ -35,7 +35,7 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
     ctx = Context(params, rules, seed, width, height)
     footprint = cast(FootprintStrategy, resolve("footprint", params.shape.value)).footprint(ctx)
     # A lone room (`params.room`) replaces the building's layout.
-    layout_name = "room" if params.room is not None else rules.program.layout
+    layout_name = "room" if params.room is not None else ctx.layout_name
     layout = cast(LayoutStrategy, resolve("layout", layout_name))
     openings = cast(OpeningsStrategy, resolve("openings", "default"))
     furnishing = cast(FurnishingStrategy, resolve("furnishing", rules.program.furnishing))

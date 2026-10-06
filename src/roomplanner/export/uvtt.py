@@ -47,7 +47,7 @@ def to_uvtt(
         # Windows can be opened (or climbed through when broken): portals like doors.
         if door.kind is OpeningKind.BREACH or door.state is OpeningState.MISSING:
             continue
-        a, b = opening_segment(door)
+        a, b = opening_segment(door, floor)
         if door.state is OpeningState.BLOCKED:
             walls.append([grid(a), grid(b)])
             continue

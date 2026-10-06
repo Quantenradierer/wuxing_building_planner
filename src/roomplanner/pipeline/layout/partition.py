@@ -18,7 +18,7 @@ import math
 import random
 from dataclasses import dataclass, replace
 
-from roomplanner.geometry import Cell, Side, thinnest_extent
+from roomplanner.geometry import Cell, Corner, Diagonal, Side, thinnest_extent
 from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import (
     AllocationError,
@@ -58,10 +58,13 @@ class Skeleton:
     main_hint: Cell  # facade cell of the main entrance
     main_side: Side
     far: frozenset[Cell] = frozenset()  # cells of the second stairwell, which has an exit
+    band: frozenset[Cell] = frozenset()  # cells of the 45 degree corridor, if there is one
 
 
 @register("layout", "partition")
 class PartitionLayout:
+    diagonal_links = False  # parallel corridors are joined by 45 degree ones, not straight ones
+
     def main_min_depth(self, ctx: Context) -> int:
         return ctx.rules.program.corridor.width + ctx.rules.program.strip_depth[0]
 
@@ -110,12 +113,13 @@ class PartitionLayout:
         street = ctx.params.street_side
         lobby_entry = _lobby_entry(ctx)
         corridor = self._bands(ctx, footprint, rng)
-        corridor = self._connect(footprint, corridor, width)
+        band = self._diagonal(ctx, footprint, corridor, ctx.rng("diagonal"))
+        corridor = self._connect(footprint, corridor | band, width)
         corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
-        corridor = self._tidy(corridor, frozenset(), width)
+        corridor = self._tidy(corridor, frozenset(), width, band)
         # Tidying drops bands a notch clipped thin, and the wings they served: branch again.
         corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
-        corridor = self._tidy(corridor, frozenset(), width)
+        corridor = self._tidy(corridor, frozenset(), width, band)
         corridor = self._back_corridor(ctx, footprint, corridor, width)
         lobby = frozenset[Cell]()
         hint: Cell | None = None
@@ -130,10 +134,17 @@ class PartitionLayout:
         else:
             hint, path = self._gate(footprint, corridor, street, width)
             corridor |= path
-        corridor = self._tidy(corridor, lobby, width)
+        corridor = self._tidy(corridor, lobby, width, band)
         cores, far = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
         return Skeleton(
-            corridor, cores, lobby, lobby_entry.room if lobby_entry else None, hint, street, far
+            corridor,
+            cores,
+            lobby,
+            lobby_entry.room if lobby_entry else None,
+            hint,
+            street,
+            far,
+            band & corridor,
         )
 
     def _lobby(
@@ -189,8 +200,9 @@ class PartitionLayout:
                 return frozenset(cells), at
         return None
 
-    @staticmethod
-    def _bands(ctx: Context, footprint: frozenset[Cell], rng: random.Random) -> frozenset[Cell]:
+    def _bands(
+        self, ctx: Context, footprint: frozenset[Cell], rng: random.Random
+    ) -> frozenset[Cell]:
         """Parallel corridors along the long axis, as many as keep each row of rooms between
         them (and the facades) within the program's strip depth, joined by cross corridors."""
         program = ctx.rules.program
@@ -218,7 +230,7 @@ class PartitionLayout:
             shift = rng.randint(-1, 1) if rows >= smin + 2 else 0
             starts.append(lo + round(rows * (i + 1) + width * i) + shift)
         cells = {c for c in footprint if any(t <= cross(c) < t + width for t in starts)}
-        if count > 1:
+        if count > 1 and not self.diagonal_links:
             length = uhi - ulo
             ends = [ulo + round(rows), uhi - round(rows) - width]
             spots = ends if length >= 4 * rows else [(ulo + uhi - width) // 2]
@@ -229,6 +241,84 @@ class PartitionLayout:
                 if span[0] <= cross(c) < span[1] and any(u <= along(c) < u + width for u in spots)
             }
         return frozenset(cells)
+
+    def _diagonal(
+        self,
+        ctx: Context,
+        footprint: frozenset[Cell],
+        corridor: frozenset[Cell],
+        rng: random.Random,
+    ) -> frozenset[Cell]:
+        """The diagonal layout's links (ADR 0016): 45 degree corridors between the parallel
+        ones instead of the straight cross corridors. Each is a staircase band whose steps
+        `_bevels` turns into walls. They join every corridor to the next (a spanning set),
+        and a second link goes between two that are far enough apart along the corridors."""
+        if not self.diagonal_links:
+            return frozenset()
+        program = ctx.rules.program
+        thick = program.corridor.width - 1  # a band this thick is as wide as a corridor
+        longest = 2 * program.strip_depth[1]
+        candidates: list[tuple[Cell, Cell, frozenset[Cell]]] = []
+        for start in sorted(corridor):
+            for dx, dy in ((1, 1), (1, -1)):
+                path = [start]
+                while len(path) <= longest:
+                    cell = Cell(path[-1].x + dx, path[-1].y + dy)
+                    if cell not in footprint:
+                        break
+                    path.append(cell)
+                    if cell in corridor:
+                        break
+                else:
+                    continue
+                if path[-1] not in corridor or len(path) < 8 or len(path) > longest:
+                    continue
+                if any(c in corridor for c in path[1:-1]):
+                    continue
+                room = frozenset(
+                    Cell(x, y)
+                    for x in range(min(c.x for c in path) - thick, max(c.x for c in path) + thick)
+                    for y in range(min(c.y for c in path) - thick, max(c.y for c in path) + thick)
+                )
+                band = thicken(path, thick, footprint)
+                if band != thicken(path, thick, room) or any(
+                    thicken([c], thick, footprint) & corridor for c in path[3:-3]
+                ):
+                    continue  # clipped by the footprint, or brushing another corridor
+                side = thick + 2  # rooms must flank the band: free floor a few cells either side
+                if any(
+                    Cell(c.x + dx, c.y) not in footprint or Cell(c.x + dx, c.y) in corridor
+                    for c in path[3:-3]
+                    for dx in (-side, side)
+                ):
+                    continue
+                candidates.append((path[0], path[-1], band))
+        pieces = components(corridor)
+        piece_of = {c: i for i, piece in enumerate(pieces) for c in piece}
+        rng.shuffle(candidates)
+        links: dict[frozenset[int], int] = {}
+        chosen: list[tuple[Cell, frozenset[Cell]]] = []
+        linked = [{i} for i in range(len(pieces))]  # union-find by merging sets
+        for first, last, band in candidates:
+            a, b = piece_of[first], piece_of[last]
+            if a == b or any(band & other for _, other in chosen):
+                continue
+            pair = frozenset((a, b))
+            if linked[a] is linked[b]:  # already connected: only a second link, far from the first
+                gap = max(2 * longest, 3 * program.strip_depth[1])
+                if links[pair] >= 2 or any(
+                    abs(first.x - at.x) + abs(first.y - at.y) < gap
+                    for at, _ in chosen
+                    if piece_of[at] in pair
+                ):
+                    continue
+            else:
+                merged = linked[a] | linked[b]
+                for i in merged:
+                    linked[i] = merged
+            links[pair] = links.get(pair, 0) + 1
+            chosen.append((first, band))
+        return frozenset(c for _, band in chosen for c in band) - corridor
 
     @staticmethod
     def _connect(
@@ -398,9 +488,15 @@ class PartitionLayout:
         return corridor | thicken([gate, *descend(gate, dist)], width, footprint)
 
     @staticmethod
-    def _tidy(corridor: frozenset[Cell], lobby: frozenset[Cell], width: int) -> frozenset[Cell]:
-        """Drop bits thinner than the corridor and pieces that lead nowhere."""
-        kept = opened(corridor, width)
+    def _tidy(
+        corridor: frozenset[Cell],
+        lobby: frozenset[Cell],
+        width: int,
+        keep: frozenset[Cell] = frozenset(),
+    ) -> frozenset[Cell]:
+        """Drop bits thinner than the corridor and pieces that lead nowhere (`keep`: the
+        diagonal corridor, which is thinner than a square corridor along its steps)."""
+        kept = opened(corridor, width) | (keep & corridor)
         pieces = [p for p in components(kept) if not lobby or contact(p, lobby) >= 2]
         return pieces[0] if pieces else kept
 
@@ -573,7 +669,8 @@ class PartitionLayout:
         rooms = _merge_thin(rooms, ctx.rules)
         rooms = carve_stalls(rooms, ctx.rules)
         entrances = self._entrances(ctx, footprint, skeleton, rooms) if ground else []
-        return FloorPlan(level, role_name, rooms, entrances)
+        bevels = _bevels(skeleton.band, skeleton.corridor, rooms, ctx.rules)
+        return FloorPlan(level, role_name, rooms, entrances, diagonals=bevels)
 
     def _entrances(
         self,
@@ -648,6 +745,59 @@ class PartitionLayout:
             index = next(i for i, r in enumerate(rooms) if cell in r.cells)
             result.append(EntranceRequest(kind, side, index, cell))
         return result
+
+
+@register("layout", "partition_diagonal")
+class DiagonalPartitionLayout(PartitionLayout):
+    """The partition layout with diagonal corridors where it would have cross corridors."""
+
+    diagonal_links = True
+
+
+_CORNERS = (
+    (Side.N, Side.E, Corner.NE),
+    (Side.N, Side.W, Corner.NW),
+    (Side.S, Side.E, Corner.SE),
+    (Side.S, Side.W, Corner.SW),
+)
+
+
+def _bevels(
+    band: frozenset[Cell], corridor: frozenset[Cell], rooms: list[PlannedRoom], rules: Rules
+) -> frozenset[Diagonal]:
+    """The diagonal walls along a diagonal corridor (ADR 0016): the room cells at the
+    corners of its staircase edge (corridor on two adjacent sides and the cell between, none
+    on the other two) are cut by a 45 degree wall, the corner triangle going to the
+    corridor. Circulation, core and annex cells stay square."""
+    if not band:
+        return frozenset()
+    owner = {c: r for r in rooms for c in r.cells}
+    fixed = {e.room for e in rules.program.core}
+    near = {
+        n
+        for c in band
+        for n in (Cell(c.x + dx, c.y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+    }
+    result: set[Diagonal] = set()
+    for cell in sorted(near - corridor):
+        room = owner.get(cell)
+        if room is None or room.host is not None or room.type in fixed:
+            continue
+        if rules.spec(room.type).circulation or room.hub:
+            continue
+        for a, b, corner in _CORNERS:
+            na, nb = cell.neighbour(a), cell.neighbour(b)
+            diag = Cell(na.x + nb.x - cell.x, na.y + nb.y - cell.y)
+            behind = (cell.neighbour(a.opposite), cell.neighbour(b.opposite))
+            if not (na in corridor and nb in corridor and diag in corridor):
+                continue
+            if any(c in corridor for c in behind) or not ({na, nb, diag} & band):
+                continue
+            if owner.get(na) is not owner.get(nb) or owner.get(na) is None:
+                continue
+            result.add(Diagonal(cell.x, cell.y, corner))
+            break
+    return frozenset(result)
 
 
 def _merge_thin(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
