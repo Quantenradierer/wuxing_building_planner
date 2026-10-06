@@ -39,6 +39,14 @@ NOISE = 0.8  # random share added to the pool's "furthest below its share" score
 L_SHAPE = 0.3  # chance that a cut also tries carving a corner off (leaving an L)
 MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
+ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
+JOG = 0.1  # score penalty per end of a cut that misses such a wall by 1-2 cells
+_ACROSS = {
+    Side.N: (Side.E, Side.W),
+    Side.S: (Side.E, Side.W),
+    Side.E: (Side.N, Side.S),
+    Side.W: (Side.N, Side.S),
+}
 
 
 @dataclass
@@ -97,6 +105,8 @@ class Assigner:
         self.outer_m = self.grid.mask(self.outer)
         self.access_m = self.grid.mask(access)
         self._mask_cache: dict[frozenset[Cell], int] = {}
+        self._rooms = 0
+        self.owner: dict[Cell, int] = {}  # cell -> index of the placed room holding it
         self._useful_cache: dict[int, bool] = {}
 
     # --- entry point ------------------------------------------------------------------
@@ -173,6 +183,7 @@ class Assigner:
         _, piece, rests, index = best
         region = free.pop(index)
         free.extend(rests)
+        self._own(piece)
         rooms.append(PlannedRoom(need.entry.room, piece))
         return True
 
@@ -312,6 +323,7 @@ class Assigner:
             rests = grid.components(rest)
             score = base + sum(r.bit_count() / 20 for r in rests if not self._useful_m(r))
             score += grid.blind(rest, self.border_m) / 20
+            score += self._jog(grid.cells(piece), grid.cells(rest))
             score += self.rng.uniform(0, 0.1)
             if best is None or score < best[0]:
                 best = (score, piece, rests)
@@ -319,6 +331,38 @@ class Assigner:
             return None
         score, piece, rests = best
         return Choice(grid.cells(piece), [grid.cells(r) for r in rests], score)
+
+    def _jog(self, piece: frozenset[Cell], rest: frozenset[Cell]) -> float:
+        """Cost of the cut line between `piece` and `rest`: a wall that continues the wall
+        between two placed rooms across the region is a bonus, one that misses it by a cell
+        or two (a staggered wall: _____-----___) a penalty."""
+        if not self.owner:
+            return 0.0
+        ends: set[tuple[Cell, Cell, Side]] = set()
+        for p in piece:
+            for s in Side:
+                n = p.neighbour(s)
+                if n not in rest:
+                    continue
+                for d in _ACROSS[s]:
+                    e, f = p.neighbour(d), n.neighbour(d)
+                    if e not in piece or f not in rest:
+                        ends.add((e, f, s))
+        score = 0.0
+        owner = self.owner
+        for e, f, s in ends:
+            if e in piece or e in rest or f in piece or f in rest:
+                continue
+            for j in (0, 1, -1, 2, -2):
+                a, b = e, f
+                for _ in range(abs(j)):
+                    side = s if j > 0 else s.opposite
+                    a, b = a.neighbour(side), b.neighbour(side)
+                ia, ib = owner.get(a), owner.get(b)
+                if ia is not None and ib is not None and ia != ib:
+                    score += -ALIGNED if j == 0 else JOG
+                    break
+        return score
 
     def _slabs(self, region: int, low: int, cap: float, aim: int) -> list[int]:
         """Pieces cut off either end of `region` along either axis, of low..cap cells."""
@@ -430,6 +474,7 @@ class Assigner:
                 if halves:
                     free.extend(halves)
                 else:
+                    self._own(region)
                     rooms.append(PlannedRoom(self.filler, region, leftover=True))
                 continue
             _, entry, choice = chosen
@@ -486,4 +531,10 @@ class Assigner:
 
     def _add(self, entry: RoomEntry, cells: frozenset[Cell], rooms: list[PlannedRoom]) -> None:
         self.made[id(entry)] = self.made.get(id(entry), 0) + 1
+        self._own(cells)
         rooms.append(PlannedRoom(entry.room, cells))
+
+    def _own(self, cells: frozenset[Cell]) -> None:
+        self._rooms += 1
+        for cell in cells:
+            self.owner[cell] = self._rooms
