@@ -6,8 +6,11 @@ rooms:
     min_side: 3
     circulation: true
     furniture:       # code-mandated, sparse: one of each per long stretch of corridor
-      - {object: fire_alarm_panel, placement: wall, per: 400, count: [0, 2]}
-      - {object: hydrant, placement: wall, per: 600, count: [0, 2]}
+      - {object: fire_extinguisher, placement: wall, even: true, per: 150, count: [1, 12]}
+      - {object: fire_alarm_panel, placement: wall, even: true, per: 400, count: [0, 2]}
+      - {object: hydrant, placement: wall, even: true, per: 600, count: [0, 2]}
+      - {object: medkit, placement: wall, even: true, per: 500, count: [0, 3]}
+      - {object: trash_bin, placement: wall, even: true, per: 400, count: [0, 3]}
   lobby:
     area: [60, 800]
     min_side: 6
@@ -57,17 +60,18 @@ rooms:
     area: [24, 56]
     min_side: 3
     cluster: true
-    stalls: {room: stall, max: 3, rest_area: 16, single: wc}
+    stalls: {room: stall, max: 6, rest_area: 16, single: wc}
     furniture:
       # A wash row: side by side on one wall by the entrance, not against the stalls, one
       # sink per two stalls; the bin at its end.
-      - {object: sink, placement: wall, line: true, not_against: [stall], count: [1, 3],
+      - {object: sink, placement: wall, line: true, not_against: [stall], count: [1, 4],
          per_room: [stall, 2]}
       - {object: trash_bin, placement: at, at: sink, beside: [flanks], limit: 1}
   stall:                # a toilet cubicle, 1 x 1.5 m, carved out of a public toilet
     area: [4, 12]
     min_side: 2
-    door_width: 1       # a narrow cubicle door keeps its clearance off the wc
+    door_width: 2       # as wide as the pan (1 m); the leaf swings out into the passage
+    door_opens_out: true
     windows: forbidden
     transit: false
     templates:          # drawn with the door in the south wall

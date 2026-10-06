@@ -233,6 +233,10 @@ class CorridorLayout:
                 if sum(b.kind is BandKind.CORRIDOR for b in part.bands) > 1:
                     length = part.frame.length
                     target = length / 2 + rng.uniform(-1, 1) * length / 8
+                    if squeeze and skeleton.park is not None:
+                        # Beside the shrunken car park: the rest stays in one piece.
+                        park = skeleton.park[2]
+                        target = park.u1 if park.u0 == 0 else park.u0
                     blocked = (
                         [skeleton.lobby_slice] if part is main and skeleton.lobby_slice else []
                     )

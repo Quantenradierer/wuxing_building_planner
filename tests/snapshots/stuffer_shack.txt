@@ -1,24 +1,24 @@
 supermarket 30x26 cells, wealth=middle, seed=7
 
 == Ground floor ==
-+---+---+---+===--+-----------------+--DDDDDDDDDDD----------+
-|www|www|www|     |'                |                ppp ppp|
-|www|www|www|     |                 |                ppp ppp|
-|www|www|www|     |                 |                ppp ppp|
-|   |   |   |     |                 |                       |
-|3  |4  |5  |     |                 D      ZZZZZZZ       ppp|
-+D--+D--+D--+     |                 D      ZZZZZZZ       ppp|
-|                 |        6        D      ZZZZZZZ       ppp|
-|                 |                 D                       |
-"        2        |KKK              D          7         ppp|
-"                 |KKK              |                    ppp|
-"                 |KKK              |                    ppp|
-|                 |                 |                       |
-|                 |KKK             '|o           KKK KKK ppp|
-|                 |KKK              |            KKK KKK ppp|
-|        iii iii U|KKK              |            KKK KKK ppp|
-+--DDD------------+----------DDDDD--+--DDDDDDD--------------+
-|          P             $                         P       d|
++-----+===---===--+-----------------+--DDDDDDDDDDD----------+
+|www 3D    iii iii|'                |                ppp ppp|
+|www  D           |                 |                ppp ppp|
+|www  D           |                 |                ppp ppp|
++-----+           |                 |                       |
+|www 4D           |                 D      ZZZZZZZ       ppp|
+|www  D           |                 D      ZZZZZZZ       ppp|
+|www  D    2      |        7        D      ZZZZZZZ       ppp|
++-----+           |                 D                       |
+|www 5D           |KKK              D          8         ppp|
+|www  D           |KKK              |                    ppp|
+|www  D           |KKK              |                    ppp|
++-----+           |                 |                       |
+|www 6D           |KKK             '|o           KKK KKK ppp|
+|www  D           |KKK              |            KKK KKK ppp|
+|www  D           |KKK              |            KKK KKK ppp|
++-----+--DDD------+----------DDDDD--+--DDDDDDD--------------+
+|                        $                         P   P   d|
 |                                                          d|
 |                                                          d|
 |                                                          d|
@@ -42,26 +42,27 @@ D                                                           |
 |                                                           |
 |                                                           "
 |                                                           "
-|                                                           "
-|                                                           |
+|zzz                                                        "
+|zzz                                                        |
+|zzz                     CCCCCCC CCC                        |
+|zzz                     CCCCCCC CCC                        |
+"zzz                     CCCCCCC CCC                        "
+"zzz                             CCC                        "
+"zzz                     CCCCCCC CCC                        "
 |                        CCCCCCC CCC                        |
-|                        CCCCCCC CCC                        |
-"                        CCCCCCC CCC                     zzz"
-"                                CCC                     zzz"
-"                        CCCCCCC CCC                     zzz"
-|                        CCCCCCC CCC                     zzz|
-|                        CCCCCCC CCC   zzzzzzz zzzzzzz   zzz|
-|                                      zzzzzzz zzzzzzz   zzz|
-|                                      zzzzzzz zzzzzzz   zzz|
+|zzzzzzz zzzzzzz         CCCCCCC CCC                        |
+|zzzzzzz zzzzzzz                                            |
+|zzzzzzz zzzzzzz                                            |
 +===---===---===---===---DDDDDDDDDDD-------===---===---===--+
-  objects: $ atm, o barrel, C checkout, K crate, d display_case, ' fire_extinguisher, Z forklift, z freezer, g gondola, p pallet, P pay_station, i sink, U trash_bin, w wc
+  objects: $ atm, o barrel, C checkout, K crate, d display_case, ' fire_extinguisher, Z forklift, z freezer, g gondola, p pallet, P pay_station, i sink, w wc
     1  sales_floor         540 cells
-    2  toilet               54 cells
+    2  toilet               48 cells
     3  stall                 6 cells
     4  stall                 6 cells
     5  stall                 6 cells
-    6  stockroom            72 cells
-    7  loading_bay          96 cells
+    6  stall                 6 cells
+    7  stockroom            72 cells
+    8  loading_bay          96 cells
 
 Warnings:
   - Ground floor: dropped prep_kitchen (no space)
