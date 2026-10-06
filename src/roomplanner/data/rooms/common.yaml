@@ -140,6 +140,7 @@ rooms:
     windows: forbidden
     next_to: [security_room]
     furniture:
+      - {object: guard_post, placement: wall, faces_door: true}   # desk, chair and screen at the door
       - {object: canteen_set, placement: center}
       - {object: locker, placement: perimeter, count: [4, 8]}
       - {object: weapon_locker, placement: wall, count: [1, 2]}
@@ -153,6 +154,7 @@ rooms:
     min_side: 4
     furniture:
       - {object: reception_post, placement: wall, faces_door: true}
+      - {object: bench, placement: wall, count: [1, 2]}   # waiting seats
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
   staff_room:
@@ -163,8 +165,9 @@ rooms:
       - {object: canteen_set, placement: center}
       - {object: locker, placement: wall, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
-      - {object: coffee_machine, placement: wall, count: [0, 1]}
-      - {object: fridge, placement: wall, count: [0, 1]}
+      - {object: sink, placement: wall}                 # the kitchenette: sink, fridge, coffee together
+      - {object: fridge, placement: at, at: sink, beside: [flanks], count: [0, 1]}
+      - {object: coffee_machine, placement: at, at: sink, beside: [flanks], count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   # --- building services and security tech (Sixth World) ---
   electrical_room:      # switchboards, UPS batteries, the building's network patch panels
@@ -210,7 +213,7 @@ rooms:
     windows: forbidden
     furniture:
       - {object: generator, placement: center}
-      - {object: fuel_tank, placement: wall, count: [1, 2]}
+      - {object: fuel_tank, placement: at, at: generator, beside: [flanks], count: [1, 2]}
       - {object: electrical_panel, placement: wall, count: [1, 2]}
       - {object: battery_bank, placement: wall, count: [0, 2]}
       - {object: fire_extinguisher, placement: corner}
@@ -270,6 +273,7 @@ rooms:
       - {object: terminal, placement: wall}
       - {object: shelf, placement: wall, count: [1, 2]}
       - {object: weapon_locker, placement: wall, count: [0, 1]}
+      - {object: locker, placement: wall, count: [1, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   vending_room:         # soykaf, stuffer snacks, Nuke-It meals
     area: [12, 36]
@@ -304,4 +308,5 @@ rooms:
     furniture:
       - {object: car, placement: rows, aisle: 8, margin: 0, block: 40}
       - {object: tool_rack, placement: wall, count: [0, 2]}
+      - {object: workbench, placement: wall, count: [1, 1]}
       - {object: fire_extinguisher, placement: wall}
