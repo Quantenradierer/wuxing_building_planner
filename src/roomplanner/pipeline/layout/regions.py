@@ -106,15 +106,30 @@ def descend(start: Cell, dist: dict[Cell, int]) -> list[Cell]:
 
 
 def thicken(path: Iterable[Cell], width: int, within: frozenset[Cell]) -> frozenset[Cell]:
-    """Every cell within a `width` x `width` square centred on a path cell."""
+    """Every cell of a `width` x `width` square around each path cell, the square centred on
+    it, or shifted inwards where the footprint's edge would clip it (so a path along a notch
+    stays as thick as a corridor)."""
     low, high = (width - 1) // 2, width // 2
-    return frozenset(
-        cell
-        for p in path
-        for dx in range(-low, high + 1)
-        for dy in range(-low, high + 1)
-        if (cell := Cell(p.x + dx, p.y + dy)) in within
-    )
+    shifts = sorted(range(-high, low + 1), key=abs)  # the centred square first
+    cells: set[Cell] = set()
+    for p in path:
+        best: list[Cell] = []
+        for sx in shifts:
+            for sy in shifts:
+                square = [
+                    Cell(p.x + dx + sx, p.y + dy + sy)
+                    for dx in range(-low, high + 1)
+                    for dy in range(-low, high + 1)
+                ]
+                inside = [c for c in square if c in within]
+                if len(inside) > len(best):
+                    best = inside
+                    if len(best) == len(square):
+                        break
+            if best and len(best) == width * width:
+                break
+        cells.update(best)
+    return frozenset(cells)
 
 
 def shape_ok(cells: frozenset[Cell], spec: RoomSpec) -> bool:

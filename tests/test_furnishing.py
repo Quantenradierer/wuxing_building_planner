@@ -3,7 +3,7 @@ import pytest
 from roomplanner.generator import generate
 from roomplanner.geometry import Cell, Edge, Side, connected
 from roomplanner.model import Building, OpeningKind
-from roomplanner.params import BuildingType, Wealth
+from roomplanner.params import BuildingType, Shape, Wealth
 from roomplanner.pipeline.furnishing import group_parts, ring_is_one_run
 from roomplanner.rules import load_groups, load_objects
 from roomplanner.serialization import from_json, to_json
@@ -598,3 +598,10 @@ def test_a_lone_toilet_has_doors_into_its_stalls() -> None:
     stalls = [r for r in floor.rooms if r.type == "stall"]
     assert len(stalls) >= 3
     assert not any(w.startswith("[hard]") for w in building.warnings)
+
+
+def test_irregular_office_corridor_reaches_a_wing_across_a_notch() -> None:
+    # The path joining the wing's corridor ran along the footprint's edge, was clipped to two
+    # cells and cut off: the wing became one huge filler room.
+    building = generate(make_params(width=80, depth=80, shape=Shape.IRREGULAR, seed=1674136254))
+    assert max(len(r.cells) for r in building.floor(0).rooms if r.type == "nap_room") <= 110
