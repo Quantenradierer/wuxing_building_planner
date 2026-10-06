@@ -113,6 +113,9 @@ class PartitionLayout:
         corridor = self._connect(footprint, corridor, width)
         corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
         corridor = self._tidy(corridor, frozenset(), width)
+        # Tidying drops bands a notch clipped thin, and the wings they served: branch again.
+        corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
+        corridor = self._tidy(corridor, frozenset(), width)
         corridor = self._back_corridor(ctx, footprint, corridor, width)
         lobby = frozenset[Cell]()
         hint: Cell | None = None

@@ -605,3 +605,10 @@ def test_irregular_office_corridor_reaches_a_wing_across_a_notch() -> None:
     # cells and cut off: the wing became one huge filler room.
     building = generate(make_params(width=80, depth=80, shape=Shape.IRREGULAR, seed=1674136254))
     assert max(len(r.cells) for r in building.floor(0).rooms if r.type == "nap_room") <= 110
+
+
+def test_irregular_office_corridor_survives_a_band_clipped_by_a_notch() -> None:
+    # A band clipped thin by a notch is tidied away; the wing it served gets a branch again.
+    building = generate(make_params(width=80, depth=80, shape=Shape.IRREGULAR, seed=3081433933))
+    corridor = [r for r in building.floor(0).rooms if r.type == "corridor"]
+    assert sum(len(r.cells) for r in corridor) > 700
