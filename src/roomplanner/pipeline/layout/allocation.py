@@ -71,6 +71,9 @@ class Segment:
         return self.aligned.width // self.unit
 
 
+REQUIRED_SHARE = 0.75  # of the segments' area that required rooms may take together
+
+
 @dataclass
 class Request:
     type: str
@@ -182,6 +185,7 @@ class Allocator:
         for room in reserved:
             if (request := next((r for r in requests if r.type == room), None)) is not None:
                 requests.remove(request)
+        self._squeeze(requests)
         self.fill_types = {e.room for e in fills}
         self.fills = fills
         self.fill_counts = dict(Counter(existing))
@@ -222,6 +226,20 @@ class Allocator:
                 message = f"{floor_name}: no space for {request.priority} room {request.type}"
                 raise AllocationError(message)
         return rooms
+
+    def _squeeze(self, requests: list[Request]) -> None:
+        """Required rooms that picked large areas together take more than the segments hold
+        (a casino's cage): they shrink towards their least area, so all of them still fit."""
+        room = sum(s.segment.span.width * s.segment.depth for s in self.states)
+        required = [r for r in requests if r.priority is Priority.REQUIRED]
+        excess = sum(r.area for r in required) - REQUIRED_SHARE * room
+        slack = sum(r.area - r.spec.area[0] for r in required if r.area > r.spec.area[0])
+        if excess <= 0 or slack <= 0:
+            return
+        keep = 1 - min(1.0, excess / slack)
+        for r in required:
+            if r.area > r.spec.area[0]:
+                r.area = r.spec.area[0] + round((r.area - r.spec.area[0]) * keep)
 
     # --- requests ---------------------------------------------------------------------
 

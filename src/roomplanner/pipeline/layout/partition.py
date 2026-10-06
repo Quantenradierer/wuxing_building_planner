@@ -550,9 +550,8 @@ class PartitionLayout:
             for option in options[:CORE_CANDIDATES]:
                 rest = free - option
                 slivers = sum(
-                    len(p)
+                    len(p) if len(p) < SLIVER else len(p) - len(opened(p, 3))
                     for p in components(rest)
-                    if len(p) < SLIVER or thinnest_extent(p, p, 3) < 3
                 )
                 ox = sum(c.x for c in option) / len(option)
                 oy = sum(c.y for c in option) / len(option)
@@ -575,6 +574,7 @@ class PartitionLayout:
                     continue
                 raise AllocationError(f"no space for the {entry.room}")
             _, cells = min(scored, key=lambda s: (s[0], min(s[1])))
+            cells = _to_outer_wall(cells, free, footprint)
             taken |= cells
             if entry.place != "far":
                 cluster |= cells
@@ -798,6 +798,78 @@ def _bevels(
             result.add(Diagonal(cell.x, cell.y, corner))
             break
     return frozenset(result)
+
+
+def _to_outer_wall(
+    cells: frozenset[Cell], free: frozenset[Cell], footprint: frozenset[Cell]
+) -> frozenset[Cell]:
+    """A core one or two cells short of the outer wall grows to it: that gap is no room."""
+    for side in Side:
+        for step in (1, 2):
+            grown: set[Cell] = set()
+            for cell in cells:
+                if cell.neighbour(side) in cells:
+                    continue
+                run = cell
+                for _ in range(step):
+                    run = run.neighbour(side)
+                    grown.add(run)
+                if run.neighbour(side) in footprint:
+                    break
+            else:
+                if grown <= free and grown.isdisjoint(cells):
+                    return cells | grown
+    return cells
+
+
+def _trim_tips(
+    rooms: list[PlannedRoom], band: frozenset[Cell], rules: Rules
+) -> tuple[list[PlannedRoom], frozenset[Cell]]:
+    """A room beside a diagonal corridor ends in a 45 degree tip too thin to use: the cells
+    thinner than the room's `min_side` go to the corridor they touch (where the room stays
+    thick without them). Returns the rooms and the cells moved."""
+    if not band:
+        return rooms, frozenset()
+    fixed = {e.room for e in rules.program.core}
+    result = list(rooms)
+    moved: set[Cell] = set()
+
+    def near(c: Cell) -> bool:  # a cell the slanted wall may run through
+        return any(Cell(c.x + dx, c.y + dy) in band for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+
+    for room in rooms:
+        spec = rules.spec(room.type)
+        if spec.circulation or room.host is not None or room.type in fixed or room.unit:
+            continue
+        if not contact(room.cells, band):
+            continue
+        cells = room.cells
+        for _ in range(4):
+            slanted = frozenset(c for c in cells if near(c))
+            tips = frozenset(
+                c for c in cells if thinnest_slanted([c], cells, slanted) < spec.min_side
+            )
+            if not tips or tips == cells:
+                break
+            kept = cells - tips
+            if len(components(kept)) != 1:
+                break
+            cells = kept
+        gone = room.cells - cells
+        if not gone:
+            continue
+        # only tips on the corridor, the rest of a thin piece stays with the room
+        corridors = [r for r in result if r.type == "corridor"]
+        target = max(corridors, key=lambda r: contact(gone, r.cells), default=None)
+        if target is None or not contact(gone, target.cells):
+            continue
+        movable = frozenset(c for c in gone if contact([c], target.cells | moved))
+        if not movable:
+            continue
+        result[result.index(room)] = replace(room, cells=room.cells - movable)
+        result[result.index(target)] = replace(target, cells=target.cells | movable)
+        moved |= movable
+    return result, frozenset(moved)
 
 
 def _merge_thin(rooms: list[PlannedRoom], rules: Rules) -> list[PlannedRoom]:
