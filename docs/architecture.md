@@ -383,7 +383,9 @@ irregular and any footprint is the same case. Programs with `units` are rejected
 1. **Skeleton**, identical on every floor: parallel corridors along the long axis (as many as
    keep each row of rooms within `strip_depth`) with cross corridors; pieces a footprint
    splits are joined; cells farther than `strip_depth[1]` from circulation get a side corridor
-   to the outer wall; corridor bits thinner than the corridor width go (`opened`). The lobby is
+   to the outer wall; on buildings with width + depth >= 100 now and then a dead-end stub
+   (`_stubs`) runs from circulation into a pocket 8+ cells from it and stops short of the wall,
+   so the back of a deep row of rooms has a door instead of becoming sleep pods; corridor bits thinner than the corridor width go (`opened`). The lobby is
    a rectangle on the street facade with its inner side on a corridor (`_lobby_beside`; else
    reserved first and joined by a branch). Core entries take rectangles beside a corridor,
    scored for little waste (`far` ones as far from the first as possible).
@@ -397,7 +399,9 @@ irregular and any footprint is the same case. Programs with `units` are rejected
    rectangle so the rest is an L). A cut scores the piece's size mismatch, soft windows and
    `near`, and penalises rest pieces nothing could use and *blind* cells (no straight line to
    circulation). `fill` entries then type what is left: the type furthest below its share of
-   the mix plus noise; too-big regions are cut, `priority: optional` types are the last
+   the mix plus noise plus a bonus for types the region's placed neighbours already are
+   (`CLUSTER`: rows of meeting rooms, blocks of huddle rooms; not for a window-needing room
+   inside); too-big regions are cut, `priority: optional` types are the last
    choice, a piece nothing fits is a `leftover` (the program's `cluster_filler`).
 4. After the assignment `absorb_leftovers` and `carve_stalls` run as in the corridor layout,
    and the ground floor gets its main, service and emergency entrances.

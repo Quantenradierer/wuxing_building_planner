@@ -135,6 +135,7 @@ class PartitionLayout:
             hint, path = self._gate(footprint, corridor, street, width)
             corridor |= path
         corridor = self._tidy(corridor, lobby, width, band)
+        corridor = self._stubs(footprint, corridor, lobby, ctx)
         cores, far = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
         return Skeleton(
             corridor,
@@ -467,6 +468,41 @@ class PartitionLayout:
         return corridor
 
     @staticmethod
+    def _stubs(
+        footprint: frozenset[Cell],
+        corridor: frozenset[Cell],
+        lobby: frozenset[Cell],
+        ctx: Context,
+    ) -> frozenset[Cell]:
+        """Now and then a dead end: a corridor stub into a pocket deeper than a row of rooms
+        that stops short of the wall, so the rooms there have a door instead of being sleep
+        pods nobody can walk to."""
+        program = ctx.rules.program
+        rng = ctx.rng("stubs")
+        x0, y0, x1, y1 = bbox(footprint)
+        if x1 - x0 + y1 - y0 < STUB_MIN_SPAN:
+            return corridor
+        for _ in range(STUBS):
+            dist = distances(corridor | lobby, footprint)
+            far = [
+                c for c in footprint - lobby - corridor if dist.get(c, 0) > program.strip_depth[0]
+            ]
+            pieces = [p for p in components(far) if len(p) >= STUB_POCKET]
+            if not pieces:
+                break
+            piece = max(pieces, key=len)
+            if rng.random() > STUB_CHANCE:
+                continue
+            cx = sum(c.x for c in piece) / len(piece)
+            cy = sum(c.y for c in piece) / len(piece)
+            tip = min(piece, key=lambda c: (abs(c.x - cx) + abs(c.y - cy), c))
+            path = [tip, *descend(tip, dist)[1:]]
+            stub = corridor | (thicken(path, program.corridor.width, footprint) - lobby)
+            if opened(stub, program.corridor.width) >= stub:  # not clipped thin by the walls
+                corridor = stub
+        return corridor
+
+    @staticmethod
     def _back_corridor(
         ctx: Context, footprint: frozenset[Cell], corridor: frozenset[Cell], width: int
     ) -> frozenset[Cell]:
@@ -760,6 +796,10 @@ class DiagonalPartitionLayout(PartitionLayout):
 
 
 LINK_GAP = (50, 70)  # cells between diagonal corridors joining the same two corridors
+STUBS = 6  # dead-end stubs a skeleton tries
+STUB_POCKET = 30  # cells: smallest pocket far from circulation that gets one
+STUB_CHANCE = 0.8
+STUB_MIN_SPAN = 100  # width + depth: smaller buildings have no room to spare
 _CORNERS = (
     (Side.N, Side.E, Corner.NE),
     (Side.N, Side.W, Corner.NW),

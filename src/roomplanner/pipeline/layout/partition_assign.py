@@ -40,6 +40,8 @@ L_SHAPE = 0.3  # chance that a cut also tries carving a corner off (leaving an L
 MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
 ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
+CLUSTER = 1.8  # score bonus for a type whose placed neighbours are all of that type
+STRAND = 6  # a rest no room can use costs its cells over this (unreachable ones end as sleep pods)
 JOG = 0.1  # score penalty per end of a cut that misses such a wall by 1-2 cells
 _ACROSS = {
     Side.N: (Side.E, Side.W),
@@ -107,6 +109,7 @@ class Assigner:
         self._mask_cache: dict[frozenset[Cell], int] = {}
         self._rooms = 0
         self.owner: dict[Cell, int] = {}  # cell -> index of the placed room holding it
+        self.kinds: dict[int, str] = {}  # index of a placed room -> its type
         self._useful_cache: dict[int, bool] = {}
 
     # --- entry point ------------------------------------------------------------------
@@ -321,7 +324,7 @@ class Assigner:
                 continue
             rest = whole & ~piece
             rests = grid.components(rest)
-            score = base + sum(r.bit_count() / 20 for r in rests if not self._useful_m(r))
+            score = base + sum(r.bit_count() / STRAND for r in rests if not self._useful_m(r))
             score += grid.blind(rest, self.border_m) / 20
             score += self._jog(grid.cells(piece), grid.cells(rest))
             score += self.rng.uniform(0, 0.1)
@@ -522,19 +525,36 @@ class Assigner:
         made = sum(self.made.values())
         deficit = entry.weight / total * (made + 1) - self.made.get(id(entry), 0)
         spec = self.rules.spec(entry.room)
+        # a room that needs a window is not clustered into the interior
+        starved = spec.windows is WindowRule.REQUIRED and self.outer.isdisjoint(cells)
         return (
             deficit
             + self.rng.uniform(0, NOISE)
+            + (0.0 if starved else CLUSTER * self._alike(entry.room, cells))
             - self._soft(cells, spec, entry.near)
             - (0.5 if entry.priority is Priority.OPTIONAL else 0.0)
         )
 
+    def _alike(self, kind: str, cells: frozenset[Cell]) -> float:
+        """Share of the placed rooms around `cells` that are of type `kind`: rooms of a type
+        sit next to each other (a row of meeting rooms, a block of huddle rooms)."""
+        around = {
+            self.owner[n]
+            for c in cells
+            for s in Side
+            if (n := c.neighbour(s)) not in cells and n in self.owner
+        }
+        if not around:
+            return 0.0
+        return sum(self.kinds[i] == kind for i in around) / len(around)
+
     def _add(self, entry: RoomEntry, cells: frozenset[Cell], rooms: list[PlannedRoom]) -> None:
         self.made[id(entry)] = self.made.get(id(entry), 0) + 1
-        self._own(cells)
+        self._own(cells, entry.room)
         rooms.append(PlannedRoom(entry.room, cells))
 
-    def _own(self, cells: frozenset[Cell]) -> None:
+    def _own(self, cells: frozenset[Cell], kind: str = "") -> None:
         self._rooms += 1
+        self.kinds[self._rooms] = kind
         for cell in cells:
             self.owner[cell] = self._rooms
