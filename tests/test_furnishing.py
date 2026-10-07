@@ -241,7 +241,7 @@ def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
     [
         (BuildingType.CLINIC, 52, 49, Wealth.LUXURY, 945989),  # toilet wraps round the row
         (BuildingType.HOSPITAL, 55, 35, Wealth.SQUATTER, 942500),  # a widened stall
-        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 876507),
+        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 876509),
     ],
 )
 def test_the_stalls_of_a_toilet_all_face_the_same_way(

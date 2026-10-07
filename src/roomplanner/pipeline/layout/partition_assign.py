@@ -41,6 +41,7 @@ MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
 ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
 CLUSTER = 1.8  # score bonus for a type whose placed neighbours are all of that type
+SAME_SIZE = 1.0  # score bonus for a piece of a size another room of its type already has
 STRAND = 6  # a rest no room can use costs its cells over this (unreachable ones end as sleep pods)
 JOG = 0.1  # score penalty per end of a cut that misses such a wall by 1-2 cells
 _ACROSS = {
@@ -110,6 +111,7 @@ class Assigner:
         self._rooms = 0
         self.owner: dict[Cell, int] = {}  # cell -> index of the placed room holding it
         self.kinds: dict[int, str] = {}  # index of a placed room -> its type
+        self.sizes: dict[str, set[tuple[int, int]]] = {}  # type -> (w, h) of its rectangles
         self._useful_cache: dict[int, bool] = {}
 
     # --- entry point ------------------------------------------------------------------
@@ -186,7 +188,7 @@ class Assigner:
         _, piece, rests, index = best
         region = free.pop(index)
         free.extend(rests)
-        self._own(piece)
+        self._own(piece, need.entry.room)
         rooms.append(PlannedRoom(need.entry.room, piece))
         return True
 
@@ -275,7 +277,9 @@ class Assigner:
 
     def _cut(self, region: frozenset[Cell], need: Need) -> Choice | None:
         """The best piece of `region` for `need`: a straight cut off one end, or a corner."""
-        return self._cut_for(region, need.spec, need.low, need.high, need.target, need)
+        return self._cut_for(
+            region, need.spec, need.low, need.high, need.target, need, kind=need.entry.room
+        )
 
     def _cut_for(
         self,
@@ -286,8 +290,10 @@ class Assigner:
         target: int,
         need: Need | None,
         near: str | None = None,
+        kind: str | None = None,
     ) -> Choice | None:
         grid = self.grid
+        known: set[tuple[int, int]] = self.sizes.get(kind, set()) if kind else set()
         whole = self._mask(region)
         total = len(region)
         pieces: list[tuple[int, float]] = []
@@ -314,6 +320,11 @@ class Assigner:
                 continue
             base = abs(size - target) / target - bonus
             base += self._soft_m(piece, spec, near_room)
+            if known:
+                x0, y0, x1, y1 = grid.bbox(piece)
+                lit = spec.windows is not WindowRule.REQUIRED or piece & self.outer_m
+                if lit and (x1 - x0, y1 - y0) in known and (x1 - x0) * (y1 - y0) == size:
+                    base -= SAME_SIZE
             scored.append((base, piece))
         scored.sort(key=lambda s: (s[0], grid.min_cell(s[1])))
         best: tuple[float, int, list[int]] | None = None
@@ -463,7 +474,9 @@ class Assigner:
                 if len(region) < low:
                     continue
                 spec = self.rules.spec(entry.room)
-                choice = self._cut_for(region, spec, low, high, (low + high) // 2, None, entry.near)
+                choice = self._cut_for(
+                    region, spec, low, high, (low + high) // 2, None, entry.near, entry.room
+                )
                 if choice is None:
                     continue
                 score = choice.score - self._wanted(entry, choice.piece, total, pool)
@@ -531,9 +544,19 @@ class Assigner:
             deficit
             + self.rng.uniform(0, NOISE)
             + (0.0 if starved else CLUSTER * self._alike(entry.room, cells))
+            + (
+                SAME_SIZE
+                if not starved and self._rect(cells) in self.sizes.get(entry.room, ())
+                else 0.0
+            )
             - self._soft(cells, spec, entry.near)
             - (0.5 if entry.priority is Priority.OPTIONAL else 0.0)
         )
+
+    @staticmethod
+    def _rect(cells: frozenset[Cell]) -> tuple[int, int] | None:
+        x0, y0, x1, y1 = bbox(cells)
+        return (x1 - x0, y1 - y0) if (x1 - x0) * (y1 - y0) == len(cells) else None
 
     def _alike(self, kind: str, cells: frozenset[Cell]) -> float:
         """Share of the placed rooms around `cells` that are of type `kind`: rooms of a type
@@ -556,5 +579,7 @@ class Assigner:
     def _own(self, cells: frozenset[Cell], kind: str = "") -> None:
         self._rooms += 1
         self.kinds[self._rooms] = kind
+        if kind and (shape := self._rect(cells)) is not None:
+            self.sizes.setdefault(kind, set()).add(shape)
         for cell in cells:
             self.owner[cell] = self._rooms

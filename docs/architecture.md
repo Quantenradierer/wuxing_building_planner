@@ -401,7 +401,9 @@ irregular and any footprint is the same case. Programs with `units` are rejected
    circulation). `fill` entries then type what is left: the type furthest below its share of
    the mix plus noise plus a bonus for types the region's placed neighbours already are
    (`CLUSTER`: rows of meeting rooms, blocks of huddle rooms; not for a window-needing room
-   inside); too-big regions are cut, `priority: optional` types are the last
+   inside) and a bonus for a piece whose width and height another room of the type already
+   has (`SAME_SIZE`; identical rooms get identical furniture, and interior doors hinge at the
+   nearer end of the wall so identical rooms also get the same swing); too-big regions are cut, `priority: optional` types are the last
    choice, a piece nothing fits is a `leftover` (the program's `cluster_filler`).
 4. After the assignment `absorb_leftovers` and `carve_stalls` run as in the corridor layout,
    and the ground floor gets its main, service and emergency entrances.

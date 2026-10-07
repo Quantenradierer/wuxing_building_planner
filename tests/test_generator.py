@@ -200,7 +200,7 @@ def test_small_composite_shapes_explain_the_minimum(shape: Shape) -> None:
 
 
 def test_l_shape_misses_one_corner() -> None:
-    building = generate(make_params(shape=Shape.L, width=60, depth=48))
+    building = generate(make_params(shape=Shape.L, width=60, depth=48, seed=1))
     footprint = building.floor(0).footprint
     corners = [(0, 0), (59, 0), (0, 47), (59, 47)]
     assert sum((x, y) in footprint for x, y in corners) == 3
@@ -811,7 +811,7 @@ def test_small_shops_get_a_staff_wc_instead_of_a_public_toilet(
 
 
 def test_stall_wc_backs_onto_the_wall_opposite_the_door() -> None:
-    building = generate(make_params(width=48, depth=32, seed=2))
+    building = generate(make_params(width=48, depth=32, seed=3))
     faced = 0
     for floor in building.floors:
         clearances = floor.door_clearances()

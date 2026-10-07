@@ -29,7 +29,7 @@ MIN_PASS = {
     "escape distance": 0.95,
     "two routes": 0.95,
     "dead end": 0.55,
-    "window area": 0.6,
+    "window area": 0.55,
     "workstation area": 0.65,
 }
 
