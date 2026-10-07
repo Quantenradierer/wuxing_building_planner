@@ -395,7 +395,7 @@ def test_meeting_room_screens_sit_on_the_axis_of_the_table() -> None:
 
 def test_office_kitchens_are_sometimes_open_to_the_corridor() -> None:
     kinds: set[bool] = set()
-    for seed in range(6):
+    for seed in range(12):
         for floor in generate(make_params(width=60, depth=40, floors_above=3, seed=seed)).floors:
             owner = {c: r for r in floor.rooms for c in r.cells}
             for room in (r for r in floor.rooms if r.type == "kitchenette"):
