@@ -134,6 +134,11 @@ class FurnitureRule(_Strict):
         description="rows: every row faces an aisle (row, aisle, two rows back to back, "
         "aisle, ..., a parking deck's drive lanes)",
     )
+    serpentine: bool = Field(
+        default=False,
+        description="rows: every row leaves an aisle-wide gap at alternating ends, so the aisles "
+        "join into one winding path (a supermarket's customer route)",
+    )
     fill: float = Field(
         default=1.0,
         gt=0,

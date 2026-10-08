@@ -7,7 +7,8 @@ rooms:
     furniture:
       - {object: checkout, placement: near_exit, count: [1, 4]}
       - {object: freezer, placement: wall, count: [0, 3]}
-      - {object: gondola, placement: rows, aisle: 3, margin: 3}
+      - {object: gondola, placement: wall, count: [6, 14], per: 60}   # shelves around the outer wall
+      - {object: gondola, placement: rows, aisle: 3, margin: 5, block: 1000, serpentine: true}   # one winding route
       - {object: guard_post, placement: near_exit, count: [0, 1], security: [low, corporate, aaa]}
       - {object: display_case, placement: wall, count: [0, 2]}
       - {object: atm, placement: wall, count: [0, 1]}
