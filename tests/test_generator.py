@@ -173,7 +173,7 @@ def test_generated_building_is_valid() -> None:
 
 def test_all_building_types_generate() -> None:
     for building_type in BuildingType:
-        building = generate(make_params(building_type=building_type, width=60, depth=40))
+        building = generate(make_params(building_type=building_type, width=60, depth=40, seed=6))
         rules = rules_for(building_type, building.params.wealth)
         assert validate(building, rules) == []
 

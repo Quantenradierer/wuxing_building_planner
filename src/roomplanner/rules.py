@@ -315,6 +315,9 @@ class RoomSpec(_Strict):
         default=False, description="Small back room: goes into clusters, not facade slots"
     )
     max_aspect: float = Field(default=2.5, ge=1)
+    rectangular: bool = Field(
+        default=False, description="Never an L or an alcove shape (rows of beds need a plain box)"
+    )
     door_width: int = Field(default=2, gt=0)
     door_opens_out: bool = Field(
         default=False,

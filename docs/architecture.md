@@ -314,7 +314,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    fit, `weight` sets how often each is picked, and `limit` caps how many a floor gets
    (new annex hosts and the room behind the core included; a floor role's `core_back`
    overrides the program's). For example, an office's 3 m interior rows get mostly
-   huddle and focus rooms, now and then a supply or nap room, one copy room and one break
+   huddle and focus rooms, now and then a supply room or a big nap room (a plain rectangle, `rectangular: true`, pods in aligned rows), one copy room and one break
    room; the vending room is a counted room by the core. `near: core | entrance | service`
    pulls rooms towards those anchors. A room whose `access` names the ground floor's lobby
    type (the waiting room) goes beside the lobby: a segment sharing a side with it whose

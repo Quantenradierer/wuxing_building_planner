@@ -104,13 +104,13 @@ rooms:
       - {object: whiteboard, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 2]}
   nap_room:                 # sleep pods, so nobody has to go home
-    area: [12, 80]
-    min_side: 3
+    area: [48, 120]
+    min_side: 6
+    rectangular: true
     cluster: true
     windows: forbidden
     furniture:
-      - {object: capsule, placement: rows, aisle: 1, margin: 1, accessible: true}   # pods in rows,
-      - {object: capsule, placement: perimeter, count: 60, sideways: true, accessible: true}   # then as many along the walls as fit
+      - {object: capsule, placement: rows, aisle: 2, margin: 0, block: 12, accessible: true}   # pods side by side in aligned rows, an aisle at their feet
       - {object: locker, placement: wall, match: capsule}   # a locker for every pod
   copy_room:                # printers, paper, mail
     area: [20, 48]
