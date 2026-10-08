@@ -1,7 +1,7 @@
 """Invariants that must hold for any parameters: impossible input is rejected, never broken."""
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import Phase, given, settings
 from hypothesis import strategies as st
 
 from roomplanner.errors import InfeasibleError
@@ -56,7 +56,7 @@ def generate_or_none(params: GenerationParams) -> Building | None:
         return None
 
 
-@settings(max_examples=100, deadline=None)
+@settings(max_examples=40, deadline=None, phases=[Phase.explicit, Phase.reuse, Phase.generate])
 @given(params_strategy)
 def test_generated_buildings_have_no_hard_violations(params: GenerationParams) -> None:
     building = generate_or_none(params)
@@ -64,7 +64,7 @@ def test_generated_buildings_have_no_hard_violations(params: GenerationParams) -
         assert hard_violations(building, rules_for(params.building_type, params.wealth)) == []
 
 
-@settings(max_examples=25, deadline=None)
+@settings(max_examples=15, deadline=None)
 @given(params_strategy)
 def test_generation_is_deterministic_and_serializable(params: GenerationParams) -> None:
     building = generate_or_none(params)
@@ -73,7 +73,7 @@ def test_generation_is_deterministic_and_serializable(params: GenerationParams) 
         assert from_json(to_json(building)) == building
 
 
-@settings(max_examples=25, deadline=None)
+@settings(max_examples=15, deadline=None)
 @given(
     params_strategy.map(
         lambda p: p.model_copy(

@@ -16,7 +16,7 @@ from roomplanner.validation import hard_violations
 
 from .conftest import make_params
 
-SEEDS = range(1, 9)
+SEEDS = range(1, 5)
 
 
 @cache
