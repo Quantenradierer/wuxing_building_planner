@@ -1177,9 +1177,9 @@ class RoomFurnisher:
                 positions = [p + shift for p in positions]
 
         if rule.serpentine and toward is None:  # rows alternately flush with one end
-            run = _line(length - 2 * m - rule.aisle, along, per_block, rule.aisle, rule.gap)
-            flush = [m + p for p in run]
-            flush_far = [m + rule.aisle + p for p in run]
+            run = _line(length - rule.aisle, along, per_block, rule.aisle, rule.gap)
+            flush = list(run)  # wall to wall: the gap at the far end is the only way through
+            flush_far = [rule.aisle + p for p in run]
             line_of = [flush_far if i % 2 else flush for i in range(len(rows))]
         else:
             line_of = [positions] * len(rows)

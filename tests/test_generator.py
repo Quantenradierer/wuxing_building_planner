@@ -311,7 +311,7 @@ def test_public_toilets_have_stalls_private_bathrooms_not() -> None:
             rooms = {r.id: r for r in floor.rooms}
             for obj in floor.objects:
                 if obj.kind == "wc":
-                    assert rooms[obj.room].type in ("stall", "wc", "bathroom")
+                    assert rooms[obj.room].type in ("stall", "wc", "bathroom", "bedsit")
             stalls = [r for r in floor.rooms if r.type == "stall"]
             if building_type is BuildingType.APARTMENT:
                 assert not stalls

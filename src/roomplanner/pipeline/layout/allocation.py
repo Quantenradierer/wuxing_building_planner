@@ -430,8 +430,13 @@ class Allocator:
         # Cluster members mostly don't touch the facade, so rooms needing windows stay full.
         needs_window = request.spec.windows is WindowRule.REQUIRED
         needs_window = needs_window or request.spec.facade_door is not None  # a vehicle door
+        needs_window = needs_window or request.type in self.rules.program.units  # subdivided
         low, high = request.spec.area
-        if (column := self._facade_column(request.spec, low, high, segment)) is not None:
+        unit = request.type in self.rules.program.units  # subdivided, never stacked
+        if (
+            not unit
+            and (column := self._facade_column(request.spec, low, high, segment)) is not None
+        ):
             hall = math.ceil(self.hallway / segment.unit) * segment.unit
             cluster = Cluster((hall + column) // segment.unit, hall, 1, column, [[]])
             front = self._member_depth(request, cluster)
@@ -622,6 +627,7 @@ class Allocator:
             spec = self.rules.spec(entry.room)
             stackable = spec.cluster or spec.windows is not WindowRule.REQUIRED
             stackable = stackable and entry.limit is None  # a stack holds several
+            stackable = stackable and entry.room not in self.rules.program.units
             if stackable and (cluster := self._fill_cluster(entry, state)) is not None:
                 # Small fill rooms (coffins, …) in deep strips: stacked along a hallway.
                 state.slots.append(cluster)
@@ -631,11 +637,18 @@ class Allocator:
                 # the row's rooms take the rest (wider stacks, else a storeroom).
                 self._spread(state, state.free_units, fills)
                 return
-            if (cluster := self._facade_cluster(entry, state)) is not None:
+            if (
+                entry.room not in self.rules.program.units
+                and (cluster := self._facade_cluster(entry, state)) is not None
+            ):
                 # Small window rooms in deep facade strips: at the facade, back rooms behind.
                 state.slots.append(cluster)
                 continue
-            if state.slots and self._facade_stack(entry, segment) is not None:
+            if (
+                state.slots
+                and entry.room not in self.rules.program.units
+                and self._facade_stack(entry, segment) is not None
+            ):
                 # No room left for another stack: widen the row rather than a huge room.
                 self._spread(state, state.free_units, fills)
                 return
@@ -971,6 +984,7 @@ class Allocator:
             if self.rules.spec(e.room).windows is not WindowRule.REQUIRED
             and not self.rules.spec(e.room).circulation
             and e.limit is None  # a limited room (one laundry) can't back every stack
+            and e.room not in self.rules.program.units
         ]
         fitting = [e for e in backs if self.rules.spec(e.room).min_side <= rest]
         return (fitting or backs or [RoomEntry(room=self.rules.program.cluster_filler, fill=True)])[

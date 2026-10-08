@@ -16,8 +16,9 @@ rooms:
     windows: forbidden
     door_width: 2
   micro_flat:           # a bedsit: one room with bed, toilet and kitchenette (unit, one room)
-    area: [50, 130]
+    area: [60, 200]
     min_side: 6
+    max_aspect: 4
     windows: required
     door_width: 2
   hallway:              # in a deep unit it runs along the whole unit (T-shaped)
@@ -69,8 +70,9 @@ rooms:
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: mattress, placement: scatter, count: [1, 2], wealth: [squatter]}
   bedsit:               # living, sleeping, cooking and washing in one room
-    area: [40, 130]
+    area: [40, 200]
     min_side: 6
+    max_aspect: 4
     windows: optional
     access: [hallway]
     furniture:
