@@ -79,6 +79,7 @@ def _back_corner(
     xs, ys = [c.x for c in cells], [c.y for c in cells]
     found: list[frozenset[Cell]] = []
     low, high = closet.area
+    thin = min(host.min_side, thinnest_extent(cells, cells))  # the host stays no thinner
     for w in range(closet.min_side, 9):
         for h in range(closet.min_side, 9):
             if not low <= w * h <= high:
@@ -96,6 +97,7 @@ def _back_corner(
                         and len(rest) >= host.area[0]
                         and connected(rest)
                         and _box(rest) >= host.min_side
+                        and thinnest_extent(rest, rest, thin) >= thin
                     ):
                         found.append(block)
     return rng.choice(sorted(found, key=min)) if found else None

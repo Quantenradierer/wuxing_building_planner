@@ -18,7 +18,9 @@ from roomplanner.errors import InfeasibleError
 from roomplanner.geometry import Cell, connected, thinnest_extent
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.footprint import arm_depth
-from roomplanner.pipeline.registry import register
+from roomplanner.pipeline.layout.corridor import CorridorLayout
+from roomplanner.pipeline.layout.parts import decompose, depth_of, wing_frame
+from roomplanner.pipeline.registry import register, resolve
 
 TOP = 8  # outlines drawn from the best this many (by proportion)
 
@@ -66,6 +68,24 @@ def _fits(cells: frozenset[Cell], arm: int) -> bool:
     return len(cells) > 0 and connected(cells) and thinnest_extent(cells, cells, arm) >= arm
 
 
+def _decomposes(ctx: Context, cells: frozenset[Cell], arm: int) -> bool:
+    """Corridor layouts cut the outline into a main part and wings: a notch must not leave a
+    wing too shallow for a corridor and a row of rooms."""
+    if not isinstance(resolve("layout", ctx.layout_name), CorridorLayout):
+        return True
+    program = ctx.rules.program
+    wing = program.corridor.width + program.strip_depth[0]
+    pieces = decompose(cells, ctx.params.street_side, arm, wing)
+    return all(
+        (p.parent is None and depth_of(p) >= arm)
+        or (
+            p.junction is not None
+            and min(wing_frame(p.box, p.junction).length, depth_of(p)) >= wing
+        )
+        for p in pieces
+    )
+
+
 @register("footprint", "osm")
 class OsmFootprint:
     """The outline of a real building, stretched to the requested size."""
@@ -90,7 +110,7 @@ class OsmFootprint:
         for _, outline, transpose in [*picks, *options[TOP:]]:
             flip_x, flip_y = rng.random() < 0.5, rng.random() < 0.5
             cells = _resample(outline, ctx.width, ctx.height, transpose, flip_x, flip_y)
-            if _fits(cells, arm):
+            if _fits(cells, arm) and _decomposes(ctx, cells, arm):
                 return cells
         raise InfeasibleError(
             f"{ctx.width}x{ctx.height} fits no real building outline, every part needs at "
