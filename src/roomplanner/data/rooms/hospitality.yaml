@@ -143,10 +143,11 @@ rooms:
     area: [12, 36]
     min_side: 4
     furniture:
-      - {object: counter, placement: wall, faces_door: true}
-      - {object: shelf, placement: wall, count: [1, 3]}
-      - {object: weapon_locker, placement: wall, count: [1, 3]}   # weapons are checked here
-      - {object: coat_rack, placement: scatter, count: [1, 3]}
+      - {object: counter, placement: wall, line: true, faces_door: true}
+      - {object: stool, placement: at, at: counter, beside: [back], count: [0, 1]}   # attendant
+      - {object: shelf, placement: wall, line: true, count: [1, 3]}
+      - {object: weapon_locker, placement: wall, line: true, count: [1, 3]}   # weapons are checked here
+      - {object: coat_rack, placement: wall, line: true, count: [1, 3]}
   coffin_hall:          # coffin motel: pods stacked along both sides of an aisle
     area: [40, 400]
     min_side: 6
@@ -184,7 +185,7 @@ rooms:
     furniture:
       - {object: bar_set, placement: back}   # away from the street door
       - {object: guard_post, placement: near_exit, count: [0, 1]}   # the bouncer
-      - {object: sofa_set, placement: wall, per: 80, count: [0, 3]}
+      - {object: sofa_set, placement: wall, line: true, per: 80, count: [0, 3]}
       - {object: cafe_table, placement: grid, per: 30, count: [2, 10]}
       - {object: pool_table, placement: center, count: [0, 1]}
       - {object: arcade_machine, placement: wall, count: [0, 2]}
@@ -198,7 +199,9 @@ rooms:
     windows: forbidden
     transit: false
     furniture:
-      - {object: sofa_set, placement: wall}
-      - {object: safe, placement: corner, count: [0, 1]}
+      - {object: desk, placement: wall, faces_door: true}   # the fixer behind it
+      - {object: chair, placement: at, at: desk, beside: [front], count: [2, 2]}   # guest chairs
+      - {object: sofa_set, placement: wall, count: [0, 1]}
+      - {object: safe, placement: corner}
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: weapon_locker, placement: wall, count: [0, 1]}

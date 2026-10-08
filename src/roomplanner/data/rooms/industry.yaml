@@ -8,12 +8,12 @@ rooms:
     facade_door: 6         # forklifts and vans straight into the hall
     furniture:
       - {object: rack, placement: rows, aisle: 4, margin: 3}
-      - {object: pallet, placement: scatter, per: 120, count: [1, 10]}
+      - {object: pallet, placement: near_exit, per: 120, count: [1, 10]}   # staged at the dock door
       - {object: shipping_container, placement: wall, per: 500, count: [0, 3]}
-      - {object: drone_dock, placement: scatter, count: [1, 3], security: [corporate, aaa]}
-      - {object: forklift, placement: scatter, count: [0, 2]}
-      - {object: crate, placement: scatter, per: 150, count: [0, 6]}
-      - {object: barrel, placement: scatter, per: 150, count: [0, 6]}
+      - {object: drone_dock, placement: wall, count: [1, 3], security: [corporate, aaa]}
+      - {object: forklift, placement: wall, count: [1, 2]}
+      - {object: crate, placement: near_exit, per: 150, count: [0, 6]}
+      - {object: barrel, placement: wall, line: true, per: 150, count: [0, 6]}
       - {object: workbench, placement: wall, count: [0, 1]}
       - {object: fire_extinguisher, placement: wall, per: 300, count: [1, 4]}
       - {object: hydrant, placement: wall, count: [0, 1]}
@@ -22,8 +22,9 @@ rooms:
     area: [24, 60]
     min_side: 5
     furniture:
-      - {object: workstation, placement: wall, per: 40, count: [1, 2], scale: false}
-      - {object: filing_cabinet, placement: wall, count: [1, 3]}
+      - {object: workstation, placement: wall, line: true, per: 40, count: [1, 2], scale: false}
+      - {object: filing_cabinet, placement: wall, line: true, count: [1, 3]}
+      - {object: counter, placement: wall, faces_door: true, count: [0, 1]}   # drivers' counter
       - {object: terminal, placement: corner}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
   clean_room:
@@ -34,18 +35,21 @@ rooms:
     vestibule: airlock
     furniture:
       - {object: lab_bench, placement: rows, aisle: 3, margin: 2}
-      - {object: fume_hood, placement: wall, count: [1, 2]}
-      - {object: stool, placement: at, at: lab_bench, count: [0, 1]}
+      - {object: fume_hood, placement: wall, line: true, count: [1, 2]}
+      - {object: stool, placement: at, at: lab_bench, beside: [front], count: [1, 1]}
+      - {object: sink, placement: wall, count: [0, 1]}
       - {object: terminal, placement: wall, count: [0, 1]}
   wet_lab:
     area: [60, 160]
     min_side: 6
     furniture:
-      - {object: lab_bench, placement: rows, aisle: 3, margin: 2}
-      - {object: fume_hood, placement: wall, count: [1, 3]}
-      - {object: specimen_fridge, placement: wall, count: [1, 2]}
+      - {object: lab_bench, placement: wall, line: true, count: [1, 4]}   # continuous wall benches
+      - {object: lab_bench, placement: rows, aisle: 3, margin: 2, count: [0, 6]}   # island benches
+      - {object: fume_hood, placement: wall, line: true, count: [1, 3]}
+      - {object: specimen_fridge, placement: wall, line: true, count: [1, 2]}
       - {object: sink, placement: wall}
-      - {object: stool, placement: at, at: lab_bench, count: [0, 1]}
+      - {object: stool, placement: at, at: lab_bench, beside: [front], count: [1, 1]}
+      - {object: desk, placement: wall, count: [0, 1]}   # write-up desk
       - {object: terminal, placement: wall, count: [0, 1]}
       - {object: fire_extinguisher, placement: wall}
   specimen_storage:
@@ -56,7 +60,7 @@ rooms:
     access: [wet_lab, clean_room, lab]
     annex: 1.0                # always behind a lab if one fits
     furniture:
-      - {object: specimen_fridge, placement: wall, per: 5, count: [2, 8]}
+      - {object: specimen_fridge, placement: wall, line: true, per: 5, count: [2, 8]}
   test_chamber:
     area: [60, 160]
     min_side: 7
@@ -64,10 +68,10 @@ rooms:
     door_width: 3
     furniture:
       - {object: machinery, placement: center}
-      - {object: terminal, placement: wall, count: [1, 3]}
+      - {object: terminal, placement: wall, line: true, count: [1, 3]}   # observation console
       - {object: machinery, placement: wall, count: [0, 2]}
       - {object: workbench, placement: wall, count: [0, 1]}
-      - {object: crate, placement: scatter, count: [0, 2]}
+      - {object: crate, placement: wall, count: [0, 2]}
   corp_lobby:           # reception with a security checkpoint
     area: [80, 400]
     min_side: 8
@@ -87,17 +91,20 @@ rooms:
     door_width: 3
     furniture:
       - {object: cubicle, placement: rows, aisle: 2, paired: true, block: 30}   # back to back
-      - {object: copier, placement: wall, count: [1, 2]}
+      - {object: copier, placement: wall, line: true, count: [1, 2]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: water_cooler, placement: wall, count: [0, 1]}
-      - {object: filing_cabinet, placement: wall, count: [0, 2]}
+      - {object: filing_cabinet, placement: wall, line: true, count: [0, 2]}
+      - {object: desk, placement: wall, faces_door: true, count: [0, 1]}   # supervisor
   airlock:              # gowning / air shower in front of a clean room
     area: [12, 40]
     min_side: 3
     windows: forbidden
     furniture:
-      - {object: locker, placement: wall, count: [1, 3]}
-      - {object: bench, placement: wall, count: [0, 1]}
+      - {object: locker, placement: wall, line: true, count: [1, 3]}
+      - {object: bench, placement: at, at: locker, beside: [front], count: [1, 1]}
+      - {object: sink, placement: wall}   # hand wash / air shower stand-in
+      - {object: rug, placement: center, count: [0, 1]}   # sticky mat
   icu:
     area: [80, 200]
     min_side: 8
@@ -105,9 +112,11 @@ rooms:
     windows: required
     door_width: 3
     furniture:
-      - {object: patient_bed, placement: wall, spaced: true, per: 24, count: [2, 8]}
-      - {object: machinery, placement: wall, per: 30, count: [1, 6]}
-      - {object: medical_cabinet, placement: wall, count: [1, 2]}
+      - {object: patient_bed, placement: wall, line: true, per: 24, count: [2, 8]}
+      - {object: machinery, placement: at, at: patient_bed, beside: [back], limit: 1}   # ventilator per bed
+      - {object: reception_post, placement: center, count: [0, 1]}   # nurse station
+      - {object: medical_cabinet, placement: wall, line: true, count: [1, 2]}
+      - {object: sink, placement: wall}
   imaging:
     area: [60, 140]
     min_side: 7
@@ -115,9 +124,9 @@ rooms:
     door_width: 3
     furniture:
       - {object: scanner, placement: center}
-      - {object: terminal, placement: wall, count: [1, 2]}
-      - {object: medical_cabinet, placement: wall, count: [0, 1]}
-      - {object: chair, placement: at, at: terminal, count: [0, 1]}
+      - {object: terminal, placement: near_exit, count: [1, 2]}   # console beside the door
+      - {object: chair, placement: at, at: terminal, count: [1, 1]}
+      - {object: medical_cabinet, placement: wall, line: true, count: [1, 2]}
   cafeteria:
     area: [80, 300]
     min_side: 8
@@ -125,9 +134,9 @@ rooms:
     door_width: 3
     furniture:
       - {object: canteen_set, placement: rows, aisle: 2, margin: 2}
-      - {object: counter, placement: wall, count: [1, 2]}
-      - {object: vending_machine, placement: wall, count: [1, 2]}
-      - {object: trash_bin, placement: wall, count: [1, 2]}
+      - {object: counter, placement: wall, line: true, count: [1, 2]}   # serving line
+      - {object: vending_machine, placement: wall, line: true, count: [1, 2]}
+      - {object: trash_bin, placement: near_exit, count: [1, 2]}
       - {object: coffee_machine, placement: wall, count: [0, 1]}
       - {object: medkit, placement: wall, count: [0, 1]}
   storefront:           # street doc's cover business (pawn shop, noodle bar)
@@ -135,11 +144,11 @@ rooms:
     min_side: 6
     circulation: true
     furniture:
-      - {object: counter, placement: wall, faces_door: true}
-      - {object: shelf, placement: wall, per: 8, count: [2, 8]}
+      - {object: counter, placement: wall, line: true, faces_door: true}
+      - {object: shelf, placement: wall, line: true, per: 8, count: [2, 8]}
       - {object: vending_machine, placement: wall, count: [0, 1]}
-      - {object: display_case, placement: wall, count: [0, 2]}
-      - {object: stool, placement: at, at: counter, count: [0, 1]}
+      - {object: display_case, placement: wall, line: true, count: [0, 2]}
+      - {object: stool, placement: at, at: counter, beside: [front], count: [1, 1]}
       - {object: atm, placement: wall, count: [0, 1]}
   recovery_room:
     area: [30, 90]
@@ -147,6 +156,9 @@ rooms:
     next_to: [operating_room]
     furniture:
       - {object: patient_bed, placement: wall, spaced: true, per: 15, count: [1, 4]}
+      - {object: medical_cart, placement: wall, count: [0, 1]}   # crash cart
+      - {object: sink, placement: wall}
+      - {object: reception_post, placement: wall, faces_door: true, count: [0, 1]}   # nurse desk
       - {object: medical_cabinet, placement: wall, count: [0, 1]}
   back_room_or:         # the street doc's operating table
     area: [40, 100]
