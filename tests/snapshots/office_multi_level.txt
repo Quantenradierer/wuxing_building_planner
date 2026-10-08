@@ -82,11 +82,11 @@ office 48x28 cells, wealth=middle, seed=7
 
 == Ground floor ==
 +===---===---===---===--+===---===---===---===+--===--+--DDD-------===---===---===---===---===--+
-"*                     *|*                 k  |  U    D                                ooooooo l"
-"                       |                     |       D                                ooooooo  "
-"                       |                     D       D                    c c         ooooooo l"
+"*                     *|*                 k  |  U    D                                         "
+"                       |                     |       D                                         "
+"                       |                     D       D                    c c                  "
 |                       |                     D       |                                         |
-|                       |        c c          D       |                    ttt 17              l|
+|                       |        c c          D       |          l l       ttt 17               |
 |                       |                     |       +-------------------+ttt                  |
 "            c c        |      rrrrrrr 8      |       |    ###############|ttt                  "
 "                       |      rrrrrrr        |       |    ###############|                     "
@@ -104,7 +104,7 @@ office 48x28 cells, wealth=middle, seed=7
 "                       +---+-----------+-----+       Deeeeeee|  hhh    |                       "
 "                           |i          D  WWW|       Deeeeeee|c hhh c  |          ddd ddd      "
 |                           |i          D  WWW|       |eeeeeee|         |          ddd ddd      |
-|                           |i   9      D10WWW|       |eeeeeee|    19   |        c ddd ddd c    |
+|                           |i   9      D10WWW|       |eeeeeee|    18   |        c ddd ddd c    |
 |                           |           |     |       +-------+         |          ddd ddd      |
 |                      k k  |           |     |*              |         |          ddd ddd     k|
 +--DDD----------------------+--DDD------+-----+               +--DDD----+--DDD------------------+
@@ -116,29 +116,29 @@ office 48x28 cells, wealth=middle, seed=7
 "                                                                                               |
 "            qqqqqqq       * '                                                           qqqqqqq|
 +--DDD--------------------------+                           +--DDD--------+-----+--DDD----------+
-|                              *|                           |             D6 WWW|          sss n|
-|                               |                           |             D  WWW|              n|
-"                               |                           |i     5      D  WWW|s     14      n"
-"                               |                           |i            +-----+s             n"
-"                               |            c              |i            D7 WWW|s             n"
-|                               |                           |             D  WWW|              n|
-|      c   c 12c c   c   c      |q       RRRRRRRRR          |U            D  WWW|          sss n|
-|                               |q       RRRRRRRRR          +-------------+-+---+--DDD----------+
-"    TTTTTTTTTTT TTTTTTTTTTT    |q       RRRRRRRRR          D        QQQQQQQ|            QQQ QQQ|
-"    TTTTTTTTTTT TTTTTTTTTTT    |q                          D        QQQQQQQ|            QQQ QQQ|
-"    TTTTTTTTTTT TTTTTTTTTTT    |q           4              D      15QQQQQQQ|            QQQ QQQ|
-|    TTTTTTTTTTT TTTTTTTTTTT    |q                          |               |            QQQ QQQ|
-|    TTTTTTTTTTT TTTTTTTTTTT    |q                          |               |            QQQ QQQ|
-|                               |                           +---------------+-+          QQQ QQQ|
-"      c   c   c c   c   c      |x                          |    QQQQQQQ   QQQ|QQQ     18QQQ QQQ|
-"                               |                           |    QQQQQQQ   QQQ|QQQ              |
-"                               |                           D    QQQQQQQ   QQQ|QQQ              |
-|                               |                           D              QQQ|QQQ              |
-|                               |                           D        16    QQQ|QQQ              |
-|                               |                           |              QQQ|QQQ              |
-|                              *|*                          |        l     QQQ|QQQ              |
-+===---===---===---===---===----+----===---DDDDDDD-----===--+-----------------+-----------------+
-  objects: q bench, k cabinet, t canteen_table, Q capsule, c chair, n counter, e elevator_car, F filing_cabinet, a fire_alarm_panel, ' fire_extinguisher, f fridge, h huddle_table, l locker, x medkit, T meeting_table, d office_desk, * plant, R reception_desk, r round_table, s shelf, i sink, o sofa, # stairs, U trash_bin, < wall_screen, w water_cooler, W wc
+|                              *|                           |             D6 WWW|              P|
+|                               |                           |             D  WWW|              P|
+"                               |                           |i     5      D  WWW|              P"
+"                               |                           |i            +-----+               "
+"                               |            c              |i            D7 WWW|              P"
+|                               |                           |             D  WWW|              P|
+|      c   c 12c c   c   c      |q       RRRRRRRRR          |U            D  WWW|              P|
+|                               |q       RRRRRRRRR          +-------------+-----+               |
+"    TTTTTTTTTTT TTTTTTTTTTT    |q       RRRRRRRRR          D    QQQQQQQ QQQQQQQ|              n"
+"    TTTTTTTTTTT TTTTTTTTTTT    |q                          D    QQQQQQQ QQQQQQQ|              n"
+"    TTTTTTTTTTT TTTTTTTTTTT    |q           4              D    QQQQQQQ QQQQQQQ|      14      n"
+|    TTTTTTTTTTT TTTTTTTTTTT    |q                          |                   |              n|
+|    TTTTTTTTTTT TTTTTTTTTTT    |q                          |        15        l|s             n|
+|                               |                           +-------------------+s             n|
+"      c   c   c c   c   c      |x                          |    QQQQQQQ     QQQ|s             n"
+"                               |                           |    QQQQQQQ     QQQ|               "
+"                               |                           D    QQQQQQQ     QQQ|s              "
+|                               |                           D                QQQ|s              |
+|                               |                           D        16      QQQ|s              |
+|                               |                           |                QQQ|               |
+|                              *|*                          |  l l           QQQ|nnnnnnn PPP PPP|
++===---===---===---===---===----+----===---DDDDDDD-----===--+-------------------+----===---===--+
+  objects: q bench, k cabinet, t canteen_table, Q capsule, c chair, P copier, n counter, e elevator_car, F filing_cabinet, a fire_alarm_panel, ' fire_extinguisher, f fridge, h huddle_table, l locker, x medkit, T meeting_table, d office_desk, * plant, R reception_desk, r round_table, s shelf, i sink, # stairs, U trash_bin, < wall_screen, w water_cooler, W wc
     1  corridor            248 cells
     2  stairwell            50 cells
     3  elevator             16 cells
@@ -152,12 +152,11 @@ office 48x28 cells, wealth=middle, seed=7
    11  office               82 cells
    12  meeting_room        176 cells
    13  meeting_room        162 cells
-   14  copy_room            32 cells
-   15  nap_room             24 cells
-   16  nap_room             36 cells
+   14  copy_room            88 cells
+   15  nap_room             30 cells
+   16  nap_room             40 cells
    17  staff_room           96 cells
-   18  nap_room             66 cells
-   19  huddle_room          25 cells
+   18  huddle_room          25 cells
 
 == Basement B1 ==
 +---------------------------+-----+-----------+-------+---------------+-----------------+-------+
