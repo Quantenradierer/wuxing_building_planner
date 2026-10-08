@@ -16,14 +16,15 @@ rooms:
       - {object: double_bed_set, placement: wall, spaced: true}
       - {object: home_workstation, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [1, 2]}
-      - {object: armchair, placement: scatter, count: [0, 1]}
-      - {object: wall_screen, placement: wall, count: [0, 1]}
-      - {object: wardrobe, placement: wall, count: [0, 1]}
+      - {object: armchair, placement: corner, count: [0, 1]}
+      - {object: side_table, placement: at, at: armchair, count: [0, 1]}
+      - {object: wall_screen, placement: end, count: [0, 1]}
+      - {object: wardrobe, placement: wall}
   capsule_dorm:         # rows of sleeping pods, back to back
     area: [240, 900]
     min_side: 10
     furniture:
-      - {object: capsule, placement: rows, aisle: 3, margin: 0, paired: true}
+      - {object: capsule, placement: rows, aisle: 3, margin: 1, paired: true}
   shower_room:
     area: [16, 48]
     min_side: 4
@@ -47,8 +48,10 @@ rooms:
     cluster: true
     access: [staff_room]
     furniture:
-      - {object: shelf, placement: wall, per: 5, count: [2, 8]}
-      - {object: laundry_cart, placement: wall, count: [0, 2]}
+      - {object: shelf, placement: wall, line: true, per: 5, count: [2, 8]}
+      - {object: laundry_cart, placement: wall, line: true, count: [1, 2]}
+      - {object: sink, placement: wall}
+      - {object: trash_bin, placement: at, at: sink, count: [0, 1]}
   restaurant:
     area: [80, 300]
     min_side: 8
@@ -56,7 +59,9 @@ rooms:
     door_width: 3
     furniture:
       - {object: dining_set, placement: rows, aisle: 2, margin: 2}
+      - {object: sofa, placement: wall, line: true, count: [0, 4]}      # banquette seating
       - {object: counter, placement: wall, count: [0, 1]}
+      - {object: stool, placement: at, at: counter, beside: [front], count: [0, 2]}
       - {object: plant, placement: corner, count: [1, 3]}
       - {object: coat_rack, placement: corner, count: [0, 1]}
   commercial_kitchen:
@@ -66,13 +71,13 @@ rooms:
     next_to: [restaurant]
     connect: [restaurant]   # the pass: a door straight into the dining room
     furniture:
-      - {object: stove, placement: wall, count: [2, 4]}
-      - {object: counter, placement: wall, count: [2, 4]}
-      - {object: fridge, placement: wall, count: [1, 3]}
+      - {object: stove, placement: wall, line: true, count: [2, 4]}      # one cooking line
+      - {object: counter, placement: wall, line: true, faces_door: true, count: [2, 4]}      # pass
+      - {object: fridge, placement: wall, line: true, count: [1, 3]}
       - {object: fire_extinguisher, placement: wall}
-      - {object: counter, placement: center, count: [0, 1]}
-      - {object: sink, placement: wall, count: [1, 2]}
-      - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: counter, placement: center, count: [0, 1]}      # prep island
+      - {object: sink, placement: wall, line: true, count: [1, 2]}      # dish pit
+      - {object: shelf, placement: wall, line: true, count: [0, 2]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   bar_room:
     area: [60, 200]
@@ -81,8 +86,8 @@ rooms:
     furniture:
       - {object: bar_set, placement: wall}
       - {object: cafe_table, placement: grid, per: 24, count: [2, 8]}
-      - {object: sofa, placement: wall, count: [0, 2]}
-      - {object: arcade_machine, placement: wall, count: [0, 2]}
+      - {object: sofa, placement: wall, line: true, count: [0, 2]}
+      - {object: arcade_machine, placement: wall, line: true, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: pool_table, placement: center, count: [0, 1]}
   dance_floor:          # the club's hall
@@ -97,8 +102,8 @@ rooms:
       - {object: coat_check, placement: near_exit}                      # cloakroom counter
       - {object: security_gate, placement: near_exit, count: [0, 2]}   # MAD scanner
       - {object: cafe_table, placement: grid, per: 60, count: [1, 6]}
-      - {object: speaker, placement: corner, count: [2, 4]}
-      - {object: sofa, placement: wall, count: [1, 4]}
+      - {object: speaker, placement: at, at: dj_booth, beside: [flanks], limit: 1}
+      - {object: sofa, placement: wall, line: true, count: [1, 4]}      # booths
       - {object: stage, placement: wall, count: [0, 1], near_room: backstage}
   lounge:               # upper club floors
     area: [80, 100000]
@@ -117,18 +122,21 @@ rooms:
     min_side: 5
     furniture:
       - {object: lounge_set, placement: wall}
-      - {object: rug, placement: center, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
-      - {object: counter, placement: wall, count: [0, 1]}
+      - {object: counter, placement: wall}      # private bar
+      - {object: stool, placement: at, at: counter, beside: [front], count: [1, 2]}
       - {object: plant, placement: corner, count: [0, 1]}
   backstage:
     wealth_shift: -1          # plainer than the rest of the building
     area: [30, 90]
     min_side: 5
     furniture:
-      - {object: locker, placement: wall, count: [2, 6]}
+      - {object: counter, placement: wall, line: true}      # dressing station
+      - {object: mirror, placement: wall, count: [0, 2]}
+      - {object: stool, placement: at, at: counter, beside: [front], count: [1, 3]}
+      - {object: locker, placement: wall, line: true, count: [2, 6]}
       - {object: sofa, placement: wall, count: [0, 1]}
-      - {object: crate, placement: scatter, count: [1, 3]}
+      - {object: crate, placement: wall, count: [1, 3]}
       - {object: workstation, placement: wall, count: [0, 1]}
       - {object: coat_rack, placement: corner, count: [0, 2]}
   cloakroom:

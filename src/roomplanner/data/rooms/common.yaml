@@ -266,6 +266,9 @@ rooms:
     area: [9, 72]      # a server room's is carved at 3 x 4; a data hall's is a full-depth column
     min_side: 3
     windows: forbidden
+    furniture:
+      - {object: terminal, placement: near_exit, count: [1, 2]}      # badge / biometric readers
+      - {object: wall_screen, placement: wall, count: [0, 1]}      # camera monitor
   safe_room:            # panic room: supplies, a terminal, a way to call for help
     area: [12, 40]
     min_side: 4
