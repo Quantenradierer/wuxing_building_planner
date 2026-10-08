@@ -1,5 +1,7 @@
 """Corridors shaped like real buildings (ADR 0017)."""
 
+from itertools import pairwise
+
 from roomplanner.generator import generate
 from roomplanner.pipeline.layout.osm import shapes
 from roomplanner.validation import hard_violations
@@ -13,7 +15,7 @@ def test_the_shapes_are_octilinear_paths() -> None:
     assert len(shapes()) >= 20
     for shape in shapes():
         for path in shape.paths:
-            for (ax, ay), (bx, by) in zip(path, path[1:], strict=False):
+            for (ax, ay), (bx, by) in pairwise(path):
                 dx, dy = abs(bx - ax), abs(by - ay)
                 assert dx == 0 or dy == 0 or dx == dy, shape.ident
 

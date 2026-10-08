@@ -131,7 +131,7 @@ def rasterise(points: list[Point]) -> list[str] | None:
     x0, y0 = min(p[0] for p in points), min(p[1] for p in points)
     wide = max(p[0] for p in points) - x0
     high = max(p[1] for p in points) - y0
-    if not MIN_SIDE <= min(wide, high) or max(wide, high) > MAX_SIDE:
+    if min(wide, high) < MIN_SIDE or max(wide, high) > MAX_SIDE:
         return None
     size = (math.ceil(wide / CELL) + 1, math.ceil(high / CELL) + 1)
     image = Image.new("1", size, 0)

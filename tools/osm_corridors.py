@@ -46,9 +46,6 @@ REGIONS = [  # name, lat, lon, radius (m)
     ("amsterdam", 52.37, 4.90, 12000),
     ("paris", 48.86, 2.35, 12000),
     ("london", 51.51, -0.12, 12000),
-    ("new-york", 40.73, -73.99, 12000),
-    ("boston", 42.36, -71.06, 12000),
-    ("tokyo", 35.68, 139.70, 12000),
 ]
 # category: Overpass selectors of the buildings the corridors must lie in
 CATEGORIES = {
@@ -57,10 +54,7 @@ CATEGORIES = {
     "school": ['way["building"="school"]'],
     "hospital": ['way["building"="hospital"]', 'way["amenity"="hospital"]["building"]'],
     "commercial": ['way["building"~"^(commercial|retail)$"]'],
-    "hotel": ['way["building"="hotel"]'],
     "government": ['way["building"~"^(government|civic|public)$"]'],
-    "industrial": ['way["building"~"^(industrial|warehouse)$"]'],
-    "apartments": ['way["building"="apartments"]'],
 }
 PER_CATEGORY = 24  # shapes kept per category
 EXCLUDED = ("tunnel", "railway", "public_transport", "subway", "bridge", "highway", "area:highway")
