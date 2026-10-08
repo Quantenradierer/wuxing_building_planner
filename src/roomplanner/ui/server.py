@@ -63,7 +63,11 @@ def options() -> JsonObject:
         "shape": [s.value for s in Shape],
         "sides": [s.value for s in Side],
         "entrances": [e.value for e in EntranceKind],
-        "layouts": ["partition", "partition_diagonal"],  # interchangeable on any partition type
+        "layouts": [
+            "partition",
+            "partition_diagonal",
+            "partition_osm",
+        ],  # interchangeable on any partition type
         # Room types per building type, for generating a lone room.
         "rooms": {t.value: sorted(load_rules(t).rooms) for t in BuildingType},
         "themes": sorted(f.name.removesuffix(".yaml") for f in (_DATA / "themes").iterdir()),

@@ -83,6 +83,7 @@ class Shape(StrEnum):
     Z = "z"
     STEPPED = "stepped"
     IRREGULAR = "irregular"  # one of the others, picked by the seed
+    OSM = "osm"  # the outline of a real building from OpenStreetMap, picked by the seed
 
 
 class GenerationParams(BaseModel):

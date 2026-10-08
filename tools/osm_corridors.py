@@ -18,6 +18,7 @@ import itertools
 import json
 import math
 import sys
+import time
 import urllib.parse
 import urllib.request
 from collections import Counter
@@ -26,18 +27,43 @@ from pathlib import Path
 import yaml
 from PIL import Image, ImageDraw
 
-OVERPASS = "https://overpass-api.de/api/interpreter"
-REGIONS = [  # name, lat, lon, radius (m)
-    ("rhein-main", 50.11, 8.68, 40000),
-    ("berlin", 52.52, 13.40, 20000),
-    ("munich", 48.14, 11.58, 20000),
-    ("london", 51.51, -0.12, 20000),
-    ("tokyo", 35.68, 139.70, 20000),
-    ("paris", 48.86, 2.35, 20000),
-    ("new-york", 40.73, -73.99, 20000),
-    ("hamburg", 53.55, 9.99, 20000),
-    ("zurich", 47.37, 8.54, 20000),
+OVERPASS = [  # public instances, tried in turn
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
 ]
+REGIONS = [  # name, lat, lon, radius (m)
+    ("rhein-main", 50.11, 8.68, 12000),
+    ("berlin", 52.52, 13.40, 12000),
+    ("munich", 48.14, 11.58, 12000),
+    ("hamburg", 53.55, 9.99, 12000),
+    ("cologne", 50.94, 6.96, 12000),
+    ("stuttgart", 48.78, 9.18, 12000),
+    ("karlsruhe", 49.01, 8.40, 12000),
+    ("dresden", 51.05, 13.74, 12000),
+    ("vienna", 48.21, 16.37, 12000),
+    ("zurich", 47.37, 8.54, 12000),
+    ("amsterdam", 52.37, 4.90, 12000),
+    ("paris", 48.86, 2.35, 12000),
+    ("london", 51.51, -0.12, 12000),
+    ("new-york", 40.73, -73.99, 12000),
+    ("boston", 42.36, -71.06, 12000),
+    ("tokyo", 35.68, 139.70, 12000),
+]
+# category: Overpass selectors of the buildings the corridors must lie in
+CATEGORIES = {
+    "office": ['way["building"="office"]'],
+    "university": ['way["building"~"^(university|college)$"]'],
+    "school": ['way["building"="school"]'],
+    "hospital": ['way["building"="hospital"]', 'way["amenity"="hospital"]["building"]'],
+    "commercial": ['way["building"~"^(commercial|retail)$"]'],
+    "hotel": ['way["building"="hotel"]'],
+    "government": ['way["building"~"^(government|civic|public)$"]'],
+    "industrial": ['way["building"~"^(industrial|warehouse)$"]'],
+    "apartments": ['way["building"="apartments"]'],
+}
+PER_CATEGORY = 24  # shapes kept per category
+EXCLUDED = ("tunnel", "railway", "public_transport", "subway", "bridge", "highway", "area:highway")
 CELL = 0.5  # m
 PIXEL = 0.25  # m, raster resolution
 MIN_AREA = 40.0  # m2 of corridor in a network
@@ -53,18 +79,33 @@ OUT = Path(__file__).resolve().parent.parent / "src/roomplanner/data/osm_corrido
 Point = tuple[float, float]
 
 
-def fetch(path: Path) -> None:
-    parts = [
-        f'way["indoor"="corridor"](around:{radius},{lat},{lon});' for _, lat, lon, radius in REGIONS
-    ]
-    query = "[out:json][timeout:180];(" + "".join(parts) + ");out geom;"
-    request = urllib.request.Request(
-        OVERPASS,
-        data=urllib.parse.urlencode({"data": query}).encode(),
-        headers={"User-Agent": "roomplanner/0.1 (corridor shapes)"},
-    )
-    with urllib.request.urlopen(request, timeout=300) as response:
-        path.write_bytes(response.read())
+def fetch(folder: Path) -> None:
+    """One Overpass query per category and region: the corridors inside such buildings."""
+    folder.mkdir(parents=True, exist_ok=True)
+    for category, selectors in CATEGORIES.items():
+        for name, lat, lon, radius in REGIONS:
+            target = folder / f"{category}_{name}.json"
+            if target.exists():
+                continue
+            buildings = "".join(f"{sel}(around:{radius},{lat},{lon});" for sel in selectors)
+            query = (
+                f"[out:json][timeout:240];({buildings})->.b;.b map_to_area->.a;"
+                'way["indoor"="corridor"](area.a);out geom tags;'
+            )
+            for attempt in range(6):
+                request = urllib.request.Request(
+                    OVERPASS[attempt % len(OVERPASS)],
+                    data=urllib.parse.urlencode({"data": query}).encode(),
+                    headers={"User-Agent": "roomplanner/0.1 (corridor shapes)"},
+                )
+                try:
+                    with urllib.request.urlopen(request, timeout=300) as response:
+                        target.write_bytes(response.read())
+                    break
+                except OSError as error:
+                    print(f"{category} {name}: {error}", file=sys.stderr)
+                    time.sleep(10 * (attempt + 1))
+            time.sleep(5)
 
 
 # --- geometry ---------------------------------------------------------------------------
@@ -378,9 +419,22 @@ def interest(paths: list[list[tuple[int, int]]]) -> tuple[int, int]:
     return bends, diagonal
 
 
-def build(raw: Path) -> None:
-    data = json.loads(raw.read_text())
-    ways = [w for w in data["elements"] if w.get("type") == "way" and "geometry" in w]
+def build(folder: Path) -> None:
+    ways: list[dict] = []
+    seen: set[int] = set()
+    for file in sorted(folder.glob("*.json")):
+        category = file.name.split("_")[0]
+        for w in json.loads(file.read_text())["elements"]:
+            if w.get("type") != "way" or "geometry" not in w or w["id"] in seen:
+                continue
+            tags = w.get("tags", {})
+            if any(k in tags for k in EXCLUDED) or str(tags.get("level", "0")).startswith("-"):
+                continue
+            if str(tags.get("layer", "0")).startswith("-") or tags.get("room") == "stairs":
+                continue
+            seen.add(w["id"])
+            w["_category"] = category
+            ways.append(w)
     found: list[dict] = []
     for group in clusters(ways):
         lat0 = group[0]["geometry"][0]["lat"]
@@ -413,20 +467,29 @@ def build(raw: Path) -> None:
         found.append(
             {
                 "id": f"osm-{min(w['id'] for w in group)}",
+                "category": group[0]["_category"],
+                "source": sorted(w["id"] for w in group),  # OSM way ids
                 "bends": bends,
                 "diagonal": diagonal,
                 "paths": [[[x - x0, y - y0] for x, y in path] for path in paths],
             }
         )
-    # the more interesting shapes, about half of them with diagonals
-    found.sort(key=lambda t: -t["bends"])
-    slanted = [t for t in found if t["diagonal"]][: MAX_TEMPLATES // 2]
-    square = [t for t in found if not t["diagonal"]][: MAX_TEMPLATES // 2]
-    found = slanted + square
+    # per category the most interesting shapes, about half of them with diagonals
+    kept: list[dict] = []
+    for category in CATEGORIES:
+        mine = sorted((t for t in found if t["category"] == category), key=lambda t: -t["bends"])
+        slanted = [t for t in mine if t["diagonal"]][: PER_CATEGORY // 2]
+        square = [t for t in mine if not t["diagonal"]][: PER_CATEGORY - len(slanted)]
+        kept += slanted + square
+        print(f"{category}: {len(mine)} usable, {len(slanted) + len(square)} kept")
+    found = kept
     found.sort(key=lambda t: t["id"])
     header = (
-        "# Corridor centrelines of real buildings, cells of 0.5 m, 8 directions.\n"
-        "# Generated by tools/osm_corridors.py. Data (c) OpenStreetMap contributors, ODbL.\n"
+        "# Corridor centrelines of real buildings: cells of 0.5 m, eight directions.\n"
+        "# Generated by tools/osm_corridors.py from OpenStreetMap indoor mapping (way ids in\n"
+        "# `source`). (c) OpenStreetMap contributors, Open Database License 1.0:\n"
+        "# https://www.openstreetmap.org/copyright. This file is a derived database and stays\n"
+        "# under the ODbL; see docs/third-party.md.\n"
     )
     OUT.write_text(header + yaml.safe_dump(found, default_flow_style=None, width=100))
     print(f"{len(found)} shapes -> {OUT}")

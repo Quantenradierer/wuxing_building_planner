@@ -97,3 +97,8 @@ uv run pytest            # UPDATE_SNAPSHOTS=1 rewrites the ASCII snapshots
 uv run ruff check . && uv run ruff format --check .
 uv run pyright
 ```
+
+## Credits
+
+The `partition_osm` layout uses corridor shapes derived from OpenStreetMap, © OpenStreetMap
+contributors, ODbL. Credit them on maps made with it; see `docs/third-party.md`.

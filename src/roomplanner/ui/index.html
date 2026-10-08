@@ -90,6 +90,7 @@
     </div>
     <label class="field"><span data-i18n="layout">Layout</span> <select name="layout"></select></label>
     <label class="field"><span data-i18n="shape">Shape</span> <select name="shape"></select></label>
+    <p id="osm-credit" hidden style="color:var(--muted);font-size:12px;margin:4px 0 8px"><span data-i18n="osm_credit">Shapes taken from real buildings:</span> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors (ODbL)</a></p>
     <label class="field"><span data-i18n="wealth">Wealth</span> <select name="wealth"></select></label>
     <label class="field"><span data-i18n="condition">Condition</span> <select name="condition"></select></label>
     <label class="field"><span data-i18n="security">Security</span> <select name="security"></select></label>
@@ -213,6 +214,7 @@ function fillChoices(keep = {}) {
   fillSelect("theme", o.themes, pick("theme"));
   fillSelect("layout", o.layouts, pick("layout"), (v) => t(`layout_${v}`), t("layout_default"));
   fillRooms(pick("room"));
+  syncCredit();
   for (const label of $("entrances").querySelectorAll("label")) {
     label.lastChild.textContent = ` ${term("entrance", label.querySelector("input").value)}`;
   }
@@ -288,6 +290,12 @@ function syncRoom() {
   const lone = form.elements.room.value !== "";
   for (const name of ["floors_above", "floors_below", "shape"]) form.elements[name].disabled = lone;
 }
+// Layout and footprint taken from OpenStreetMap need its credit (ODbL).
+function syncCredit() {
+  $("osm-credit").hidden = form.elements.layout.value !== "partition_osm" && form.elements.shape.value !== "osm";
+}
+form.elements.layout.addEventListener("change", syncCredit);
+form.elements.shape.addEventListener("change", syncCredit);
 form.elements.building_type.addEventListener("change", () => fillRooms());
 form.elements.room.addEventListener("change", syncRoom);
 

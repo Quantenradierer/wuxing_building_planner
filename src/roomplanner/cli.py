@@ -244,8 +244,21 @@ def _emit(
         typer.echo(text, nl=output_format is OutputFormat.JSON)
     else:
         output.write_text(text, encoding="utf-8")
+    _report(building)
+
+
+OSM_NOTICE = (
+    "notice: shapes (c) OpenStreetMap contributors, ODbL "
+    "(https://www.openstreetmap.org/copyright); credit them wherever you publish this map"
+)
+
+
+def _report(building: Building) -> None:
+    """Warnings, and the OpenStreetMap credit for layouts that use its corridor shapes."""
     for warning in building.warnings:
         typer.echo(f"warning: {warning}", err=True)
+    if building.params.layout == "partition_osm" or building.params.shape is Shape.OSM:
+        typer.echo(OSM_NOTICE, err=True)
 
 
 def _write_images(
@@ -273,8 +286,7 @@ def _write_images(
             # Encoder method 1: 3x faster than the default 4, ~14% bigger.
             picture.save(target, quality=80, method=1)
         typer.echo(str(target))
-    for warning in building.warnings:
-        typer.echo(f"warning: {warning}", err=True)
+    _report(building)
 
 
 def _export_vtt(
@@ -306,8 +318,7 @@ def _export_vtt(
             typer.echo(str(target))
     except (RoomplannerError, OSError) as error:
         _fail(str(error))
-    for warning in building.warnings:
-        typer.echo(f"warning: {warning}", err=True)
+    _report(building)
 
 
 def _entrances(value: str | None) -> tuple[EntranceKind, ...] | None:
