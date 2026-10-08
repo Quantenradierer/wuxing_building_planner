@@ -46,6 +46,7 @@ CLUSTER = 1.8  # score bonus for a type whose placed neighbours are all of that 
 SAME_SIZE = 1.0  # score bonus for a piece of a size another room of its type already has
 GROWTH_SLACK = 1.6  # each further round lets rooms outgrow their size and aspect limits more
 MAX_GROWTH = 8  # cells: thickest strip of leftover a room beside it grows over
+TANGLED = 0.15  # score penalty per corner a rest has over MAX_CORNERS
 STRAND = 6  # a rest no room can use costs its cells over this (unreachable ones end as sleep pods)
 JOG = 0.1  # score penalty per end of a cut that misses such a wall by 1-2 cells
 _ACROSS = {
@@ -349,6 +350,7 @@ class Assigner:
             rests = grid.components(rest)
             score = base + sum(r.bit_count() / STRAND for r in rests if not self._useful_m(r))
             score += grid.blind(rest, self.border_m) / 20
+            score += TANGLED * sum(max(0, grid.corners(r) - MAX_CORNERS) for r in rests)
             score += self._jog(grid.cells(piece), grid.cells(rest))
             score += self.rng.uniform(0, 0.1)
             if best is None or score < best[0]:

@@ -18,6 +18,7 @@ from typing import Any
 
 import roomplanner.pipeline  # noqa: F401  registers the strategies
 from roomplanner.errors import InfeasibleError
+from roomplanner.generator import generate
 from roomplanner.geometry import corners, thinnest_extent
 from roomplanner.params import BuildingType, GenerationParams
 from roomplanner.pipeline.base import AllocationError, Context
@@ -75,7 +76,16 @@ def measure(layout: str, kind: BuildingType, seeds: int, worst: int) -> None:
                     narrow += 1
                     by_type[room.type + " narrow"] += 1
                 if n > MAX_CORNERS or thin < NARROW:
-                    examples.append((n, room.type, f"{width}x{depth}s{seed}", thin, len(room.cells), room.leftover))
+                    examples.append(
+                        (
+                            n,
+                            room.type,
+                            f"{width}x{depth}s{seed}",
+                            thin,
+                            len(room.cells),
+                            room.leftover,
+                        )
+                    )
     print(
         f"{layout:20} rooms {rooms}  odd {odd / max(1, rooms):6.1%}  "
         f"narrow {narrow / max(1, rooms):6.1%}  floors {floors}  failed {failed}"
@@ -83,7 +93,29 @@ def measure(layout: str, kind: BuildingType, seeds: int, worst: int) -> None:
     for name, count in by_type.most_common(worst):
         print(f"    {count:4}  {name}")
     for n, rtype, where, thin, size, left in sorted(examples, reverse=True)[:worst]:
-        print(f"    corners {n:2} thin {thin} cells {size:3} {rtype} {where}{' leftover' if left else ''}")
+        note = " leftover" if left else ""
+        print(f"    corners {n:2} thin {thin} cells {size:3} {rtype} {where}{note}")
+
+
+def hard(layout: str, kind: BuildingType, seeds: int) -> None:
+    """Hard violations of complete buildings over the size matrix."""
+    total = buildings = 0
+    for width, depth in [*SIZES, (104, 103), (120, 115)]:
+        for seed in range(seeds):
+            params = GenerationParams(
+                building_type=kind, width=width, depth=depth, floors_above=1, seed=seed,
+                layout=layout,
+            )  # fmt: skip
+            try:
+                building = generate(params)
+            except AllocationError, InfeasibleError:
+                continue
+            buildings += 1
+            found = [w for w in building.warnings if w.startswith("[hard]")]
+            total += len(found)
+            for warning in found:
+                print(f"  {width}x{depth} seed {seed}: {warning}")
+    print(f"{layout:20} hard violations {total} in {buildings} buildings")
 
 
 def main() -> None:
@@ -91,9 +123,13 @@ def main() -> None:
     parser.add_argument("--type", default="office")
     parser.add_argument("--seeds", type=int, default=6)
     parser.add_argument("--worst", type=int, default=12)
+    parser.add_argument("--hard", action="store_true", help="count hard violations instead")
     parser.add_argument("layouts", nargs="*", default=["partition", "partition_diagonal"])
     args = parser.parse_args()
     for layout in args.layouts:
+        if args.hard:
+            hard(layout, BuildingType(args.type), args.seeds)
+            continue
         measure(layout, BuildingType(args.type), args.seeds, args.worst)
 
 
