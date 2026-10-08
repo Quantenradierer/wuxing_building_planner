@@ -137,7 +137,7 @@ def test_detects_objects_outside_their_room() -> None:
 
 
 def test_irregular_rooms_may_have_alcoves_of_at_least_one_and_a_half_metres() -> None:
-    params = make_params(seed=5)
+    params = make_params(seed=1)
     building = generate(params)
     ground = building.floor(0)
     rules = rules_for(params.building_type, params.wealth)

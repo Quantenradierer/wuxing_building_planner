@@ -8,11 +8,12 @@ get one, and only if the rest of the room stays big enough and in one piece.
 from __future__ import annotations
 
 import random
+from dataclasses import replace
 
 from roomplanner.geometry import Cell, Side, connected, thinnest_extent
 from roomplanner.params import Security
 from roomplanner.pipeline.base import PlannedRoom
-from roomplanner.rules import Rules
+from roomplanner.rules import RoomSpec, Rules
 
 
 def carve_vestibules(
@@ -43,6 +44,61 @@ def carve_vestibules(
         result[-1] = host
         result.append(vestibule)
     return result
+
+
+def carve_closets(
+    rooms: list[PlannedRoom], rules: Rules, circulation: frozenset[Cell], rng: random.Random
+) -> list[PlannedRoom]:
+    """Rooms with a `closet` (an executive's safe room) lose a block in a corner away from
+    circulation, entered only through the room."""
+    result: list[PlannedRoom] = []
+    for room in rooms:
+        spec = rules.spec(room.type)
+        lucky = rng.random() < spec.closet_chance  # always drawn: one fit doesn't shift others
+        if spec.closet is None or not lucky or room.host is not None:
+            result.append(room)
+            continue
+        closet = rules.spec(spec.closet)
+        cells = _back_corner(room.cells, circulation, closet, spec, rng)
+        if cells is None:
+            result.append(room)
+            continue
+        host = replace(room, cells=room.cells - cells)
+        result += [host, PlannedRoom(spec.closet, cells, room.unit, host=host)]
+    return result
+
+
+def _back_corner(
+    cells: frozenset[Cell],
+    circulation: frozenset[Cell],
+    closet: RoomSpec,
+    host: RoomSpec,
+    rng: random.Random,
+) -> frozenset[Cell] | None:
+    """A block of the closet's size in a corner of `cells` touching no circulation."""
+    xs, ys = [c.x for c in cells], [c.y for c in cells]
+    found: list[frozenset[Cell]] = []
+    low, high = closet.area
+    for w in range(closet.min_side, 9):
+        for h in range(closet.min_side, 9):
+            if not low <= w * h <= high:
+                continue
+            for x in range(min(xs), max(xs) - w + 2):
+                for y in range(min(ys), max(ys) - h + 2):
+                    block = frozenset(Cell(x + i, y + j) for i in range(w) for j in range(h))
+                    rest = cells - block
+                    if (
+                        block <= cells
+                        and not any(c.neighbour(s) in circulation for c in block for s in Side)
+                        and sum(c.neighbour(s) in rest for c in block for s in Side) >= 2
+                        and sum(c.neighbour(s) not in cells for c in block for s in Side)
+                        >= w + h  # two walls of the room
+                        and len(rest) >= host.area[0]
+                        and connected(rest)
+                        and _box(rest) >= host.min_side
+                    ):
+                        found.append(block)
+    return rng.choice(sorted(found, key=min)) if found else None
 
 
 def _corner(
@@ -98,3 +154,9 @@ def _in_corner(block: frozenset[Cell], cells: frozenset[Cell], side: Side) -> bo
         )
         for dx, dy in flanks
     )
+
+
+def _box(cells: frozenset[Cell]) -> int:
+    """The shorter side of the cells' bounding box."""
+    xs, ys = [c.x for c in cells], [c.y for c in cells]
+    return min(max(xs) - min(xs), max(ys) - min(ys)) + 1

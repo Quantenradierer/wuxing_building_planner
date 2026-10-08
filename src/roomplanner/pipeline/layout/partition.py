@@ -42,7 +42,7 @@ from roomplanner.pipeline.layout.regions import (
     thicken,
 )
 from roomplanner.pipeline.layout.stalls import carve_stalls
-from roomplanner.pipeline.layout.vestibules import carve_vestibules
+from roomplanner.pipeline.layout.vestibules import carve_closets, carve_vestibules
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import Priority, RoomEntry, Rules, evaluate, variables
 
@@ -716,6 +716,9 @@ class PartitionLayout:
             skeleton.corridor | lobby_cells,
             ctx.params.security,
             ctx.rng(f"vestibules:{level}"),
+        )
+        rooms = carve_closets(
+            rooms, ctx.rules, skeleton.corridor | lobby_cells, ctx.rng(f"closets:{level}")
         )
         entrances = self._entrances(ctx, footprint, skeleton, rooms) if ground else []
         bevels = _bevels(skeleton.band, skeleton.corridor, rooms, ctx.rules)

@@ -154,6 +154,8 @@ rooms:
       - {object: workstation, placement: wall, count: [0, 1]}   # the clerk's desk
   executive_office:
     wealth_shift: +1          # fancier than the rest of the building
+    closet: safe_room         # a panic room in a back corner (partition layouts)
+    closet_chance: 0.6
     area: [80, 160]
     min_side: 8
     windows: required

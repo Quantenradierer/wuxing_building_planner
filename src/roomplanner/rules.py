@@ -332,6 +332,10 @@ class RoomSpec(_Strict):
         description="Partition layouts: a small room carved from a corner at the circulation, "
         "which then is the only way in; chance by security level in `vestibule_chance`",
     )
+    closet: str | None = Field(
+        default=None, description="partition layouts: sometimes this small room in a back corner"
+    )
+    closet_chance: float = Field(default=0.5, ge=0, le=1, description="closet: per room")
     vestibule_chance: dict[Security, float] = Field(default={}, description="See corner_vestibule")
     next_to: list[str] = Field(default=[], description="Placed next to these room types")
     connect: list[str] = Field(
