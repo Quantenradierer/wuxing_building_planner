@@ -38,6 +38,7 @@ src/roomplanner/
     layout/allocation.py     fills strip segments with a floor role's rooms
     layout/units.py          subdivides units (apartments)
     layout/hall.py           hall layout (supermarket), a corridor layout variant
+    layout/osm.py            partition layout with corridors shaped like real buildings (ADR 0017)
     layout/room.py           room layout: one room (`params.room`) without a building
     openings.py              walls, doors, windows
     furnishing.py            furniture and fixtures
