@@ -1176,10 +1176,18 @@ class RoomFurnisher:
                 shift = (length - positions[-1] - along - m) // 2
                 positions = [p + shift for p in positions]
 
+        if rule.serpentine and toward is None:  # rows alternately flush with one end
+            run = _line(length - 2 * m - rule.aisle, along, per_block, rule.aisle, rule.gap)
+            flush = [m + p for p in run]
+            flush_far = [m + rule.aisle + p for p in run]
+            line_of = [flush_far if i % 2 else flush for i in range(len(rows))]
+        else:
+            line_of = [positions] * len(rows)
+
         def rects(shift: int) -> list[Rect]:
             found: list[Rect] = []
-            for across, facing in rows:
-                for position in positions:
+            for (across, facing), row_positions in zip(rows, line_of, strict=True):
+                for position in row_positions:
                     if horizontal:
                         rect = (x0 + position, y0 + across + shift, along, deep, facing)
                     else:
