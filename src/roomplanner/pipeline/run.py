@@ -60,7 +60,16 @@ def run(params: GenerationParams, rules: Rules, seed: int) -> Building:
             plan.removed, plan.diagonals = chamfer(
                 footprint,
                 0 if params.room else chamfer_size(attempt_ctx.rng("chamfer")),
-                (r.cells for f in plan.floors for r in f.rooms),
+                # the roof is open air to the edge: it takes any cut, the rooms below decide
+                [r.cells for f in plan.floors for r in f.rooms if r.type != "roof"],
+                [
+                    rules.spec(r.type).min_side
+                    if r.type in rules.rooms and rules.spec(r.type).circulation
+                    else 0
+                    for f in plan.floors
+                    for r in f.rooms
+                    if r.type != "roof"
+                ],
             )
         except AllocationError as error:
             failure = error

@@ -110,7 +110,7 @@ def test_diagonal_doors_survive_json_and_show_in_every_view() -> None:
 def test_long_buildings_get_more_diagonal_corridors() -> None:
     def runs(width: int) -> int:
         floor = generate(
-            make_params(width=width, depth=50, floors_above=1, layout="partition_diagonal", seed=3)
+            make_params(width=width, depth=50, floors_above=1, layout="partition_diagonal", seed=7)
         ).floors[0]
         # one diagonal wall run per corridor: its cells start at the corridor's top row
         inner_cells = {(d.x, d.y) for d in floor.diagonals if floor.is_inner_diagonal(d)}

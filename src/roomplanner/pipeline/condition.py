@@ -23,6 +23,7 @@ from roomplanner.pipeline.registry import register
 from roomplanner.rules import FurnitureRule, Placement
 
 BREACH_WIDTH = 2  # edges
+MAX_DEBRIS = 40  # per room: a roof is as big as the floor, and every piece costs a room scan
 MIN_BREACH_WALL = 4  # a wall run must be this long to take a breach
 
 
@@ -196,7 +197,7 @@ def _debris(
             rules.append(FurnitureRule(object=kind, placement=Placement.SCATTER))
         if tier.debris_per is not None:
             debris = table.debris + (table.rubble if tier.rubble else [])
-            count = _count(room.area / tier.debris_per, rng)
+            count = min(_count(room.area / tier.debris_per, rng), MAX_DEBRIS)
             for _ in range(count):
                 kind = rng.choice(debris)
                 rules.append(FurnitureRule(object=kind, placement=Placement.SCATTER))

@@ -18,7 +18,7 @@ SMALL = RenderOptions(cell_px=8, padding=2)
 def test_image_covers_the_building_plus_padding() -> None:
     building = generate(make_params(width=30, depth=20, floors_above=2))
     images = render_building(building, load_theme("neon"), SMALL)
-    assert set(images) == {0, 1}
+    assert set(images) == {0, 1, 2}  # 2: the roof
     assert images[0].size == ((30 + 4) * 8, (20 + 4) * 8)
 
 

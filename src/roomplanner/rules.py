@@ -103,6 +103,8 @@ class Placement(StrEnum):
     FACING_EXIT = "facing_exit"  # on the entrance's axis, facing it (reception desk)
     FILL = "fill"  # the room's width at the far wall, facing the door (stairs, elevator car)
     PERIMETER = "perimeter"  # side by side along every wall, as many as fit (vending machines)
+    GATES = "gates"  # a pair of lane gates across the entrance door's axis, aligned with it
+    GUARD = "guard"  # beside the gates, at right angles to the entrance, facing the lane
     AXIS = "axis"  # on a wall at an end of the biggest object's long axis, facing it (screen)
 
 
@@ -218,6 +220,11 @@ class FurnitureRule(_Strict):
         "against a neighbour; later objects keep the aisle) and lined up with the earlier "
         "ones of its kind: beds in a row, each reachable from both long sides",
     )
+    match: str | None = Field(
+        default=None,
+        description="As many as there are objects of this kind already placed; if they don't "
+        "all fit, the last of those make room (a locker for every sleep pod)",
+    )
     even: bool = Field(
         default=False,
         description="wall: as far as possible from the earlier ones of its kind (extinguishers "
@@ -320,6 +327,12 @@ class RoomSpec(_Strict):
     vestibule: str | None = Field(
         default=None, description="Entered only through this room type, placed beside it"
     )
+    corner_vestibule: str | None = Field(
+        default=None,
+        description="Partition layouts: a small room carved from a corner at the circulation, "
+        "which then is the only way in; chance by security level in `vestibule_chance`",
+    )
+    vestibule_chance: dict[Security, float] = Field(default={}, description="See corner_vestibule")
     next_to: list[str] = Field(default=[], description="Placed next to these room types")
     connect: list[str] = Field(
         default=[], description="Also a direct door to adjacent rooms of these types"
@@ -408,6 +421,7 @@ class Applies(StrEnum):
     TOP = "top"
     BELOW_TOP = "below_top"  # the floor under the top one (also `upper`)
     BASEMENT = "basement"
+    ROOF = "roof"  # the extra level over the top floor; not one of `floors_above`
 
 
 class BalconyRule(_Strict):
@@ -613,6 +627,16 @@ class Rules:
     def active_core(self, params: GenerationParams) -> list[CoreEntry]:
         return [c for c in self.program.core if evaluate(c.when, variables(params))]
 
+    def levels(self, params: GenerationParams) -> range:
+        """All floor levels, lowest basement first; a roof level on top where a role has one."""
+        roof = any(
+            role.roof is not None
+            and Applies.ROOF in role.applies
+            and evaluate(role.when, variables(params, params.floors_above))
+            for role in self.program.floor_roles.values()
+        )
+        return range(-params.floors_below, params.floors_above + roof)
+
     def role_for(self, level: int, params: GenerationParams) -> tuple[str, FloorRole]:
         tags = _level_tags(level, params)
         for name, role in self.program.floor_roles.items():
@@ -626,6 +650,8 @@ def _level_tags(level: int, params: GenerationParams) -> set[Applies]:
         return {Applies.BASEMENT}
     if level == 0:
         return {Applies.GROUND}
+    if level >= params.floors_above:
+        return {Applies.ROOF}
     if level == params.floors_above - 1:
         return {Applies.TOP}
     if level == params.floors_above - 2:

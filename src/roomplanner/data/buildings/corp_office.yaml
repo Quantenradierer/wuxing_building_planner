@@ -44,21 +44,21 @@ floor_roles:
       - {room: vault, count: [0, 1], when: "floors_below == 0", security: [corporate, aaa], priority: optional}
       - {room: drone_bay, count: 1, near: service, when: "floors_below == 0", security: [corporate, aaa], priority: optional}
       - {room: archive, count: [0, 1], area: [60, 120], when: "floors_below == 0"}
-      - {room: office, fill: true}
-      - {room: meeting_room, fill: true, area: [64, 180]}   # deep strips: may be bigger
+      - {room: office, fill: true, weight: 3}
+      - {room: meeting_room, fill: true, weight: 0.5, area: [64, 180]}   # deep strips: may be bigger
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
       # a supply room or a nap room.
-      - {room: huddle_room, fill: true}
-      - {room: focus_room, fill: true, weight: 0.5}
+      - {room: huddle_room, fill: true, weight: 0.3}
+      - {room: focus_room, fill: true, weight: 0.2}
       - {room: storage, fill: true, weight: 0.3}
       - {room: nap_room, fill: true, weight: 0.3}
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
       - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
       - {room: training_room, fill: true, priority: optional, limit: 1}   # big leftovers
-  roof:                     # a third of the rest: a flat roof on top, climate plant around
-    applies: [top]
-    when: "floors_above >= 3 and roll >= 50 and roll < 80"
+  roof:                     # the flat roof over the top floor, climate plant around
+    applies: [roof]
+    when: "floors_above >= 2"
     roof: roof
   executive:                # on top, or under the roof
     applies: [top, below_top]
@@ -75,12 +75,12 @@ floor_roles:
       - {room: vending_room, count: 1, near: core, priority: optional, when: "width + depth >= 75"}   # soykaf
       - {room: executive_quarters, count: [0, 1], priority: optional}
       - {room: safe_room, count: 1, priority: optional}
-      - {room: executive_office, fill: true}
-      - {room: meeting_room, fill: true, area: [64, 180]}   # deep strips: may be bigger
+      - {room: executive_office, fill: true, weight: 3}
+      - {room: meeting_room, fill: true, weight: 0.5, area: [64, 180]}   # deep strips: may be bigger
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
       # a supply room.
-      - {room: huddle_room, fill: true}
-      - {room: focus_room, fill: true, weight: 0.5}
+      - {room: huddle_room, fill: true, weight: 0.3}
+      - {room: focus_room, fill: true, weight: 0.2}
       - {room: storage, fill: true, weight: 0.3}
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
@@ -95,12 +95,12 @@ floor_roles:
       - {room: cubicle_farm, share: 0.5}
       - {room: executive_office, count: [0, 1]}   # now and then a manager with a view
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
-      - {room: office, fill: true}
-      - {room: meeting_room, fill: true, area: [64, 180]}   # deep strips: may be bigger
+      - {room: office, fill: true, weight: 3}
+      - {room: meeting_room, fill: true, weight: 0.5, area: [64, 180]}   # deep strips: may be bigger
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
       # a supply room or a nap room.
-      - {room: huddle_room, fill: true}
-      - {room: focus_room, fill: true, weight: 0.5}
+      - {room: huddle_room, fill: true, weight: 0.3}
+      - {room: focus_room, fill: true, weight: 0.2}
       - {room: storage, fill: true, weight: 0.3}
       - {room: nap_room, fill: true, weight: 0.3}
       - {room: staff_room, fill: true, limit: 1}

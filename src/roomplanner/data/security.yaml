@@ -81,9 +81,9 @@ tiers:
     floodlights: {kind: flood, radius: 10, colour: "#f4fbff", intensity: 0.9}
     furniture:
       lobby:
-        - {object: guard_post, placement: center}
+        - {object: guard_post, placement: guard}
       reception_lobby:
-        - {object: guard_post, placement: center}
+        - {object: guard_post, placement: guard}
       security_room:
         - {object: terminal, placement: wall, count: [2, 4]}
         - {object: weapon_locker, placement: wall}
@@ -141,11 +141,11 @@ tiers:
     floodlights: {kind: flood, radius: 12, colour: "#f4fbff", intensity: 1.0}
     furniture:
       lobby:
-        - {object: guard_post, placement: center}
-        - {object: security_gate, placement: near_exit, count: 2}
+        - {object: security_gate, placement: gates, count: 2, margin: 0}   # across the entrance
+        - {object: guard_post, placement: guard}   # beside the gates, looking across the lane
       reception_lobby:
-        - {object: guard_post, placement: center}
-        - {object: security_gate, placement: near_exit, count: 2}
+        - {object: security_gate, placement: gates, count: 2, margin: 0}   # across the entrance
+        - {object: guard_post, placement: guard}   # beside the gates, looking across the lane
       security_room:
         - {object: terminal, placement: wall, count: [3, 6]}
         - {object: weapon_locker, placement: wall, count: [1, 2]}

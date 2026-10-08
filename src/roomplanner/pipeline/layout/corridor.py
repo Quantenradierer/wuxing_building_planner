@@ -147,7 +147,7 @@ class CorridorLayout:
         core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
         corridors = main_corridor * frames[0][1].length
         corridors += sum(corridor * frame.length for _, frame, _ in frames[1:])
-        for level in ctx.params.levels:
+        for level in ctx.rules.levels(ctx.params):
             _, role = ctx.rules.role_for(level, ctx.params)
             needed = core + corridors
             for entry in role.rooms:
@@ -173,7 +173,7 @@ class CorridorLayout:
             if axis not in plan.facade_grid:
                 offset = part.frame.absolute_grid_offset(part.grid)
                 plan.facade_grid[axis] = (offset, part.grid.module)
-        for level in ctx.params.levels:
+        for level in ctx.rules.levels(ctx.params):
             plan.floors.append(self._floor(ctx, skeleton, level, rng, plan.warnings))
         return plan
 
@@ -276,7 +276,7 @@ class CorridorLayout:
         one end of the main part before anything else: the cores and the cross corridor
         keep out of it. Not at the lobby's end, not across a wing's junction."""
         frame, grid = main.frame, main.grid
-        for level in ctx.params.levels:
+        for level in ctx.rules.levels(ctx.params):
             role = ctx.rules.role_for(level, ctx.params)[1]
             values = variables(ctx.params, level)
             entry = next(

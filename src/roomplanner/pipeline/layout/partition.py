@@ -42,6 +42,7 @@ from roomplanner.pipeline.layout.regions import (
     thicken,
 )
 from roomplanner.pipeline.layout.stalls import carve_stalls
+from roomplanner.pipeline.layout.vestibules import carve_vestibules
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import Priority, RoomEntry, Rules, evaluate, variables
 
@@ -80,7 +81,7 @@ class PartitionLayout:
             )
         core = sum(c.size[0] * c.size[1] for c in ctx.rules.active_core(ctx.params))
         corridor = program.corridor.width * max(ctx.width, ctx.height)
-        for level in ctx.params.levels:
+        for level in ctx.rules.levels(ctx.params):
             _, role = ctx.rules.role_for(level, ctx.params)
             needed = core + corridor
             for entry in role.rooms:
@@ -100,8 +101,8 @@ class PartitionLayout:
         rng = ctx.rng("layout")
         skeleton = self._skeleton(ctx, footprint, rng)
         plan = BuildingPlan(floors=[])
-        shared: dict[tuple[str, bool], tuple[list[PlannedRoom], list[str]]] = {}
-        for level in ctx.params.levels:
+        shared: dict[tuple[str, bool, int], tuple[list[PlannedRoom], list[str]]] = {}
+        for level in ctx.rules.levels(ctx.params):
             plan.floors.append(self._floor(ctx, footprint, skeleton, level, shared, plan))
         return plan
 
@@ -664,7 +665,7 @@ class PartitionLayout:
         footprint: frozenset[Cell],
         skeleton: Skeleton,
         level: int,
-        shared: dict[tuple[str, bool], tuple[list[PlannedRoom], list[str]]],
+        shared: dict[tuple[str, bool, int], tuple[list[PlannedRoom], list[str]]],
         plan: BuildingPlan,
     ) -> FloorPlan:
         role_name, role = ctx.rules.role_for(level, ctx.params)
@@ -680,7 +681,7 @@ class PartitionLayout:
         lobby_cells = skeleton.lobby if ground else frozenset[Cell]()
         if lobby_cells and skeleton.lobby_type:
             fixed.append(PlannedRoom(skeleton.lobby_type, lobby_cells))
-        key = (role_name, ground)
+        key = (role_name, ground, level)  # every floor gets its own partition
         if key not in shared:
             free = footprint - skeleton.corridor - core_cells - lobby_cells
             access = skeleton.corridor | lobby_cells
@@ -700,7 +701,7 @@ class PartitionLayout:
                 access,
                 anchors,
                 ctx.rules.program.cluster_filler,
-                ctx.rng(f"assign:{role_name}:{ground}"),
+                ctx.rng(f"assign:{role_name}:{level}"),
             )
             rooms = assigner.run(components(free), f"level {level}")
             shared[key] = (rooms, assigner.warnings)
@@ -709,6 +710,13 @@ class PartitionLayout:
         rooms = absorb_leftovers(rooms, ctx.rules, skeleton.band)
         rooms = _merge_thin(rooms, ctx.rules, skeleton.band)
         rooms = carve_stalls(rooms, ctx.rules)
+        rooms = carve_vestibules(
+            rooms,
+            ctx.rules,
+            skeleton.corridor | lobby_cells,
+            ctx.params.security,
+            ctx.rng(f"vestibules:{level}"),
+        )
         entrances = self._entrances(ctx, footprint, skeleton, rooms) if ground else []
         bevels = _bevels(skeleton.band, skeleton.corridor, rooms, ctx.rules)
         return FloorPlan(level, role_name, rooms, entrances, diagonals=bevels)

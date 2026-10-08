@@ -60,8 +60,8 @@ floor_roles:
       - {room: meet_me_room, fill: true, limit: 1}
       - {room: suppression_room, fill: true, limit: 1}
   roof:                     # dry coolers and condensers on the flat roof
-    applies: [top]
-    when: "floors_above >= 3 and roll >= 50"
+    applies: [roof]
+    when: "floors_above >= 2"
     roof: roof
   halls:
     applies: [upper, top]

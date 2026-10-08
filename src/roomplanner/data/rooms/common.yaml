@@ -31,7 +31,7 @@ rooms:
     min_side: 8
     circulation: true
     furniture:
-      - {object: reception_post, placement: facing_exit}   # facing the entrance
+      - {object: reception_post, placement: facing_exit, margin: 4}   # facing the entrance, room for the security gates before it
       - {object: plant, placement: corner, count: [1, 4]}
       - {object: bench, placement: wall, count: [1, 3]}
       - {object: lounge_set, placement: wall, per: 200, count: [0, 3]}
@@ -97,8 +97,9 @@ rooms:
     access: [office, executive_office, manager_office, kitchenette, kitchen, staff_room,
              stockroom, treatment_room, lab, nurse_station, meeting_room]
     furniture:
-      - {object: shelf, placement: wall, per: 5, count: [2, 16]}
-      - {object: crate, placement: wall, per: 30, count: [0, 3]}
+      - {object: shelf, placement: rows, aisle: 2, margin: 1, paired: true}   # stacked to the brim
+      - {object: shelf, placement: perimeter, count: 60}
+      - {object: crate, placement: wall, count: [0, 3]}
       - {object: cabinet, placement: wall, count: [0, 2]}
   utility:
     wealth_shift: -1          # plainer than the rest of the building
@@ -259,6 +260,10 @@ rooms:
       - {object: safe, placement: corner, count: [1, 2]}
       - {object: crate, placement: scatter, count: [0, 2]}
       - {object: suppression_tanks, placement: wall, count: [0, 1]}
+  mantrap:              # two interlocked doors, one person at a time: badge, then biometrics
+    area: [9, 72]      # a server room's is carved at 3 x 4; a data hall's is a full-depth column
+    min_side: 3
+    windows: forbidden
   safe_room:            # panic room: supplies, a terminal, a way to call for help
     area: [12, 40]
     min_side: 4

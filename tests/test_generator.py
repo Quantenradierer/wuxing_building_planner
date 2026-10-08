@@ -32,7 +32,7 @@ def test_dimensions_are_cells() -> None:
 
 def test_levels_run_from_lowest_basement_to_top() -> None:
     building = generate(make_params(floors_above=3, floors_below=2))
-    assert [f.level for f in building.floors] == [-2, -1, 0, 1, 2]
+    assert [f.level for f in building.floors] == [-2, -1, 0, 1, 2, 3]  # 3: the roof
 
 
 def test_service_side_defaults_to_opposite_of_street() -> None:

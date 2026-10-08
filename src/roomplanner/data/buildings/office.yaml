@@ -38,23 +38,24 @@ floor_roles:
       - {room: guard_room, count: 1, near: entrance, security: [corporate, aaa]}   # guards off patrol
       - {room: storage, count: 1, priority: optional, when: "floors_below == 0"}
       - {room: electrical_room, count: 1, near: service, when: "floors_below == 0", priority: optional}
+      - {room: executive_office, count: 1, when: "floors_above == 1", priority: optional}   # a single floor: the boss has the corner
       - {room: spider_room, count: 1, security: [corporate, aaa], priority: optional}
       - {room: drone_bay, count: [0, 1], when: "floors_below == 0", security: [aaa], priority: optional}
       - {room: archive, count: [0, 1], area: [60, 120], when: "floors_below == 0"}
-      - {room: office, fill: true}
-      - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: office, fill: true, weight: 3}
+      - {room: meeting_room, fill: true, weight: 0.5}      # interior rows without facade
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
       # a supply room or a nap room.
-      - {room: huddle_room, fill: true}
-      - {room: focus_room, fill: true, weight: 0.5}
+      - {room: huddle_room, fill: true, weight: 0.3}
+      - {room: focus_room, fill: true, weight: 0.2}
       - {room: storage, fill: true, weight: 0.3}
       - {room: nap_room, fill: true, weight: 0.3}
       - {room: staff_room, fill: true, limit: 1}
       - {room: copy_room, fill: true, limit: 1}
       - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
-  roof:                     # often the last level is just the flat roof
-    applies: [top]
-    when: "floors_above >= 2 and roll >= 60"
+  roof:                     # the flat roof over the top floor (not one of the floors above)
+    applies: [roof]
+    when: "floors_above >= 2"
     roof: roof
   executive:
     applies: [top]
@@ -68,13 +69,14 @@ floor_roles:
       - {room: vending_room, count: 1, near: core, priority: optional, when: "width + depth >= 75"}   # soykaf
       - {room: meeting_room, count: [1, 2]}
       - {room: executive_quarters, count: [0, 1], priority: optional}
-      - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional}
-      - {room: executive_office, fill: true}
-      - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: executive_office, count: [2, 3]}
+      - {room: safe_room, count: [1, 2], security: [corporate, aaa], priority: optional}   # next to an executive office
+      - {room: executive_office, fill: true, weight: 3}
+      - {room: meeting_room, fill: true, weight: 0.5}      # interior rows without facade
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
       # a supply room or a nap room.
-      - {room: huddle_room, fill: true}
-      - {room: focus_room, fill: true, weight: 0.5}
+      - {room: huddle_room, fill: true, weight: 0.3}
+      - {room: focus_room, fill: true, weight: 0.2}
       - {room: storage, fill: true, weight: 0.3}
       - {room: nap_room, fill: true, weight: 0.3}
       - {room: staff_room, fill: true, limit: 1}
@@ -93,13 +95,15 @@ floor_roles:
       - {room: open_office, share: 0.4, wealth: [middle, high]}
       - {room: open_office, share: 0.2, wealth: [luxury]}
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
-      - {room: executive_office, count: [0, 1]}   # now and then a manager with a view
-      - {room: office, fill: true}
-      - {room: meeting_room, fill: true}      # interior rows without facade
+      - {room: executive_office, count: 1, when: "level == floors_above - 1", priority: optional}   # the top floor's manager with a view
+      - {room: executive_office, count: [0, 1], when: "level != floors_above - 1"}   # now and then a manager with a view
+      - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional, when: "level == floors_above - 1"}
+      - {room: office, fill: true, weight: 3}
+      - {room: meeting_room, fill: true, weight: 0.5}      # interior rows without facade
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
       # a supply room or a nap room.
-      - {room: huddle_room, fill: true}
-      - {room: focus_room, fill: true, weight: 0.5}
+      - {room: huddle_room, fill: true, weight: 0.3}
+      - {room: focus_room, fill: true, weight: 0.2}
       - {room: storage, fill: true, weight: 0.3}
       - {room: nap_room, fill: true, weight: 0.3}
       - {room: staff_room, fill: true, limit: 1}

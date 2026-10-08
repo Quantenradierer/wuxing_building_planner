@@ -47,17 +47,17 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Ground floor ==
 +--===----+--DDD----+===---===---===--+-------------+
-"  www i  |         |#################|LLL LLL LLL L|
-"  www i  |         |#################|            L|
-"  www i  |s       s|#################|L           L|
-|         |s       s|#################|L            |
-|    4    |s   2   s|#################|L     5   KKK|
-|         |         |                 |          KKK|
-"         |k       s|        1        |          KKK|
-"         |        s|                 |             |
-"         |        s|                 |        LLL )|
+"  www i  |        s|#################|LLL LLL LLL L|
+"  www i  |        s|#################|            L|
+"  www i  |s sss   s|#################|L           L|
+|         |s        |#################|L            |
+|    4    |s sss   s|#################|L     5   KKK|
+|         |        s|                 |          KKK|
+"         |    2   s|        1        |          KKK|
+"         |         |                 |             |
+"         |        k|                 |        LLL )|
 +--DDD----+--DDD----+------DDD--------+--DDD--------+
-|                                RRRRR             '|
+|                  RRRRR                       RRRRR|
 |                                                   |
 "R                                                 R"
 "R                                                 R"
@@ -73,17 +73,17 @@ gun_shop 26x18 cells, wealth=high, seed=3
 |                                                   |
 "                                                   |
 "                                                   |
-"          ddddd       ddddd       ddddd            |
+"  n       ddddd       ddddd       ddddd           $|
+|  n                                                |
+|  n                                     ddddd ddddd|
+|  n                                                |
+"c n                                       c        "
+"  n                                                "
+"  n                                                "
 |                                                   |
-|R                               ddddd ddddd        |
-|R                                                  |
-"R                                 c                "
-"R                                                  "
-"R                                                  "
-|                                                   |
-|    RRRRR     RRRRR             RRRRR RRRRR RRRRR $|
+|        RRRRR RRRRR             RRRRR   RRRRR RRRRR|
 +--===---===---===-------DDD-----===---===---===----+
-  objects: k cabinet, K crate, d display_case, ' fire_extinguisher, $ pay_station, ) safe, s shelf, i sink, # stairs, c stool, w wc, L weapon_locker, R weapon_rack
+  objects: k cabinet, n counter, K crate, d display_case, $ pay_station, ) safe, s shelf, i sink, # stairs, c stool, w wc, L weapon_locker, R weapon_rack
     1  stairwell            45 cells
     2  storage              25 cells
     3  gun_shop_floor      338 cells

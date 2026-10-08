@@ -66,12 +66,13 @@ def test_foundry_scene_has_a_level_per_floor_and_stairs_between_them() -> None:
     b = building(security=Security.AAA)
     scene = to_foundry(b, load_theme("neon"), SMALL, "tower").scene
     levels = {level["_id"]: level for level in scene["levels"]}
-    assert len(levels) == 3
+    assert len(levels) == 4  # three floors and the roof over them
     assert scene["initialLevel"] == "defaultLevel0000"
     assert [level["elevation"] for level in scene["levels"]] == [
         {"bottom": 0.0, "top": 3.0},
         {"bottom": 3.0, "top": 6.0},
         {"bottom": 6.0, "top": 9.0},
+        {"bottom": 9.0, "top": 12.0},
     ]
     assert scene["grid"] == {"type": 1, "size": 12, "distance": 1.0, "units": "m"}
     for placeable in scene["walls"] + scene["lights"]:
@@ -108,7 +109,7 @@ def test_foundry_export_is_one_deterministic_file_with_its_images() -> None:
     )
     scene = document["scene"]
     files = [level["background"]["src"] for level in scene["levels"]]
-    assert files == ["tower_F0.webp", "tower_F1.webp", "tower_F2.webp"]
+    assert files == ["tower_F0.webp", "tower_F1.webp", "tower_F2.webp", "tower_F3.webp"]
     assert set(document["images"]) == set(files)
     image = Image.open(io.BytesIO(base64.b64decode(document["images"]["tower_F0.webp"])))
     assert (image.format, image.size) == ("WEBP", (scene["width"], scene["height"]))

@@ -109,8 +109,9 @@ rooms:
     cluster: true
     windows: forbidden
     furniture:
-      - {object: capsule, placement: perimeter, count: [2, 4], sideways: true, accessible: true}
-      - {object: locker, placement: wall, count: [0, 3]}
+      - {object: capsule, placement: rows, aisle: 1, margin: 1, accessible: true}   # pods in rows,
+      - {object: capsule, placement: perimeter, count: 60, sideways: true, accessible: true}   # then as many along the walls as fit
+      - {object: locker, placement: wall, match: capsule}   # a locker for every pod
   copy_room:                # printers, paper, mail
     area: [20, 48]
     min_side: 4
@@ -134,11 +135,13 @@ rooms:
   server_room:
     area: [40, 160]
     min_side: 6
+    corner_vestibule: mantrap       # a small mantrap at the door, the likelier the higher the security
+    vestibule_chance: {none: 0, low: 0.05, corporate: 0.35, aaa: 0.8}
     transit: false
     windows: forbidden
     furniture:
       - {object: suppression_tanks, placement: wall, count: [0, 1]}
-      - {object: server_rack, placement: rows, aisle: 2, margin: 1, count: [2, 12], paired: true}   # an office's racks, fronts to a shared cold aisle
+      - {object: server_rack, placement: rows, aisle: 2, margin: 1, paired: true}   # racks fill the room, fronts to a shared cold aisle
       - {object: workstation, placement: wall, count: [0, 1]}   # the admin console
       - {object: fire_extinguisher, placement: corner}
   archive:

@@ -35,6 +35,7 @@ from roomplanner.rules import (
 
 TOLERANCE = 1.4  # a room may be this much bigger than its maximum area
 ELASTIC = 3  # an open office is drawn from at most this many times its minimum area
+STARVED = 3.0  # penalty for a room that needs a window where there is none
 NOISE = 0.8  # random share added to the pool's "furthest below its share" score
 L_SHAPE = 0.3  # chance that a cut also tries carving a corner off (leaving an L)
 MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
@@ -530,7 +531,7 @@ class Assigner:
         return (
             deficit
             + self.rng.uniform(0, NOISE)
-            + (0.0 if starved else CLUSTER * self._alike(entry.room, cells))
+            + (-STARVED if starved else CLUSTER * self._alike(entry.room, cells))
             - self._soft(cells, spec, entry.near)
             - (0.5 if entry.priority is Priority.OPTIONAL else 0.0)
         )

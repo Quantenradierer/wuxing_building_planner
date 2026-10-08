@@ -335,7 +335,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    onto it. The renderer draws its facade as a railing (theme `walls.open_air`).
    Floors above a balcony floor leave its cells out of their footprint (`FloorPlan.cut`): it
    stays open to the sky and their rows are shallower there.
-10. **Roof** (`roof:` of a floor role): the floor is the core (stair housing, lift shafts) and
+10. **Roof** (`roof:` of a floor role, `applies: [roof]`): an extra level over the top floor (not one of `floors_above`; `Rules.levels`); the floor is the core (stair housing, lift shafts) and
    one open-air, circulation room around it (the climate plant), less a balcony's sky below.
    Corp towers end in one a third of the time; plain offices in 40 %.
 
@@ -390,7 +390,7 @@ irregular and any footprint is the same case. Programs with `units` are rejected
    reserved first and joined by a branch). Core entries take rectangles beside a corridor,
    scored for little waste (`far` ones as far from the first as possible).
 2. **Regions**: the footprint less corridor, core and (on the ground floor) the lobby, in
-   4-connected pieces. Floors of one role share their partition (`shared`).
+   4-connected pieces. Every floor gets its own partition (`shared` is keyed by level, so a repeated role still varies).
 3. **Needs and mix** (`Assigner`): `count` / `share` entries become needs, required first,
    then by size class (`data/sizes.yaml`, from the room's area range) and minimum area; an
    open office or other elastic room is drawn from at most 3x its minimum. Each need takes the
@@ -406,7 +406,7 @@ irregular and any footprint is the same case. Programs with `units` are rejected
 4. After the assignment `absorb_leftovers` and `carve_stalls` run as in the corridor layout,
    and the ground floor gets its main, service and emergency entrances.
 
-Not ported yet: annexes, vestibules, `next_to`, balconies, roof balcony cut-outs, units,
+Corner vestibules (a mantrap at a server room, `corner_vestibule` + `vestibule_chance` by security level, `layout/vestibules.py`) are carved after the partition. Not ported yet: annexes, full-depth vestibules, `next_to`, balconies, roof balcony cut-outs, units,
 service stubs, the facade grid.
 
 ### Room layout

@@ -11,7 +11,7 @@ from collections.abc import Callable, Iterable
 from typing import cast
 
 from roomplanner.errors import InfeasibleError
-from roomplanner.geometry import Cell, Corner, Diagonal, Side, connected, rectangle
+from roomplanner.geometry import Cell, Corner, Diagonal, Side, connected, rectangle, thinnest_extent
 from roomplanner.pipeline.base import Context, FootprintStrategy, LayoutStrategy
 from roomplanner.pipeline.registry import register, resolve
 
@@ -207,7 +207,10 @@ CHAMFER_MARGIN = 2  # cells of straight facade kept between two cuts and at thei
 
 
 def chamfer(
-    footprint: frozenset[Cell], size: int, rooms: Iterable[frozenset[Cell]]
+    footprint: frozenset[Cell],
+    size: int,
+    rooms: Iterable[frozenset[Cell]],
+    min_sides: Iterable[int] = (),
 ) -> tuple[frozenset[Cell], frozenset[Diagonal]]:
     """Cut the convex corners of the footprint with 45 degree walls `size` cells long.
 
@@ -215,12 +218,14 @@ def chamfer(
     diagonals across the cells it crosses, which stay as half floor. A corner is cut where
     both its facades are straight for `2 * size + CHAMFER_MARGIN` cells (so no two cuts
     meet), the square behind it is floor and no room (of any floor) would lose a quarter of
-    its cells or fall apart. A tight corner gets the biggest cut that fits, if it is at least
+    its cells or fall apart, nor get thinner than its `min_sides` (parallel to `rooms`).
+    A tight corner gets the biggest cut that fits, if it is at least
     `MIN_CHAMFER`.
     """
     if size < MIN_CHAMFER:
         return frozenset(), frozenset()
     rooms = list(rooms)
+    sides = [*min_sides, *[0] * len(rooms)][: len(rooms)]
     removed: set[Cell] = set()
     diagonals: set[Diagonal] = set()
     for cell in sorted(footprint):
@@ -233,7 +238,7 @@ def chamfer(
             fit = min(size, (along_x - CHAMFER_MARGIN) // 2, (along_y - CHAMFER_MARGIN) // 2)
             while fit >= MIN_CHAMFER:
                 gone, halves = _cut(footprint, cell, corner, fit)
-                if gone is not None and halves is not None and _harmless(gone, rooms):
+                if gone is not None and halves is not None and _harmless(gone, rooms, sides):
                     removed |= gone
                     diagonals |= halves
                     break
@@ -263,10 +268,15 @@ def _cut(
     return gone, halves
 
 
-def _harmless(gone: set[Cell], rooms: list[frozenset[Cell]]) -> bool:
-    for cells in rooms:
+def _harmless(gone: set[Cell], rooms: list[frozenset[Cell]], sides: list[int]) -> bool:
+    for cells, side in zip(rooms, sides, strict=True):
         lost = cells & gone
-        if lost and (len(cells) - len(lost) < 0.75 * len(cells) or not connected(cells - lost)):
+        if not lost:
+            continue
+        rest = cells - lost
+        if len(rest) < 0.75 * len(cells) or not connected(rest):
+            return False
+        if side and thinnest_extent(cells, cells, side) >= side > thinnest_extent(rest, rest, side):
             return False
     return True
 

@@ -247,7 +247,7 @@ class RoomFurnisher:
                 self.blocking |= obj.cells
         self.placed: list[PlacedObject] = []
         self.last_group: Rect | None = None  # where the last group went
-        self.access: list[frozenset[Cell]] = []  # cells next to `accessible` objects
+        self.access: dict[Rect, frozenset[Cell]] = {}  # cells next to `accessible` objects
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
@@ -268,6 +268,12 @@ class RoomFurnisher:
                 continue
             if rule.placement is Placement.AT:
                 self._at(rule, spec)
+                continue
+            if rule.match is not None:
+                self._match(rule, spec)
+                continue
+            if rule.placement is Placement.GATES:
+                self._gates(rule, spec)
                 continue
             low, high = rule.count_range
             if rule.per_room is not None:
@@ -301,6 +307,28 @@ class RoomFurnisher:
                 if not self._place_one(alone, self._spec(main)):
                     break
         return self.placed
+
+    def _match(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
+        """As many objects as there are of kind `rule.match`: when they don't all fit, the
+        last of those makes room, one by one (a locker for every sleep pod)."""
+        want = sum(o.kind == rule.match for o in self.placed)
+        have = 0
+        while have < want:
+            if self._place_one(rule, spec):
+                have += 1
+                continue
+            victim = next((o for o in reversed(self.placed) if o.kind == rule.match), None)
+            if victim is None:
+                break
+            self._remove(victim)
+            want -= 1
+
+    def _remove(self, obj: PlacedObject) -> None:
+        self.placed.remove(obj)
+        self.taken -= obj.cells
+        if obj.blocking:
+            self.blocking -= obj.cells
+        self.access.pop((obj.x, obj.y, obj.w, obj.h, obj.facing), None)
 
     def _pairs(
         self, rule: FurnitureRule, spec: ObjectSpec, head: str, desks: int, single: str | None
@@ -556,8 +584,20 @@ class RoomFurnisher:
                 candidates = self._grid(spec, rule.aisle, rule.margin)
             case Placement.FACING_EXIT:
                 candidates = self._facing_exit(spec, rule.margin)
+                if rule.margin > 2:  # a lobby too shallow for it: nearer the door
+                    candidates += self._facing_exit(spec, 2)
             case Placement.AXIS:
                 candidates = self._on_axis(spec)
+            case Placement.GUARD:
+                candidates = self._beside_gates(spec)
+                if not candidates:  # no gates: the middle of the room
+                    cx, cy = (self.box[0] + self.box[2]) / 2, (self.box[1] + self.box[3]) / 2
+                    candidates = self._anywhere(spec)
+                    candidates.sort(
+                        key=lambda r: abs(r[0] + r[2] / 2 - cx) + abs(r[1] + r[3] / 2 - cy)
+                    )
+            case Placement.GATES:
+                return False
             case Placement.PERIMETER:
                 candidates = self._along_walls(spec)
                 if rule.sideways:
@@ -1001,6 +1041,70 @@ class RoomFurnisher:
                     spots.append((x, y, deep, along, facing))
         return spots
 
+    def _gates(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
+        """Gates in pairs flanking the lane of each exterior door, side by side at the
+        same depth, in line with the door's outer cells (a lane between them). A door
+        under three cells wide has no room for a pair."""
+        along, deep = spec.size
+        pairs = max(1, rule.count_range[1] // 2)
+        for door in self.floor.openings:
+            if pairs <= 0:
+                break
+            if door.kind is not OpeningKind.DOOR or len(door.edges) < 3:
+                continue
+            a, b = door.edges[0].cells()
+            inside, outside = (a, b) if a in self.cells else (b, a)
+            if inside not in self.cells or outside in self.floor.footprint:
+                continue
+            dx, dy = inside.x - outside.x, inside.y - outside.y
+            facing = next(s for s in Side if s.delta == (-dx, -dy))
+            if dx == 0:
+                lateral = sorted(e.x for e in door.edges)
+            else:
+                lateral = sorted(e.y for e in door.edges)
+            ends = (lateral[0], lateral[-1])
+            for k in range(len(door.edges) + rule.margin, len(door.edges) + rule.margin + 12):
+                rects: list[Rect] = []
+                for pos in ends:
+                    if dx == 0:
+                        wall = inside.y if dy > 0 else inside.y + 1
+                        y = wall + k if dy > 0 else wall - k - deep
+                        rects.append((pos, y, along, deep, facing))
+                    else:
+                        wall = inside.x if dx > 0 else inside.x + 1
+                        x = wall + k if dx > 0 else wall - k - deep
+                        rects.append((x, pos, deep, along, facing))
+                first = self._try(rule.object, rects[0], spec.walkable)
+                if first and self._try(rule.object, rects[1], spec.walkable):
+                    pairs -= 1
+                    break
+                if first:
+                    self._remove(self.placed[-1])
+
+    def _beside_gates(self, spec: ObjectSpec) -> list[Rect]:
+        """Spots to the sides of the placed gates, backed away from the lane and facing it:
+        at right angles to the way in."""
+        gates = [o for o in self.placed if o.kind == "security_gate"]
+        if len(gates) < 2:
+            return []
+        along, deep = spec.size
+        spots: list[Rect] = []
+        gates.sort(key=lambda o: (o.x, o.y))
+        low, high = gates[0], gates[-1]
+        if low.h > low.w:  # lane runs along y, gates side by side along x
+            mid = low.y + low.h / 2
+            for shift in (0, -1, 1, -2, 2):
+                y = round(mid - along / 2) + shift
+                spots.append((low.x - deep, y, deep, along, Side.E))
+                spots.append((high.x + high.w, y, deep, along, Side.W))
+        else:
+            mid = low.x + low.w / 2
+            for shift in (0, -1, 1, -2, 2):
+                x = round(mid - along / 2) + shift
+                spots.append((x, low.y - deep, along, deep, Side.S))
+                spots.append((x, high.y + high.h, along, deep, Side.N))
+        return spots
+
     def _exterior_door(self) -> tuple[float, float] | None:
         for door in self.floor.openings:
             if door.kind is not OpeningKind.DOOR:
@@ -1106,7 +1210,7 @@ class RoomFurnisher:
                 break
             if rule.fill < 1 and self.rng.random() >= rule.fill:
                 continue
-            if self._try(rule.object, rect, spec.walkable):
+            if self._try(rule.object, rect, spec.walkable, rule.accessible):
                 placed += 1
                 if rule.front_clear:
                     self.clearance = self.clearance | self._in_front(rect, rule.front_clear)
@@ -1249,7 +1353,7 @@ class RoomFurnisher:
 
     def _accessible(self, free: set[Cell] | frozenset[Cell]) -> bool:
         """Every `accessible` object keeps a free cell at its front or a flank."""
-        return all(access & free for access in self.access)
+        return all(access & free for access in self.access.values())
 
     def _try(self, kind: str, rect: Rect, walkable: bool = False, accessible: bool = False) -> bool:
         if kind in self.ctx.rules.groups:
@@ -1273,7 +1377,7 @@ class RoomFurnisher:
             self.blocking |= cells
         self.taken |= cells
         if accessible:
-            self.access.append(self._access_cells(rect))
+            self.access[rect] = self._access_cells(rect)
         self.placed.append(PlacedObject(kind, x, y, w, h, facing, self.room.id, not walkable))
         return True
 
