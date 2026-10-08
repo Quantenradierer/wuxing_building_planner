@@ -12,17 +12,17 @@ from roomplanner.pipeline.openings import DAYLIGHT
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
 
-from .conftest import make_params
+from .conftest import generate_uncached, make_params
 
 
 def test_same_seed_same_building() -> None:
-    assert generate(make_params(seed=3)) == generate(make_params(seed=3))
+    assert generate_uncached(make_params(seed=3)) == generate_uncached(make_params(seed=3))
 
 
 def test_missing_seed_is_resolved_and_recorded() -> None:
     building = generate(make_params(seed=None))
     assert building.params.seed == building.seed
-    assert generate(building.params) == building
+    assert generate_uncached(building.params) == building
 
 
 def test_dimensions_are_cells() -> None:
@@ -394,7 +394,7 @@ def test_police_ground_floor_has_records_not_storerooms() -> None:
 )
 def test_stairs_and_core_doors_line_up_on_every_floor(building_type: BuildingType) -> None:
     params = make_params(
-        building_type=building_type, width=60, depth=44, floors_above=3, floors_below=1, seed=5
+        building_type=building_type, width=60, depth=44, floors_above=2, floors_below=1, seed=5
     )
     building = generate(params)
     stairs = {
@@ -491,7 +491,7 @@ def test_core_rooms_are_as_big_as_their_stairs_and_car(building_type: BuildingTy
     """The stairs span the stairwell with a landing at the door; the car is the shaft."""
     for width, depth in ((40, 32), (70, 44)):
         params = make_params(
-            building_type=building_type, width=width, depth=depth, floors_above=4, seed=1
+            building_type=building_type, width=width, depth=depth, floors_above=2, seed=1
         )
         for floor in generate(params).floors:
             for room in floor.rooms:

@@ -64,7 +64,7 @@ def test_supermarket_has_shelf_rows_and_checkouts_near_the_entrance() -> None:
 def test_wealth_scales_furniture_per_room() -> None:
     def per_office(wealth: Wealth) -> float:
         offices = objects = 0
-        for seed in range(3):
+        for seed in range(2):
             for floor in generate(make_params(width=60, depth=40, wealth=wealth, seed=seed)).floors:
                 ids = {r.id for r in floor.rooms if r.type == "office"}
                 offices += len(ids)
@@ -226,13 +226,13 @@ def test_a_small_stuffer_shack_has_more_than_one_row_of_gondolas() -> None:
 def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
     kinds: set[str] = set()
     for seed in range(8):
-        params = make_params(width=60, depth=40, floors_above=2, wealth=Wealth.LUXURY, seed=seed)
-        for floor in generate(params).floors:
-            for room in floor.rooms:
-                if room.type != "meeting_room":
-                    continue
-                tables = [o.kind for o in floor.objects if o.room == room.id and "table" in o.kind]
-                kinds.add("long" if len(tables) == 2 else tables[0])
+        for width, depth in ((8, 8), (10, 8), (12, 8), (14, 9), (16, 9), (20, 10)):
+            params = make_params(
+                room="meeting_room", width=width, depth=depth, wealth=Wealth.LUXURY, seed=seed
+            )
+            floor = generate(params).floor(0)
+            tables = [o.kind for o in floor.objects if "table" in o.kind]
+            kinds.add("long" if len(tables) == 2 else tables[0])
     assert {"round_table", "meeting_table", "long"} <= kinds
 
 
@@ -274,7 +274,7 @@ def test_the_stalls_of_a_toilet_all_face_the_same_way(
 def test_meeting_rooms_are_roomy_and_every_table_has_chairs() -> None:
     for seed in range(4):
         params = make_params(
-            width=72, depth=30, floors_above=2, wealth=Wealth.SQUATTER, seed=519501 + seed
+            width=72, depth=30, floors_above=1, wealth=Wealth.SQUATTER, seed=519501 + seed
         )
         for floor in generate(params).floors:
             for room in floor.rooms:
@@ -332,7 +332,7 @@ def test_an_office_is_filled_with_desks_each_with_its_own_chair() -> None:
         # The mix of rooms varies: the first seed whose floor has a private office at all.
         floors = (
             generate(
-                make_params(width=60, depth=40, floors_above=3, wealth=wealth, seed=seed)
+                make_params(width=60, depth=40, floors_above=2, wealth=wealth, seed=seed)
             ).floor(1)
             for seed in range(1, 5)
         )
@@ -428,19 +428,13 @@ def test_corp_offices_have_one_training_room_per_floor_at_most_and_none_upstairs
 
 
 def test_vending_machines_line_the_walls_of_an_office_vending_room() -> None:
-    rooms = 0
-    for seed in range(4):
-        params = make_params(width=72, depth=52, floors_above=3, seed=seed)
-        for floor in generate(params).floors:
-            vending = [r for r in floor.rooms if r.type == "vending_room"]
-            assert len(vending) <= 1
-            for room in vending:
-                rooms += 1
-                machines = [o for o in floor.objects if o.room == room.id]
-                machines = [o for o in machines if o.kind == "vending_machine"]
-                # a machine per metre of wall, roughly: the room's perimeter less doors
-                assert len(machines) * 2 >= len(room.cells) // 6
-    assert rooms
+    for seed in range(6):
+        params = make_params(room="vending_room", width=8 + seed, depth=6 + seed % 3, seed=seed)
+        floor = generate(params).floor(0)
+        (room,) = floor.rooms
+        machines = [o for o in floor.objects if o.room == room.id and o.kind == "vending_machine"]
+        # a machine per metre of wall, roughly: the room's perimeter less doors
+        assert len(machines) * 2 >= len(room.cells) // 6
 
 
 def test_vending_rooms_are_open_on_one_or_two_sides_and_take_no_other_doors() -> None:

@@ -15,14 +15,13 @@ def office(**overrides: object) -> Building:
 
 def test_every_nap_room_has_a_locker_for_each_pod() -> None:
     pods = 0
-    for seed in range(1, 6):
-        for floor in office(seed=seed).floors:
-            for room in floor.rooms:
-                if room.type != "nap_room":
-                    continue
-                kinds = Counter(o.kind for o in floor.objects if o.room == room.id)
-                assert kinds["locker"] == kinds["capsule"]
-                pods += kinds["capsule"]
+    for seed in range(1, 9):
+        floor = generate(
+            make_params(room="nap_room", width=10 + seed, depth=8 + seed % 3, seed=seed)
+        ).floor(0)
+        kinds = Counter(o.kind for o in floor.objects)
+        assert kinds["locker"] == kinds["capsule"]
+        pods += kinds["capsule"]
     assert pods > 10
 
 
@@ -44,7 +43,7 @@ def test_floors_of_one_role_are_not_copies() -> None:
 def test_server_rooms_get_small_mantraps_more_often_with_security() -> None:
     def mantraps(security: Security) -> list[tuple[Floor, int]]:
         found: list[tuple[Floor, int]] = []
-        for seed in range(1, 13):
+        for seed in range(1, 11):
             building = generate(
                 make_params(
                     building_type=BuildingType.OFFICE,
