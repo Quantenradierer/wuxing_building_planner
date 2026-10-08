@@ -383,7 +383,9 @@ irregular and any footprint is the same case. Programs with `units` are rejected
 1. **Skeleton**, identical on every floor: parallel corridors along the long axis (as many as
    keep each row of rooms within `strip_depth`) with cross corridors; pieces a footprint
    splits are joined; cells farther than `strip_depth[1]` from circulation get a side corridor
-   to the outer wall; on buildings with width + depth >= 100 now and then a dead-end stub
+   to the outer wall; the straight skeleton is broken up: a parallel corridor may *kink* sideways
+   part-way (`_jogs`, `JOG`, a small plaza at the bend, only where the rows of rooms keep their
+   minimum depth) and may *stop short* of a facade (`_trims`, `TRIM`) so rooms wrap round its end; on buildings with width + depth >= 100 now and then a dead-end stub
    (`_stubs`) runs from circulation into a pocket 8+ cells from it and stops short of the wall,
    so the back of a deep row of rooms has a door instead of becoming sleep pods; corridor bits thinner than the corridor width go (`opened`). The lobby is
    a rectangle on the street facade with its inner side on a corridor (`_lobby_beside`; else

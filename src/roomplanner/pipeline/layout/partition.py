@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import math
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 
 from roomplanner.geometry import Cell, Corner, Diagonal, Side, thinnest_extent
@@ -232,6 +233,10 @@ class PartitionLayout:
             shift = rng.randint(-1, 1) if rows >= smin + 2 else 0
             starts.append(lo + round(rows * (i + 1) + width * i) + shift)
         cells = {c for c in footprint if any(t <= cross(c) < t + width for t in starts)}
+        added, dropped = self._jogs(
+            footprint, starts, width, rows, smin, (ulo, uhi), cross, along, rng
+        )
+        cells = (cells - dropped) | added
         if count > 1 and not self.diagonal_links:
             length = uhi - ulo
             ends = [ulo + round(rows), uhi - round(rows) - width]
@@ -242,7 +247,78 @@ class PartitionLayout:
                 for c in footprint
                 if span[0] <= cross(c) < span[1] and any(u <= along(c) < u + width for u in spots)
             }
+            if spots is ends:
+                cells -= self._trims(footprint, starts, width, rows, (ulo, uhi), cross, along, rng)
         return frozenset(cells)
+
+    @staticmethod
+    def _trims(
+        footprint: frozenset[Cell],
+        starts: list[int],
+        width: int,
+        rows: float,
+        span: tuple[int, int],
+        cross: Callable[[Cell], int],
+        along: Callable[[Cell], int],
+        rng: random.Random,
+    ) -> set[Cell]:
+        """Corridors that stop short of a facade: the run between the end cross corridor and
+        the facade is cut off by TRIM (a share of it), so the rooms at the end wrap round."""
+        ulo, uhi = span
+        cut: set[Cell] = set()
+        for start in starts:
+            for high in (False, True):
+                if rng.random() > TRIM_CHANCE:
+                    continue
+                run = round(rows * rng.uniform(*TRIM))
+                for c in footprint:
+                    u, v = along(c), cross(c)
+                    if start - JOG[1] <= v < start + width + JOG[1] and (
+                        u >= uhi - run if high else u < ulo + run
+                    ):
+                        cut.add(c)
+        return cut
+
+    @staticmethod
+    def _jogs(
+        footprint: frozenset[Cell],
+        starts: list[int],
+        width: int,
+        rows: float,
+        smin: int,
+        span: tuple[int, int],
+        cross: Callable[[Cell], int],
+        along: Callable[[Cell], int],
+        rng: random.Random,
+    ) -> tuple[set[Cell], set[Cell]]:
+        """Corridors that kink instead of running dead straight: from a point along the
+        corridor on, it runs `JOG` cells to the side (towards the middle of the building),
+        joined by a cross piece with a small plaza at the kink. The rows of rooms beside
+        it get a step. Returns the cells to add and the straight run's cells to drop."""
+        ulo, uhi = span
+        room = int(rows) - smin  # what a row of rooms can lose to a kink and keep its depth
+        if uhi - ulo < 5 * JOG[1] or room < JOG[0]:
+            return set(), set()
+        added: set[Cell] = set()
+        dropped: set[Cell] = set()
+        mid = (len(starts) - 1) / 2
+        for i, start in enumerate(starts):
+            if rng.random() > JOG_CHANCE:
+                continue
+            offset = rng.randint(JOG[0], min(JOG[1], room))
+            if i > mid or (i == mid and rng.random() < 0.5):
+                offset = -offset
+            at = ulo + round((uhi - ulo) * rng.uniform(0.3, 0.7))
+            lo, hi = sorted((start, start + offset))
+            for c in footprint:
+                u, v = along(c), cross(c)
+                if u >= at and start + offset <= v < start + offset + width:
+                    added.add(c)
+                elif u >= at and start <= v < start + width:
+                    dropped.add(c)
+                if at - 2 <= u < at + width + 2 and lo - 2 <= v < hi + width + 2:
+                    added.add(c)
+        return added, dropped - added
 
     def _diagonal(
         self,
@@ -807,6 +883,10 @@ class DiagonalPartitionLayout(PartitionLayout):
 
 
 LINK_GAP = (50, 70)  # cells between diagonal corridors joining the same two corridors
+JOG = (3, 6)  # cells a corridor kinks sideways
+JOG_CHANCE = 0.6
+TRIM = (0.4, 1.0)  # share of the run from the end cross corridor to the facade that goes
+TRIM_CHANCE = 0.5
 STUBS = 6  # dead-end stubs a skeleton tries
 STUB_POCKET = 30  # cells: smallest pocket far from circulation that gets one
 STUB_CHANCE = 0.8

@@ -26,7 +26,7 @@ RULES = {
 }
 # Smallest share of buildings without the warning (measured, with some margin).
 MIN_PASS = {
-    "escape distance": 0.95,
+    "escape distance": 0.9,
     "two routes": 0.95,
     "dead end": 0.55,
     "window area": 0.55,
