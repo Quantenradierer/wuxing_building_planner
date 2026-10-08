@@ -5,11 +5,11 @@ rooms:
     min_side: 6
     access: [reception_lobby]   # opens onto the lobby with the reception where it can
     furniture:
-      - {object: bench, placement: wall, count: [2, 6]}
+      - {object: wall_screen, placement: end}                                  # the focal point
+      - {object: bench, placement: rows, aisle: 2, margin: 1, toward: wall_screen}   # runs facing it
       - {object: vending_machine, placement: wall, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 2]}
       - {object: water_cooler, placement: wall, count: [0, 1]}
-      - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   exam_room:
     area: [40, 70]
@@ -47,11 +47,11 @@ rooms:
     vestibule: scrub_room       # entered only through the scrub room beside it
     furniture:
       - {object: operating_table, placement: center}
-      - {object: medical_cabinet, placement: wall, count: [2, 4]}
+      - {object: medical_cabinet, placement: wall, count: [2, 4], line: true}   # one run
       - {object: vital_monitor, placement: at, at: operating_table, beside: [flanks]}
       - {object: medical_cart, placement: at, at: operating_table, beside: [flanks]}
       - {object: iv_stand, placement: at, at: operating_table, beside: [flanks], count: [0, 1]}
-      - {object: machinery, placement: wall, count: [0, 1]}
+      - {object: machinery, placement: at, at: operating_table, beside: [back]}   # anaesthesia at the head
   scrub_room:           # scrub-in beside an OR; beds are wheeled through
     area: [24, 80]
     min_side: 4
@@ -67,10 +67,10 @@ rooms:
     next_to: [operating_room]
     windows: forbidden
     furniture:
-      - {object: counter, placement: wall, count: [1, 2]}
-      - {object: sink, placement: wall, count: [1, 2]}
-      - {object: machinery, placement: wall}
-      - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: counter, placement: center, count: [0, 1]}     # the packing table
+      - {object: machinery, placement: wall, count: [2, 4], line: true}   # autoclaves in one bank
+      - {object: sink, placement: wall, count: [1, 2], line: true}
+      - {object: shelf, placement: wall, count: [0, 2], line: true}   # sterile storage
   ward:                 # patient room
     area: [60, 120]
     min_side: 6
@@ -79,15 +79,15 @@ rooms:
     furniture:
       - {object: patient_bed, placement: wall, spaced: true, count: [1, 4]}
       - {object: cabinet, placement: wall, count: [1, 2]}
-      - {object: chair, placement: scatter, count: [0, 2]}
+      - {object: chair, placement: at, at: patient_bed, beside: [flanks], count: [0, 1]}
+      - {object: sink, placement: wall, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   nurse_station:
     area: [24, 60]
     min_side: 4
     furniture:
-      - {object: counter, placement: wall, count: [1, 2]}
+      - {object: reception_post, placement: wall, faces_door: true}   # counter facing the approach, the nurse's chair behind it
       - {object: terminal, placement: wall, count: [1, 2]}
-      - {object: chair, placement: at, at: counter, beside: [front], count: [1, 2]}
       - {object: medical_cabinet, placement: wall, count: [0, 1]}
       - {object: medical_cart, placement: scatter, count: [0, 1]}
   pharmacy:
@@ -95,16 +95,20 @@ rooms:
     min_side: 5
     windows: forbidden
     furniture:
-      - {object: counter, placement: wall}
-      - {object: shelf, placement: rows, aisle: 2, margin: 1}
-      - {object: stool, placement: at, at: counter, count: [0, 1]}
+      - {object: counter, placement: wall, faces_door: true, line: true, count: [2, 3]}   # the public side
+      - {object: shelf, placement: wall, line: true, count: [3, 8]}                       # stock along the walls behind it
+      - {object: fridge, placement: wall, count: [0, 1]}
+      - {object: safe, placement: corner, count: [0, 1]}
+      - {object: stool, placement: at, at: counter, beside: [front], count: [0, 1]}
   lab:
     area: [40, 120]
     min_side: 6
     furniture:
-      - {object: counter, placement: wall, count: [2, 4]}
-      - {object: fridge, placement: wall, count: [0, 2]}
-      - {object: stool, placement: at, at: counter, count: [0, 1]}
+      - {object: counter, placement: wall, count: [2, 4], line: true}   # long continuous runs
+      - {object: lab_bench, placement: rows, aisle: 3, margin: 2, count: [0, 6]}   # islands
+      - {object: stool, placement: at, at: counter, beside: [front], count: [0, 1]}
+      - {object: stool, placement: at, at: lab_bench, beside: [front], count: [0, 1]}
+      - {object: specimen_fridge, placement: wall, count: [0, 2], line: true}
       - {object: sink, placement: wall, count: [0, 1]}
       - {object: terminal, placement: wall, count: [0, 1]}
   xray:

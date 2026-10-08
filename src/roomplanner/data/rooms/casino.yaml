@@ -26,9 +26,8 @@ rooms:
     furniture:
       - {object: card_table_set, placement: center}
       - {object: roulette_set, placement: wall, count: [0, 1]}
-      - {object: counter, placement: wall, count: [0, 1]}            # the host's bar
+      - {object: counter, placement: wall}                             # the host's bar
       - {object: sofa_set, placement: wall, count: [0, 1]}
-      - {object: rug, placement: center, count: [0, 1]}
       - {object: plant, placement: corner, count: [1, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
   cage_complex:         # a unit, subdivided per the program's `units:` (cage, count room, vault)
@@ -64,7 +63,6 @@ rooms:
     furniture:
       - {object: wall_screen, placement: end}
       - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
-      - {object: wall_screen, placement: wall, count: [0, 3]}
       - {object: server_rack, placement: wall, count: [0, 2]}
       - {object: rigger_cocoon, placement: wall, count: [0, 1], security: [corporate, aaa]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
