@@ -103,8 +103,7 @@ class Placement(StrEnum):
     FACING_EXIT = "facing_exit"  # on the entrance's axis, facing it (reception desk)
     FILL = "fill"  # the room's width at the far wall, facing the door (stairs, elevator car)
     PERIMETER = "perimeter"  # side by side along every wall, as many as fit (vending machines)
-    GATES = "gates"  # a pair of lane gates across the entrance door's axis, aligned with it
-    GUARD = "guard"  # beside the gates, at right angles to the entrance, facing the lane
+    GATES = "gates"  # one lane gate across each entrance door's axis, `margin` cells inside it
     AXIS = "axis"  # on a wall at an end of the biggest object's long axis, facing it (screen)
 
 
@@ -138,6 +137,20 @@ class FurnitureRule(_Strict):
         default=False,
         description="rows: every row leaves an aisle-wide gap at alternating ends, so the aisles "
         "join into one winding path (a supermarket's customer route)",
+    )
+    centered: bool = Field(
+        default=False,
+        description="rows: centred in the room even where a side is open (a plaza's island)",
+    )
+    displace: list[str] = Field(
+        default_factory=list,
+        description="Object kinds already in the room that make way when this one found no "
+        "place (security layer: benches and plants give the guard desk its wall)",
+    )
+    wall_back: bool = Field(
+        default=False,
+        description="rows: only two rows, each with its back to a wall of the room (heads of "
+        "beds at the wall), the aisle between them",
     )
     fill: float = Field(
         default=1.0,

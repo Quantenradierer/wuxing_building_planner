@@ -110,7 +110,7 @@ rooms:
     cluster: true
     windows: forbidden
     furniture:
-      - {object: capsule, placement: rows, aisle: 2, margin: 0, block: 12, accessible: true}   # pods side by side in aligned rows, an aisle at their feet
+      - {object: capsule, placement: rows, aisle: 2, margin: 0, block: 12, accessible: true, wall_back: true}   # pods side by side in aligned rows, heads at the wall, an aisle at their feet
       - {object: locker, placement: wall, match: capsule}   # a locker for every pod
   copy_room:                # printers, paper, mail
     area: [20, 48]

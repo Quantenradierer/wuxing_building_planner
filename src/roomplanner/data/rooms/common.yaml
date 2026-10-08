@@ -300,8 +300,8 @@ rooms:
     windows: forbidden
     transit: false
     furniture:
-      - {object: vending_machine, placement: rows, paired: true, margin: 0, aisle: 1, block: 10, count: [1, 6]}
-      - {object: bench, placement: wall, count: [0, 2]}
+      - {object: vending_machine, placement: rows, paired: true, margin: 0, aisle: 1, block: 10, count: [1, 6], centered: true}
+      - {object: bench, placement: center, count: [0, 2]}
       - {object: trash_bin, placement: scatter, count: [0, 1]}
   car_park:             # a building's basement parking: claims one whole end of the level first
     area: [600, 1800]
