@@ -2,33 +2,33 @@ office 32x18 cells, wealth=middle, seed=1
 
 == Ground floor ==
 +--===----+---------+-------------------------+--DDD-----===----+
-"sss sss s|E EEE EEE|  sss sss sss            |        sss sss s"
-"        s|E        |                         |                s"
-"s s s   s|E        |  sss sss sss sss sss    |  sss sss sss   s"
-|s s s    |         |                         |                 |
-|s s s   s|E        |  sss sss sss sss sss    |  sss sss sss   s|
-|        s|E        |                         |                s|
-"s s s 13s|E   10  S|            8            |        11      s"
-"s s s    |        S|                         |                 "
-"s s s   s|        S|                         |k               s"
-|        s|         |                         |                s|
-|        s|         |      sss sss sss sss    |      sss sss   s|
+"l l l l l|E EEE EEE|  sss sss sss            |        sss sss s"
+"         |E        |                         |                s"
+"l c c   i|E        |  sss sss sss sss sss    |  sss sss sss   s"
+|        i|         |                         |                 |
+|  ttt   i|E        |  sss sss sss sss sss    |  sss sss sss   s|
+|  ttt    |E        |                         |                s|
+"  ttt 13'|E   10  S|            8            |        11      s"
+"         |        S|                         |                 "
+"  c c    |        S|                         |k               s"
+|         |         |                         |                s|
+|         |         |      sss sss sss sss    |      sss sss   s|
 |         |         |                         |                 |
-|         |        '|                         |      sss sss sss|
+|         |        f|                         |      sss sss sss|
 +--DDD----+DDD------+--DDD--------------------+DDD--+-----------+
-D                                c                  |    nnnnnnn|
-D                                                   |           |
-D      1                     RRRRRRRRR              D          s|
-|                            RRRRRRRRR              D          s|
-|^^^                         RRRRRRRRR              D          s"
-|^^^                                                |           "
-|^^^ '       *                                      |    12    s"
-+---+---+---+---+                                   |          s|
-|www|www|www|www|<                                 U|          s|
-|www|www|www|www|<                                  |           |
-|www|www|www|www|<               2                  |          s"
-|   |   |   |   |<                                  |          s"
-|4  |5  |6  |7  |<                                  |          s"
+D                                c                  |  sss sss s|
+D                                                   |          s|
+D      1                     RRRRRRRRR              D    s s   s|
+|                            RRRRRRRRR              D    s s    |
+|^^^                         RRRRRRRRR              D    s s   s"
+|^^^                                                |          s"
+|^^^ f       *                                      |  12s s   s"
++---+---+---+---+                                   |    s s    |
+|www|www|www|www|<                                 U|s   s s   s|
+|www|www|www|www|<                                  |s         s|
+|www|www|www|www|<               2                  |s         s"
+|   |   |   |   |<                                  |           "
+|4  |5  |6  |7  |<                                  |sss sss sss"
 +DDD+DDD+DDD+DDD+                                   +-----------+
 |               |                                   |    www i  |
 |               |                                   |    www i  |
@@ -38,7 +38,7 @@ D      1                     RRRRRRRRR              D          s|
 |               |                                   |           |
 |    U iii iii  |  a qqqqqqq             qqqqqqq x  |           |
 +--===---===----+----===-------DDDDDDD-------===----+----===----+
-  objects: q bench, k cabinet, c chair, n counter, E electrical_panel, a fire_alarm_panel, ' fire_extinguisher, x medkit, * plant, R reception_desk, ^ roof_hatch, S server_rack, s shelf, i sink, U trash_bin, < wall_screen, w wc
+  objects: q bench, k cabinet, t canteen_table, c chair, ' coffee_machine, E electrical_panel, a fire_alarm_panel, f fire_extinguisher, l locker, x medkit, * plant, R reception_desk, ^ roof_hatch, S server_rack, s shelf, i sink, U trash_bin, < wall_screen, w wc
     1  corridor             32 cells
     2  reception_lobby     198 cells
     3  toilet               32 cells
@@ -50,8 +50,8 @@ D      1                     RRRRRRRRR              D          s|
     9  wc                   24 cells
    10  electrical_room      35 cells
    11  storage              63 cells
-   12  copy_room            42 cells
-   13  storage              35 cells
+   12  storage              42 cells
+   13  staff_room           35 cells
 
 Warnings:
   - level 0: no space for executive_office

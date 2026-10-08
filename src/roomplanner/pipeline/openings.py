@@ -319,6 +319,7 @@ def _door(
     rng: random.Random,
     start: int,
     diagonal: bool = False,
+    steady: bool = False,
 ) -> Opening:
     edges = tuple(run[start : start + width])
     axis = run[0].axis
@@ -332,7 +333,9 @@ def _door(
         else:
             towards = Side.W if first.x == into.x else Side.E
     hinges = (Side.W, Side.E) if axis is Axis.H else (Side.N, Side.S)
-    return Opening(OpeningKind.DOOR, edges, Swing(towards, rng.choice(hinges)), diagonal=diagonal)
+    # `steady`: hinged at the nearer end of the wall, so rooms of one shape get one layout
+    hinge = hinges[start * 2 + width <= len(run)] if steady else rng.choice(hinges)
+    return Opening(OpeningKind.DOOR, edges, Swing(towards, hinge), diagonal=diagonal)
 
 
 def _interior_doors(
@@ -521,6 +524,7 @@ def _interior_doors(
             rng,
             start,
             run[0] in diagonal_edges,
+            steady=rooms[i].type != "stall",
         )
         if spec.door_slides:
             door = replace(door, sliding=True)

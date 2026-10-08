@@ -42,6 +42,9 @@ MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
 ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
 CLUSTER = 1.8  # score bonus for a type whose placed neighbours are all of that type
+SAME_SIZE = 1.0  # score bonus for a piece of a size another room of its type already has
+GROWTH_SLACK = 1.6  # each further round lets rooms outgrow their size and aspect limits more
+MAX_GROWTH = 8  # cells: thickest strip of leftover a room beside it grows over
 STRAND = 6  # a rest no room can use costs its cells over this (unreachable ones end as sleep pods)
 JOG = 0.1  # score penalty per end of a cut that misses such a wall by 1-2 cells
 _ACROSS = {
@@ -111,6 +114,7 @@ class Assigner:
         self._rooms = 0
         self.owner: dict[Cell, int] = {}  # cell -> index of the placed room holding it
         self.kinds: dict[int, str] = {}  # index of a placed room -> its type
+        self.sizes: dict[str, set[tuple[int, int]]] = {}  # type -> (w, h) of its rectangles
         self._useful_cache: dict[int, bool] = {}
 
     # --- entry point ------------------------------------------------------------------
@@ -130,6 +134,8 @@ class Assigner:
                     raise AllocationError(message)
                 self.warnings.append(message)
         self._fill(free, pool, rooms)
+        for slack in (1.0, GROWTH_SLACK, GROWTH_SLACK**2):
+            self._grow_into_leftovers(rooms, slack)
         return rooms
 
     # --- the rooms a floor needs ------------------------------------------------------
@@ -187,7 +193,7 @@ class Assigner:
         _, piece, rests, index = best
         region = free.pop(index)
         free.extend(rests)
-        self._own(piece)
+        self._own(piece, need.entry.room)
         rooms.append(PlannedRoom(need.entry.room, piece))
         return True
 
@@ -276,7 +282,9 @@ class Assigner:
 
     def _cut(self, region: frozenset[Cell], need: Need) -> Choice | None:
         """The best piece of `region` for `need`: a straight cut off one end, or a corner."""
-        return self._cut_for(region, need.spec, need.low, need.high, need.target, need)
+        return self._cut_for(
+            region, need.spec, need.low, need.high, need.target, need, kind=need.entry.room
+        )
 
     def _cut_for(
         self,
@@ -287,8 +295,10 @@ class Assigner:
         target: int,
         need: Need | None,
         near: str | None = None,
+        kind: str | None = None,
     ) -> Choice | None:
         grid = self.grid
+        known: set[tuple[int, int]] = self.sizes.get(kind, set()) if kind else set()
         whole = self._mask(region)
         total = len(region)
         pieces: list[tuple[int, float]] = []
@@ -315,6 +325,11 @@ class Assigner:
                 continue
             base = abs(size - target) / target - bonus
             base += self._soft_m(piece, spec, near_room)
+            if known:
+                x0, y0, x1, y1 = grid.bbox(piece)
+                lit = spec.windows is not WindowRule.REQUIRED or piece & self.outer_m
+                if lit and (x1 - x0, y1 - y0) in known and (x1 - x0) * (y1 - y0) == size:
+                    base -= SAME_SIZE
             scored.append((base, piece))
         scored.sort(key=lambda s: (s[0], grid.min_cell(s[1])))
         best: tuple[float, int, list[int]] | None = None
@@ -464,7 +479,9 @@ class Assigner:
                 if len(region) < low:
                     continue
                 spec = self.rules.spec(entry.room)
-                choice = self._cut_for(region, spec, low, high, (low + high) // 2, None, entry.near)
+                choice = self._cut_for(
+                    region, spec, low, high, (low + high) // 2, None, entry.near, entry.room
+                )
                 if choice is None:
                     continue
                 score = choice.score - self._wanted(entry, choice.piece, total, pool)
@@ -484,6 +501,80 @@ class Assigner:
             _, entry, choice = chosen
             self._add(entry, choice.piece, rooms)
             free.extend(choice.rests)
+
+    def _grow_into_leftovers(self, rooms: list[PlannedRoom], slack: float) -> None:
+        """Leftovers cut off from circulation (a strip along a facade behind a row of rooms) are
+        long thin sleep pods nobody would build: the rooms beside them grow over them instead,
+        each over the part straight behind it, as far as its size and shape allow."""
+        for _ in range(4 * len(rooms) + 8):
+            left = frozenset(c for r in rooms if r.leftover for c in r.cells)
+            if not left:
+                break
+            best: tuple[float, int, frozenset[Cell]] | None = None
+            for index, room in enumerate(rooms):
+                if room.leftover or room.unit is not None or room.host is not None:
+                    continue
+                spec = self.rules.spec(room.type)
+                if spec.stalls is not None:
+                    continue
+                found = self._growth(room, spec, left, slack)
+                if found is not None and (best is None or found[0] < best[0]):
+                    best = (found[0], index, found[1])
+            if best is None:
+                break
+            _, index, gain = best
+            grown = rooms[index]
+            rooms[index] = PlannedRoom(
+                grown.type, grown.cells | gain, grown.unit, grown.entry, grown.host
+            )
+            for other, room in enumerate(rooms):
+                if room.leftover and not room.cells.isdisjoint(gain):
+                    rest = room.cells - gain
+                    rooms[other] = PlannedRoom(room.type, rest, leftover=True)
+            rooms[:] = [r for r in rooms if r.cells]
+
+    def _growth(
+        self, room: PlannedRoom, spec: RoomSpec, left: frozenset[Cell], slack: float
+    ) -> tuple[float, frozenset[Cell]] | None:
+        """The best strip of `left` straight behind a side of the rectangle `room`: (how full
+        the room gets, the strip). Only strips thinner than a room is deep, and only ones
+        that leave the room a decent rectangle."""
+        x0, y0, x1, y1 = bbox(room.cells)
+        if (x1 - x0) * (y1 - y0) != len(room.cells):
+            return None
+        entry = next((e for e in self.entries if e.room == room.type), None)
+        high = self._range(entry)[1] if entry is not None else spec.area[1]
+        best: tuple[float, frozenset[Cell]] | None = None
+        for side in Side:
+            strip: set[Cell] = set()
+            for depth in range(1, MAX_GROWTH + 1):
+                layer = self._layer(x0, y0, x1, y1, side, depth)
+                if not layer <= left:
+                    break
+                strip |= layer
+                w, h = x1 - x0, y1 - y0
+                if side in (Side.E, Side.W):
+                    w += depth
+                else:
+                    h += depth
+                if w * h > high * TOLERANCE * slack:
+                    break
+                if max(w, h) > spec.max_aspect * slack * min(w, h):
+                    break
+                score = w * h / high - 0.1 * depth  # the emptier room, the thicker strip
+                if best is None or score < best[0]:
+                    best = (score, frozenset(strip))
+        return best
+
+    @staticmethod
+    def _layer(x0: int, y0: int, x1: int, y1: int, side: Side, depth: int) -> frozenset[Cell]:
+        if side is Side.N:
+            return frozenset(Cell(x, y0 - depth) for x in range(x0, x1))
+        if side is Side.S:
+            return frozenset(Cell(x, y1 - 1 + depth) for x in range(x0, x1))
+        if side is Side.W:
+            return frozenset(Cell(x0 - depth, y) for y in range(y0, y1))
+        return frozenset(Cell(x1 - 1 + depth, y) for y in range(y0, y1))
 
     def _halve(self, region: frozenset[Cell], pool: list[RoomEntry]) -> list[frozenset[Cell]]:
         """A region no room can be cut from, though it is bigger than any room: split it
@@ -532,9 +623,19 @@ class Assigner:
             deficit
             + self.rng.uniform(0, NOISE)
             + (-STARVED if starved else CLUSTER * self._alike(entry.room, cells))
+            + (
+                SAME_SIZE
+                if not starved and self._rect(cells) in self.sizes.get(entry.room, ())
+                else 0.0
+            )
             - self._soft(cells, spec, entry.near)
             - (0.5 if entry.priority is Priority.OPTIONAL else 0.0)
         )
+
+    @staticmethod
+    def _rect(cells: frozenset[Cell]) -> tuple[int, int] | None:
+        x0, y0, x1, y1 = bbox(cells)
+        return (x1 - x0, y1 - y0) if (x1 - x0) * (y1 - y0) == len(cells) else None
 
     def _alike(self, kind: str, cells: frozenset[Cell]) -> float:
         """Share of the placed rooms around `cells` that are of type `kind`: rooms of a type
@@ -557,5 +658,7 @@ class Assigner:
     def _own(self, cells: frozenset[Cell], kind: str = "") -> None:
         self._rooms += 1
         self.kinds[self._rooms] = kind
+        if kind and (shape := self._rect(cells)) is not None:
+            self.sizes.setdefault(kind, set()).add(shape)
         for cell in cells:
             self.owner[cell] = self._rooms
