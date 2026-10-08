@@ -45,7 +45,7 @@ def test_unit_doors_open_into_the_hallway() -> None:
         for a, b in door_pairs(floor):
             if a.unit != b.unit:
                 inside = a if a.unit is not None else b
-                assert inside.type == "hallway"
+                assert inside.type in ("hallway", "bedsit")  # a bedsit is the whole unit
 
 
 def test_bathrooms_and_bedrooms_are_not_passed_through() -> None:

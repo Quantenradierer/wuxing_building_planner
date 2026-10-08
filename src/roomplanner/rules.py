@@ -544,6 +544,15 @@ class UnitSpec(_Strict):
     back: list[str]
     back_fill: str | None = None
     front_fill: str | None = None
+    single: str | None = Field(
+        default=None,
+        description="The whole unit is this one room (a bedsit with kitchen and toilet in it)",
+    )
+    small: str | None = Field(
+        default=None,
+        description="The room of a unit too small for two zones (default: back[0]); an "
+        "all-in-one room, so a den never lacks its toilet and kitchen",
+    )
 
 
 class WealthRule(_Strict):

@@ -50,12 +50,16 @@ def subdivide(
     def side(kind: str) -> int:
         return rules.spec(kind).min_side
 
+    if spec.single is not None:
+        return [room(spec.single, 0, width, 0, depth, entry=True)]
     back_min = max(side(k) for k in spec.back)
     # Too narrow for an entry leg as wide as the back room: keep a hall of its own.
     merge = spec.hall_in_back and width >= max(spec.hall_width, side(spec.back[0])) + back_min
     hall_width = max(spec.hall_width, side(spec.back[0])) if merge else spec.hall_width
     front_min = max([hall_width, *(side(k) for k in spec.front)])
-    fits_spine = depth - hall_width >= front_min + back_min
+    fits_spine = depth - hall_width >= front_min + back_min and not _short_hall(
+        spec, rules, width, depth, hall_width, front_min, back_min
+    )
     spine = hall_width if fits_spine and not merge else 0
     front_depth = round((depth - spine) * FRONT_SHARE)
     # Not so deep that a front room at its minimum width exceeds its maximum area.
@@ -67,7 +71,7 @@ def subdivide(
 
     if back_depth < back_min or width < hall_width + back_min:
         # Too small for two zones: one room, entered from the corridor.
-        return [room(spec.back[0], 0, width, 0, depth, entry=True)]
+        return [room(spec.small or spec.back[0], 0, width, 0, depth, entry=True)]
 
     # Corridor side: [front[0]] hall [front[1:]], each at least its minimum side.
     rooms: list[PlannedRoom] = []
@@ -139,6 +143,33 @@ def subdivide(
         rooms[first] = PlannedRoom(spec.back[0], cells, unit=unit, entry=True)
         del rooms[hall]
     return rooms
+
+
+def _short_hall(
+    spec: UnitSpec,
+    rules: Rules,
+    width: int,
+    depth: int,
+    hall_width: int,
+    front_min: int,
+    back_min: int,
+) -> bool:
+    """Two back rooms (the second entered through the first) already cover the unit's width
+    within their maximum areas: no hall along the unit, which is mostly corridor otherwise."""
+    if len(spec.back) + (spec.back_fill is not None) < 2:
+        return False
+    kinds = [*spec.back, *([spec.back_fill] if spec.back_fill else [])][:2]
+    back_depth = depth - max(front_min, round(depth * FRONT_SHARE))
+    if back_depth < back_min:
+        return False
+    front_depth = depth - back_depth
+    fronts = sum(rules.spec(k).area[1] for k in spec.front)
+    # The front rooms stay within their maximum areas without closets (there is no hall
+    # to open them onto).
+    return (
+        sum(rules.spec(k).area[1] for k in kinds) >= width * back_depth
+        and fronts >= (width - hall_width) * front_depth
+    )
 
 
 def _front_fill(

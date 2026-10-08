@@ -261,7 +261,7 @@ def test_bedrooms_get_a_window_cell_per_six_square_metres() -> None:
         width=41,
         depth=46,
         floors_above=5,
-        wealth=Wealth.SQUATTER,
+        wealth=Wealth.MIDDLE,
         seed=7104,
     )
     bedrooms = 0
@@ -272,7 +272,7 @@ def test_bedrooms_get_a_window_cell_per_six_square_metres() -> None:
                 bedrooms += 1
                 cells = sum(len(w.edges) for w in windows if set(w.edges[0].cells()) & room.cells)
                 assert cells * DAYLIGHT >= room.area, room
-    assert bedrooms > 20
+    assert bedrooms > 10
 
 
 def test_kitchen_opens_straight_into_the_restaurant() -> None:

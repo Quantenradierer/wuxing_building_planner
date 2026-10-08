@@ -32,6 +32,7 @@ from roomplanner.pipeline.base import (
 from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
 from roomplanner.pipeline.layout.partition_assign import Assigner
+from roomplanner.pipeline.layout.partition_units import split_units
 from roomplanner.pipeline.layout.regions import (
     bbox,
     components,
@@ -75,8 +76,6 @@ class PartitionLayout:
 
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         program = ctx.rules.program
-        if program.units:
-            return [f"{program.building}: units are not supported by the partition layout yet"]
         problems: list[str] = []
         if min(ctx.width, ctx.height) < self.main_min_depth(ctx):
             problems.append(
@@ -1013,6 +1012,14 @@ class PartitionLayout:
             shared[key] = (rooms, assigner.warnings)
             plan.warnings += assigner.warnings
         rooms = [*fixed, *shared[key][0]]
+        if ctx.rules.program.units:
+            rooms = split_units(
+                rooms,
+                ctx.rules,
+                skeleton.corridor | lobby_cells,
+                level,
+                ctx.rng(f"units:{level}"),
+            )
         rooms = absorb_leftovers(rooms, ctx.rules, skeleton.band)
         rooms = _merge_thin(rooms, ctx.rules, skeleton.band)
         rooms = carve_stalls(rooms, ctx.rules)
