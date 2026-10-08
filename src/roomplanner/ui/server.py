@@ -124,9 +124,13 @@ def _params(request: JsonObject) -> GenerationParams:
     if not isinstance(raw, dict):
         raise RequestError("missing params")
     try:
-        return GenerationParams.model_validate(raw)
+        params = GenerationParams.model_validate(raw)
     except ValidationError as error:
         raise RequestError(_validation_message(error)) from error
+    if params.layout is not None and load_rules(params.building_type).program.units:
+        # the page keeps its layout choice when the type changes; unit buildings can't take it
+        params = params.model_copy(update={"layout": None})
+    return params
 
 
 def _data_url(image: Image.Image) -> str:

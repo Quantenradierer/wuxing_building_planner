@@ -240,6 +240,10 @@ class Assigner:
     def _shape_m(self, mask: int, spec: RoomSpec) -> bool:
         """Wide enough: circulation rooms (an open office) count together with the corridor
         beside them, as the validator does."""
+        if spec.rectangular:
+            x0, y0, x1, y1 = self.grid.bbox(mask)
+            if (x1 - x0) * (y1 - y0) != mask.bit_count():
+                return False
         if spec.circulation:
             return self.grid.thick(mask, mask | self.access_m, spec.min_side)
         if self.grid.thick(mask, mask, spec.min_side):

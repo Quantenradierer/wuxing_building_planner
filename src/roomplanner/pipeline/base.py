@@ -45,6 +45,7 @@ class PlannedRoom:
     front: Side | None = None  # the wall its door goes in if it can (stalls: towards the passage)
     hub: bool = False  # doors and walls treat it as circulation (a hall without a corridor)
     hallway: bool = False  # a cluster's side hallway: ends after its last door
+    sealed: bool = False  # keeps its shape: no leftover piece joins it
 
 
 @dataclass(frozen=True)

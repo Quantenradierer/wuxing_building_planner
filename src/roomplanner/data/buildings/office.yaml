@@ -10,7 +10,7 @@ strip_depth: [10, 14]      # depth of a row of rooms between corridor and facade
 facade:
   module: 3                # partitions along facades snap to this grid (1.5 m)
   window: 2                # one window per module; partitions may touch its ends
-cluster_filler: nap_room   # leftover space: sleep pods, so nobody has to go home
+cluster_filler: storage   # leftover space: storerooms, mostly absorbed by neighbours
 
 core:
   - {room: stairwell, size: [5, 10], when: "floors_total >= 2"}
@@ -70,7 +70,6 @@ floor_roles:
       - {room: meeting_room, count: [1, 2]}
       - {room: executive_quarters, count: [0, 1], priority: optional}
       - {room: executive_office, count: [2, 3]}
-      - {room: safe_room, count: [1, 2], security: [corporate, aaa], priority: optional}   # next to an executive office
       - {room: executive_office, fill: true, weight: 3}
       - {room: meeting_room, fill: true, weight: 0.5}      # interior rows without facade
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then
@@ -97,7 +96,6 @@ floor_roles:
       - {room: network_closet, count: [0, 1], near: core, priority: optional}
       - {room: executive_office, count: 1, when: "level == floors_above - 1", priority: optional}   # the top floor's manager with a view
       - {room: executive_office, count: [0, 1], when: "level != floors_above - 1"}   # now and then a manager with a view
-      - {room: safe_room, count: [0, 1], security: [corporate, aaa], priority: optional, when: "level == floors_above - 1"}
       - {room: office, fill: true, weight: 3}
       - {room: meeting_room, fill: true, weight: 0.5}      # interior rows without facade
       # Thin interior rows: huddle and focus rooms, a copy room, a break room, now and then

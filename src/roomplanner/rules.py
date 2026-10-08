@@ -315,6 +315,9 @@ class RoomSpec(_Strict):
         default=False, description="Small back room: goes into clusters, not facade slots"
     )
     max_aspect: float = Field(default=2.5, ge=1)
+    rectangular: bool = Field(
+        default=False, description="Never an L or an alcove shape (rows of beds need a plain box)"
+    )
     door_width: int = Field(default=2, gt=0)
     door_opens_out: bool = Field(
         default=False,
@@ -332,6 +335,10 @@ class RoomSpec(_Strict):
         description="Partition layouts: a small room carved from a corner at the circulation, "
         "which then is the only way in; chance by security level in `vestibule_chance`",
     )
+    closet: str | None = Field(
+        default=None, description="partition layouts: sometimes this small room in a back corner"
+    )
+    closet_chance: float = Field(default=0.5, ge=0, le=1, description="closet: per room")
     vestibule_chance: dict[Security, float] = Field(default={}, description="See corner_vestibule")
     next_to: list[str] = Field(default=[], description="Placed next to these room types")
     connect: list[str] = Field(

@@ -315,7 +315,7 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    fit, `weight` sets how often each is picked, and `limit` caps how many a floor gets
    (new annex hosts and the room behind the core included; a floor role's `core_back`
    overrides the program's). For example, an office's 3 m interior rows get mostly
-   huddle and focus rooms, now and then a supply or nap room, one copy room and one break
+   huddle and focus rooms, now and then a supply room or a big nap room (a plain rectangle, `rectangular: true`, pods in aligned rows), one copy room and one break
    room; the vending room is a counted room by the core. `near: core | entrance | service`
    pulls rooms towards those anchors. A room whose `access` names the ground floor's lobby
    type (the waiting room) goes beside the lobby: a segment sharing a side with it whose
@@ -384,7 +384,14 @@ irregular and any footprint is the same case. Programs with `units` are rejected
 1. **Skeleton**, identical on every floor: parallel corridors along the long axis (as many as
    keep each row of rooms within `strip_depth`) with cross corridors; pieces a footprint
    splits are joined; cells farther than `strip_depth[1]` from circulation get a side corridor
-   to the outer wall; on buildings with width + depth >= 100 now and then a dead-end stub
+   to the outer wall; the straight skeleton is broken up: a parallel corridor may *kink* sideways
+   part-way (`_jogs`, `JOG`, a small plaza at the bend, only where the rows of rooms keep their
+   minimum depth) and may *stop short* of a facade (`_trims`, `TRIM`) so rooms wrap round its end; the end cross
+   corridors sit at varying depths (`CROSS_AT`); corridors swell into hubs and alcoves in the
+   inner rows (`_bulges`); a plaza big enough keeps a walkway round a `plaza_island` in its middle
+   (vending machines, no walls: `hub` room, `_islands`); and a block is cut out of a corridor a
+   loop bypasses, so it is interrupted and a room fills the gap (`_breaks`); a corridor arm that runs into a facade ends in one fire exit, a small sealed closet
+   across its end (`CAP`), or bare wall (`_ends`); on buildings with width + depth >= 100 now and then a dead-end stub
    (`_stubs`) runs from circulation into a pocket 8+ cells from it and stops short of the wall,
    so the back of a deep row of rooms has a door instead of becoming sleep pods; corridor bits thinner than the corridor width go (`opened`). The lobby is
    a rectangle on the street facade with its inner side on a corridor (`_lobby_beside`; else

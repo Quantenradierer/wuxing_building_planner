@@ -84,6 +84,8 @@ tiers:
         - {object: guard_post, placement: guard}
       reception_lobby:
         - {object: guard_post, placement: guard}
+      corp_lobby:
+        - {object: guard_post, placement: guard}
       security_room:
         - {object: terminal, placement: wall, count: [2, 4]}
         - {object: weapon_locker, placement: wall}
@@ -145,6 +147,8 @@ tiers:
         - {object: guard_post, placement: guard}   # beside the gates, looking across the lane
       reception_lobby:
         - {object: security_gate, placement: gates, count: 2, margin: 0}   # across the entrance
+        - {object: guard_post, placement: guard}   # beside the gates, looking across the lane
+      corp_lobby:
         - {object: guard_post, placement: guard}   # beside the gates, looking across the lane
       security_room:
         - {object: terminal, placement: wall, count: [3, 6]}

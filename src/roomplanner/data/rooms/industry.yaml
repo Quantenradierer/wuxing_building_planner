@@ -73,8 +73,8 @@ rooms:
     min_side: 8
     circulation: true
     furniture:
-      - {object: reception_post, placement: facing_exit}
-      - {object: security_gate, placement: near_exit, count: [2, 3]}
+      - {object: reception_post, placement: facing_exit, margin: 4}   # room for the gates before it
+      - {object: security_gate, placement: gates, count: 2, margin: 0}   # across the entrance
       - {object: plant, placement: corner, count: [2, 4]}
       - {object: bench, placement: wall, count: [1, 2]}
       - {object: wall_screen, placement: wall, count: [0, 2]}

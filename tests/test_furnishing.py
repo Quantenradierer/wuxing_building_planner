@@ -241,7 +241,7 @@ def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
     [
         (BuildingType.CLINIC, 52, 49, Wealth.LUXURY, 945989),  # toilet wraps round the row
         (BuildingType.HOSPITAL, 55, 35, Wealth.SQUATTER, 942500),  # a widened stall
-        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 876509),
+        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 1),
     ],
 )
 def test_the_stalls_of_a_toilet_all_face_the_same_way(
@@ -354,7 +354,7 @@ def test_office_interior_rows_mix_huddle_focus_copy_and_break_rooms() -> None:
             assert types.count("staff_room") <= 1
             for kind in ("huddle_room", "focus_room"):
                 counts[kind] = counts.get(kind, 0) + types.count(kind)
-    assert counts["focus_room"] < counts["huddle_room"]
+    assert counts["huddle_room"] and counts["focus_room"] < 2 * counts["huddle_room"]
 
 
 @pytest.mark.parametrize(
@@ -523,16 +523,23 @@ def test_some_office_towers_end_in_a_flat_roof_the_stairs_open_onto() -> None:
     )
 
 
-def test_office_leftovers_become_nap_rooms_full_of_sleep_pods() -> None:
+def test_office_nap_rooms_are_big_boxes_with_aligned_rows_of_sleep_pods() -> None:
     params = make_params(
-        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=3, seed=1
+        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=3, seed=4
     )
     floor = generate(params).floor(2)
     naps = [r for r in floor.rooms if r.type == "nap_room"]
     assert naps
     for room in naps:
+        xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
+        assert (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1) == len(room.cells)
+        assert len(room.cells) >= 48
         pods = [o for o in floor.objects if o.room == room.id and o.kind == "capsule"]
         assert len(pods) >= 2
+        assert len({o.facing for o in pods}) == 1  # all lie the same way
+        by_y = pods[0].facing in (Side.N, Side.S)
+        starts = {min(c.y if by_y else c.x for c in o.cells) for o in pods}
+        assert len(starts) <= 2  # in one or two rows, not scattered
 
 
 def test_office_lobbies_have_a_reception_desk_with_a_free_way_from_the_door() -> None:

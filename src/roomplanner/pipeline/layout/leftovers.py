@@ -33,7 +33,7 @@ def absorb_leftovers(
         hosts = {id(r.host) for r in result if r.host is not None}
         options: list[tuple[int, float, PlannedRoom]] = []
         for other in result:
-            if other is room or other.unit is not None or other.host is not None:
+            if other is room or other.unit is not None or other.host is not None or other.sealed:
                 continue
             spec = rules.spec(other.type)
             if other.type in fixed or id(other) in hosts or spec.stalls is not None:
@@ -103,7 +103,7 @@ def _best_host(
     """The neighbour of a rectangle that stays within its size limit, and how full it gets."""
     best: tuple[PlannedRoom | None, float] = (None, 0.0)
     for other in result:
-        if other is room or other.unit is not None or other.host is not None:
+        if other is room or other.unit is not None or other.host is not None or other.sealed:
             continue
         spec = rules.spec(other.type)
         if other.type in fixed or id(other) in hosts or spec.stalls is not None or spec.circulation:
