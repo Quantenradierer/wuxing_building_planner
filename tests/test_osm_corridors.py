@@ -34,3 +34,15 @@ def test_osm_buildings_are_valid_and_mostly_slanted() -> None:
 def test_the_same_seed_gives_the_same_building() -> None:
     params = make_params(width=60, depth=40, floors_above=1, layout="partition_osm", seed=7)
     assert generate(params) == generate(params)
+
+
+def test_osm_layout_rarely_ends_with_hard_violations() -> None:
+    """Diagonal bands that brush a wall or a corridor used to leave slivers no room fits."""
+    bad = 0
+    cases = [(w, d, s) for w, d in ((60, 40), (48, 30)) for s in range(1, 7)]
+    for w, d, seed in cases:
+        building = generate(
+            make_params(width=w, depth=d, floors_above=1, layout="partition_osm", seed=seed)
+        )
+        bad += any(x.startswith("[hard]") for x in building.warnings)
+    assert bad <= len(cases) // 4

@@ -34,6 +34,7 @@ units:
     back: [living_room]
     back_fill: bedroom
     front_fill: closet
+    small: bedsit
   studio:
     hall: hallway
     front: [bathroom, kitchen]
@@ -44,6 +45,10 @@ units:
     front: [bathroom, kitchen]
     back: [den]
     front_fill: closet
+    small: bedsit
+  micro_flat:
+    back: [bedsit]
+    single: bedsit
 
 floor_roles:
   ground:
@@ -57,6 +62,9 @@ floor_roles:
       - {room: apartment, fill: true}
       - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
       - {room: inner_flat, fill: true}         # interior rows without facade: windowless flats
+      - {room: micro_flat, fill: true, weight: 4, wealth: [squatter, low]}      # all in one room: the poorer, the likelier
+      - {room: micro_flat, fill: true, weight: 1, wealth: [middle]}
+      - {room: micro_flat, fill: true, weight: 0.3, wealth: [high]}
       - {room: laundry, count: [1, 2]}
       - {room: drone_bay, count: [1, 2]}       # parcel drones
       - {room: mechanical_room, count: [0, 1]}
@@ -66,6 +74,9 @@ floor_roles:
       - {room: apartment, fill: true}
       - {room: studio, fill: true, priority: optional}   # widths too narrow for a flat
       - {room: inner_flat, fill: true}         # interior rows without facade: windowless flats
+      - {room: micro_flat, fill: true, weight: 4, wealth: [squatter, low]}      # all in one room: the poorer, the likelier
+      - {room: micro_flat, fill: true, weight: 1, wealth: [middle]}
+      - {room: micro_flat, fill: true, weight: 0.3, wealth: [high]}
       - {room: laundry, count: [0, 1]}
       - {room: mechanical_room, count: [0, 1]}
   basement:

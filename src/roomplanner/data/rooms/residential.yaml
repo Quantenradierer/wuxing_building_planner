@@ -15,6 +15,12 @@ rooms:
     min_side: 7
     windows: forbidden
     door_width: 2
+  micro_flat:           # a bedsit: one room with bed, toilet and kitchenette (unit, one room)
+    area: [60, 200]
+    min_side: 6
+    max_aspect: 4
+    windows: required
+    door_width: 2
   hallway:              # in a deep unit it runs along the whole unit (T-shaped)
     area: [9, 90]
     min_side: 3
@@ -63,6 +69,28 @@ rooms:
       - {object: wall_screen, placement: wall, count: [0, 1]}   # the trid
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: mattress, placement: scatter, count: [1, 2], wealth: [squatter]}
+  bedsit:               # living, sleeping, cooking and washing in one room
+    area: [40, 200]
+    min_side: 6
+    max_aspect: 4
+    windows: optional
+    access: [hallway]
+    furniture:
+      - {object: bed_set, placement: wall, spaced: true}
+      - {object: bunk_bed, placement: wall, count: [0, 1], wealth: [squatter, low]}
+      - {object: wc, placement: wall}
+      - {object: sink, placement: wall}
+      - {object: shower, placement: corner, count: [0, 1]}
+      - {object: counter, placement: wall}
+      - {object: stove, placement: wall, wealth: [squatter, high, luxury]}
+      - {object: autokitchen, placement: wall, wealth: [low, middle, high, luxury]}
+      - {object: fridge, placement: wall}
+      - {object: sofa_set, placement: wall, count: [0, 1], wealth: [middle, high, luxury]}
+      - {object: kitchen_table_set, placement: scatter, count: [0, 1]}
+      - {object: shelf, placement: wall, count: [0, 2]}
+      - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: wardrobe, placement: wall, count: [0, 1]}
+      - {object: mattress, placement: scatter, count: [0, 1], wealth: [squatter]}
   bedroom:
     area: [40, 70]
     min_side: 5
@@ -71,6 +99,8 @@ rooms:
     transit: false
     furniture:
       - {object: bed_set, placement: wall, spaced: true}
+      - {object: bed_set, placement: wall, spaced: true, count: [0, 1]}   # a shared room: two beds
+      - {object: bunk_bed, placement: wall, count: [0, 1]}               # or two beds on top of each other
       - {object: home_workstation, placement: wall, count: [0, 1]}
       - {object: wardrobe, placement: wall, count: [0, 1]}
       - {object: cabinet, placement: wall, count: [0, 2]}

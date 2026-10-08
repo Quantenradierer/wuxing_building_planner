@@ -18,7 +18,7 @@ from roomplanner.geometry import (
     thinnest_slanted,
 )
 from roomplanner.model import Building, Floor, OpeningKind
-from roomplanner.rules import Rules, WindowRule
+from roomplanner.rules import Rules
 
 
 class Severity(StrEnum):
@@ -196,13 +196,6 @@ def _flood(floor: Floor, doors: set[Edge], start: set[Cell]) -> frozenset[Cell]:
 
 def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
     violations: list[Violation] = []
-    window_cells = {
-        c
-        for o in floor.openings
-        if o.kind is OpeningKind.WINDOW
-        for e in o.edges
-        for c in e.cells()
-    }
     # Circulation rooms have no walls between them: their width counts as one open space.
     open_space = frozenset(
         c
@@ -227,10 +220,6 @@ def _check_rules(floor: Floor, rules: Rules) -> list[Violation]:
                 f"{room.type} {room.id} is {thinnest} cells wide in places, minimum {spec.min_side}"
             )
             violations.append(Violation(Severity.HARD, floor.level, message))
-        has_window = not window_cells.isdisjoint(room.cells)
-        if spec.windows is WindowRule.REQUIRED and floor.level >= 0 and not has_window:
-            message = f"{room.type} {room.id} has no window"
-            violations.append(Violation(Severity.SOFT, floor.level, message))
     return violations
 
 

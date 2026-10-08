@@ -244,9 +244,10 @@ rooms:
     windows: optional
     door_width: 3
     furniture:
-      - {object: drone_dock, placement: grid, per: 12, count: [2, 8], aisle: 2, margin: 1}
-      - {object: drone_rack, placement: perimeter, count: [1, 3]}
-      - {object: workbench, placement: wall, count: [0, 1]}
+      - {object: drone_dock, placement: perimeter, per: 12, count: [2, 8]}   # a row along the wall, the lane in front
+      - {object: drone_rack, placement: wall, count: [1, 3]}
+      - {object: workbench, placement: wall, count: [1, 1]}                   # the repair bench
+      - {object: console, placement: wall, count: [0, 1]}                     # the rigger's console
       - {object: electrical_panel, placement: wall, count: [0, 1]}
       - {object: fire_extinguisher, placement: corner}
   vault:                # cash, paydata on chips, deposit boxes
@@ -256,9 +257,10 @@ rooms:
     transit: false
     access: [count_room]      # a casino vault: entered through the count room
     furniture:
-      - {object: deposit_boxes, placement: wall, per: 6, count: [1, 6]}
+      - {object: deposit_boxes, placement: perimeter, per: 6, count: [1, 6]}   # one continuous wall of boxes
       - {object: safe, placement: corner, count: [1, 2]}
-      - {object: crate, placement: scatter, count: [0, 2]}
+      - {object: count_table, placement: wall, count: [0, 1]}
+      - {object: crate, placement: wall, count: [0, 2]}
       - {object: suppression_tanks, placement: wall, count: [0, 1]}
   mantrap:              # two interlocked doors, one person at a time: badge, then biometrics
     area: [9, 72]      # a server room's is carved at 3 x 4; a data hall's is a full-depth column
@@ -298,8 +300,8 @@ rooms:
     windows: forbidden
     transit: false
     furniture:
-      - {object: vending_machine, placement: rows, paired: true, margin: 0, aisle: 1, block: 10, count: [1, 6]}
-      - {object: bench, placement: wall, count: [0, 2]}
+      - {object: vending_machine, placement: rows, paired: true, margin: 0, aisle: 1, block: 10, count: [1, 6], centered: true}
+      - {object: bench, placement: center, count: [0, 2]}
       - {object: trash_bin, placement: scatter, count: [0, 1]}
   car_park:             # a building's basement parking: claims one whole end of the level first
     area: [600, 1800]

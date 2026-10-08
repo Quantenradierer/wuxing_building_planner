@@ -401,7 +401,11 @@ class _Canvas:
         if directory is None:
             return None
         params = self.building.params
-        tier = load_condition().tiers[params.condition].look(obj.wealth or params.wealth)
+        tiers = list(Wealth)
+        # Poor wealth is no sprite tier of its own (low / squatter look like middle); only
+        # condition wear takes the look below middle.
+        wealth = max(obj.wealth or params.wealth, Wealth.MIDDLE, key=tiers.index)
+        tier = load_condition().tiers[params.condition].look(wealth)
         sprites = _sprites(directory)
         name = sprite_name(sprites, obj.kind, tier)
         if name is None and (stand_in := self.theme.sprite_fallbacks.get(obj.kind)):

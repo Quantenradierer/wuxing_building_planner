@@ -211,5 +211,18 @@ def _furniture(
         existing = [o for o in objects if o.room == room.id]
         clearance = clearances.get(room.id, frozenset())
         furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid, existing)
-        objects += furnisher.place(rules)
+        placed = furnisher.place(rules)
+        kinds = {o.kind for o in placed}
+        missing = [
+            r
+            for r in rules
+            if r.displace and (furnisher.main_part(r.object) or r.object) not in kinds
+        ]
+        if missing:  # make way: the room starts again without the objects in the way
+            gone = {kind for r in missing for kind in r.displace}
+            existing = [o for o in existing if o.kind not in gone]
+            objects = [o for o in objects if o.room != room.id or o.kind not in gone]
+            furnisher = RoomFurnisher(ctx, floor, room, rng, clearance, solid, existing)
+            placed = furnisher.place(rules)
+        objects += placed
     return tuple(objects)

@@ -257,7 +257,7 @@ class RoomFurnisher:
         for rule in rules:
             factor = tier_factor if rule.scale else 1.0
             if rule.choose:
-                kinds = [*self._choices(rule), self._main_part(rule.object) or rule.object]
+                kinds = [*self._choices(rule), self.main_part(rule.object) or rule.object]
                 for kind in kinds:
                     if self._place_one(rule.model_copy(update={"object": kind}), self._spec(kind)):
                         break
@@ -301,7 +301,7 @@ class RoomFurnisher:
                 # not on a grid, whose objects must all be alike.
                 if rule.placement is Placement.GRID:
                     break
-                if (main := self._main_part(rule.object)) is None:
+                if (main := self.main_part(rule.object)) is None:
                     break
                 alone = rule.model_copy(update={"object": main})
                 if not self._place_one(alone, self._spec(main)):
@@ -490,7 +490,7 @@ class RoomFurnisher:
             return ObjectSpec(size=group.size, glyph="+")
         return self.ctx.rules.objects[kind]
 
-    def _main_part(self, kind: str) -> str | None:
+    def main_part(self, kind: str) -> str | None:
         """A group's biggest part, or None for a plain object."""
         if (group := self.ctx.rules.groups.get(kind)) is None:
             return None
@@ -511,7 +511,7 @@ class RoomFurnisher:
                     candidates = [r for r in candidates if self._flanks(r) is not None]
                     candidates.sort(
                         key=lambda r: self._line_rank(
-                            self._main_part(rule.object) or rule.object, r
+                            self.main_part(rule.object) or rule.object, r
                         ),
                     )
                 if rule.even:
@@ -588,14 +588,6 @@ class RoomFurnisher:
                     candidates += self._facing_exit(spec, 2)
             case Placement.AXIS:
                 candidates = self._on_axis(spec)
-            case Placement.GUARD:
-                candidates = self._beside_gates(spec)
-                if not candidates:  # no gates: the middle of the room
-                    cx, cy = (self.box[0] + self.box[2]) / 2, (self.box[1] + self.box[3]) / 2
-                    candidates = self._anywhere(spec)
-                    candidates.sort(
-                        key=lambda r: abs(r[0] + r[2] / 2 - cx) + abs(r[1] + r[3] / 2 - cy)
-                    )
             case Placement.GATES:
                 return False
             case Placement.PERIMETER:
@@ -1042,13 +1034,13 @@ class RoomFurnisher:
         return spots
 
     def _gates(self, rule: FurnitureRule, spec: ObjectSpec) -> None:
-        """Gates in pairs flanking the lane of each exterior door, side by side at the
-        same depth, in line with the door's outer cells (a lane between them). A door
-        under three cells wide has no room for a pair."""
+        """One gate across the lane of each exterior door (at most `count` doors), centred on
+        the door, `margin` to `margin` + 2 cells inside it, as wide as the lane it closes.
+        A door under three cells wide has no room for it."""
         along, deep = spec.size
-        pairs = max(1, rule.count_range[1] // 2)
+        left = rule.count_range[1]
         for door in self.floor.openings:
-            if pairs <= 0:
+            if left <= 0:
                 break
             if door.kind is not OpeningKind.DOOR or len(door.edges) < 3:
                 continue
@@ -1058,52 +1050,26 @@ class RoomFurnisher:
                 continue
             dx, dy = inside.x - outside.x, inside.y - outside.y
             facing = next(s for s in Side if s.delta == (-dx, -dy))
-            if dx == 0:
-                lateral = sorted(e.x for e in door.edges)
+            if dx == 0:  # a door in a horizontal wall: the gate lies across the lane along x
+                centre = sum(e.x for e in door.edges) / len(door.edges) + 0.5
+                x = round(centre - deep / 2)
+                wall = inside.y if dy > 0 else inside.y + 1
+                rects = [
+                    (x, wall + k if dy > 0 else wall - k - along, deep, along, _SIDEWAYS[facing])
+                    for k in range(rule.margin, rule.margin + 3)
+                ]
             else:
-                lateral = sorted(e.y for e in door.edges)
-            ends = (lateral[0], lateral[-1])
-            for k in range(len(door.edges) + rule.margin, len(door.edges) + rule.margin + 12):
-                rects: list[Rect] = []
-                for pos in ends:
-                    if dx == 0:
-                        wall = inside.y if dy > 0 else inside.y + 1
-                        y = wall + k if dy > 0 else wall - k - deep
-                        rects.append((pos, y, along, deep, facing))
-                    else:
-                        wall = inside.x if dx > 0 else inside.x + 1
-                        x = wall + k if dx > 0 else wall - k - deep
-                        rects.append((x, pos, deep, along, facing))
-                first = self._try(rule.object, rects[0], spec.walkable)
-                if first and self._try(rule.object, rects[1], spec.walkable):
-                    pairs -= 1
-                    break
-                if first:
-                    self._remove(self.placed[-1])
-
-    def _beside_gates(self, spec: ObjectSpec) -> list[Rect]:
-        """Spots to the sides of the placed gates, backed away from the lane and facing it:
-        at right angles to the way in."""
-        gates = [o for o in self.placed if o.kind == "security_gate"]
-        if len(gates) < 2:
-            return []
-        along, deep = spec.size
-        spots: list[Rect] = []
-        gates.sort(key=lambda o: (o.x, o.y))
-        low, high = gates[0], gates[-1]
-        if low.h > low.w:  # lane runs along y, gates side by side along x
-            mid = low.y + low.h / 2
-            for shift in (0, -1, 1, -2, 2):
-                y = round(mid - along / 2) + shift
-                spots.append((low.x - deep, y, deep, along, Side.E))
-                spots.append((high.x + high.w, y, deep, along, Side.W))
-        else:
-            mid = low.x + low.w / 2
-            for shift in (0, -1, 1, -2, 2):
-                x = round(mid - along / 2) + shift
-                spots.append((x, low.y - deep, along, deep, Side.S))
-                spots.append((x, high.y + high.h, along, deep, Side.N))
-        return spots
+                centre = sum(e.y for e in door.edges) / len(door.edges) + 0.5
+                y = round(centre - deep / 2)
+                wall = inside.x if dx > 0 else inside.x + 1
+                rects = [
+                    (wall + k if dx > 0 else wall - k - along, y, along, deep, _SIDEWAYS[facing])
+                    for k in range(rule.margin, rule.margin + 3)
+                ]
+            if any(
+                self._try(rule.object, rect, True) for rect in rects
+            ):  # the lane runs through it
+                left -= 1
 
     def _exterior_door(self) -> tuple[float, float] | None:
         for door in self.floor.openings:
@@ -1137,8 +1103,9 @@ class RoomFurnisher:
         m = rule.margin
         # No margin along an open side (an open office's side to the corridor).
         start, end = (Side.N, Side.S) if horizontal else (Side.W, Side.E)
-        m0 = 0 if toward is None and self._open_side(start) else m
-        m1 = 0 if toward is None and self._open_side(end) else m
+        opened = toward is None and not rule.centered
+        m0 = 0 if opened and self._open_side(start) else m
+        m1 = 0 if opened and self._open_side(end) else m
         pitch = along + rule.gap
         per_block = max(1, math.floor((rule.block + rule.gap) / pitch))  # cross aisle every `block`
         rows: list[tuple[int, Side]] = []  # offset across the room, facing
@@ -1161,6 +1128,11 @@ class RoomFurnisher:
             else:
                 rows.append((across, Side.S))
                 across += deep + rule.aisle
+        if rule.wall_back and toward is None:
+            last = width - m1 - deep
+            rows = [(m0, Side.S)]
+            if last >= m0 + deep + rule.aisle:
+                rows.append((last, Side.N))
         positions = [m + p for p in _line(length - 2 * m, along, per_block, rule.aisle, rule.gap)]
         if toward is None and positions:  # centred along the room
             spare = length - m - (positions[-1] + along)
@@ -1176,10 +1148,18 @@ class RoomFurnisher:
                 shift = (length - positions[-1] - along - m) // 2
                 positions = [p + shift for p in positions]
 
+        if rule.serpentine and toward is None:  # rows alternately flush with one end
+            run = _line(length - rule.aisle, along, per_block, rule.aisle, rule.gap)
+            flush = list(run)  # wall to wall: the gap at the far end is the only way through
+            flush_far = [rule.aisle + p for p in run]
+            line_of = [flush_far if i % 2 else flush for i in range(len(rows))]
+        else:
+            line_of = [positions] * len(rows)
+
         def rects(shift: int) -> list[Rect]:
             found: list[Rect] = []
-            for across, facing in rows:
-                for position in positions:
+            for (across, facing), row_positions in zip(rows, line_of, strict=True):
+                for position in row_positions:
                     if horizontal:
                         rect = (x0 + position, y0 + across + shift, along, deep, facing)
                     else:
@@ -1198,14 +1178,20 @@ class RoomFurnisher:
         tail = rule.aisle if lanes and rows and rows[-1][1] is Side.S else 0
         spare = max(0, width - m1 - (rows[-1][0] + deep + tail)) if rows else 0
         target = 0 if m0 < m1 else spare if m1 < m0 else spare // 2
-        if toward is not None:
+        if toward is not None or rule.wall_back:
             target = 0
+        if rule.wall_back:
+            spare = 0
         shift = max(
             range(spare + 1), key=lambda s: (sum(map(free, rects(s))), -abs(s - target), -s)
         )
         cap = rule.count_range[1] if rule.count is not None else None  # `count` caps the rows
         placed = 0
-        for rect in rects(shift):
+        spots = rects(shift)
+        if rule.centered:  # the ones nearest the middle, so a capped few stand in the centre
+            mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+            spots.sort(key=lambda r: abs(r[0] + r[2] / 2 - mx) + abs(r[1] + r[3] / 2 - my))
+        for rect in spots:
             if cap is not None and placed >= cap:
                 break
             if rule.fill < 1 and self.rng.random() >= rule.fill:

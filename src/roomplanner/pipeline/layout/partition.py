@@ -19,7 +19,16 @@ import random
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
-from roomplanner.geometry import Cell, Corner, Diagonal, Side, corners, thinnest_extent
+from roomplanner.geometry import (
+    Cell,
+    Corner,
+    Diagonal,
+    Side,
+    corners,
+    largest_rectangle,
+    rectangle,
+    thinnest_extent,
+)
 from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import (
     AllocationError,
@@ -32,6 +41,7 @@ from roomplanner.pipeline.base import (
 from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
 from roomplanner.pipeline.layout.partition_assign import MAX_CORNERS, Assigner
+from roomplanner.pipeline.layout.partition_units import split_units
 from roomplanner.pipeline.layout.regions import (
     bbox,
     components,
@@ -62,7 +72,9 @@ class Skeleton:
     far: frozenset[Cell] = frozenset()  # cells of the second stairwell, which has an exit
     band: frozenset[Cell] = frozenset()  # cells of the 45 degree corridor, if there is one
     islands: tuple[frozenset[Cell], ...] = ()  # vending islands in the middle of plazas
-    caps: tuple[tuple[str, frozenset[Cell]], ...] = ()  # small rooms closing dead-end arms
+    caps: tuple[
+        tuple[str, frozenset[Cell]], ...
+    ] = ()  # dead-end arm ends, cut off to join neighbours
     exit: tuple[Side, Cell] | None = None  # the dead-end arm that ends in a fire exit
 
 
@@ -75,8 +87,6 @@ class PartitionLayout:
 
     def check_feasibility(self, ctx: Context, footprint: frozenset[Cell]) -> list[str]:
         program = ctx.rules.program
-        if program.units:
-            return [f"{program.building}: units are not supported by the partition layout yet"]
         problems: list[str] = []
         if min(ctx.width, ctx.height) < self.main_min_depth(ctx):
             problems.append(
@@ -117,7 +127,7 @@ class PartitionLayout:
         width = program.corridor.width
         street = ctx.params.street_side
         lobby_entry = _lobby_entry(ctx)
-        corridor, hubs = self._bands(ctx, footprint, rng)
+        corridor = self._bands(ctx, footprint, rng)
         band = self._diagonal(ctx, footprint, corridor, ctx.rng("diagonal"))
         corridor = self._connect(footprint, corridor | band, width)
         corridor = self._branch(footprint, corridor, frozenset(), frozenset(), ctx)
@@ -143,7 +153,7 @@ class PartitionLayout:
         corridor = self._breaks(footprint, corridor, lobby, width, band, ctx.rng("breaks"))
         corridor = self._stubs(footprint, corridor, lobby, ctx)
         cores, far = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
-        islands = self._islands(corridor, hubs)
+        islands = self._islands(corridor)
         core_cells = frozenset(c for room in cores for c in room.cells)
         corridor -= frozenset(c for island in islands for c in island)
         exit, caps = self._ends(ctx, footprint, corridor, lobby | core_cells, band, width)
@@ -288,21 +298,23 @@ class PartitionLayout:
         return exit, caps
 
     @staticmethod
-    def _islands(corridor: frozenset[Cell], hubs: list[frozenset[Cell]]) -> list[frozenset[Cell]]:
-        """The plazas that survived the tidying whole, with the walkway round them intact,
-        each cut a vending island out of its middle."""
-        islands: list[frozenset[Cell]] = []
-        taken: set[Cell] = set()
-        for hub in hubs:
-            ring = {
-                Cell(c.x + dx, c.y + dy)
-                for c in hub
+    def _islands(corridor: frozenset[Cell]) -> list[frozenset[Cell]]:
+        """Every plaza (a stretch of corridor wide enough to leave a walkway of RING cells
+        all round something) gets a vending island, the biggest rectangle of its middle."""
+        deep = frozenset(
+            c
+            for c in corridor
+            if all(
+                Cell(c.x + dx, c.y + dy) in corridor
                 for dx in range(-RING, RING + 1)
                 for dy in range(-RING, RING + 1)
-            }
-            if hub and ring <= corridor and not ring & taken:
-                islands.append(hub)
-                taken |= ring
+            )
+        )
+        islands: list[frozenset[Cell]] = []
+        for piece in components(deep):
+            x0, y0, x1, y1 = largest_rectangle(piece)
+            if min(x1 - x0, y1 - y0) >= ISLAND_MIN:
+                islands.append(rectangle(x0, y0, x1 - x0, y1 - y0))
         return islands
 
     def _lobby(
@@ -360,7 +372,7 @@ class PartitionLayout:
 
     def _bands(
         self, ctx: Context, footprint: frozenset[Cell], rng: random.Random
-    ) -> tuple[frozenset[Cell], list[frozenset[Cell]]]:
+    ) -> frozenset[Cell]:
         """Parallel corridors along the long axis, as many as keep each row of rooms between
         them (and the facades) within the program's strip depth, joined by cross corridors."""
         program = ctx.rules.program
@@ -392,7 +404,6 @@ class PartitionLayout:
             footprint, starts, width, rows, smin, (ulo, uhi), cross, along, rng
         )
         cells = (cells - dropped) | added
-        hubs: list[frozenset[Cell]] = []
         if count > 1 and not self.diagonal_links:
             length = uhi - ulo
             offsets = [round(rows * rng.uniform(*CROSS_AT)) for _ in range(2)]
@@ -407,7 +418,7 @@ class PartitionLayout:
             if spots is ends:
                 cut = self._trims(footprint, starts, width, offsets, (ulo, uhi), cross, along, rng)
                 cells -= cut
-                swollen, hubs = self._bulges(
+                swollen = self._bulges(
                     footprint,
                     starts,
                     width,
@@ -418,7 +429,7 @@ class PartitionLayout:
                     rng,
                 )
                 cells |= swollen - cut
-        return frozenset(cells), hubs
+        return frozenset(cells)
 
     @staticmethod
     def _trims(
@@ -458,19 +469,21 @@ class PartitionLayout:
         cross: Callable[[Cell], int],
         along: Callable[[Cell], int],
         rng: random.Random,
-    ) -> tuple[set[Cell], list[frozenset[Cell]]]:
+    ) -> set[Cell]:
         """Hubs and alcoves: now and then a corridor swells into a square or a bay on one or
         both sides, into the inner rows of rooms, which breaks them up."""
         lo, hi = span
         reach = max(2, min(BULGE[1], int(slack) + 2))
         added: set[Cell] = set()
-        hubs: list[frozenset[Cell]] = []
         if hi - lo < 2 * BULGE_LENGTH[1]:
-            return added, hubs
+            return added
         for i, start in enumerate(starts):
+            used: list[tuple[int, int]] = []  # along-ranges of this corridor's bulges so far
             for _ in range(rng.randint(0, 3)):
                 length = rng.randint(*BULGE_LENGTH)
                 at = rng.randint(lo, hi - length)
+                if any(at < u1 + BULGE_GAP and u0 - BULGE_GAP < at + length for u0, u1 in used):
+                    continue  # two bulges overlapping or nearly touching make ugly steps
                 below, above = (
                     rng.randint(BULGE[0], reach) if rng.random() < 0.6 else 0 for _ in "ab"
                 )
@@ -484,26 +497,14 @@ class PartitionLayout:
                     )
                 if not below and not above:
                     below, above = (0, BULGE[0]) if i == 0 else (BULGE[0], 0)
+                used.append((at, at + length))
                 added |= {
                     c
                     for c in footprint
                     if at <= along(c) < at + length
                     and start - below <= cross(c) < start + width + above
                 }
-                # a plaza big enough to leave a walkway round a small island in its middle
-                if (
-                    length >= 2 * RING + ISLAND_MIN[0]
-                    and width + below + above >= 2 * RING + ISLAND_MIN[1]
-                ):
-                    hubs.append(
-                        frozenset(
-                            c
-                            for c in footprint
-                            if at + RING <= along(c) < at + length - RING
-                            and start - below + RING <= cross(c) < start + width + above - RING
-                        )
-                    )
-        return added, hubs
+        return added
 
     @staticmethod
     def _jogs(
@@ -563,6 +564,7 @@ class PartitionLayout:
         wide = program.corridor.width + 2  # cells per row: 45 degrees makes it 1.4 times thinner
         longest = 2 * program.strip_depth[1]
         candidates: list[tuple[Cell, Cell, frozenset[Cell]]] = []
+        slant: dict[frozenset[Cell], int] = {}
         for start in sorted(corridor):
             for dx, dy in ((1, 1), (1, -1)):
                 path = [start]
@@ -599,6 +601,7 @@ class PartitionLayout:
                 ):
                     continue
                 candidates.append((path[0], path[-1], band))
+                slant[band] = dx
         pieces = components(corridor)
         piece_of = {c: i for i, piece in enumerate(pieces) for c in piece}
         rng.shuffle(candidates)
@@ -609,15 +612,41 @@ class PartitionLayout:
             return c.x if horizontal else c.y
 
         chosen: list[tuple[frozenset[int], int, frozenset[Cell]]] = []  # (pair, position, band)
+        ends: set[Cell] = set()  # where chosen links meet their corridors
+        slants: dict[frozenset[int], set[int]] = {}
+
+        def ordered(first: Cell, last: Cell, band: frozenset[Cell]) -> bool:
+            """Whether a link continues or mirrors a chosen one (shares an end with it), or
+            runs parallel to one between the same corridors."""
+            pair = frozenset((piece_of[first], piece_of[last]))
+            return first in ends or last in ends or slant[band] in slants.get(pair, ())
+
+        def take(first: Cell, last: Cell, band: frozenset[Cell], pair: frozenset[int]) -> None:
+            chosen.append((pair, along(first), band))
+            ends.update((first, last))
+            slants.setdefault(pair, set()).add(slant[band])
+
         linked = [{i} for i in range(len(pieces))]  # union-find by merging sets
+        deferred: list[tuple[Cell, Cell, frozenset[Cell]]] = []
         for first, last, band in candidates:
+            a, b = piece_of[first], piece_of[last]
+            if linked[a] is linked[b] or any(band & other for _, _, other in chosen):
+                continue
+            if chosen and not ordered(first, last, band) and rng.random() < ORDERED:
+                deferred.append((first, last, band))  # only if nothing ordered connects them
+                continue
+            merged = linked[a] | linked[b]
+            for i in merged:
+                linked[i] = merged
+            take(first, last, band, frozenset((a, b)))
+        for first, last, band in deferred:
             a, b = piece_of[first], piece_of[last]
             if linked[a] is linked[b] or any(band & other for _, _, other in chosen):
                 continue
             merged = linked[a] | linked[b]
             for i in merged:
                 linked[i] = merged
-            chosen.append((frozenset((a, b)), along(first), band))
+            take(first, last, band, frozenset((a, b)))
         # More of them along long corridors: one every `link_gap` cells or so
         for first, last, band in candidates:
             pair = frozenset((piece_of[first], piece_of[last]))
@@ -626,7 +655,9 @@ class PartitionLayout:
                 p == pair and abs(at - along(first)) < gap for p, at, _ in chosen
             ):
                 continue
-            chosen.append((pair, along(first), band))
+            if not ordered(first, last, band) and rng.random() < ORDERED:
+                continue
+            take(first, last, band, pair)
         return frozenset(c for _, _, band in chosen for c in band) - corridor
 
     @staticmethod
@@ -982,8 +1013,6 @@ class PartitionLayout:
         fixed = [*circulation, *skeleton.cores]
         island_cells = frozenset(c for island in skeleton.islands for c in island)
         fixed += [PlannedRoom("plaza_island", cells, hub=True) for cells in skeleton.islands]
-        fixed += [PlannedRoom(kind, cells, sealed=True) for kind, cells in skeleton.caps]
-        island_cells |= frozenset(c for _, cells in skeleton.caps for c in cells)
         lobby_cells = skeleton.lobby if ground else frozenset[Cell]()
         if lobby_cells and skeleton.lobby_type:
             fixed.append(PlannedRoom(skeleton.lobby_type, lobby_cells))
@@ -1013,6 +1042,14 @@ class PartitionLayout:
             shared[key] = (rooms, assigner.warnings)
             plan.warnings += assigner.warnings
         rooms = [*fixed, *shared[key][0]]
+        if ctx.rules.program.units:
+            rooms = split_units(
+                rooms,
+                ctx.rules,
+                skeleton.corridor | lobby_cells,
+                level,
+                ctx.rng(f"units:{level}"),
+            )
         rooms = absorb_leftovers(rooms, ctx.rules, skeleton.band)
         rooms = _merge_thin(rooms, ctx.rules, skeleton.band)
         rooms = carve_stalls(rooms, ctx.rules)
@@ -1046,33 +1083,38 @@ class PartitionLayout:
         ]
         if EntranceKind.SERVICE in wanted:
             side = ctx.params.service_side
-            if side is skeleton.main_side:
-                hints.append((EntranceKind.SERVICE, side, skeleton.main_hint))
-            else:
-                options = [(c, s) for c, s in corridor_edge if s is side]
-                if not options:
-                    allowed = {
-                        i
-                        for i, r in enumerate(rooms)
-                        if ctx.rules.spec(r.type).facade_door
-                        or ctx.rules.spec(r.type).circulation
-                        or r.type in ctx.rules.program.service_rooms
-                    }
-                    owner = {c: i for i, r in enumerate(rooms) for c in r.cells}
-                    options = [
-                        (c, s)
-                        for c, s in facade(footprint, footprint)
-                        if s is side and c not in skeleton.lobby
-                    ]
-                    options = [o for o in options if owner.get(o[0]) in allowed] or options
-                    options.sort(
-                        key=lambda o: min(
-                            abs(o[0].x - k.x) + abs(o[0].y - k.y) for k in skeleton.corridor
-                        )
+            main = skeleton.main_hint
+            options = [(c, s) for c, s in corridor_edge if s is side]
+            if not options:
+                allowed = {
+                    i
+                    for i, r in enumerate(rooms)
+                    if ctx.rules.spec(r.type).facade_door
+                    or ctx.rules.spec(r.type).circulation
+                    or r.type in ctx.rules.program.service_rooms
+                }
+                owner = {c: i for i, r in enumerate(rooms) for c in r.cells}
+                options = [
+                    (c, s)
+                    for c, s in facade(footprint, footprint)
+                    if s is side and c not in skeleton.lobby
+                ]
+                options = [o for o in options if owner.get(o[0]) in allowed] or options
+                options.sort(
+                    key=lambda o: min(
+                        abs(o[0].x - k.x) + abs(o[0].y - k.y) for k in skeleton.corridor
                     )
+                )
+
+            def from_main(o: tuple[Cell, Side]) -> int:
+                return abs(o[0].x - main.x) + abs(o[0].y - main.y)
+
+            if side is skeleton.main_side:  # not beneath the main door: far along the facade
                 if options:
-                    cell, _ = options[len(options) // 2] if corridor_edge else options[0]
-                    hints.append((EntranceKind.SERVICE, side, cell))
+                    hints.append((EntranceKind.SERVICE, side, max(options, key=from_main)[0]))
+            elif options:
+                cell, _ = options[len(options) // 2] if corridor_edge else options[0]
+                hints.append((EntranceKind.SERVICE, side, cell))
         if EntranceKind.EMERGENCY in wanted and skeleton.far:
             # on the landing: the facade cell nearest the corridor the stairs are entered from
             exits = sorted(facade(skeleton.far, footprint))
@@ -1116,6 +1158,7 @@ class DiagonalPartitionLayout(PartitionLayout):
     diagonal_links = True
 
 
+ORDERED = 0.75  # chance that a diagonal link must line up with one already placed
 LINK_GAP = (50, 70)  # cells between diagonal corridors joining the same two corridors
 JOG = (3, 6)  # cells a corridor kinks sideways
 JOG_CHANCE = 0.6
@@ -1124,13 +1167,14 @@ TRIM_CHANCE = 0.5
 CROSS_AT = (0.8, 1.5)  # where the end cross corridors sit, as a share of the row depth from the end
 BULGE = (2, 5)  # cells a hub or alcove reaches out from a corridor
 BULGE_LENGTH = (6, 14)
+BULGE_GAP = 3  # cells kept free between two bulges of one corridor
 BREAKS = (0, 2)  # interruptions cut into the corridors
 BREAK_LENGTH = (5, 10)
 CAP = (4, 5)  # cells deep a room closing a dead-end arm is
 CAP_CHANCE = 0.7
 CAP_ROOMS = ("network_closet",)
-RING = 3  # cells of walkway round an island in a plaza
-ISLAND_MIN = (3, 3)  # smallest island, along the corridor and across it
+RING = 3  # cells of walkway round an island in a plaza (a corridor is 3 wide at least)
+ISLAND_MIN = 3  # smallest island side
 STUBS = 6  # dead-end stubs a skeleton tries
 STUB_POCKET = 30  # cells: smallest pocket far from circulation that gets one
 STUB_CHANCE = 0.8

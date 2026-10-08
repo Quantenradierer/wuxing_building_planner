@@ -3,7 +3,7 @@
 from collections import Counter
 
 from roomplanner.generator import generate
-from roomplanner.model import Building, Floor, PlacedObject
+from roomplanner.model import Building, Cell, Edge, Floor, OpeningKind, PlacedObject
 from roomplanner.params import BuildingType, Security
 
 from .conftest import make_params
@@ -74,7 +74,7 @@ def gates_and_desks(floor: Floor) -> tuple[list[PlacedObject], list[PlacedObject
     )
 
 
-def test_security_gates_flank_the_entrance_lane_and_the_guard_looks_across_it() -> None:
+def test_one_security_gate_crosses_each_entrance_and_a_guard_desk_stands_in_the_lobby() -> None:
     checked = 0
     for seed in range(1, 6):
         building = generate(
@@ -88,14 +88,18 @@ def test_security_gates_flank_the_entrance_lane_and_the_guard_looks_across_it() 
         )
         floor = building.floor(0)
         gates, desks = gates_and_desks(floor)
-        assert len(gates) == 2
-        a, b = gates
-        along_y = a.h > a.w
-        # side by side at the same depth, as long as the lane is deep
-        assert (a.y, a.h) == (b.y, b.h) if along_y else (a.x, a.w) == (b.x, b.w)
-        guard = next(d for d in desks if d.kind == "guard_desk")
-        reception = next(d for d in desks if d.kind == "reception_desk")
-        assert guard.facing.axis != reception.facing.axis  # at right angles
+        lobby = next(r for r in floor.rooms if r.type == "reception_lobby")
+        doors = [
+            d
+            for d in floor.openings
+            if d.kind is OpeningKind.DOOR
+            and len(d.edges) >= 3
+            and (d.edges[0].cells()[0] in lobby.cells) != (d.edges[0].cells()[1] in lobby.cells)
+            and (d.edges[0].cells()[0] in floor.footprint)
+            != (d.edges[0].cells()[1] in floor.footprint)
+        ]
+        assert len(gates) == len(doors) >= 1
+        assert any(d.kind == "guard_desk" for d in desks)
         checked += 1
     assert checked == 5
 
@@ -105,3 +109,19 @@ def test_an_office_has_an_executive_office_on_its_top_floor() -> None:
         building = generate(make_params(width=60, depth=40, floors_above=2, seed=seed))
         top = building.floor(1)
         assert any(r.type == "executive_office" for r in top.rooms)
+
+
+def test_the_head_of_every_pod_in_a_nap_room_is_at_a_wall() -> None:
+    pods = 0
+    for seed in range(1, 6):
+        for floor in office(seed=seed).floors:
+            for pod in (o for o in floor.objects if o.kind == "capsule"):
+                back = pod.facing.opposite
+                cells = [
+                    Cell(x, y)
+                    for x in range(pod.x, pod.x + pod.w)
+                    for y in range(pod.y, pod.y + pod.h)
+                ]
+                assert any(Edge.of(c, back) in floor.walls for c in cells), pod
+                pods += 1
+    assert pods
