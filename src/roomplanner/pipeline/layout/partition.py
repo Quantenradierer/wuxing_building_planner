@@ -40,7 +40,7 @@ from roomplanner.pipeline.base import (
 )
 from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
-from roomplanner.pipeline.layout.partition_assign import MAX_CORNERS, Assigner
+from roomplanner.pipeline.layout.partition_assign import MAX_CORNERS, UNLIMITED, Assigner
 from roomplanner.pipeline.layout.partition_units import split_units
 from roomplanner.pipeline.layout.regions import (
     bbox,
@@ -1028,17 +1028,28 @@ class PartitionLayout:
                 )
             if ground:
                 anchors["entrance"] = skeleton.main_hint
-            assigner = Assigner(
-                ctx.rules,
-                role.rooms,
-                variables(ctx.params, level),
-                footprint,
-                access,
-                anchors,
-                ctx.rules.program.cluster_filler,
-                ctx.rng(f"assign:{role_name}:{level}"),
-            )
-            rooms = assigner.run(components(free), f"level {level}")
+            # Rooms with at most MAX_CORNERS corners; a floor that cannot place every room that
+            # way is assigned again with any shape allowed: an odd room beats a missing one.
+            for corners_allowed in (MAX_CORNERS, UNLIMITED):
+                assigner = Assigner(
+                    ctx.rules,
+                    role.rooms,
+                    variables(ctx.params, level),
+                    footprint,
+                    access,
+                    anchors,
+                    ctx.rules.program.cluster_filler,
+                    ctx.rng(f"assign:{role_name}:{level}"),
+                    corners_allowed,
+                )
+                try:
+                    rooms = assigner.run(components(free), f"level {level}")
+                except AllocationError:
+                    if corners_allowed == UNLIMITED:
+                        raise
+                    continue
+                if not assigner.warnings:
+                    break
             shared[key] = (rooms, assigner.warnings)
             plan.warnings += assigner.warnings
         rooms = [*fixed, *shared[key][0]]

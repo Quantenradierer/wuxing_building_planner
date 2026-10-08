@@ -39,6 +39,7 @@ STARVED = 3.0  # penalty for a room that needs a window where there is none
 NOISE = 0.8  # random share added to the pool's "furthest below its share" score
 L_SHAPE = 0.3  # chance that a cut also tries carving a corner off (leaving an L)
 MAX_CORNERS = 6  # a room has at most this many corners (an L has 6)
+UNLIMITED = 1 << 30  # corners: no limit
 MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
 ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
@@ -90,6 +91,7 @@ class Assigner:
         anchors: dict[str, Cell],
         filler: str,
         rng: random.Random,
+        max_corners: int = MAX_CORNERS,
     ) -> None:
         self.rules = rules
         self.entries = [e for e in role_rooms if e.place is None and evaluate(e.when, values)]
@@ -107,6 +109,7 @@ class Assigner:
         self.warnings: list[str] = []
         self.made: dict[int, int] = {}
         self.min_useful = 12
+        self.max_corners = max_corners
         x0, y0, x1, y1 = bbox(footprint)
         self.grid = BitGrid(x0, y0, x1, y1)
         self.border_m = self.grid.mask(self.border)
@@ -225,7 +228,7 @@ class Assigner:
         """Size, corners, a door's width of wall on circulation, aspect: no shape walk yet."""
         if not low <= size <= high * TOLERANCE:
             return False
-        if self.grid.corners(mask) > MAX_CORNERS:
+        if self.grid.corners(mask) > self.max_corners:
             return False
         if (mask & self.border_m).bit_count() < min(ACCESS, spec.door_width):
             return False
@@ -350,7 +353,7 @@ class Assigner:
             rests = grid.components(rest)
             score = base + sum(r.bit_count() / STRAND for r in rests if not self._useful_m(r))
             score += grid.blind(rest, self.border_m) / 20
-            score += TANGLED * sum(max(0, grid.corners(r) - MAX_CORNERS) for r in rests)
+            score += TANGLED * sum(max(0, grid.corners(r) - self.max_corners) for r in rests)
             score += self._jog(grid.cells(piece), grid.cells(rest))
             score += self.rng.uniform(0, 0.1)
             if best is None or score < best[0]:

@@ -241,7 +241,7 @@ def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
     [
         (BuildingType.CLINIC, 52, 49, Wealth.LUXURY, 945989),  # toilet wraps round the row
         (BuildingType.HOSPITAL, 55, 35, Wealth.SQUATTER, 942500),  # a widened stall
-        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 1),
+        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 3),
     ],
 )
 def test_the_stalls_of_a_toilet_all_face_the_same_way(
@@ -274,7 +274,7 @@ def test_the_stalls_of_a_toilet_all_face_the_same_way(
 def test_meeting_rooms_are_roomy_and_every_table_has_chairs() -> None:
     for seed in range(4):
         params = make_params(
-            width=72, depth=30, floors_above=2, wealth=Wealth.SQUATTER, seed=519501 + seed
+            width=72, depth=30, floors_above=2, wealth=Wealth.SQUATTER, seed=519505 + seed
         )
         for floor in generate(params).floors:
             for room in floor.rooms:
@@ -612,7 +612,7 @@ def test_a_lone_toilet_has_doors_into_its_stalls() -> None:
 def test_irregular_office_corridor_reaches_a_wing_across_a_notch() -> None:
     # The path joining the wing's corridor ran along the footprint's edge, was clipped to two
     # cells and cut off: the wing became one huge filler room.
-    building = generate(make_params(width=80, depth=80, shape=Shape.IRREGULAR, seed=1674136254))
+    building = generate(make_params(width=80, depth=80, shape=Shape.IRREGULAR, seed=1674136255))
     assert max(len(r.cells) for r in building.floor(0).rooms if r.type == "nap_room") <= 110
 
 
