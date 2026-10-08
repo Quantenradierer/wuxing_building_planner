@@ -38,6 +38,7 @@ ELASTIC = 3  # an open office is drawn from at most this many times its minimum 
 STARVED = 3.0  # penalty for a room that needs a window where there is none
 NOISE = 0.8  # random share added to the pool's "furthest below its share" score
 L_SHAPE = 0.3  # chance that a cut also tries carving a corner off (leaving an L)
+MAX_CORNERS = 6  # a room has at most this many corners (an L has 6)
 MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
 ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
@@ -220,8 +221,10 @@ class Assigner:
         return self._cheap_fit_m(self._mask(cells), len(cells), spec, low, high)
 
     def _cheap_fit_m(self, mask: int, size: int, spec: RoomSpec, low: int, high: int) -> bool:
-        """Size, a door's width of wall on circulation, aspect: no shape walk yet."""
+        """Size, corners, a door's width of wall on circulation, aspect: no shape walk yet."""
         if not low <= size <= high * TOLERANCE:
+            return False
+        if self.grid.corners(mask) > MAX_CORNERS:
             return False
         if (mask & self.border_m).bit_count() < min(ACCESS, spec.door_width):
             return False

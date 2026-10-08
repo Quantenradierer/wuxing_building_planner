@@ -136,6 +136,17 @@ class BitGrid:
                 return False
         return True
 
+    def corners(self, mask: int) -> int:
+        """Corners of the outline, like `geometry.corners`. Lattice point p has the cells
+        around it at bits p, p + 1, p + stride and p + stride + 1 of the mask shifted up by a
+        cell, so the left and top edges have a lattice point too."""
+        stride = self.stride
+        tl = mask << (stride + 1)
+        tr, bl, br = tl >> 1, tl >> stride, tl >> (stride + 1)
+        odd = tl ^ tr ^ bl ^ br
+        diagonal = (tl & br & ~(tr | bl)) | (tr & bl & ~(tl | br))
+        return odd.bit_count() + 2 * diagonal.bit_count()
+
     def blind(self, rest: int, border: int) -> int:
         """Cells of `rest` with no straight line through `rest` to `border`."""
         seen = rest & border

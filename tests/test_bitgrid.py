@@ -3,7 +3,7 @@
 import random
 
 from roomplanner.bitgrid import BitGrid
-from roomplanner.geometry import Cell, Side, thinnest_extent
+from roomplanner.geometry import Cell, Side, corners, thinnest_extent
 from roomplanner.pipeline.layout.regions import bbox, components
 
 W, H = 14, 11
@@ -41,6 +41,7 @@ def test_bitgrid_matches_cell_sets() -> None:
         assert grid.bbox(mask) == (x0, y0, x1, y1)
         assert grid.min_cell(mask) == min(cells)
         assert [grid.cells(m) for m in grid.components(mask)] == components(cells)
+        assert grid.corners(mask) == corners(cells)
         assert grid.connected(mask) == (len(components(cells)) == 1)
         for enough in (1, 2, 3, 4):
             assert grid.thick(mask, mask, enough) == (thinnest_extent(cells, cells) >= enough)
@@ -55,3 +56,13 @@ def test_rect_and_lines() -> None:
     assert grid.cells(box) == frozenset(Cell(x, y) for x in range(4, 7) for y in (4, 5))
     assert [(k, n) for k, _, n in grid.lines(box, vertical=True)] == [(2, 2), (3, 2), (4, 2)]
     assert [(k, n) for k, _, n in grid.lines(box, vertical=False)] == [(1, 3), (2, 3)]
+
+
+def test_corners_of_simple_shapes() -> None:
+    grid = BitGrid(0, 0, 6, 6)
+    square = frozenset(Cell(x, y) for x in range(3) for y in range(2))
+    ell = square | {Cell(0, 2), Cell(0, 3)}
+    assert corners(square) == grid.corners(grid.mask(square)) == 4
+    assert corners(ell) == grid.corners(grid.mask(ell)) == 6
+    touching = frozenset({Cell(0, 0), Cell(1, 1)})
+    assert corners(touching) == grid.corners(grid.mask(touching)) == 8

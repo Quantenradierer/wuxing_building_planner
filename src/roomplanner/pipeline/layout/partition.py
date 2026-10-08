@@ -19,7 +19,7 @@ import random
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
-from roomplanner.geometry import Cell, Corner, Diagonal, Side, thinnest_extent
+from roomplanner.geometry import Cell, Corner, Diagonal, Side, corners, thinnest_extent
 from roomplanner.params import EntranceKind
 from roomplanner.pipeline.base import (
     AllocationError,
@@ -31,7 +31,7 @@ from roomplanner.pipeline.base import (
 )
 from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
-from roomplanner.pipeline.layout.partition_assign import Assigner
+from roomplanner.pipeline.layout.partition_assign import MAX_CORNERS, Assigner
 from roomplanner.pipeline.layout.regions import (
     bbox,
     components,
@@ -1242,7 +1242,7 @@ def _thin_host(
     """The neighbour a thin piece joins and whether the joined piece is thick enough there:
     thick first (else the thickest), then a room before a corridor, then the longest shared
     wall."""
-    options: list[tuple[bool, int, bool, int, int, PlannedRoom]] = []
+    options: list[tuple[bool, bool, int, bool, int, int, PlannedRoom]] = []
     for other in rooms:
         if other is room or other.host is not None or other.sealed or other.type in fixed:
             continue
@@ -1253,6 +1253,7 @@ def _thin_host(
             options.append(
                 (
                     thick,
+                    corners(piece | other.cells) <= MAX_CORNERS,  # the room stays regular
                     0 if thick else extent,
                     not spec.circulation,
                     shared,
@@ -1260,11 +1261,11 @@ def _thin_host(
                     other,
                 )
             )
-    if band and contact(piece, band) and any(o[2] for o in options):
-        options = [o for o in options if o[2]]
+    if band and contact(piece, band) and any(o[3] for o in options):
+        options = [o for o in options if o[3]]
     if not options:
         return None
-    thick, *_, other = max(options, key=lambda o: o[:5])
+    thick, *_, other = max(options, key=lambda o: o[:6])
     return thick, other
 
 
