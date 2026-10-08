@@ -413,6 +413,14 @@ irregular and any footprint is the same case. Programs with `units` are rejected
    has (`SAME_SIZE`; identical rooms get identical furniture, and interior doors hinge at the
    nearer end of the wall so identical rooms also get the same swing); too-big regions are cut, `priority: optional` types are the last
    choice, a piece nothing fits is a `leftover` (the program's `cluster_filler`).
+   *Shapes*: a room has at most 6 corners (`MAX_CORNERS`; a rectangle 4, an L 6). Pieces
+   with more are not offered, cuts whose rests would be tangled cost score, and a thin
+   leftover joins the neighbour that keeps the union regular if it can. A floor that cannot
+   place every room that way is assigned again with any shape allowed (an odd room beats a
+   missing one). `tools/shape_metric.py` counts odd and narrow rooms (and with `--hard` the
+   hard violations of whole buildings); on the office, `partition`: odd rooms 11% -> 2%,
+   narrow rooms (stalls aside) 2% -> 1%. Diagonal and OSM layouts count the steps of a
+   45 degree wall as corners, so their numbers are inflated.
 4. After the assignment `absorb_leftovers` and `carve_stalls` run as in the corridor layout,
    and the ground floor gets its main, service and emergency entrances.
 

@@ -38,6 +38,8 @@ ELASTIC = 3  # an open office is drawn from at most this many times its minimum 
 STARVED = 3.0  # penalty for a room that needs a window where there is none
 NOISE = 0.8  # random share added to the pool's "furthest below its share" score
 L_SHAPE = 0.3  # chance that a cut also tries carving a corner off (leaving an L)
+MAX_CORNERS = 6  # a room has at most this many corners (an L has 6)
+UNLIMITED = 1 << 30  # corners: no limit
 MIN_USEFUL = 3  # cells: thinnest part of a region some room could still use
 ACCESS = 2  # cells of shared wall with circulation a room needs for a door
 ALIGNED = 0.12  # score bonus per end of a cut that continues a wall between two placed rooms
@@ -45,6 +47,7 @@ CLUSTER = 1.8  # score bonus for a type whose placed neighbours are all of that 
 SAME_SIZE = 1.0  # score bonus for a piece of a size another room of its type already has
 GROWTH_SLACK = 1.6  # each further round lets rooms outgrow their size and aspect limits more
 MAX_GROWTH = 8  # cells: thickest strip of leftover a room beside it grows over
+TANGLED = 0.15  # score penalty per corner a rest has over MAX_CORNERS
 STRAND = 6  # a rest no room can use costs its cells over this (unreachable ones end as sleep pods)
 JOG = 0.1  # score penalty per end of a cut that misses such a wall by 1-2 cells
 _ACROSS = {
@@ -88,6 +91,7 @@ class Assigner:
         anchors: dict[str, Cell],
         filler: str,
         rng: random.Random,
+        max_corners: int = MAX_CORNERS,
     ) -> None:
         self.rules = rules
         self.entries = [e for e in role_rooms if e.place is None and evaluate(e.when, values)]
@@ -105,6 +109,7 @@ class Assigner:
         self.warnings: list[str] = []
         self.made: dict[int, int] = {}
         self.min_useful = 12
+        self.max_corners = max_corners
         x0, y0, x1, y1 = bbox(footprint)
         self.grid = BitGrid(x0, y0, x1, y1)
         self.border_m = self.grid.mask(self.border)
@@ -220,8 +225,10 @@ class Assigner:
         return self._cheap_fit_m(self._mask(cells), len(cells), spec, low, high)
 
     def _cheap_fit_m(self, mask: int, size: int, spec: RoomSpec, low: int, high: int) -> bool:
-        """Size, a door's width of wall on circulation, aspect: no shape walk yet."""
+        """Size, corners, a door's width of wall on circulation, aspect: no shape walk yet."""
         if not low <= size <= high * TOLERANCE:
+            return False
+        if self.grid.corners(mask) > self.max_corners:
             return False
         if (mask & self.border_m).bit_count() < min(ACCESS, spec.door_width):
             return False
@@ -346,6 +353,7 @@ class Assigner:
             rests = grid.components(rest)
             score = base + sum(r.bit_count() / STRAND for r in rests if not self._useful_m(r))
             score += grid.blind(rest, self.border_m) / 20
+            score += TANGLED * sum(max(0, grid.corners(r) - self.max_corners) for r in rests)
             score += self._jog(grid.cells(piece), grid.cells(rest))
             score += self.rng.uniform(0, 0.1)
             if best is None or score < best[0]:

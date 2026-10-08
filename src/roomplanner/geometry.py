@@ -190,6 +190,22 @@ def largest_rectangle(cells: frozenset[Cell]) -> tuple[int, int, int, int]:
     return best[1]
 
 
+def corners(cells: AbstractSet[Cell]) -> int:
+    """Corners of the outline of the cells: lattice points where the four cells around are not
+    a straight edge (one or three of them in; two diagonal ones count twice)."""
+    points = {(c.x + dx, c.y + dy) for c in cells for dx in (0, 1) for dy in (0, 1)}
+    total = 0
+    for x, y in points:
+        a, b = Cell(x - 1, y - 1) in cells, Cell(x, y - 1) in cells
+        c, d = Cell(x - 1, y) in cells, Cell(x, y) in cells
+        around = a + b + c + d
+        if around in (1, 3):
+            total += 1
+        elif around == 2 and a == d:
+            total += 2
+    return total
+
+
 @lru_cache(maxsize=16)
 def boundary_edges(cells: frozenset[Cell]) -> frozenset[Edge]:
     """Edges separating the given cells from everything else."""

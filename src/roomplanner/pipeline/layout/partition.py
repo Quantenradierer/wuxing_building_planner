@@ -24,6 +24,7 @@ from roomplanner.geometry import (
     Corner,
     Diagonal,
     Side,
+    corners,
     largest_rectangle,
     rectangle,
     thinnest_extent,
@@ -39,7 +40,7 @@ from roomplanner.pipeline.base import (
 )
 from roomplanner.pipeline.layout.corridor import FAR_CORE_MIN
 from roomplanner.pipeline.layout.leftovers import absorb_leftovers
-from roomplanner.pipeline.layout.partition_assign import Assigner
+from roomplanner.pipeline.layout.partition_assign import MAX_CORNERS, UNLIMITED, Assigner
 from roomplanner.pipeline.layout.partition_units import split_units
 from roomplanner.pipeline.layout.regions import (
     bbox,
@@ -1027,17 +1028,28 @@ class PartitionLayout:
                 )
             if ground:
                 anchors["entrance"] = skeleton.main_hint
-            assigner = Assigner(
-                ctx.rules,
-                role.rooms,
-                variables(ctx.params, level),
-                footprint,
-                access,
-                anchors,
-                ctx.rules.program.cluster_filler,
-                ctx.rng(f"assign:{role_name}:{level}"),
-            )
-            rooms = assigner.run(components(free), f"level {level}")
+            # Rooms with at most MAX_CORNERS corners; a floor that cannot place every room that
+            # way is assigned again with any shape allowed: an odd room beats a missing one.
+            for corners_allowed in (MAX_CORNERS, UNLIMITED):
+                assigner = Assigner(
+                    ctx.rules,
+                    role.rooms,
+                    variables(ctx.params, level),
+                    footprint,
+                    access,
+                    anchors,
+                    ctx.rules.program.cluster_filler,
+                    ctx.rng(f"assign:{role_name}:{level}"),
+                    corners_allowed,
+                )
+                try:
+                    rooms = assigner.run(components(free), f"level {level}")
+                except AllocationError:
+                    if corners_allowed == UNLIMITED:
+                        raise
+                    continue
+                if not assigner.warnings:
+                    break
             shared[key] = (rooms, assigner.warnings)
             plan.warnings += assigner.warnings
         rooms = [*fixed, *shared[key][0]]
@@ -1285,7 +1297,7 @@ def _thin_host(
     """The neighbour a thin piece joins and whether the joined piece is thick enough there:
     thick first (else the thickest), then a room before a corridor, then the longest shared
     wall."""
-    options: list[tuple[bool, int, bool, int, int, PlannedRoom]] = []
+    options: list[tuple[bool, bool, int, bool, int, int, PlannedRoom]] = []
     for other in rooms:
         if other is room or other.host is not None or other.sealed or other.type in fixed:
             continue
@@ -1296,6 +1308,7 @@ def _thin_host(
             options.append(
                 (
                     thick,
+                    corners(piece | other.cells) <= MAX_CORNERS,  # the room stays regular
                     0 if thick else extent,
                     not spec.circulation,
                     shared,
@@ -1303,11 +1316,11 @@ def _thin_host(
                     other,
                 )
             )
-    if band and contact(piece, band) and any(o[2] for o in options):
-        options = [o for o in options if o[2]]
+    if band and contact(piece, band) and any(o[3] for o in options):
+        options = [o for o in options if o[3]]
     if not options:
         return None
-    thick, *_, other = max(options, key=lambda o: o[:5])
+    thick, *_, other = max(options, key=lambda o: o[:6])
     return thick, other
 
 
