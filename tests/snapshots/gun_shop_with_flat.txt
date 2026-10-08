@@ -2,15 +2,15 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Floor 1 ==
 +--===---===--+===--+===---===---===--+===---===----+
-"    N bbb N  |i www|#################|    N bbb N  "
-"      bbb    |i www|#################|      bbb    "
-"      bbb    |i www|#################|      bbb    "
-|      bbb    |     |#################|      bbb    |
-|    3 bbb    |  4  |#################|    5 bbb    |
+"a   N bbb N  |www i|#################|a   N bbb N  "
+"a     bbb    |www i|#################|a     bbb    "
+"a     bbb    |www i|#################|a     bbb    "
+|a     bbb    |     |#################|a     bbb    |
+|a   3 bbb    |  4  |#################|a   5 bbb    |
 |      bbb    |     |                 |      bbb    |
-"      bbb    |    k|        1        |      bbb    "
+"k     bbb    |     |        1        |k     bbb    "
 "             |     |                 |             "
-"             |     |                 |             "
+"            k|     |                 |            k"
 +--DDD--------+DDD--+------DDD--------+--DDD--------+
 |        sss         sss           sss         sss s|
 |                                                  s|
@@ -38,7 +38,7 @@ gun_shop 26x18 cells, wealth=high, seed=3
 |<                 ooooooo           ooooooo        |
 |<       sss       ooooooo           ooooooo       *|
 +--===---===---===---===---===---===---===---===----+
-  objects: A armchair, b bed, k cabinet, c chair, t coffee_table, n counter, d dining_table, f fridge, N nightstand, * plant, ~ rug, s shelf, i sink, o sofa, # stairs, v stove, < wall_screen, w wc
+  objects: A armchair, b bed, k cabinet, c chair, t coffee_table, n counter, d dining_table, f fridge, N nightstand, * plant, ~ rug, s shelf, i sink, o sofa, # stairs, v stove, < wall_screen, a wardrobe, w wc
     1  stairwell            45 cells
     2  flat_loft           338 cells
     3  bedroom              35 cells

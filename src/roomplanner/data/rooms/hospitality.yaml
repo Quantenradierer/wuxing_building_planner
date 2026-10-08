@@ -29,7 +29,7 @@ rooms:
     min_side: 4
     cluster: true
     furniture:
-      - {object: shower, placement: wall, per: 8, count: [1, 4]}
+      - {object: shower, placement: wall, per: 8, count: [1, 4], line: true}
       - {object: sink, placement: wall, count: [1, 2], line: true}
       - {object: bench, placement: center, count: [0, 1]}
   locker_room:
@@ -39,7 +39,7 @@ rooms:
     cluster: true
     furniture:
       - {object: locker, placement: wall, per: 3, count: [2, 16]}
-      - {object: bench, placement: center, count: [0, 1]}
+      - {object: bench, placement: center}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   linen_room:
     area: [12, 30]
