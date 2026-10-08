@@ -389,7 +389,8 @@ irregular and any footprint is the same case. Programs with `units` are rejected
    corridors sit at varying depths (`CROSS_AT`); corridors swell into hubs and alcoves in the
    inner rows (`_bulges`); a plaza big enough keeps a walkway round a `plaza_island` in its middle
    (vending machines, no walls: `hub` room, `_islands`); and a block is cut out of a corridor a
-   loop bypasses, so it is interrupted and a room fills the gap (`_breaks`); on buildings with width + depth >= 100 now and then a dead-end stub
+   loop bypasses, so it is interrupted and a room fills the gap (`_breaks`); a corridor arm that runs into a facade ends in one fire exit, a small sealed closet
+   across its end (`CAP`), or bare wall (`_ends`); on buildings with width + depth >= 100 now and then a dead-end stub
    (`_stubs`) runs from circulation into a pocket 8+ cells from it and stops short of the wall,
    so the back of a deep row of rooms has a door instead of becoming sleep pods; corridor bits thinner than the corridor width go (`opened`). The lobby is
    a rectangle on the street facade with its inner side on a corridor (`_lobby_beside`; else

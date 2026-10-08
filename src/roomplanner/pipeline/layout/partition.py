@@ -62,6 +62,8 @@ class Skeleton:
     far: frozenset[Cell] = frozenset()  # cells of the second stairwell, which has an exit
     band: frozenset[Cell] = frozenset()  # cells of the 45 degree corridor, if there is one
     islands: tuple[frozenset[Cell], ...] = ()  # vending islands in the middle of plazas
+    caps: tuple[tuple[str, frozenset[Cell]], ...] = ()  # small rooms closing dead-end arms
+    exit: tuple[Side, Cell] | None = None  # the dead-end arm that ends in a fire exit
 
 
 @register("layout", "partition")
@@ -142,7 +144,10 @@ class PartitionLayout:
         corridor = self._stubs(footprint, corridor, lobby, ctx)
         cores, far = self._cores(ctx, footprint, corridor | lobby, lobby, rng)
         islands = self._islands(corridor, hubs)
+        core_cells = frozenset(c for room in cores for c in room.cells)
         corridor -= frozenset(c for island in islands for c in island)
+        exit, caps = self._ends(ctx, footprint, corridor, lobby | core_cells, band, width)
+        corridor -= frozenset(c for _, cells in caps for c in cells)
         return Skeleton(
             corridor,
             cores,
@@ -153,6 +158,8 @@ class PartitionLayout:
             far,
             band & corridor,
             tuple(islands),
+            tuple(caps),
+            exit,
         )
 
     def _breaks(
@@ -194,6 +201,91 @@ class PartitionLayout:
                     corridor = rest
                     break
         return corridor
+
+    @staticmethod
+    def _arm_tips(
+        footprint: frozenset[Cell], corridor: frozenset[Cell], width: int
+    ) -> list[tuple[Side, Cell]]:
+        """Where a corridor arm runs into a facade and stops: the side and the middle cell of
+        its end, an arm being a stretch no wider than a corridor with nothing beside it."""
+        tips: list[tuple[Side, Cell]] = []
+        for side in Side:
+            dx, dy = side.delta
+            edge = sorted(c for c in corridor if Cell(c.x + dx, c.y + dy) not in footprint)
+            seen: set[Cell] = set()
+            for tip in edge:
+                if tip in seen:
+                    continue
+                run = [tip]
+                c = tip
+                while (n := Cell(c.x + abs(dy), c.y + abs(dx))) in corridor and Cell(
+                    n.x + dx, n.y + dy
+                ) not in footprint:
+                    run.append(n)
+                    c = n
+                seen.update(run)
+                before = Cell(tip.x - abs(dy), tip.y - abs(dx))
+                after = Cell(c.x + abs(dy), c.y + abs(dx))
+                behind = {Cell(r.x - dx, r.y - dy) for r in run}
+                if (
+                    len(run) <= width
+                    and before not in corridor
+                    and after not in corridor
+                    and behind <= corridor
+                ):
+                    tips.append((side, run[len(run) // 2]))
+        return tips
+
+    def _ends(
+        self,
+        ctx: Context,
+        footprint: frozenset[Cell],
+        corridor: frozenset[Cell],
+        lobby: frozenset[Cell],
+        band: frozenset[Cell],
+        width: int,
+    ) -> tuple[tuple[Side, Cell] | None, list[tuple[str, frozenset[Cell]]]]:
+        """What the corridor arms that run into a facade end in: one of them a fire exit,
+        most of the rest a small service room across their end, a few stay bare."""
+        rng = ctx.rng("ends")
+        tips = self._arm_tips(footprint, corridor, width)
+        if not tips:
+            return None, []
+        exit = tips[rng.randrange(len(tips))]
+        caps: list[tuple[str, frozenset[Cell]]] = []
+        pieces = len(components(corridor))
+        for side, cell in tips:
+            if (side, cell) == exit or rng.random() > CAP_CHANCE:
+                continue
+            dx, dy = side.delta
+            depth = rng.randint(*CAP)
+            span = range(-(width // 2), width - width // 2)
+            cells = frozenset(
+                Cell(cell.x + abs(dy) * j - dx * k, cell.y + abs(dx) * j - dy * k)
+                for j in span
+                for k in range(depth)
+            )
+            kind = rng.choice(CAP_ROOMS)
+            beside = {
+                Cell(cell.x + abs(dy) * j - dx * k, cell.y + abs(dx) * j - dy * k)
+                for j in (span.start - 1, span.stop)
+                for k in range(depth)
+            }
+            if not beside <= footprint or beside & corridor:
+                continue  # in a corner, or the corridor goes on beside it: a sliver is left
+            if any(
+                Cell(c.x + ex, c.y + ey) in lobby
+                for c in cells
+                for ex in (-2, 0, 2)
+                for ey in (-2, 0, 2)
+            ):
+                continue  # beside the lobby or a core, whose doors face the corridor here
+            if cells <= corridor and not cells & (lobby | band):
+                rest = corridor - cells
+                if len(components(rest)) == pieces:
+                    caps.append((kind, cells))
+                    corridor = rest
+        return exit, caps
 
     @staticmethod
     def _islands(corridor: frozenset[Cell], hubs: list[frozenset[Cell]]) -> list[frozenset[Cell]]:
@@ -890,6 +982,8 @@ class PartitionLayout:
         fixed = [*circulation, *skeleton.cores]
         island_cells = frozenset(c for island in skeleton.islands for c in island)
         fixed += [PlannedRoom("plaza_island", cells, hub=True) for cells in skeleton.islands]
+        fixed += [PlannedRoom(kind, cells, sealed=True) for kind, cells in skeleton.caps]
+        island_cells |= frozenset(c for _, cells in skeleton.caps for c in cells)
         lobby_cells = skeleton.lobby if ground else frozenset[Cell]()
         if lobby_cells and skeleton.lobby_type:
             fixed.append(PlannedRoom(skeleton.lobby_type, lobby_cells))
@@ -1004,6 +1098,10 @@ class PartitionLayout:
                     key=lambda o: (min(abs(o[0].x - t.x) + abs(o[0].y - t.y) for t in taken), o),
                 )
                 hints.append((EntranceKind.EMERGENCY, side, cell))
+        if EntranceKind.EMERGENCY in wanted and skeleton.exit is not None:
+            side, cell = skeleton.exit
+            if all(abs(cell.x - h.x) + abs(cell.y - h.y) > 3 for _, _, h in hints):
+                hints.append((EntranceKind.EMERGENCY, side, cell))
         result: list[EntranceRequest] = []
         for kind, side, cell in hints:
             index = next(i for i, r in enumerate(rooms) if cell in r.cells)
@@ -1028,6 +1126,9 @@ BULGE = (2, 5)  # cells a hub or alcove reaches out from a corridor
 BULGE_LENGTH = (6, 14)
 BREAKS = (0, 2)  # interruptions cut into the corridors
 BREAK_LENGTH = (5, 10)
+CAP = (4, 5)  # cells deep a room closing a dead-end arm is
+CAP_CHANCE = 0.7
+CAP_ROOMS = ("network_closet",)
 RING = 3  # cells of walkway round an island in a plaza
 ISLAND_MIN = (3, 3)  # smallest island, along the corridor and across it
 STUBS = 6  # dead-end stubs a skeleton tries
@@ -1061,7 +1162,7 @@ def _bevels(
     result: set[Diagonal] = set()
     for cell in sorted(near - corridor):
         room = owner.get(cell)
-        if room is None or room.host is not None or room.type in fixed:
+        if room is None or room.host is not None or room.sealed or room.type in fixed:
             continue
         if rules.spec(room.type).circulation or room.hub:
             continue
@@ -1143,7 +1244,7 @@ def _thin_host(
     wall."""
     options: list[tuple[bool, int, bool, int, int, PlannedRoom]] = []
     for other in rooms:
-        if other is room or other.host is not None or other.type in fixed:
+        if other is room or other.host is not None or other.sealed or other.type in fixed:
             continue
         if shared := contact(piece, other.cells):
             spec = rules.spec(other.type)
