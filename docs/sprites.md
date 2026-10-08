@@ -39,7 +39,8 @@ picks with `attempt` below 10 (those are from the older model).
   the top edge"; cars: front bumper at the top, since they park nose to the wall).
 - Wealth variants are `<kind>.high` (used for high and luxury) and `<kind>.squatter`.
   Lookup falls back towards middle, then to the theme's `sprite_fallbacks` stand-in.
-- The tier looked up is the object's wealth moved by the building's condition
+- The tier looked up is the object's wealth (low and squatter count as middle: poor wealth
+  has no sprites of its own, only condition wear goes below middle) moved by the building's condition
   (`look_shift` / `looks` in `data/condition.yaml`): pristine middle..luxury (one up),
   maintained low..high, run down squatter..middle (one down), derelict and ruined
   squatter..low (two down).
