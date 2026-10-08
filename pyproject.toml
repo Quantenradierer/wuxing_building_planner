@@ -43,3 +43,9 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-n auto"
+markers = [
+    "technical: data structures, geometry, serialization, exports, CLI, UI",
+    "validation: invariants and quality gates (validator, properties, building code, snapshots)",
+    "behaviour: what layout and furnishing produce per building type",
+]

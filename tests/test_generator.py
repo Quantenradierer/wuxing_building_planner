@@ -12,11 +12,11 @@ from roomplanner.pipeline.openings import DAYLIGHT
 from roomplanner.rules import rules_for
 from roomplanner.validation import hard_violations, validate
 
-from .conftest import make_params
+from .conftest import make_params, uncached_generate
 
 
 def test_same_seed_same_building() -> None:
-    assert generate(make_params(seed=3)) == generate(make_params(seed=3))
+    assert generate(make_params(seed=3)) == uncached_generate(make_params(seed=3))
 
 
 def test_missing_seed_is_resolved_and_recorded() -> None:

@@ -13,6 +13,8 @@ from roomplanner.rules import rules_for
 from roomplanner.serialization import from_json, to_json
 from roomplanner.validation import hard_violations
 
+from .conftest import uncached_generate
+
 IMPLEMENTED = list(BuildingType)
 # Big programs need more room; smaller buildings of these types are rejected with a reason.
 # Smallest width and depth at which every tier fits (OR suite plus core; rich tiers'
@@ -67,7 +69,7 @@ def test_generated_buildings_have_no_hard_violations(params: GenerationParams) -
 def test_generation_is_deterministic_and_serializable(params: GenerationParams) -> None:
     building = generate_or_none(params)
     if building is not None:
-        assert generate(params) == building
+        assert uncached_generate(params) == building
         assert from_json(to_json(building)) == building
 
 
