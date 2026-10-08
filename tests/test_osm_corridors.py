@@ -6,7 +6,7 @@ from roomplanner.generator import generate
 from roomplanner.pipeline.layout.osm import shapes
 from roomplanner.validation import hard_violations
 
-from .conftest import make_params
+from .conftest import make_params, uncached_generate
 
 SEEDS = range(1, 6)
 
@@ -33,7 +33,7 @@ def test_osm_buildings_are_valid_and_mostly_slanted() -> None:
 
 def test_the_same_seed_gives_the_same_building() -> None:
     params = make_params(width=60, depth=40, floors_above=1, layout="partition_osm", seed=7)
-    assert generate(params) == generate(params)
+    assert generate(params) == uncached_generate(params)
 
 
 def test_osm_layout_rarely_ends_with_hard_violations() -> None:
