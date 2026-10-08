@@ -291,6 +291,16 @@ rooms:
       - {object: vending_machine, placement: perimeter, per: 4, count: [2, 8]}
       - {object: vending_machine, placement: rows, paired: true, margin: 3, aisle: 2, block: 10, count: [0, 4]}
       - {object: trash_bin, placement: scatter}
+  plaza_island:         # a small block in the middle of a corridor plaza: machines and benches
+    area: [9, 120]
+    min_side: 3
+    open: 1                   # no walls: the walkway runs all round it
+    windows: forbidden
+    transit: false
+    furniture:
+      - {object: vending_machine, placement: rows, paired: true, margin: 0, aisle: 1, block: 10, count: [1, 6]}
+      - {object: bench, placement: wall, count: [0, 2]}
+      - {object: trash_bin, placement: scatter, count: [0, 1]}
   car_park:             # a building's basement parking: claims one whole end of the level first
     area: [600, 1800]
     min_side: 16
