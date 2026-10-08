@@ -21,7 +21,7 @@ import yaml
 from roomplanner.geometry import Cell
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.layout.partition import PartitionLayout
-from roomplanner.pipeline.layout.regions import bbox, thicken
+from roomplanner.pipeline.layout.regions import bbox, opened, thicken
 from roomplanner.pipeline.registry import register
 
 MIN_SCALE = 0.4  # a shape is shrunk or stretched by at most this much...
@@ -29,6 +29,10 @@ MAX_SCALE = 4.0  # ...and that much
 FILL = 0.4  # the shape's shorter side fills at least this share of the room it is given
 SLANTED = 0.4  # score bonus of shapes with diagonal corridors: the point of this layout
 TOP = 8  # shapes drawn from the best this many (by fit)
+MIN_DIAGONAL = 8  # cells; shorter 45 degree runs are dropped
+TRIES = 12  # placements tried; the one that leaves the fewest slivers wins
+TOLERABLE = 0.02  # share of the free floor in slivers that ends the search early
+SLIVER = 6  # free floor not covered by a square this wide is no room
 
 Path = list[tuple[int, int]]
 
@@ -140,15 +144,24 @@ class OsmMixin:
         if not options:
             return frozenset(), frozenset()
         options.sort(key=lambda o: -o[0])
-        _, scale, _, paths = rng.choice(options[:TOP])
-        xs = [x for p in paths for x, _ in p]
-        ys = [y for p in paths for _, y in p]
-        slack = (room[0] - round(max(xs) * scale), room[1] - round(max(ys) * scale))
-        at = (
-            x0 + margin + rng.randint(0, max(0, slack[0])),
-            y0 + margin + rng.randint(0, max(0, slack[1])),
-        )
-        return _draw(paths, scale, at, width, footprint)
+        best: tuple[float, tuple[frozenset[Cell], frozenset[Cell]]] | None = None
+        for _ in range(TRIES):
+            _, scale, _, paths = rng.choice(options[:TOP])
+            xs = [x for p in paths for x, _ in p]
+            ys = [y for p in paths for _, y in p]
+            slack = (room[0] - round(max(xs) * scale), room[1] - round(max(ys) * scale))
+            at = (
+                x0 + margin + rng.randint(0, max(0, slack[0])),
+                y0 + margin + rng.randint(0, max(0, slack[1])),
+            )
+            drawn = _draw(paths, scale, at, width, footprint)
+            sliver = _slivers(footprint, drawn[0] | drawn[1])
+            if best is None or sliver < best[0]:
+                best = (sliver, drawn)
+            if sliver <= TOLERABLE:
+                break
+        assert best is not None
+        return best[1]
 
     def _bands(
         self, ctx: Context, footprint: frozenset[Cell], rng: random.Random
@@ -166,26 +179,52 @@ class OsmMixin:
         return self._network(ctx, footprint)[1] - corridor
 
 
+def _slivers(footprint: frozenset[Cell], corridor: frozenset[Cell]) -> float:
+    """Share of the floor left beside the corridors that is too thin to hold a room."""
+    free = footprint - corridor
+    if not free:
+        return 1.0
+    return 1 - len(opened(free, SLIVER)) / len(free)
+
+
 def _draw(
     paths: list[Path], scale: float, at: tuple[int, int], width: int, footprint: frozenset[Cell]
 ) -> tuple[frozenset[Cell], frozenset[Cell]]:
     """Thicken the scaled centrelines: axis-parallel runs to a corridor's width, 45 degree runs
     to staircase bands as wide as `_diagonal` makes them."""
     straight: set[Cell] = set()
-    slanted: set[Cell] = set()
+    runs: list[list[Cell]] = []
     wide = width + 2  # cells per row: 45 degrees makes a band 1.4 times thinner
     for path in paths:
         points = [(at[0] + round(x * scale), at[1] + round(y * scale)) for x, y in path]
         for a, b in itertools.pairwise(points):
-            for start, end in zip(_octilinear(a, b), _octilinear(a, b)[1:], strict=False):
+            for start, end in itertools.pairwise(_octilinear(a, b)):
                 run = _cells(start, end)
                 if start[0] != end[0] and start[1] != end[1]:
-                    slanted.update(
-                        Cell(c.x + k, c.y) for c in run for k in range(-wide // 2, wide // 2)
-                    )
+                    runs.append(run)
                 else:
                     straight.update(thicken(run, width, footprint))
-    return frozenset(straight & footprint), frozenset(slanted & footprint) - frozenset(straight)
+    bands = [
+        frozenset(Cell(c.x + k, c.y) for c in run[1:-1] for k in range(-wide // 2, wide // 2))
+        for run in runs
+    ]
+    # A staircase band needs the floor to either side free for rooms (as the partition layout
+    # demands of its diagonal links); one that brushes a corridor or the wall is dropped.
+    side = width + 1
+    slanted: set[Cell] = set()
+    for i, (run, band) in enumerate(zip(runs, bands, strict=True)):
+        others = straight.union(*(o for j, o in enumerate(bands) if j != i))
+        if len(run) < MIN_DIAGONAL or not band <= footprint:
+            continue
+        if any(
+            Cell(c.x + dx, c.y) not in footprint or Cell(c.x + dx, c.y) in others
+            for c in run[3:-3]
+            for dx in (-side, side)
+        ):
+            continue
+        slanted |= band
+        straight.update(thicken([run[0], run[-1]], width, footprint))
+    return frozenset(straight & footprint), frozenset(slanted) - frozenset(straight)
 
 
 @register("layout", "partition_osm")
