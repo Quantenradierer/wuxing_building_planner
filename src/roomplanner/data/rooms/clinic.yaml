@@ -117,7 +117,7 @@ rooms:
     windows: forbidden
     furniture:
       - {object: exam_table, placement: center}
-      - {object: machinery, placement: wall}
+      - {object: machinery, placement: at, at: exam_table, beside: [back]}   # the tube at the head of the table
       - {object: terminal, placement: wall}
       - {object: chair, placement: at, at: terminal, beside: [front]}
   morgue:
@@ -126,10 +126,10 @@ rooms:
     windows: forbidden
     door_width: 3
     furniture:
-      - {object: morgue_drawers, placement: wall, count: [2, 4]}
-      - {object: operating_table, placement: center, count: [0, 1]}
+      - {object: morgue_drawers, placement: wall, count: [2, 4], line: true}   # one bank
+      - {object: operating_table, placement: center}                            # the autopsy table
       - {object: gurney_set, placement: wall, spaced: true, count: [0, 2]}
-      - {object: sink, placement: wall, count: [0, 1]}
+      - {object: sink, placement: wall}
       - {object: medical_cart, placement: scatter, count: [0, 1]}
   doctor_office:
     area: [36, 70]
@@ -138,8 +138,8 @@ rooms:
     furniture:
       - {object: desk_with_visitors, placement: wall}
       - {object: exam_table, placement: wall}
-      - {object: sink, placement: wall, count: [0, 1]}
-      - {object: cabinet, placement: corner, count: [0, 1]}
+      - {object: sink, placement: wall}
+      - {object: medical_cabinet, placement: wall}
       - {object: shelf, placement: wall, count: [0, 1]}
   consultation_room:    # cosmetic clinic: a desk, two armchairs, a screen
     wealth_shift: +1          # fancier than the rest of the building
@@ -148,7 +148,9 @@ rooms:
     windows: required
     furniture:
       - {object: desk_with_visitors, placement: wall}
-      - {object: armchair, placement: scatter, count: [1, 2]}
+      - {object: exam_table, placement: wall}
+      - {object: sink, placement: wall}
+      - {object: armchair, placement: grid, aisle: 2, margin: 2, count: [1, 2]}
       - {object: terminal, placement: corner, count: [0, 1]}
       - {object: plant, placement: corner, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
@@ -159,13 +161,13 @@ rooms:
     windows: forbidden
     furniture:
       - {object: exam_table, placement: center}
-      - {object: machinery, placement: wall, count: [1, 2]}
+      - {object: machinery, placement: wall, count: [1, 2], line: true}
       - {object: terminal, placement: wall, count: [1, 2]}
-      - {object: medical_cabinet, placement: wall, count: [1, 2]}
+      - {object: medical_cabinet, placement: wall, count: [1, 2], line: true}
       - {object: stool, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
       - {object: vital_monitor, placement: at, at: exam_table, beside: [flanks], count: [0, 1]}
       - {object: workbench, placement: wall, count: [0, 1]}
-      - {object: cyberware_rack, placement: wall, count: [0, 1]}
+      - {object: cyberware_rack, placement: wall, count: [0, 1], line: true}
   recovery_suite:       # private room for a paying patient
     wealth_shift: +1          # fancier than the rest of the building
     area: [50, 110]
@@ -174,8 +176,9 @@ rooms:
     furniture:
       - {object: patient_bed, placement: wall, spaced: true}
       - {object: sofa, placement: wall, count: [0, 1]}
-      - {object: armchair, placement: scatter, count: [0, 1]}
-      - {object: plant, placement: corner, count: [1, 2]}
+      - {object: armchair, placement: at, at: patient_bed, beside: [flanks], limit: 1, count: [0, 1]}
+      - {object: sink, placement: wall, count: [0, 1]}                       # ensuite washbasin
+      - {object: plant, placement: corner, count: [0, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: side_table, placement: at, at: armchair, beside: [flanks], count: [0, 1]}
   cyber_surgery:        # implant surgery: an OR with the cyberware at hand
@@ -185,13 +188,13 @@ rooms:
     door_width: 3
     furniture:
       - {object: operating_table, placement: center}
-      - {object: cyberware_rack, placement: wall, count: [1, 3]}
-      - {object: medical_cabinet, placement: wall, count: [1, 2]}
-      - {object: vital_monitor, placement: at, at: operating_table, beside: [flanks]}
-      - {object: medical_cart, placement: at, at: operating_table, beside: [flanks]}
+      - {object: cyberware_rack, placement: wall, count: [1, 3], line: true}
+      - {object: medical_cabinet, placement: wall, count: [1, 2], line: true}
+      - {object: vital_monitor, placement: at, at: operating_table, beside: [flanks], count: 1}
+      - {object: medical_cart, placement: at, at: operating_table, beside: [front]}   # instruments at the foot, not beside the monitor
       - {object: specimen_fridge, placement: wall, count: [0, 1]}
-      - {object: machinery, placement: wall, count: [0, 1]}
-      - {object: sink, placement: wall}
+      - {object: machinery, placement: at, at: operating_table, beside: [back], count: [0, 1]}   # anaesthesia at the head
+      - {object: sink, placement: wall, line: true}
   cyberware_storage:    # implants waiting for their owners, in fridges and on hooks
     area: [12, 36]
     min_side: 3
@@ -201,16 +204,19 @@ rooms:
     annex: 0.8
     transit: false
     furniture:
-      - {object: cyberware_rack, placement: wall, per: 6, count: [1, 4]}
-      - {object: specimen_fridge, placement: wall, count: [1, 2]}
+      - {object: cyberware_rack, placement: wall, per: 6, count: [1, 4], line: true}
+      - {object: specimen_fridge, placement: wall, count: [1, 2], line: true}
+      - {object: terminal, placement: wall, count: [0, 1]}
       - {object: safe, placement: corner, count: [0, 1]}
   body_bank:            # organs, vat-grown tissue and bodies on ice
     area: [30, 100]
     min_side: 5
     windows: forbidden
     furniture:
-      - {object: cryo_pod, placement: wall, per: 20, count: [1, 4]}
-      - {object: specimen_fridge, placement: wall, per: 8, count: [2, 6]}
+      - {object: cryo_pod, placement: rows, aisle: 2, margin: 1, per: 20, count: [1, 6]}   # one direction, service aisle in front
+      - {object: specimen_fridge, placement: wall, per: 8, count: [2, 6], line: true}
+      - {object: counter, placement: center, count: [0, 1]}                              # prep table
+      - {object: sink, placement: wall, count: [0, 1]}
       - {object: terminal, placement: wall}
       - {object: medical_cabinet, placement: wall, count: [0, 1]}
   docwagon_bay:         # ambulance garage at the back door, gurneys ready
@@ -220,8 +226,9 @@ rooms:
     door_width: 4
     facade_door: 6         # the ambulance drives in
     furniture:
-      - {object: ambulance, placement: wall}
+      - {object: ambulance, placement: center}   # clear of the walls
       - {object: gurney_set, placement: wall, spaced: true, count: [1, 2]}
       - {object: medical_cabinet, placement: wall, count: [0, 2]}
       - {object: medical_cart, placement: wall, count: [0, 1]}
+      - {object: locker, placement: wall, count: [2, 4], line: true}   # gear
       - {object: fire_extinguisher, placement: wall}
