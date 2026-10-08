@@ -562,6 +562,7 @@ class PartitionLayout:
         wide = program.corridor.width + 2  # cells per row: 45 degrees makes it 1.4 times thinner
         longest = 2 * program.strip_depth[1]
         candidates: list[tuple[Cell, Cell, frozenset[Cell]]] = []
+        slant: dict[frozenset[Cell], int] = {}
         for start in sorted(corridor):
             for dx, dy in ((1, 1), (1, -1)):
                 path = [start]
@@ -598,6 +599,7 @@ class PartitionLayout:
                 ):
                     continue
                 candidates.append((path[0], path[-1], band))
+                slant[band] = dx
         pieces = components(corridor)
         piece_of = {c: i for i, piece in enumerate(pieces) for c in piece}
         rng.shuffle(candidates)
@@ -608,15 +610,41 @@ class PartitionLayout:
             return c.x if horizontal else c.y
 
         chosen: list[tuple[frozenset[int], int, frozenset[Cell]]] = []  # (pair, position, band)
+        ends: set[Cell] = set()  # where chosen links meet their corridors
+        slants: dict[frozenset[int], set[int]] = {}
+
+        def ordered(first: Cell, last: Cell, band: frozenset[Cell]) -> bool:
+            """Whether a link continues or mirrors a chosen one (shares an end with it), or
+            runs parallel to one between the same corridors."""
+            pair = frozenset((piece_of[first], piece_of[last]))
+            return first in ends or last in ends or slant[band] in slants.get(pair, ())
+
+        def take(first: Cell, last: Cell, band: frozenset[Cell], pair: frozenset[int]) -> None:
+            chosen.append((pair, along(first), band))
+            ends.update((first, last))
+            slants.setdefault(pair, set()).add(slant[band])
+
         linked = [{i} for i in range(len(pieces))]  # union-find by merging sets
+        deferred = []
         for first, last, band in candidates:
+            a, b = piece_of[first], piece_of[last]
+            if linked[a] is linked[b] or any(band & other for _, _, other in chosen):
+                continue
+            if chosen and not ordered(first, last, band) and rng.random() < ORDERED:
+                deferred.append((first, last, band))  # only if nothing ordered connects them
+                continue
+            merged = linked[a] | linked[b]
+            for i in merged:
+                linked[i] = merged
+            take(first, last, band, frozenset((a, b)))
+        for first, last, band in deferred:
             a, b = piece_of[first], piece_of[last]
             if linked[a] is linked[b] or any(band & other for _, _, other in chosen):
                 continue
             merged = linked[a] | linked[b]
             for i in merged:
                 linked[i] = merged
-            chosen.append((frozenset((a, b)), along(first), band))
+            take(first, last, band, frozenset((a, b)))
         # More of them along long corridors: one every `link_gap` cells or so
         for first, last, band in candidates:
             pair = frozenset((piece_of[first], piece_of[last]))
@@ -625,7 +653,9 @@ class PartitionLayout:
                 p == pair and abs(at - along(first)) < gap for p, at, _ in chosen
             ):
                 continue
-            chosen.append((pair, along(first), band))
+            if not ordered(first, last, band) and rng.random() < ORDERED:
+                continue
+            take(first, last, band, pair)
         return frozenset(c for _, _, band in chosen for c in band) - corridor
 
     @staticmethod
@@ -1123,6 +1153,7 @@ class DiagonalPartitionLayout(PartitionLayout):
     diagonal_links = True
 
 
+ORDERED = 0.75  # chance that a diagonal link must line up with one already placed
 LINK_GAP = (50, 70)  # cells between diagonal corridors joining the same two corridors
 JOG = (3, 6)  # cells a corridor kinks sideways
 JOG_CHANCE = 0.6
