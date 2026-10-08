@@ -472,8 +472,14 @@ def build(folder: Path) -> None:
     kept: list[dict] = []
     for category in CATEGORIES:
         mine = sorted((t for t in found if t["category"] == category), key=lambda t: -t["bends"])
-        slanted = [t for t in mine if t["diagonal"]][: PER_CATEGORY // 2]
-        square = [t for t in mine if not t["diagonal"]][: PER_CATEGORY - len(slanted)]
+        slanted = [t for t in mine if t["diagonal"]]
+        square = [t for t in mine if not t["diagonal"]]
+        half = PER_CATEGORY // 2
+        slanted, square = (
+            slanted[: max(half, PER_CATEGORY - len(square))],
+            square[: max(half, PER_CATEGORY - len(slanted))],
+        )
+        slanted, square = slanted[: PER_CATEGORY - len(square)], square
         kept += slanted + square
         print(f"{category}: {len(mine)} usable, {len(slanted) + len(square)} kept")
     found = kept
