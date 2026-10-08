@@ -1,32 +1,19 @@
 
+# Human review results WIP
+- beds in nap rooms should always have their head at the wall (but stay as orderly organized as they are now) 
+- the storages/network closets at the end of the corridors can be better utilized. Join with other rooms instead. (partition layout)
+- the partition corridors sometimes get a lot of empty space (which is okay), but: there should be something in it (we already got the plaza). AND sometimes it looks like the codes used two different rectangles at the same place, so it has various steps which look ugly.
+- plaza objects should be centered
+- if the service side is the street side, it will just add the door beneath the main door
+- the security gates and desk should be places differently like. one security gate 3-5 cells in front of the each main door. The security desk close to the wall, looking in the direction of the main door. 
+
 # Human review results
-- naprooms need the same amount of lockers as beds
-- naprooms needs as much beds as we can pack it (as long they are reachable)
-- naprooms beds need to be organized (as long they are reachable
-- storage rooms needs to be filled to the brim
-- in general, less huddle, focus or meeting rooms, more office space
-- server rooms (in corp office at least) are mostly empty
-- server rooms (in office at least) should have a small chance for mantraps (the higher security, the higher the chance if possible)
-- mantraps are too large
-- the security gates in mantraps are not aligned with room/doors/pathway
-- the security gates at the reception are not aligned with the door/pathway
-- always generate a roof if there is more one floor above (which does not count as floor above)
-- a higher chance of safe rooms for executive offices (i want to see at least one in this floor as average. but can be set as min if that's easier)
-- office (at least): floor 2 and floor 3 look exactly the same (except for the doors, and some objects in the corridor). Maybe seed every floor a bit different?
-- reception: the guard desk shouldn't be in front of the reception desk, but rather perpendicular looking at the entrance/security gates
-- There should be at least one executive office in the office (with a small chance to have a safe room)
+- apartment units have a lof of hallway. try to cut that down.
+- apartments have den's without toilet or kitchen?
+- create some kitchen/toilet/den room. All in one. (the poorer, the more likely they exists)
 
 
 
 
-# NOT YET:
-- general: we need an identifier with which version created which image
-- label/differentiate the tests: those who test functionality, and those who are hard violations
-
-
-# Done (branch human-review)
-Nap rooms: lockers match pods (`match:`), pods packed in rows then along the walls; storage and server rooms
-filled; fewer huddle/focus/meeting rooms (fill weights); mantraps: smaller, corner vestibule for office server
-rooms by security level; gates (`gates` placement) flank the entrance lane, guard post (`guard`) beside them;
-roof is an extra level over the top floor; executive offices (and safe rooms) on the top floor; every floor
-gets its own partition.
+# DON'T DO YET
+- pathways in storage rooms and offices should be 2 cells wide

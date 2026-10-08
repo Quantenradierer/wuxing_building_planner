@@ -625,7 +625,7 @@ class PartitionLayout:
             slants.setdefault(pair, set()).add(slant[band])
 
         linked = [{i} for i in range(len(pieces))]  # union-find by merging sets
-        deferred = []
+        deferred: list[tuple[Cell, Cell, frozenset[Cell]]] = []
         for first, last, band in candidates:
             a, b = piece_of[first], piece_of[last]
             if linked[a] is linked[b] or any(band & other for _, _, other in chosen):
