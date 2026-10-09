@@ -1131,7 +1131,10 @@ class RoomFurnisher:
                 rows += [(across, Side.N), (across + deep, Side.S)]
                 across += 2 * deep + rule.aisle
             else:
-                rows.append((across, Side.S))
+                # A paired block's leftover row faces the aisle behind the pair, not away
+                # from it: it would read as a pair missing its partner.
+                lone = rule.paired and toward is None and bool(rows)
+                rows.append((across, Side.N if lone else Side.S))
                 across += deep + rule.aisle
         if rule.wall_back and toward is None:
             last = width - m1 - deep
