@@ -108,6 +108,9 @@
       <input name="seed" type="number" min="0" placeholder="random" data-i18n-placeholder="random">
       <button type="button" id="reroll" data-i18n-title="reroll">🎲</button>
     </div>
+    <label class="field"><span data-i18n="rooms_seed">Room seed</span> <input name="rooms_seed" type="number" min="0" placeholder="= seed" data-i18n-placeholder="same_seed"></label>
+    <label class="field"><span data-i18n="furniture_seed">Furniture seed</span> <input name="furniture_seed" type="number" min="0" placeholder="= seed" data-i18n-placeholder="same_seed"></label>
+    <label class="field"><span data-i18n="security_seed">Security seed</span> <input name="security_seed" type="number" min="0" placeholder="= seed" data-i18n-placeholder="same_seed"></label>
 
     <h2 data-i18n="h_image">Image</h2>
     <label class="field"><span data-i18n="theme">Theme</span> <select name="theme"></select></label>
@@ -318,6 +321,9 @@ function formValues() {
     room: f.room.value || null,
     layout: f.layout.value || null,
     seed: f.seed.value === "" ? null : +f.seed.value,
+    rooms_seed: f.rooms_seed.value === "" ? null : +f.rooms_seed.value,
+    furniture_seed: f.furniture_seed.value === "" ? null : +f.furniture_seed.value,
+    security_seed: f.security_seed.value === "" ? null : +f.security_seed.value,
   };
   if ($("entrances-override").checked) {
     params.entrances = [...$("entrances").querySelectorAll("input:checked")].map((b) => b.value);

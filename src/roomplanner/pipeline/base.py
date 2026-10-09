@@ -29,8 +29,23 @@ class Context:
         return self.params.layout or self.rules.program.layout
 
     def rng(self, stage: str) -> random.Random:
-        """Independent, reproducible random stream per stage and attempt."""
-        return random.Random(f"{self.seed}:{self.attempt}:{stage}")
+        """Independent, reproducible random stream per stage and attempt.
+
+        The stage picks the seed: the room choice, the furniture and the security devices each
+        have their own (`GenerationParams.rooms_seed` etc.), everything else follows `seed`.
+        """
+        return random.Random(f"{self._seed_for(stage)}:{self.attempt}:{stage}")
+
+    def _seed_for(self, stage: str) -> int:
+        group = stage.split(":", 1)[0]
+        own = {
+            "assign": self.params.rooms_seed,
+            "units": self.params.rooms_seed,
+            "allocate": self.params.rooms_seed,
+            "furnish": self.params.furniture_seed,
+            "security": self.params.security_seed,
+        }.get(group)
+        return self.seed if own is None else own
 
 
 @dataclass(frozen=True)

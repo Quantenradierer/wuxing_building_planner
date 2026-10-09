@@ -101,6 +101,15 @@ def generate(
         typer.Option(help="Layout strategy instead of the type's (e.g. partition_diagonal)"),
     ] = None,
     seed: Annotated[int | None, typer.Option(help="Random if omitted")] = None,
+    rooms_seed: Annotated[
+        int | None, typer.Option(help="Room choice in the layout (default: --seed)")
+    ] = None,
+    furniture_seed: Annotated[
+        int | None, typer.Option(help="Furniture in the rooms (default: --seed)")
+    ] = None,
+    security_seed: Annotated[
+        int | None, typer.Option(help="Security devices (default: --seed)")
+    ] = None,
     output_format: Annotated[OutputFormat, typer.Option("--format", "-f")] = OutputFormat.ASCII,
     output: Annotated[
         Path | None,
@@ -134,6 +143,9 @@ def generate(
             room=room,
             layout=layout,
             seed=seed,
+            rooms_seed=rooms_seed,
+            furniture_seed=furniture_seed,
+            security_seed=security_seed,
         )
         building = generate_building(params)
     except (ValidationError, ValueError) as error:

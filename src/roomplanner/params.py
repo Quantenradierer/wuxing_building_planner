@@ -115,7 +115,18 @@ class GenerationParams(BaseModel):
         default=None,
         description="Overrides the building type's layout strategy (e.g. partition_diagonal)",
     )
-    seed: int | None = None
+    seed: int | None = Field(
+        default=None, description="Layout (footprint, corridors, room shapes); random if omitted"
+    )
+    rooms_seed: int | None = Field(
+        default=None, description="Which room goes where in the layout; None = follow `seed`"
+    )
+    furniture_seed: int | None = Field(
+        default=None, description="What is inside each room; None = follow `seed`"
+    )
+    security_seed: int | None = Field(
+        default=None, description="Cameras, sensors and other devices; None = follow `seed`"
+    )
 
     @model_validator(mode="before")
     @classmethod

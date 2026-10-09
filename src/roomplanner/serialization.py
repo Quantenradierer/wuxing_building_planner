@@ -44,6 +44,9 @@ def to_dict(building: Building) -> JsonObject:
     params = building.params.model_dump(mode="json")
     if params["room"] is None:  # optional, only written for a lone room
         del params["room"]
+    for key in ("rooms_seed", "furniture_seed", "security_seed"):
+        if params[key] is None:  # optional: unset means "follow seed"
+            del params[key]
     return {
         "schema_version": building.schema_version,
         "cell_size_m": CELL_SIZE_M,

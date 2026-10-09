@@ -180,6 +180,9 @@ params ─► footprint ─► feasibility check ─► layout (core, corridors,
 - Randomness: every stage gets its own `random.Random` derived from seed, attempt and stage
   name, so changing one stage does not reshuffle the others. The same parameters and seed
   always give the same building.
+- Seeds: `seed` drives the layout; `rooms_seed` (room choice: `assign`, `units`, `allocate`
+  streams), `furniture_seed` and `security_seed` override their stages' streams and follow
+  `seed` when unset (`Context.rng`). Unset seeds are not written to the JSON.
 - Failure policy (ADR 0004): the layout's feasibility check fails fast for impossible
   input. Otherwise up to 8 attempts run; an attempt whose layout cannot place a required
   room (`AllocationError`) is discarded, hard violations trigger the next attempt. The best
