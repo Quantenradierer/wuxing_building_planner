@@ -101,6 +101,7 @@ rooms:
     # Also a closet inside one of these (entered through it), `annex` of the time (0.5).
     access: [office, executive_office, manager_office, kitchenette, kitchen, staff_room,
              stockroom, treatment_room, lab, nurse_station, meeting_room]
+    wide_path: [shelf]
     furniture:
       - {object: shelf, placement: rows, aisle: 2, margin: 1, paired: true}   # stacked to the brim
       - {object: shelf, placement: perimeter, count: 60}

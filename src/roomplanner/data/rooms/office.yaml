@@ -20,6 +20,7 @@ rooms:
     windows: required
     connect: [office]         # now and then a door into the next office,
     connect_chance: 0.1       # but usually each has its own door to the corridor
+    wide_path: [chair]
     furniture:
       # As many desk groups as fit: 2 against a wall, then 4, then a desk across the end
       # (a desk with three chairs would be a consultant's office, its own type).
@@ -34,6 +35,7 @@ rooms:
     min_side: 7
     max_aspect: 2.0
     windows: forbidden
+    wide_path: [chair]
     furniture:
       - {object: desk_pair, placement: wall, per: 20, count: [1, 14], scale: false,
          head: desk_trio, single: workstation}
@@ -45,6 +47,7 @@ rooms:
     min_side: 10
     windows: required
     circulation: true         # no wall to the corridor: the traffic passes the desks
+    wide_path: [chair]
     door_width: 3
     furniture:
       # Blocks of desks with 1 m aisles round them.
@@ -159,6 +162,7 @@ rooms:
     area: [80, 160]
     min_side: 8
     windows: required
+    wide_path: [chair]
     furniture:
       - {object: executive_desk_set, placement: back}
       - {object: lounge_set, placement: wall}

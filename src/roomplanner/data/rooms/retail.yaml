@@ -36,6 +36,7 @@ rooms:
     cluster: true
     access: [stockroom, prep_kitchen]
     windows: forbidden
+    wide_path: [shelf]
     furniture:
       - {object: shelf, placement: wall, count: [2, 6]}
   loading_bay:
@@ -54,6 +55,7 @@ rooms:
   manager_office:
     area: [32, 60]          # 8 m2: one workplace (ASR A1.2)
     min_side: 5
+    wide_path: [chair]
     furniture:
       - {object: desk_with_visitors, placement: wall}
       - {object: cabinet, placement: corner, count: [1, 2]}

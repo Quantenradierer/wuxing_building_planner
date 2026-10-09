@@ -16,6 +16,7 @@ from functools import cached_property
 from roomplanner.geometry import Axis, Cell, Edge, Side, connected
 from roomplanner.model import Floor, OpeningKind, PlacedObject, Room
 from roomplanner.params import EntranceKind, Wealth
+from roomplanner.pathways import served, wide_region
 from roomplanner.pipeline.base import Context
 from roomplanner.pipeline.registry import register
 from roomplanner.rules import FurnitureRule, GroupPart, GroupSpec, ObjectSpec, Placement
@@ -248,6 +249,8 @@ class RoomFurnisher:
         self.placed: list[PlacedObject] = []
         self.last_group: Rect | None = None  # where the last group went
         self.access: dict[Rect, frozenset[Cell]] = {}  # cells next to `accessible` objects
+        self.wide_kinds = frozenset(ctx.rules.spec(room.type).wide_path)
+        self.targets: list[frozenset[Cell]] = []  # placed objects of those kinds
         xs, ys = [c.x for c in room.cells], [c.y for c in room.cells]
         self.box = (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
 
@@ -326,6 +329,8 @@ class RoomFurnisher:
     def _remove(self, obj: PlacedObject) -> None:
         self.placed.remove(obj)
         self.taken -= obj.cells
+        if obj.kind in self.wide_kinds:
+            self.targets = [t for t in self.targets if t != obj.cells]
         if obj.blocking:
             self.blocking -= obj.cells
         self.access.pop((obj.x, obj.y, obj.w, obj.h, obj.facing), None)
@@ -1272,14 +1277,23 @@ class RoomFurnisher:
         objects = self.ctx.rules.objects
         parts = group_parts(group, objects, rect)
         solid: set[Cell] = set()
+        new_targets: list[frozenset[Cell]] = []
         for part, (px, py, pw, ph, _) in zip(group.parts, parts, strict=True):
             if not objects[part.object].walkable:
-                solid |= {Cell(cx, cy) for cx in range(px, px + pw) for cy in range(py, py + ph)}
+                part_cells = {
+                    Cell(cx, cy) for cx in range(px, px + pw) for cy in range(py, py + ph)
+                }
+                solid |= part_cells
+                if part.object in self.wide_kinds:
+                    new_targets.append(frozenset(part_cells))
         if solid & self.clearance:
             return False
         free = self.cells - self.blocking - solid
         if not free or not self._reachable(free) or not self._accessible(free):
             return False
+        if not self._wide_ok(free, new_targets):
+            return False
+        self.targets += new_targets
         self.taken |= box
         self.blocking |= solid
         self.last_group = rect
@@ -1337,6 +1351,25 @@ class RoomFurnisher:
         del sides[facing.opposite]
         return frozenset(set[Cell]().union(*sides.values())) & self.cells
 
+    @cached_property
+    def _wide_enabled(self) -> bool:
+        """Rooms whose bare floor has no 2-wide path from the door can't keep one."""
+        if not self.wide_kinds:
+            return False
+        free = self.cells - self.blocking
+        return bool(wide_region(free, self._entries))
+
+    @cached_property
+    def _entries(self) -> frozenset[Cell]:
+        return frozenset(c for c, _ in self._doors()) | self._open_cells
+
+    def _wide_ok(self, free: set[Cell] | frozenset[Cell], new: list[frozenset[Cell]]) -> bool:
+        """Every chair (shelf, ...) keeps a 2-cell-wide path to a door."""
+        if not (self.targets or new) or not self._wide_enabled:
+            return True
+        region = wide_region(free, self._entries)
+        return all(served(t, free, region) for t in [*self.targets, *new])
+
     def _accessible(self, free: set[Cell] | frozenset[Cell]) -> bool:
         """Every `accessible` object keeps a free cell at its front or a flank."""
         return all(access & free for access in self.access.values())
@@ -1360,6 +1393,10 @@ class RoomFurnisher:
                 return False
             if accessible and not self._access_cells(rect) & free:
                 return False
+            new_targets = [frozenset(cells)] if kind in self.wide_kinds else []
+            if not self._wide_ok(free, new_targets):
+                return False
+            self.targets += new_targets
             self.blocking |= cells
         self.taken |= cells
         if accessible:

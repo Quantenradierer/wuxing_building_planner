@@ -356,6 +356,11 @@ class RoomSpec(_Strict):
         default=False, description="Its door slides aside instead of swinging (elevators)"
     )
     access: list[str] = Field(default=[], description="Preferred room types to enter from")
+    wide_path: list[str] = Field(
+        default=[],
+        description="Object kinds (chairs, shelves) that keep a path 2 cells wide from a door; "
+        "a placement that would leave one without is refused",
+    )
     vestibule: str | None = Field(
         default=None, description="Entered only through this room type, placed beside it"
     )
