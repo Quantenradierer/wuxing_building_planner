@@ -368,6 +368,16 @@ Rendering and export:
 - Foundry: v14+ only (Scene Levels); the Schattenakte module must be published (GitHub
   release, `.github/workflows/schattenakte.yml`) before others can install it by URL.
 
+## Two-cell pathways
+
+Offices and storage rooms keep a path 2 cells wide from a door to their chairs / shelves: a
+room's `wide_path: [chair]` makes the furnisher refuse a placement that would leave one of
+those objects reachable only along a 1-cell path (`pathways.py`). `tools/pathwidth.py`
+measures it on the codecheck sample (rooms with at least one narrow target, before -> after):
+office 79 % -> 14 %, manager office 100 % -> 15 %, executive office 100 % -> 0 %, open office
+100 % -> 28 %, storage 96 % -> 7 %. The rest are irregular-shaped rooms and notches. Costs
+fewer desks (office chairs 1287 -> 1095) and fewer shelves (storage 4853 -> 2129).
+
 ## Building code
 
 `tools/codecheck.py` generates a fixed sample of 100 buildings (all 31 types, random size,
