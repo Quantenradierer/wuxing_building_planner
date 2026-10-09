@@ -3,99 +3,107 @@
 # walkable objects can be walked over and may stand in front of doors (stairs).
 objects:
   stairs:          {size: [6, 4], walkable: true, glyph: "#"}
-  elevator_car:    {size: [3, 3], walkable: true, glyph: e}
+  elevator_car:    {size: [3, 3], walkable: true, glyph: e, matrix: [elevator, doors, access]}
   rug:             {size: [4, 3], walkable: true, glyph: "~"}
-  roof_hatch:      {size: [2, 2], walkable: true, glyph: "^"}
-  guard_desk:      {size: [4, 2], glyph: G}
-  security_gate:   {size: [1, 3], glyph: "!"}
-  weapon_locker:   {size: [2, 1], glyph: L, bank: weapon_locker}
+  roof_hatch:      {size: [2, 2], walkable: true, glyph: "^", matrix: [lock]}
+  guard_desk:      {size: [4, 2], glyph: G, matrix: [alarm]}
+  security_gate:   {size: [1, 3], glyph: "!", matrix: [gate, lock, alarm]}
+  weapon_locker:   {size: [2, 1], glyph: L, bank: weapon_locker, matrix: [lock]}
   debris:          {size: [2, 2], glyph: ","}
   trash_pile:      {size: [2, 1], glyph: ";"}
   rubble:          {size: [3, 2], glyph: "&"}
   rubble_heap:     {size: [4, 4], glyph: "@"}
   collapsed_ceiling: {size: [5, 3], glyph: "@"}
   filing_cabinet:  {size: [2, 1], glyph: F, bank: shelving}
-  armchair:        {size: [2, 2], glyph: A}
+  armchair:        {size: [2, 2], glyph: A, matrix: [presence]}
   crate:           {size: [2, 2], glyph: K, bank: crate, loose: true}
   trash_bin:       {size: [1, 1], glyph: U}
   copier:          {size: [2, 1], glyph: P}
   desk:            {size: [3, 2], glyph: d}
-  chair:           {size: [1, 1], glyph: c}
+  chair:           {size: [1, 1], glyph: c, matrix: [movement, presence]}
   table:           {size: [2, 2], glyph: t}
   meeting_table:   {size: [6, 3], glyph: T}
   shelf:           {size: [2, 1], glyph: s, bank: shelving}
   cabinet:         {size: [1, 1], glyph: k, bank: cabinet}
   counter:         {size: [4, 1], glyph: n, bank: kitchen_line}
-  reception_desk:  {size: [5, 2], glyph: R}
-  bed:             {size: [2, 4], glyph: b}
-  double_bed:      {size: [4, 4], glyph: B}
-  sofa:            {size: [4, 2], glyph: o}
+  reception_desk:  {size: [5, 2], glyph: R, matrix: [alarm, camera, audio, doors]}
+  bed:             {size: [2, 4], glyph: b, matrix: [presence]}
+  double_bed:      {size: [4, 4], glyph: B, matrix: [presence]}
+  sofa:            {size: [4, 2], glyph: o, matrix: [presence]}
   wardrobe:        {size: [3, 1], glyph: a}
-  wc:              {size: [2, 2], glyph: w}   # 1 x 1 m: bigger than real, reads better
-  sink:            {size: [2, 1], glyph: i, bank: kitchen_line}
+  wc:              {size: [2, 2], glyph: w, matrix: [vitals]}   # 1 x 1 m: bigger than real, reads better
+  sink:            {size: [2, 1], glyph: i, bank: kitchen_line, matrix: [camera, audio, display], matrix_as: smart_mirror}
   shower:          {size: [2, 2], glyph: h, bank: shower}
   stove:           {size: [2, 1], glyph: v, bank: kitchen_line}
-  fridge:          {size: [1, 1], glyph: f, bank: kitchen_line}
-  server_rack:     {size: [2, 1], glyph: S, bank: server_rack}
+  fridge:          {size: [1, 1], glyph: f, bank: kitchen_line, matrix: [inventory, camera]}
+  server_rack:     {size: [2, 1], glyph: S, bank: server_rack, matrix: [data, network]}
   gondola:         {size: [8, 2], glyph: g}
   checkout:        {size: [2, 4], glyph: C}
   freezer:         {size: [4, 2], glyph: z, bank: freezer}
   pallet:          {size: [2, 2], glyph: p, loose: true}
   rack:            {size: [6, 2], glyph: r, bank: rack}
-  hospital_bed:    {size: [2, 4], glyph: H}
-  exam_table:      {size: [2, 4], glyph: e}
-  operating_table: {size: [2, 4], glyph: o}
+  hospital_bed:    {size: [2, 4], glyph: H, matrix: [presence, vitals, movement]}
+  exam_table:      {size: [2, 4], glyph: e, matrix: [presence, vitals]}
+  operating_table: {size: [2, 4], glyph: o, matrix: [vitals, restraints]}
   medical_cabinet: {size: [2, 1], glyph: m, bank: medical_cabinet}
-  morgue_drawers:  {size: [4, 2], glyph: M, bank: morgue_drawers}
-  locker:          {size: [1, 1], glyph: l, bank: locker}
+  morgue_drawers:  {size: [4, 2], glyph: M, bank: morgue_drawers, matrix: [lock, presence]}
+  locker:          {size: [1, 1], glyph: l, bank: locker, matrix: [lock]}
   bench:           {size: [4, 1], glyph: q}
   plant:           {size: [1, 1], glyph: "*"}
   machinery:       {size: [3, 2], glyph: m, bank: plant}
   washing_machine: {size: [1, 1], glyph: x, bank: laundry}
   mailboxes:       {size: [3, 1], glyph: u, bank: mailboxes}
-  terminal:        {size: [1, 1], glyph: j}
-  vending_machine: {size: [2, 1], glyph: y}
-  capsule:         {size: [2, 4], glyph: Q, bank: capsule}   # 1 m wide, 2 m long, side by side
+  terminal:        {size: [1, 1], glyph: j, matrix: [data, access]}
+  vending_machine: {size: [2, 1], glyph: y, matrix: [payment, camera, audio]}
+  capsule:         {size: [2, 4], glyph: Q, bank: capsule, matrix: [lock, presence]}   # 1 m wide, 2 m long, side by side
   bar_counter:     {size: [8, 2], glyph: N}
-  dj_booth:        {size: [4, 2], glyph: J}
+  dj_booth:        {size: [4, 2], glyph: J, matrix: [audio, lights]}
   speaker:         {size: [1, 1], glyph: E}
   pool_table:      {size: [5, 3], glyph: Y}
-  forklift:        {size: [2, 4], glyph: Z}
+  forklift:        {size: [2, 4], glyph: Z, matrix: [drive, camera]}
   lab_bench:       {size: [6, 2], glyph: V, bank: lab_bench}
   fume_hood:       {size: [3, 1], glyph: W, bank: fume_hood}
   specimen_fridge: {size: [2, 1], glyph: I, bank: specimen_fridge}
   cubicle:         {size: [3, 3], glyph: "["}
-  scanner:         {size: [4, 6], glyph: "]"}
+  scanner:         {size: [4, 6], glyph: "]", matrix: [scan, doors]}
   # Small things that go beside other objects (placement: at) or fill walls.
   stool:           {size: [1, 1], glyph: c}
   nightstand:      {size: [1, 1], glyph: n}
   side_table:      {size: [1, 1], glyph: "}"}
-  wall_screen:     {size: [3, 1], glyph: "<"}   # trideo / camera feeds / holo display
+  wall_screen:     {size: [3, 1], glyph: "<", matrix: [display, camera, audio]}   # trideo / camera feeds / holo display
+  door_controller: {size: [1, 1], glyph: "}", matrix: [lock, doors]}      # control box behind a maglock or card reader
+  badge_printer:   {size: [1, 1], glyph: "}", matrix: [badges, access]}      # prints visitor and staff badges at reception
+  intercom_station: {size: [1, 1], glyph: "}", matrix: [camera, audio, doors]}     # entrance and lobby intercom
+  smoke_detector_hub: {size: [1, 1], glyph: "}", matrix: [alarm, fire_doors]}   # fire alarm logic; releases the fire doors
+  visitor_kiosk:   {size: [1, 1], glyph: "}", matrix: [badges, camera, audio]}      # check-in screen in the lobby
+  smart_light_panel: {size: [1, 1], glyph: "}", matrix: [lights]}    # networked lighting control
+  toy_companion:   {size: [1, 1], glyph: "}", matrix: [audio, camera]}      # plush or doll with a microphone
+  pet_feeder_cam:  {size: [1, 1], glyph: "}", matrix: [camera, audio]}      # harmless feeder with a camera and a network link
   whiteboard:      {size: [3, 1], glyph: ">"}
-  coffee_machine:  {size: [1, 1], glyph: "'", bank: kitchen_line}
+  coffee_machine:  {size: [1, 1], glyph: "'", bank: kitchen_line, matrix: [payment, audio]}
   water_cooler:    {size: [1, 1], glyph: w}
-  iv_stand:        {size: [1, 1], glyph: i}
-  vital_monitor:   {size: [1, 1], glyph: v}
+  iv_stand:        {size: [1, 1], glyph: i, matrix: [vitals]}
+  vital_monitor:   {size: [1, 1], glyph: v, matrix: [vitals, alarm]}
   medical_cart:    {size: [2, 1], glyph: m, loose: true}
-  gurney:          {size: [2, 4], glyph: g}
+  gurney:          {size: [2, 4], glyph: g, matrix: [movement, presence]}
   barrel:          {size: [1, 1], glyph: o, loose: true}
   workbench:       {size: [4, 2], glyph: b, bank: workbench}
-  display_case:    {size: [3, 1], glyph: d}
-  atm:             {size: [1, 1], glyph: $}
+  display_case:    {size: [3, 1], glyph: d, matrix: [lock, alarm]}
+  atm:             {size: [1, 1], glyph: $, matrix: [payment, camera, audio]}
   coat_rack:       {size: [1, 1], glyph: (}
-  safe:            {size: [1, 1], glyph: )}
+  safe:            {size: [1, 1], glyph: ), matrix: [lock, alarm]}
   dryer:           {size: [1, 1], glyph: x, bank: laundry}
   laundry_cart:    {size: [1, 2], glyph: "{", bank: laundry_cart}
   arcade_machine:  {size: [2, 1], glyph: "`"}
   stage:           {size: [8, 4], walkable: true, glyph: _}
 
   # Vehicles, industry, church.
-  car:             {size: [4, 9], glyph: c}   # 2 x 4.5 m, nose to the wall
-  car_lift:        {size: [5, 10], glyph: L}  # a car up on a lift
+  car:             {size: [4, 9], glyph: c, matrix: [lock, movement, presence]}   # 2 x 4.5 m, nose to the wall
+  car_lift:        {size: [5, 10], glyph: L, matrix: [drive, lock]}  # a car up on a lift
   ramp:            {size: [6, 14], walkable: true, glyph: '\'} # to the next parking level
-  pay_station:     {size: [1, 1], glyph: $}
-  conveyor:        {size: [8, 2], glyph: "."}
-  robot_arm:       {size: [2, 2], glyph: r}
+  pay_station:     {size: [1, 1], glyph: $, matrix: [payment, gate]}
+  conveyor:        {size: [8, 2], glyph: ".", matrix: [drive]}
+  robot_arm:       {size: [2, 2], glyph: r, matrix: [drive, camera]}
   tool_rack:       {size: [3, 1], glyph: s}
   pew:             {size: [8, 2], glyph: q}
   altar:           {size: [4, 2], glyph: n}
@@ -109,7 +117,7 @@ objects:
   office_desk:     {size: [3, 2], glyph: d}
   executive_desk:  {size: [3, 2], glyph: d}
   home_desk:       {size: [3, 2], glyph: d}
-  console_desk:    {size: [3, 2], glyph: d}   # security / control consoles
+  console_desk:    {size: [3, 2], glyph: d, matrix: [access, camera, audio]}   # security / control consoles
   dining_table:    {size: [2, 2], glyph: t}   # restaurants, parish halls
   bar_table:       {size: [2, 2], glyph: t}   # bars, clubs
   canteen_table:   {size: [2, 2], glyph: t}   # cafeterias, staff rooms
@@ -123,28 +131,28 @@ objects:
   # Building services, security tech, Sixth World details.
   electrical_panel: {size: [2, 1], glyph: E, bank: electrical_panel}    # switchboard / breaker cabinet
   battery_bank:    {size: [3, 1], glyph: b, bank: battery_bank}    # UPS batteries
-  hvac_unit:       {size: [4, 3], glyph: H, bank: plant}      # air handler
+  hvac_unit:       {size: [4, 3], glyph: H, bank: plant, matrix: [air]}      # air handler
   condenser:       {size: [2, 2], glyph: C}      # rooftop air-conditioning condenser, one fan
   satellite_dish:  {size: [3, 3], glyph: Q}      # uplink dish on a stand
-  generator:       {size: [5, 3], glyph: G}      # backup diesel generator
+  generator:       {size: [5, 3], glyph: G, matrix: [power, output]}      # backup diesel generator
   fuel_tank:       {size: [3, 2], glyph: f}
   suppression_tanks: {size: [3, 1], glyph: "<", bank: suppression_tanks}  # inert gas bottles of a fire suppression system
   fire_extinguisher: {size: [1, 1], glyph: "'"}
-  fire_alarm_panel: {size: [1, 1], glyph: "a"}   # pull station: evacuation and the fire brigade
+  fire_alarm_panel: {size: [1, 1], glyph: "a", matrix: [alarm, fire_doors]}   # pull station: evacuation and the fire brigade
   medkit:          {size: [1, 1], glyph: "x"}    # first aid / AED wall box
   hydrant:         {size: [1, 1], glyph: "h"}    # hose cabinet on a standpipe
-  rigger_cocoon:   {size: [2, 3], glyph: Q}      # reclined rigger / decker chair with trodes
-  drone_dock:      {size: [2, 2], glyph: d}    # charging pad with a parked drone
+  rigger_cocoon:   {size: [2, 3], glyph: Q, matrix: [drones]}      # reclined rigger / decker chair with trodes
+  drone_dock:      {size: [2, 2], glyph: d, matrix: [drones, camera, audio]}    # charging pad with a parked drone
   drone_rack:      {size: [3, 1], glyph: s}      # small drones and spare parts on a wall rack
   deposit_boxes:   {size: [4, 1], glyph: F, bank: deposit_boxes}      # wall of safe deposit boxes
-  sim_rig:         {size: [2, 3], glyph: A}      # simsense recliner (BTL chips in the Barrens)
-  autokitchen:     {size: [2, 1], glyph: v, bank: kitchen_line}      # nuke-it autokitchen
+  sim_rig:         {size: [2, 3], glyph: A, matrix: [access, data]}      # simsense recliner (BTL chips in the Barrens)
+  autokitchen:     {size: [2, 1], glyph: v, bank: kitchen_line, matrix: [inventory, audio]}      # nuke-it autokitchen
   mattress:        {size: [2, 4], glyph: b}      # on the floor
   fire_barrel:     {size: [1, 1], glyph: f, loose: true}
   cyberware_rack:  {size: [3, 1], glyph: m}      # cyberlimbs and implants on hooks
-  cryo_pod:        {size: [2, 4], glyph: H}
-  ambulance:       {size: [4, 10], glyph: a}   # DocWagon armoured ambulance, nose to the wall
-  evidence_locker: {size: [2, 1], glyph: L}
+  cryo_pod:        {size: [2, 4], glyph: H, matrix: [lock, vitals]}
+  ambulance:       {size: [4, 10], glyph: a, matrix: [lock, movement, presence]}   # DocWagon armoured ambulance, nose to the wall
+  evidence_locker: {size: [2, 1], glyph: L, matrix: [lock]}
   shipping_container: {size: [5, 12], glyph: "["}
   crac_unit:       {size: [4, 2], glyph: W}      # data hall air conditioner: cold air into the raised floor
   chiller:         {size: [6, 3], glyph: G, bank: plant}      # water chiller of the cooling plant
@@ -153,7 +161,7 @@ objects:
   card_table:      {size: [4, 2], glyph: Z}   # blackjack / poker, dealer on the flat side
   roulette_table:  {size: [5, 3], glyph: W}   # wheel at one end, betting layout
   craps_table:     {size: [7, 3], glyph: Y}   # players stand round it
-  slot_machine:    {size: [2, 1], glyph: $}
+  slot_machine:    {size: [2, 1], glyph: $, matrix: [payment, audio]}
   cash_cart:       {size: [2, 1], glyph: m, loose: true}   # locked trolley for cash boxes and chips
   count_table:     {size: [6, 2], glyph: T}   # long table with bill counters and scales
 
@@ -166,7 +174,7 @@ objects:
   stock_pot:       {size: [1, 1], glyph: v}      # broth pot on its own burner
   clothes_rack:    {size: [4, 1], glyph: r}      # clothes on hangers, a rail
   mannequin:       {size: [1, 1], glyph: m}
-  mirror:          {size: [2, 1], glyph: i}      # standing mirror against the wall
+  mirror:          {size: [2, 1], glyph: i, matrix: [camera, audio, display]}      # standing mirror against the wall
   fitting_booth:   {size: [2, 2], glyph: F}      # curtained changing cubicle, 1 x 1 m
   display_table:   {size: [3, 2], glyph: t}      # folded clothes, shoes, bags
   deli_counter:    {size: [8, 2], glyph: N}      # glass-fronted cold counter: meat, cheese
@@ -174,7 +182,7 @@ objects:
   meat_rail:       {size: [4, 1], glyph: h}      # hooks with hanging meat
 
   # Safehouse, hacker den, mage's flat.
-  bunk_bed:        {size: [2, 4], glyph: b}      # two beds stacked, a ladder at the foot
+  bunk_bed:        {size: [2, 4], glyph: b, matrix: [presence]}      # two beds stacked, a ladder at the foot
   gun_rack:        {size: [3, 1], glyph: L}      # rifles and shotguns upright on a wall rack
   portable_ac:     {size: [1, 1], glyph: C}      # mobile air conditioner, hose out the window
   cable_clutter:   {size: [2, 2], walkable: true, glyph: "&"}   # cables and spare parts on the floor
@@ -183,11 +191,11 @@ objects:
   ward_sigil:      {size: [2, 2], walkable: true, glyph: "*"}   # a ward's mark by the door
 
   # Prisons.
-  bunk:            {size: [2, 4], glyph: b}      # two-tier steel bunk bed, bolted to the wall
-  cot:             {size: [2, 4], glyph: b}      # concrete bed slab with a thin mat (solitary)
+  bunk:            {size: [2, 4], glyph: b, matrix: [presence]}      # two-tier steel bunk bed, bolted to the wall
+  cot:             {size: [2, 4], glyph: b, matrix: [presence]}      # concrete bed slab with a thin mat (solitary)
   cell_toilet:     {size: [2, 2], glyph: w}      # steel toilet with the basin on top
   visitor_booth:   {size: [3, 2], glyph: V}      # counter with a glass partition and phones
-  weight_bench:    {size: [2, 4], glyph: W}      # bench press with a barbell rack
+  weight_bench:    {size: [2, 4], glyph: W, matrix: [vitals]}      # bench press with a barbell rack
 
 # Objects placed together as one. Drawn against a wall to the north (the group faces S);
 # `at` is [along, deep] inside the group, `facing` relative to the group (S = the group's).

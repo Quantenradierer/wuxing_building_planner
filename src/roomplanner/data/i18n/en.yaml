@@ -1,11 +1,40 @@
 # English is the language of the ids; this file holds only what is not derived from them
 # (floor names, UI texts). Rooms, objects and parameter values: id with spaces.
 terms:
+  control:
+    output: Power output
+    presence: Presence
+    power: On/Off
+    movement: Movement
+    elevator: Elevator
+    doors: Doors
+    gate: Gate
+    lock: Lock
+    alarm: Alarm
+    inventory: Inventory
+    camera: Camera
+    data: Data
+    network: Network
+    vitals: Vitals
+    restraints: Restraints
+    access: Access
+    payment: Payment
+    audio: Audio
+    lights: Lights
+    drive: Drive
+    scan: Scanner
+    display: Display
+    badges: Badges
+    fire_doors: Fire doors
+    air: Ventilation
+    drones: Drones
+    motion: Motion detection
   floor:
     ground: Ground floor
     above: "Floor {n}"
     basement: "Basement B{n}"
   word:
+    smart_mirror: Smart mirror
     elevator: Elevator
     stairs: Stairs
     change_level: Change Level
@@ -80,6 +109,7 @@ ui:
   layer_locks: Locks & entrances
   layer_objects: Furniture
   layer_devices: Security devices
+  layer_matrix: Matrix devices
   layer_lights: Lights
   layer_grid: Grid
   unit: unit

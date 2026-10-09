@@ -77,6 +77,7 @@ rooms:
     min_side: 8
     circulation: true
     furniture:
+      - {object: intercom_station, placement: wall, count: [0, 1]}
       - {object: reception_post, placement: facing_exit, margin: 4}   # room for the gates before it
       - {object: security_gate, placement: gates, count: 2, margin: 3}   # one gate 3-5 cells inside each entrance door
       - {object: plant, placement: corner, count: [2, 4]}

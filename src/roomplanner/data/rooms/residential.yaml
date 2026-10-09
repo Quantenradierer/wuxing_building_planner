@@ -33,6 +33,7 @@ rooms:
     windows: required
     access: [hallway]
     furniture:
+      - {object: pet_feeder_cam, placement: wall, count: [0, 1]}
       - {object: rug, placement: center, count: [0, 1]}
       - {object: lounge_set, placement: wall}
       - {object: kitchen_table_set, placement: scatter, count: [0, 1]}
@@ -98,6 +99,7 @@ rooms:
     access: [living_room, hallway]
     transit: false
     furniture:
+      - {object: toy_companion, placement: scatter, count: [0, 1]}
       - {object: bed_set, placement: wall, spaced: true}
       - {object: bed_set, placement: wall, spaced: true, count: [0, 1]}   # a shared room: two beds
       - {object: bunk_bed, placement: wall, count: [0, 1]}               # or two beds on top of each other

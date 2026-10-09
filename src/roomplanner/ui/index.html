@@ -181,6 +181,7 @@ const LAYERS = [  // key, on by default, swatch; the title is the UI text `layer
   ["locks", false, "#ff6b6b"],
   ["objects", false, "#9be37a"],
   ["devices", false, "#ff8a3d"],
+  ["matrix", false, "#3dd6ff"],
   ["lights", false, "#fff3a0"],
   ["grid", false, "#7a8190"],
 ];
@@ -644,6 +645,45 @@ function draw() {
     const path = el("path", { d: cellsPath(room.cells), class: "room-hit" }, hits);
     path.addEventListener("mousemove", (e) => showTip(e, roomInfo(room, floor)));
     path.addEventListener("mouseleave", hideTip);
+  }
+  if (L.matrix) drawMatrix(svg, floor);  // above the room hover targets, so its tooltips win
+}
+
+// Matrix layer: the hackable nodes (objects, security devices, lights, every door), each
+// with what it controls on hover.
+const DEVICE_CONTROLS = { camera: ["camera", "audio"], motion_sensor: ["motion"], alarm_panel: ["alarm"] };
+const control = (id) => term("control", id);
+
+function drawMatrix(svg, floor) {
+  const g = el("g", {}, svg);
+  const node = (x, y, w, h, name, controls, shape = "rect") => {
+    const text = `<b>${name}</b>: ${controls.map(control).join(", ")}`;
+    const attrs = { fill: "rgba(61,214,255,.22)", stroke: "#3dd6ff", "stroke-width": .08 };
+    const cx = x + w / 2, cy = y + h / 2;
+    const hit = shape === "circle"
+      ? el("circle", { cx, cy, r: .4, ...attrs }, g)
+      : el("rect", { x: x + .05, y: y + .05, width: w - .1, height: h - .1, rx: .1, ...attrs }, g);
+    label(g, cx, cy + .15, [["◈", 1, "bold"]], .6, "#a8f0ff");
+    hit.addEventListener("mousemove", (e) => showTip(e, text));
+    hit.addEventListener("mouseleave", hideTip);
+  };
+  const kinds = state.options?.matrix_objects ?? {};
+  for (const obj of floor.objects) {
+    const spec = kinds[obj.kind];
+    if (spec) node(obj.x, obj.y, obj.w, obj.h, spec.as ? term("word", spec.as) : objectName(obj.kind), spec.controls);
+  }
+  for (const d of floor.devices) {
+    const controls = DEVICE_CONTROLS[d.kind];
+    if (controls) node(d.x, d.y, 1, 1, humanize(d.kind), controls, "circle");
+  }
+  for (const light of floor.lights) {
+    node(light.x - .5, light.y - .5, 1, 1, `${humanize(light.kind)} ${t("light_word")}`, ["power"], "circle");
+  }
+  for (const o of floor.openings) {
+    if (o.kind !== "door") continue;  // every door has a controller, visible or not
+    const [x0, y0, x1, y1] = runCoords(o.edges);
+    node((x0 + x1) / 2 - .5, (y0 + y1) / 2 - .5, 1, 1,
+      `${term("word", "door")}${o.lock ? ` (${humanize(o.lock)}${o.rating ? " " + o.rating : ""})` : ""}`, ["lock"], "circle");
   }
 }
 

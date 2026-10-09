@@ -38,7 +38,7 @@ from roomplanner.params import (
 from roomplanner.render.image import DEFAULT_CELL_PX as VTT_CELL_PX
 from roomplanner.render.image import RenderOptions, render_floor
 from roomplanner.render.theme import load_theme
-from roomplanner.rules import load_rules
+from roomplanner.rules import load_objects, load_rules
 from roomplanner.serialization import to_dict
 
 type JsonObject = dict[str, Any]
@@ -70,6 +70,11 @@ def options() -> JsonObject:
         ],  # interchangeable on any partition type
         # Room types per building type, for generating a lone room.
         "rooms": {t.value: sorted(load_rules(t).rooms) for t in BuildingType},
+        "matrix_objects": {
+            k: {"controls": o.matrix, "as": o.matrix_as}
+            for k, o in sorted(load_objects().items())
+            if o.matrix
+        },
         "themes": sorted(f.name.removesuffix(".yaml") for f in (_DATA / "themes").iterdir()),
         "languages": [lang.value for lang in Language],
         "i18n": {lang.value: web_catalogue(lang) for lang in Language},

@@ -52,6 +52,17 @@ class ObjectSpec(_Strict):
         "kitchen line, a laundry row): a `wall` placement prefers a spot touching an earlier "
         "object of the same bank, backed against the same wall line, facing the same way",
     )
+    matrix: list[str] = Field(
+        default_factory=list,
+        description="A Matrix device (hackable node, access point, control box), listing what "
+        "hacking it controls (ids of `terms.control` in the i18n catalogues); the web UI's "
+        "Matrix mode shows only these",
+    )
+    matrix_as: str | None = Field(
+        default=None,
+        description="Id of a `terms.word` entry the Matrix layer shows instead of the object's "
+        "name, for a node mounted on it (a smart mirror above a sink)",
+    )
     loose: bool = Field(
         default=False,
         description="Movable goods (a crate, a pallet, a cart): `scatter` and `wall` stand "

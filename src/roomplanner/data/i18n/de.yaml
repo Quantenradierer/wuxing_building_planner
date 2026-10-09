@@ -213,6 +213,14 @@ rooms:
   workshop_floor: Werkstatt
   xray: Röntgen
 objects:
+  intercom_station: Sprechanlage
+  smoke_detector_hub: Brandmelderzentrale
+  toy_companion: Spielzeug-Begleiter
+  pet_feeder_cam: Futterspender mit Kamera
+  badge_printer: Ausweisdrucker
+  door_controller: Türsteuerung
+  smart_light_panel: Lichtsteuerung
+  visitor_kiosk: Besucher-Kiosk
   alchemy_bench: Alchemietisch
   altar: Altar
   ambulance: Krankenwagen
@@ -385,6 +393,34 @@ objects:
   whiteboard: Whiteboard
   workbench: Werkbank
 terms:
+  control:
+    output: Leistungsabgabe
+    presence: Präsenz
+    power: An/Aus
+    movement: Bewegung
+    elevator: Aufzug
+    doors: Türen
+    gate: Schleuse
+    lock: Schloss
+    alarm: Alarm
+    inventory: Inventar
+    camera: Kamera
+    data: Daten
+    network: Netzwerk
+    vitals: Vitalwerte
+    restraints: Fixierung
+    access: Zugang
+    payment: Bezahlung
+    audio: Audio
+    lights: Licht
+    drive: Antrieb
+    scan: Scanner
+    display: Anzeige
+    badges: Ausweise
+    fire_doors: Brandschutztüren
+    air: Lüftung
+    drones: Drohnen
+    motion: Bewegungserkennung
   # Generation parameter values, floor names and words the exports use.
   building_type:
     office: Büro
@@ -443,6 +479,7 @@ terms:
     above: "{n}. Obergeschoss"
     basement: "Untergeschoss U{n}"
   word:
+    smart_mirror: Smart-Spiegel
     elevator: Aufzug
     stairs: Treppe
     change_level: Ebene wechseln
@@ -517,6 +554,7 @@ ui:
   layer_locks: Schlösser & Eingänge
   layer_objects: Möbel
   layer_devices: Sicherheitstechnik
+  layer_matrix: Matrix-Geräte
   layer_lights: Lichter
   layer_grid: Raster
   unit: Einheit
