@@ -65,8 +65,8 @@ def _core_front(rooms: list[PlannedRoom], core: set[str]) -> frozenset[Cell]:
 
 
 def _corners(rooms: list[PlannedRoom]) -> frozenset[Cell]:
-    """Cells at a convex corner of the footprint: a corner cut (chamfer) would thin a room
-    standing there, so no room moves in."""
+    """Cells at a convex corner of the footprint: no room moves into a corner of the footprint
+    (it would be thin there)."""
     footprint = {c for r in rooms for c in r.cells}
     return frozenset(
         c

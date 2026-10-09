@@ -1,6 +1,8 @@
 # 0014: 45° corner cuts as diagonals across cells
 
-Status: accepted (2026-10-03)
+Status: accepted (2026-10-03); the seed-drawn corner cuts were removed on 2026-10-09 (a 10-cell cut
+almost always collided with a room on some floor, so few buildings got one); the diagonal
+representation stays and ADR 0016 builds on it
 
 ## Context
 
@@ -15,7 +17,7 @@ layout, doors, furniture and the validator are built on (ADR 0001).
   footprint and objects stay sets of cells; a diagonal cell is half floor.
 - The cut cell edges stay in `Floor.walls` and the validator's border invariant is
   unchanged. They are hidden (`Floor.cut_edges`): not drawn, exported, or used for openings.
-- Diagonals come from the seed (no parameter: one building in three gets cuts of 4 to 10 cells): the pipeline cuts the
+- Diagonals come from the seed (no parameter: one building in five gets cuts of 10 cells, shrunk where the facade is short): the pipeline cuts the
   convex footprint corners after the layout, so layouts are unchanged. Corners that are too
   tight, or whose cut would damage a room, stay square.
 - Furnishing treats half cells as covered floor. The serialization adds an optional

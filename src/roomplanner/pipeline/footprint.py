@@ -7,11 +7,11 @@ stays as deep as the building's layout needs for its main part.
 from __future__ import annotations
 
 import random
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from typing import cast
 
 from roomplanner.errors import InfeasibleError
-from roomplanner.geometry import Cell, Corner, Diagonal, Side, connected, rectangle, thinnest_extent
+from roomplanner.geometry import Cell, rectangle
 from roomplanner.pipeline.base import Context, FootprintStrategy, LayoutStrategy
 from roomplanner.pipeline.registry import register, resolve
 
@@ -189,102 +189,3 @@ class IrregularFootprint:
             f"{ctx.width}x{ctx.height} is too small for any irregular shape, "
             f"every arm needs at least {arm_depth(ctx)} cells"
         )
-
-
-CHAMFER_CHANCE = 1 / 3  # of buildings with cut corners
-CHAMFER_SIZES = (4, 10)  # cells, inclusive
-
-
-def chamfer_size(rng: random.Random) -> int:
-    """The seed's corner cut: none for two buildings in three, else a size in `CHAMFER_SIZES`."""
-    if rng.random() >= CHAMFER_CHANCE:
-        return 0
-    return rng.randint(*CHAMFER_SIZES)
-
-
-MIN_CHAMFER = 2  # cells; a shorter cut is no diagonal
-CHAMFER_MARGIN = 2  # cells of straight facade kept between two cuts and at their ends
-
-
-def chamfer(
-    footprint: frozenset[Cell],
-    size: int,
-    rooms: Iterable[frozenset[Cell]],
-    min_sides: Iterable[int] = (),
-) -> tuple[frozenset[Cell], frozenset[Diagonal]]:
-    """Cut the convex corners of the footprint with 45 degree walls `size` cells long.
-
-    Returns the cells that leave the footprint (wholly outside the diagonal) and the
-    diagonals across the cells it crosses, which stay as half floor. A corner is cut where
-    both its facades are straight for `2 * size + CHAMFER_MARGIN` cells (so no two cuts
-    meet), the square behind it is floor and no room (of any floor) would lose a quarter of
-    its cells or fall apart, nor get thinner than its `min_sides` (parallel to `rooms`).
-    A tight corner gets the biggest cut that fits, if it is at least
-    `MIN_CHAMFER`.
-    """
-    if size < MIN_CHAMFER:
-        return frozenset(), frozenset()
-    rooms = list(rooms)
-    sides = [*min_sides, *[0] * len(rooms)][: len(rooms)]
-    removed: set[Cell] = set()
-    diagonals: set[Diagonal] = set()
-    for cell in sorted(footprint):
-        for corner in Corner:
-            first, second = corner.sides  # vertical side first (N, S), then horizontal (W, E)
-            if cell.neighbour(first) in footprint or cell.neighbour(second) in footprint:
-                continue
-            along_x = _straight(footprint, cell, second.opposite, first)
-            along_y = _straight(footprint, cell, first.opposite, second)
-            fit = min(size, (along_x - CHAMFER_MARGIN) // 2, (along_y - CHAMFER_MARGIN) // 2)
-            while fit >= MIN_CHAMFER:
-                gone, halves = _cut(footprint, cell, corner, fit)
-                if gone is not None and halves is not None and _harmless(gone, rooms, sides):
-                    removed |= gone
-                    diagonals |= halves
-                    break
-                fit -= 1
-    return frozenset(removed), frozenset(diagonals)
-
-
-def _cut(
-    footprint: frozenset[Cell], corner_cell: Cell, corner: Corner, n: int
-) -> tuple[set[Cell] | None, set[Diagonal] | None]:
-    """The cells going and the diagonals of a cut of n cells; None if the corner is not square."""
-    dx = 1 if corner.value[1] == "W" else -1
-    dy = 1 if corner.value[0] == "N" else -1
-    gone: set[Cell] = set()
-    halves: set[Diagonal] = set()
-    for i in range(n):
-        for j in range(n):
-            if Cell(corner_cell.x + dx * i, corner_cell.y + dy * j) not in footprint:
-                return None, None
-    for i in range(n):
-        for j in range(n - i):
-            here = Cell(corner_cell.x + dx * i, corner_cell.y + dy * j)
-            if i + j == n - 1:
-                halves.add(Diagonal(here.x, here.y, corner))
-            else:
-                gone.add(here)
-    return gone, halves
-
-
-def _harmless(gone: set[Cell], rooms: list[frozenset[Cell]], sides: list[int]) -> bool:
-    for cells, side in zip(rooms, sides, strict=True):
-        lost = cells & gone
-        if not lost:
-            continue
-        rest = cells - lost
-        if len(rest) < 0.75 * len(cells) or not connected(rest):
-            return False
-        if side and thinnest_extent(cells, cells, side) >= side > thinnest_extent(rest, rest, side):
-            return False
-    return True
-
-
-def _straight(footprint: frozenset[Cell], start: Cell, step: Side, outside: Side) -> int:
-    """How many cells from `start` in direction `step` have floor and no floor on `outside`."""
-    count, cell = 0, start
-    while cell in footprint and cell.neighbour(outside) not in footprint:
-        count += 1
-        cell = cell.neighbour(step)
-    return count

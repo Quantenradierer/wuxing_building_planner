@@ -50,13 +50,12 @@ SHORT_DOOR = 0.8  # chance that an oblong core room's door goes in a short wall
 class DefaultOpenings:
     def build(self, ctx: Context, building: frozenset[Cell], plan: BuildingPlan) -> list[Floor]:
         rng = ctx.rng("openings")
-        building = building - plan.removed
         drafts: list[_Draft] = []
         core_walls = _core_walls(ctx, plan, rng)
         for planned in plan.floors:
             footprint = building - planned.cut
             rooms = tuple(
-                Room(f"{planned.level}.{i + 1}", r.type, r.cells - plan.removed, r.unit)
+                Room(f"{planned.level}.{i + 1}", r.type, r.cells, r.unit)
                 for i, r in enumerate(planned.rooms)
             )
             entries = {i for i, r in enumerate(planned.rooms) if r.entry}
@@ -97,8 +96,7 @@ class DefaultOpenings:
                 for i, r in enumerate(planned.rooms)
                 if r.front is not None
             }
-            chamfers = frozenset(d for d in plan.diagonals if d.cell in footprint)
-            diagonals = chamfers | _inner_diagonals(planned.diagonals, footprint, chamfers, owner)
+            diagonals = _inner_diagonals(planned.diagonals, footprint, owner)
             doors = _interior_doors(
                 ctx,
                 rooms,
@@ -114,7 +112,7 @@ class DefaultOpenings:
                 # Without circulation (a lone room) the street is it: the entered rooms
                 # count as reached, so their stalls get doors.
                 set() if circulation else {e.room for e in planned.entrances},
-                diagonals - chamfers,
+                diagonals,
             )
             cut = {e for d in diagonals for e in d.edges()}
             used: set[Edge] = set(cut)  # nothing opens in the outside of a diagonal
@@ -267,15 +265,13 @@ def _runs(edges: set[Edge]) -> list[Run]:
 def _inner_diagonals(
     planned: frozenset[Diagonal],
     footprint: frozenset[Cell],
-    chamfers: frozenset[Diagonal],
     owner: dict[Cell, int],
 ) -> frozenset[Diagonal]:
-    """The planned diagonals between rooms that still stand: on this floor's footprint, not
-    in a chamfered cell, the triangle's cells across both cut edges one other room's."""
-    taken = {d.cell for d in chamfers}
+    """The planned diagonals between rooms that still stand: on this floor's footprint,
+    the triangle's cells across both cut edges one other room's."""
     kept: set[Diagonal] = set()
     for d in planned:
-        if d.cell not in footprint or d.cell in taken or d.cell not in owner:
+        if d.cell not in footprint or d.cell not in owner:
             continue
         across = {owner.get(next(c for c in e.cells() if c != d.cell)) for e in d.edges()}
         if len(across) == 1 and None not in across and owner[d.cell] not in across:

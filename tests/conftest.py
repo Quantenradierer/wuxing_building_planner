@@ -18,7 +18,6 @@ from roomplanner.params import BuildingType, GenerationParams
 #   behaviour  - what the layout and furnishing stages produce for a given building type
 CATEGORIES: dict[str, str] = {
     "test_bitgrid": "technical",
-    "test_chamfer": "technical",
     "test_cli": "technical",
     "test_data": "technical",
     "test_export": "technical",

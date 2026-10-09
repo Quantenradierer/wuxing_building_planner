@@ -59,8 +59,7 @@ Out of scope: objective markers (paydata, safes, …), scenario design.
 | `seed`          | integer (random if omitted, always recorded)        | full determinism                      |
 
 There are no size presets and no room overrides. Shapes other than the rectangle are unions
-of rectangles (curves are not supported; diagonals only as corner cuts drawn from the seed, see
-ADR 0014, and as the walls of the diagonal corridors of the `partition_diagonal` layout, ADR 0016); every arm is as deep as the layout's main part
+of rectangles (curves are not supported; diagonals only as the walls of the diagonal corridors of the `partition_diagonal` layout, ADR 0016; see ADR 0014 for the representation); every arm is as deep as the layout's main part
 (e.g. corridor plus one row of rooms).
 
 Floor numbering: ground floor = 0, upper floors 1, 2, …, basements −1, −2, …

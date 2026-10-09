@@ -83,8 +83,7 @@ the next and cuts off the `cut` corner (`NW`, `NE`, `SW`, `SE`) as open air (ADR
 Everything else stays on the grid: the cell remains in the footprint and its room (it is
 half floor), the diagonal's cells meet only at their corners, and the two cell edges in
 the cut triangle stay in `Floor.walls` (`Floor.cut_edges`) so the "every footprint border is
-a wall" invariant holds; nothing draws, exports or opens them. Diagonals occur as
-chamfered building corners (seed-dependent) and as the sides of a diagonal corridor.
+a wall" invariant holds; nothing draws, exports or opens them. Diagonals occur as the sides of a diagonal corridor.
 
 *Inner diagonals* (ADR 0016) are walls between two rooms: both cells across the cut edges
 belong to one other room, whose floor the cut triangle is (`Floor.is_inner_diagonal`).
@@ -189,12 +188,6 @@ params ─► footprint ─► feasibility check ─► layout (core, corridors,
   attempt is returned, with dropped rooms and violations as warnings. If no attempt could
   place the required rooms, generation fails with `InfeasibleError`.
 - The core is placed by the layout strategy because core and corridors depend on each other.
-- Chamfers (size drawn from the seed by `chamfer_size`: one building in three, 4 to 10 cells; `pipeline/footprint.py: chamfer`) are cut after the layout of
-  each attempt, so layouts still see the plain footprint. The cells wholly outside the
-  diagonals leave the rooms and every floor's footprint (`BuildingPlan.removed`); a corner is
-  left square if its facades are shorter than `2 * size + 2` cells or a room of any floor
-  would lose a quarter of its cells or fall in two (a tight corner gets a smaller cut, at
-  least 2 cells).
 
 ### Corridor layout
 
@@ -660,7 +653,7 @@ optional fields; version 2 documents are still read.
 }
 ```
 
-A floor with chamfered corners also has `"diagonals": [[x, y, "NW" | "NE" | "SW" | "SE"], ...]`
+A floor with diagonal walls also has `"diagonals": [[x, y, "NW" | "NE" | "SW" | "SE"], ...]`
 (the cut corner; the field is absent otherwise, so it needs no schema bump). Its `walls`
 still list the cut edges of those cells; readers draw the diagonal instead
 (`(x+1, y)-(x, y+1)` for NW and SE, `(x, y)-(x+1, y+1)` for NE and SW).

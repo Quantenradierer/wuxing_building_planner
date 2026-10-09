@@ -40,7 +40,6 @@ elevators change levels.
 | `--floors-below`       | basements (default 0)                                  |
 | `--wealth`             | squatter, low, middle, high, luxury                    |
 | `--shape`              | rectangle, l, u, t, z, stepped, irregular              |
-| `--chamfer`            | cut convex corners with 45° walls this many cells long |
 | `--street-side`        | N, E, S, W: main entrance (default S)                  |
 | `--service-side`       | N, E, S, W: loading dock / back door (default opposite)|
 | `--condition`          | pristine … ruined: debris, broken doors, breaches, dark|
