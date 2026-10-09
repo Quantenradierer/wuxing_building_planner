@@ -471,10 +471,69 @@ class Assigner:
         pool: list[RoomEntry],
         rooms: list[PlannedRoom],
     ) -> None:
+        blind: list[frozenset[Cell]] = []
+        self._fill_regions(free, pool, rooms, blind)
+        # Regions cut off from circulation are reached through a neighbour of their own type
+        # (an office behind an office) before they end as leftovers.
+        while self._reach_through_neighbour(blind, pool, rooms):
+            pass
+        self._fill_regions(blind, pool, rooms, None)
+
+    def _has_access(self, region: frozenset[Cell]) -> bool:
+        return (self._mask(region) & self.border_m).bit_count() >= ACCESS
+
+    def _reach_through_neighbour(
+        self, blind: list[frozenset[Cell]], pool: list[RoomEntry], rooms: list[PlannedRoom]
+    ) -> bool:
+        """Make the first blind region a room of the type of a placed neighbour it shares a
+        door's width of wall with. The door then goes into that neighbour."""
+        for region in sorted(blind, key=lambda r: (-len(r), min(r))):
+            mask = self._mask(region)
+            options: list[tuple[float, RoomEntry]] = []
+            for entry in pool:
+                spec = self.rules.spec(entry.room)
+                low, high = self._range(entry)
+                if not self._open(entry) or spec.circulation or not spec.transit:
+                    continue
+                if not low <= len(region) <= high:
+                    continue
+                if spec.windows is WindowRule.REQUIRED and self.outer_m & mask == 0:
+                    continue
+                wall = self._shared_wall(region, entry.room)
+                if wall < min(ACCESS, spec.door_width) or not self._shape_m(mask, spec):
+                    continue
+                options.append((wall + entry.weight, entry))
+            if options:
+                self._add(max(options, key=lambda o: o[0])[1], region, rooms)
+                blind.remove(region)
+                return True
+        return False
+
+    def _shared_wall(self, region: frozenset[Cell], kind: str) -> int:
+        """Cells of `region` that touch a placed room of type `kind`."""
+        return sum(
+            any(
+                (n := c.neighbour(s)) not in region and self.kinds.get(self.owner.get(n, 0)) == kind
+                for s in Side
+            )
+            for c in region
+        )
+
+    def _fill_regions(
+        self,
+        free: list[frozenset[Cell]],
+        pool: list[RoomEntry],
+        rooms: list[PlannedRoom],
+        blind: list[frozenset[Cell]] | None,
+    ) -> None:
+        """`blind` collects the regions without access to circulation instead of filling them."""
         total = sum(e.weight for e in pool) or 1.0
         while free:
             free.sort(key=lambda r: (-len(r), min(r)))
             region = free.pop(0)
+            if blind is not None and not self._has_access(region):
+                blind.append(region)
+                continue
             options = [e for e in pool if self._open(e)]
             fitting = [e for e in options if self._fits_entry(region, e)]
             normal = [e for e in fitting if e.priority is not Priority.OPTIONAL]
