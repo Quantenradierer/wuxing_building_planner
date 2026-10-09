@@ -2,15 +2,15 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Floor 1 ==
 +--===---===--+===--+===---===---===--+===---===----+
-"a   N bbb N  |www i|#################|a   N bbb N  "
-"a     bbb    |www i|#################|a     bbb    "
-"a     bbb    |www i|#################|a     bbb    "
-|a     bbb    |     |#################|a     bbb    |
-|a   3 bbb    |  4  |#################|a   5 bbb    |
-|      bbb    |     |                 |      bbb    |
-"k     bbb    |     |        1        |k     bbb    "
+"        ddddd|  www|#################|        ddddd"
+"        ddddd|  www|#################|        ddddd"
+"      } ddddd|  www|#################|      } ddddd"
+|             |     |#################|             |
+|    3 bbbbbbb|  4 i|#################|    5 bbbbbbb|
+|      bbbbbbb|    i|                 |      bbbbbbb|
+"      bbbbbbb|    i|        1        |      bbbbbbb"
 "             |     |                 |             "
-"            k|     |                 |            k"
+"             |     |                 |             "
 +--DDD--------+DDD--+------DDD--------+--DDD--------+
 |        sss         sss           sss         sss s|
 |                                                  s|
@@ -24,9 +24,9 @@ gun_shop 26x18 cells, wealth=high, seed=3
 "ooo ttt                                            "
 "ooo ttt                 2     ~~~~~               f"
 |ooo                           ~~~~~                |
-|ooo                   c ddd c ~~~~~               v|
-|                        ddd   ~~~~~               v|
-"  AAA                 c ddd c ~~~~~               v"
+|ooo                   c aaa c ~~~~~               v|
+|                        aaa   ~~~~~               v|
+"  AAA                 c aaa c ~~~~~               v"
 "  AAA                         ~~~~~                "
 "  AAA                         ~~~~~               n"
 |                                                  n|
@@ -38,7 +38,7 @@ gun_shop 26x18 cells, wealth=high, seed=3
 |<                 ooooooo           ooooooo        |
 |<       sss       ooooooo           ooooooo       *|
 +--===---===---===---===---===---===---===---===----+
-  objects: A armchair, b bed, k cabinet, c chair, t coffee_table, n counter, d dining_table, f fridge, N nightstand, * plant, ~ rug, s shelf, i sink, o sofa, # stairs, v stove, < wall_screen, a wardrobe, w wc
+  objects: A armchair, b bunk_bed, c chair, t coffee_table, n counter, a dining_table, f fridge, d home_desk, * plant, ~ rug, s shelf, i sink, o sofa, # stairs, v stove, } toy_companion, < wall_screen, w wc
     1  stairwell            45 cells
     2  flat_loft           338 cells
     3  bedroom              35 cells
@@ -92,15 +92,15 @@ gun_shop 26x18 cells, wealth=high, seed=3
 
 == Basement B1 ==
 +-------------------+-----------------+-------------+
-|' HHHHHHH HHHHHHH  |#################|E EEE EEE EEE|
-|  HHHHHHH HHHHHHH  |#################|E            |
-|  HHHHHHH HHHHHHH  |#################|E           b|
-|  HHHHHHH HHHHHHH  |#################|            b|
-|  HHHHHHH HHHHHHH  |#################|E     4     b|
-|                   |                 |E           b|
-|        3          |        1        |E           b|
+|' HHHHHHH HHHHHHH  |#################|S EEE EEE s E|
+|  HHHHHHH HHHHHHH  |#################|            E|
+|  HHHHHHH HHHHHHH  |#################|}           E|
+|  HHHHHHH HHHHHHH  |#################|             |
+|  HHHHHHH HHHHHHH  |#################|      4     E|
+|                   |                 |            E|
+|        3          |        1        |            E|
 |                   |                 |             |
-|          EEE      |                 |            '|
+|          EEE      |                 |          EEE|
 +--DDD--------------+------DDD--------+--DDD--------+
 |                                                   |
 |                                                   |
@@ -128,7 +128,7 @@ gun_shop 26x18 cells, wealth=high, seed=3
 |                                                   |
 |                                                   |
 +---------------------------------------------------+
-  objects: b battery_bank, E electrical_panel, ' fire_extinguisher, H hvac_unit, _ shooting_lane, # stairs
+  objects: } door_controller, E electrical_panel, ' fire_extinguisher, H hvac_unit, _ shooting_lane, s smart_light_panel, S smoke_detector_hub, # stairs
     1  stairwell            45 cells
     2  test_range          338 cells
     3  mechanical_room      50 cells

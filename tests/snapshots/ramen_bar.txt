@@ -1,18 +1,18 @@
 ramen_bar 24x18 cells, wealth=middle, seed=4
 
 == Ground floor ==
-+===--+-----------+--DDD--+----===---===---===--+
-"i www|  sss sss s|       |    iii aaa nnnnnnn n"
-"i www|          s|       |                    n"
-"i www|          s|s s s  |                    n"
-|     |           |s s s  |                    n|
-|  3  |    4     s|s s s  |          5         n|
-|     |          s|       |                    n|
-"     |          s|k 1    |                    n"
-"     |           |       |                     "
-"     |           |       |                    f"
-+DDD--+--DDD------+--DDD--+--DDD----------------+
-|              yyy                   S NNN     a|
++===---===--+-----+--DDD--+----===---===---===--+
+"www       U|s   s|       |aaa nnnnnnn nnnnnnn f"
+"www        |s   s|       |                     "
+"www        |s   s|s s s  |a                   i"
+|           |     |s s s  |a                   i|
+|iii 3      |  4 s|s s s  |a         5         i|
+|           |    s|       |                     |
+"           |    s|  1    |'                    "
+"           |     |       |                     "
+"           |     |       |                     "
++--DDD------+DDD--+--DDD--+--DDD----------------+
+|                                    S NNN     a|
 |                                      NNN     a|
 "                                      NNN     a"
 "                                      NNN      "
@@ -36,11 +36,14 @@ D      ttt     ttt     ttt     ttt   S NNN     f|
 "                                               "
 "                                               "
 |                                               |
-|*                                              |
+|                                               |
 +===---===---===-------DDD-----===---===---===--+
-  objects: t bar_table, k cabinet, c chair, n counter, f fridge, * plant, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, y vending_machine, w wc
+  objects: t bar_table, c chair, ' coffee_machine, n counter, f fridge, N ramen_counter, s shelf, i sink, v stock_pot, S stool, a stove, U trash_bin, w wc
     1  storage              20 cells
     2  ramen_bar_room      312 cells
-    3  wc                   15 cells
-    4  cold_room            30 cells
+    3  wc                   30 cells
+    4  cold_room            15 cells
     5  prep_kitchen         55 cells
+
+Warnings:
+  - Ground floor: dropped manager_office (no space)
