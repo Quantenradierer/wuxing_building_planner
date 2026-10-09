@@ -13,7 +13,7 @@ from __future__ import annotations
 import math
 import random
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from roomplanner.bitgrid import BitGrid
 from roomplanner.geometry import Cell, Side
@@ -477,6 +477,9 @@ class Assigner:
         # (an office behind an office) before they end as leftovers.
         while self._reach_through_neighbour(blind, pool, rooms):
             pass
+        for region in list(blind):
+            if self._split_among_neighbours(region, rooms):
+                blind.remove(region)
         self._fill_regions(blind, pool, rooms, None)
 
     def _defer(self, blind: list[frozenset[Cell]] | None, region: frozenset[Cell]) -> bool:
@@ -740,3 +743,50 @@ class Assigner:
             self.sizes.setdefault(kind, set()).add(shape)
         for cell in cells:
             self.owner[cell] = self._rooms
+
+    def _split_among_neighbours(self, region: frozenset[Cell], rooms: list[PlannedRoom]) -> bool:
+        """Cut a blind region where its neighbours meet and give each part to the neighbour
+        beside it: every cell goes to the room that reaches it first from its own wall. Only
+        if every neighbour stays a decent room (size, shape); else nothing changes."""
+        index = {c: i for i, r in enumerate(rooms) for c in r.cells}
+        claimed: dict[Cell, int] = {}
+        frontier: list[Cell] = []
+        for cell in sorted(region):
+            for side in Side:
+                i = index.get(cell.neighbour(side))
+                if i is not None and self._takes_cells(rooms[i]):
+                    claimed[cell] = i
+                    frontier.append(cell)
+                    break
+        while frontier:
+            following: list[Cell] = []
+            for cell in frontier:
+                for side in Side:
+                    n = cell.neighbour(side)
+                    if n in region and n not in claimed:
+                        claimed[n] = claimed[cell]
+                        following.append(n)
+            frontier = following
+        if len(claimed) != len(region):
+            return False
+        grown: dict[int, frozenset[Cell]] = {}
+        for i in set(claimed.values()):
+            grown[i] = rooms[i].cells | frozenset(c for c, k in claimed.items() if k == i)
+        for i, cells in grown.items():
+            spec = self.rules.spec(rooms[i].type)
+            if len(cells) > spec.area[1] * TOLERANCE or not self._shape(cells, spec):
+                return False
+        for i, cells in grown.items():
+            rooms[i] = replace(rooms[i], cells=cells)
+        return True
+
+    def _takes_cells(self, room: PlannedRoom) -> bool:
+        spec = self.rules.spec(room.type)
+        return not (
+            room.leftover
+            or room.unit is not None
+            or room.host is not None
+            or spec.circulation
+            or spec.stalls is not None
+            or not spec.transit
+        )
