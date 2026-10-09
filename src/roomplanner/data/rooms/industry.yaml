@@ -166,13 +166,14 @@ rooms:
     windows: forbidden
     furniture:
       - {object: operating_table, placement: center}
-      - {object: medical_cabinet, placement: wall, count: [1, 3]}
+      - {object: medical_cabinet, placement: wall, line: true, count: [1, 3]}
       - {object: cyberware_rack, placement: wall, count: [0, 1]}
       - {object: machinery, placement: wall, count: [0, 1]}
       - {object: sink, placement: wall}
-      - {object: vital_monitor, placement: at, at: operating_table, beside: [flanks], count: [0, 1]}
-      - {object: iv_stand, placement: at, at: operating_table, beside: [flanks], count: [0, 1]}
-      - {object: crate, placement: scatter, count: [0, 1]}
+      - {object: vital_monitor, placement: at, at: operating_table, beside: [flanks], count: [1, 1]}
+      - {object: iv_stand, placement: at, at: operating_table, beside: [flanks], count: [1, 1]}
+      - {object: stool, placement: at, at: operating_table, beside: [flanks], count: [0, 1]}   # surgeon
+      - {object: crate, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   shop_floor:           # convenience store hall
     area: [40, 100000]
@@ -182,8 +183,9 @@ rooms:
       # Shelves first: a checkout in the middle of a small shop leaves room for two.
       - {object: gondola, placement: rows, aisle: 2, margin: 2}   # cramped, 1 m aisles
       - {object: checkout, placement: near_exit}
+      - {object: chair, placement: at, at: checkout, beside: [back], count: [0, 1]}   # cashier
       - {object: pay_station, placement: wall, count: [0, 1]}   # credstick reader
-      - {object: freezer, placement: wall, count: [1, 2]}
+      - {object: freezer, placement: wall, line: true, count: [1, 2]}
       - {object: vending_machine, placement: wall, count: [0, 2]}
       - {object: atm, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: wall, count: [0, 1]}
@@ -197,11 +199,11 @@ rooms:
     facade_door: 6         # a roller door
     furniture:
       - {object: conveyor, placement: rows, aisle: 4, margin: 3}
-      - {object: machinery, placement: wall, per: 60, count: [2, 10]}
-      - {object: robot_arm, placement: scatter, per: 150, count: [0, 6]}
-      - {object: workbench, placement: wall, per: 150, count: [1, 4]}
-      - {object: pallet, placement: scatter, per: 200, count: [0, 6]}
-      - {object: forklift, placement: scatter, count: [0, 2]}
+      - {object: machinery, placement: wall, line: true, per: 60, count: [2, 10]}
+      - {object: robot_arm, placement: at, at: conveyor, beside: [flanks], limit: 1, count: [0, 6]}   # works the line
+      - {object: workbench, placement: wall, line: true, per: 150, count: [1, 4]}
+      - {object: pallet, placement: near_exit, per: 200, count: [0, 6]}   # staged at the roller door
+      - {object: forklift, placement: near_exit, count: [0, 2]}
       - {object: drone_dock, placement: scatter, count: [1, 2], security: [corporate, aaa]}
       - {object: fire_extinguisher, placement: wall, per: 300, count: [1, 4]}
       - {object: hydrant, placement: wall, count: [0, 1]}
@@ -214,15 +216,17 @@ rooms:
       - {object: wall_screen, placement: end}
       - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
       - {object: rigger_cocoon, placement: wall, count: [0, 1]}   # rigs the forklifts and arms
-      - {object: server_rack, placement: wall, count: [0, 1]}
+      - {object: server_rack, placement: wall, count: [1, 1]}
   paint_booth:
     area: [40, 120]
     min_side: 6
     windows: forbidden
     door_width: 4
     furniture:
-      - {object: machinery, placement: wall, count: [1, 2]}
-      - {object: barrel, placement: scatter, count: [1, 4]}
+      - {object: car, placement: center}   # the vehicle being painted
+      - {object: machinery, placement: wall, line: true, count: [1, 2]}   # compressor / filter wall
+      - {object: workbench, placement: wall, count: [0, 1]}   # mixing bench
+      - {object: barrel, placement: wall, line: true, count: [1, 4]}
       - {object: fire_extinguisher, placement: corner}
   # --- parking garage ---
   parking_deck:         # one level of the garage: rows of cars, a ramp to the next level
@@ -234,16 +238,17 @@ rooms:
       - {object: ramp, placement: fixed}   # lines up with the ramp on the next level
       - {object: car, placement: rows, aisle: 11, gap: 1, lanes: true, margin: 0, block: 40,
          front_clear: 11}   # 2.5 m stalls facing 5.5 m drive lanes (MGarVO)
-      - {object: pay_station, placement: wall, count: [0, 2]}
-      - {object: drone_dock, placement: scatter, count: [1, 2], security: [corporate, aaa]}
+      - {object: pay_station, placement: near_exit, count: [0, 2]}
+      - {object: drone_dock, placement: wall, count: [1, 2], security: [corporate, aaa]}
       - {object: fire_extinguisher, placement: wall, per: 400, count: [1, 4]}
       - {object: hydrant, placement: wall, count: [0, 1]}
   attendant_booth:
     area: [9, 30]
     min_side: 3
     furniture:
-      - {object: console, placement: wall}
+      - {object: console, placement: wall, faces_door: true}
       - {object: wall_screen, placement: wall, count: [0, 1]}
+      - {object: terminal, placement: wall, count: [0, 1]}   # barrier controller / cash drawer
   # --- chop shop ---
   workshop_floor:       # cars on lifts, tools, parts everywhere
     area: [80, 100000]
@@ -252,12 +257,12 @@ rooms:
     door_width: 4
     facade_door: 6         # the roller door the cars come in through
     furniture:
-      - {object: car_lift, placement: wall, per: 120, count: [1, 4]}
-      - {object: car, placement: scatter, per: 150, count: [0, 3]}
-      - {object: workbench, placement: wall, per: 80, count: [1, 4]}
-      - {object: tool_rack, placement: wall, per: 80, count: [1, 4]}
-      - {object: barrel, placement: scatter, per: 100, count: [1, 6]}
-      - {object: crate, placement: scatter, per: 150, count: [0, 4]}
+      - {object: car_lift, placement: wall, line: true, per: 120, count: [1, 4]}
+      - {object: car, placement: center, per: 150, count: [0, 3]}
+      - {object: workbench, placement: wall, line: true, per: 80, count: [1, 4]}
+      - {object: tool_rack, placement: wall, line: true, per: 80, count: [1, 4]}
+      - {object: barrel, placement: wall, line: true, per: 100, count: [1, 6]}
+      - {object: crate, placement: wall, per: 150, count: [0, 4]}
       - {object: fire_extinguisher, placement: wall, count: [1, 2]}
       - {object: medkit, placement: wall, count: [0, 1]}
   # --- Sixth World extras ---
@@ -265,12 +270,13 @@ rooms:
     area: [40, 120]
     min_side: 6
     furniture:
-      - {object: workbench, placement: wall, count: [1, 3]}
-      - {object: drone_rack, placement: perimeter, count: [1, 3]}
-      - {object: drone_dock, placement: grid, count: [0, 2], aisle: 2, margin: 1}
-      - {object: rigger_cocoon, placement: wall, count: [0, 1]}
-      - {object: tool_rack, placement: wall, count: [0, 2]}
-      - {object: crate, placement: scatter, count: [0, 2]}
+      - {object: workbench, placement: wall, line: true, count: [1, 3]}
+      - {object: stool, placement: at, at: workbench, beside: [front], count: [0, 1]}
+      - {object: drone_rack, placement: wall, line: true, count: [1, 3]}
+      - {object: drone_dock, placement: wall, line: true, count: [1, 2]}
+      - {object: rigger_cocoon, placement: wall, count: [1, 1]}
+      - {object: tool_rack, placement: wall, line: true, count: [0, 2]}
+      - {object: crate, placement: wall, count: [0, 2]}
       - {object: fire_extinguisher, placement: corner}
   contraband_store:     # goods that aren't on the manifest
     wealth_shift: -1
@@ -282,8 +288,9 @@ rooms:
     annex: 0.8
     transit: false
     furniture:
-      - {object: crate, placement: scatter, per: 12, count: [2, 6]}
-      - {object: shelf, placement: wall, count: [1, 3]}
+      - {object: shelf, placement: wall, line: true, count: [1, 3]}   # racks in rows
+      - {object: crate, placement: wall, line: true, per: 12, count: [2, 6]}
+      - {object: workbench, placement: wall, count: [0, 1]}   # packing table
       - {object: weapon_locker, placement: wall, count: [0, 1]}
       - {object: safe, placement: corner, count: [0, 1]}
   decon_room:           # decontamination showers between the labs and the rest
@@ -292,10 +299,11 @@ rooms:
     windows: forbidden
     next_to: [wet_lab, test_chamber]
     furniture:
-      - {object: shower, placement: wall, count: [1, 3]}
-      - {object: locker, placement: wall, count: [1, 3]}
-      - {object: bench, placement: wall, count: [0, 1]}
-      - {object: trash_bin, placement: corner}
+      - {object: shower, placement: wall, line: true, count: [1, 3]}
+      - {object: locker, placement: wall, line: true, count: [1, 3]}
+      - {object: bench, placement: at, at: locker, beside: [front], count: [0, 1]}
+      - {object: sink, placement: wall, count: [0, 1]}   # eyewash
+      - {object: trash_bin, placement: near_exit}
   subject_holding:      # test subjects, "volunteers"
     area: [30, 90]
     min_side: 5
@@ -303,7 +311,8 @@ rooms:
     transit: false
     next_to: [test_chamber]
     furniture:
-      - {object: bed_set, placement: wall, spaced: true, per: 15, count: [1, 4]}
-      - {object: wc, placement: corner}
-      - {object: sink, placement: wall}
+      - {object: bed_set, placement: wall, line: true, per: 15, count: [1, 4]}
+      - {object: wc, placement: wall, line: true, per: 15, count: [1, 4]}
+      - {object: sink, placement: wall, line: true, per: 15, count: [1, 4]}
+      - {object: guard_post, placement: near_exit, count: [0, 1]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
