@@ -50,6 +50,7 @@ from roomplanner.pipeline.layout.regions import (
     distances,
     facade,
     opened,
+    shape_ok,
     thicken,
 )
 from roomplanner.pipeline.layout.stalls import carve_stalls
@@ -1277,6 +1278,9 @@ def _merge_thin(
         if thinnest_extent(room.cells, room.cells) >= min_side:
             continue
         best = _thin_host(room.cells, room, result, rules, fixed, band)
+        if (best is None or not best[0]) and _split_thin(room, result, rules, fixed, band):
+            result.remove(room)
+            continue
         if best is None or not best[0]:
             trimmed = _shed_arms(room, result, rules, fixed, min_side, band)
             result[result.index(room)] = room = trimmed
@@ -1325,6 +1329,72 @@ def _thin_host(
         return None
     thick, *_, other = max(options, key=lambda o: o[:6])
     return thick, other
+
+
+def _thick_enough(share: set[Cell], host: PlannedRoom, rules: Rules) -> bool:
+    """The host grown by `share` is wide enough there: everywhere, or (a room) as a
+    rectangle with alcoves."""
+    spec = rules.spec(host.type)
+    cells = frozenset(share | host.cells)
+    if thinnest_extent(share, cells) >= spec.min_side:
+        return True
+    return not spec.circulation and shape_ok(cells, spec)
+
+
+def _split_thin(
+    room: PlannedRoom,
+    rooms: list[PlannedRoom],
+    rules: Rules,
+    fixed: set[str],
+    band: frozenset[Cell] = frozenset(),
+) -> bool:
+    """A piece thin all over that no single neighbour makes thick: each cell goes to the
+    neighbour it touches (a room before a corridor), if every share is thick in its host.
+    A neighbour whose share would stay thin is left out and the cells go to the others.
+    Edits `rooms`; False (nothing changed) when no such split exists."""
+    beside_band = bool(band) and bool(contact(room.cells, band))
+    usable = [
+        o
+        for o in rooms
+        if o is not room
+        and o.host is None
+        and not o.sealed
+        and o.type not in fixed
+        and not (beside_band and rules.spec(o.type).circulation)
+    ]
+
+    def preferred(candidates: list[PlannedRoom]) -> PlannedRoom:
+        return max(candidates, key=lambda o: (not rules.spec(o.type).circulation, -len(o.cells)))
+
+    while len(usable) > 1:
+        # Cells touching a neighbour go to it; the cells behind them follow the cell next to them.
+        owner: dict[Cell, PlannedRoom] = {}
+        for cell in room.cells:
+            touching = [o for o in usable if any(cell.neighbour(s) in o.cells for s in Side)]
+            if touching:
+                owner[cell] = preferred(touching)
+        while len(owner) < len(room.cells):
+            grown: dict[Cell, PlannedRoom] = {}
+            for cell in room.cells - owner.keys():
+                near = [owner[n] for s in Side if (n := cell.neighbour(s)) in owner]
+                if near:
+                    grown[cell] = preferred(near)
+            if not grown:
+                return False
+            owner.update(grown)
+        shares: dict[int, set[Cell]] = {}
+        for cell, host in owner.items():
+            shares.setdefault(id(host), set()).add(cell)
+        thin = [o for o in usable if id(o) in shares and not _thick_enough(shares[id(o)], o, rules)]
+        if not thin:
+            if len(shares) < 2:
+                return False
+            for o in usable:
+                if id(o) in shares:
+                    rooms[rooms.index(o)] = replace(o, cells=o.cells | shares[id(o)])
+            return True
+        usable = [o for o in usable if o not in thin]
+    return False
 
 
 def _shed_arms(

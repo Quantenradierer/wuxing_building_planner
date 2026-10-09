@@ -62,21 +62,21 @@ safehouse 32x22 cells, wealth=middle, seed=5
 
 == Ground floor ==
 +--===+--DDD--+===---===--+===--+-----------+===---===---===----+
-"sss s|       |###########|     |  qqqqqqq s|bbb bbb l l        "
-"    s|       |###########|     |          s|bbb bbb            "
-"s s s|n      |###########|     D          s|bbb bbb            "
-|s s  |n      |###########|     D           |bbb bbb            |
-|s s s|n   c  |###########|     D    7     s|bbb bbb            |
-|    s|n      |###########|     |          s|bbb bbb            |
-"s s s|n kkk  |###########|     |          s|bbb bbb            "
-"s s  |n kkk  |###########|     |           |                   "
-"s s s|n kkk  |###########|     |  j   l    |        8          "
-|    s|       |###########|     +-----------+                   |
-|s s s|v c 4  |###########|     |    iii MMM|                   |
-|s s  |v      |###########|     |           |                   |
-"s s s|v     i|###########|    '|    6     m|                   "
-"    s|      i|           |     |          m|                   "
-"  5 s|f     i|    2      |     |          m|                KKK"
+"s    |       |###########|     |  qqqqqqq s|bbb bbb l l        "
+"s    |       |###########|     |          s|bbb bbb            "
+"s s  |n      |###########|     D          s|bbb bbb            "
+|  s  |n      |###########|     D           |bbb bbb            |
+|  s  |n   c  |###########|     D    7     s|bbb bbb            |
+|     |n      |###########|     |          s|bbb bbb            |
+"     |n ddd  |###########|     |          s|bbb bbb            "
+"     |n ddd  |###########|     |           |                   "
+"  5 k|n ddd  |###########|     |  j   l    |        8          "
+|     |       |###########|     +-----------+                   |
+|s    |v c 4  |###########|     |    iii MMM|                   |
+|s    |v      |###########|     |           |                   |
+"s    |v     i|###########|    '|    6     m|                   "
+"     |      i|           |     |          m|                   "
+"     |f     i|    2      |     |          m|                KKK"
 |     |       |           |     |           |                KKK|
 |     |       |           |     |        mmm|                KKK|
 +DDD--+--DDD--+----DDD----+     +--DDD------+--DDD--------------+
@@ -86,9 +86,9 @@ safehouse 32x22 cells, wealth=middle, seed=5
 |                                                               |
 |                                                               |
 +--DDD--------------------------+     +-----------+--DDD--------+
-"          sss sss   c kkk     *|     |           |          sss|
-"                      kkk      |     |           |             |
-"                      kkk c    |a    D           |             |
+"          sss sss   c ddd     *|     |           |          sss|
+"                      ddd      |     |           |             |
+"                      ddd c    |a    D           |             |
 |                               |a    D           |             |
 |                               |a    D           |            W|
 |                               |a    |           |            W|
@@ -106,7 +106,7 @@ safehouse 32x22 cells, wealth=middle, seed=5
 |                  ooooooo      |     |www        |KKK          |
 |*                 ooooooo      |     |www        |KKK     LLLLL|
 +--===---===---===---===---===--+DDD--+===---===--+-------------+
-  objects: A armchair, v autokitchen, q bench, b bunk_bed, c chair, ( coat_rack, t coffee_table, n counter, K crate, ' fire_extinguisher, f fridge, L gun_rack, k kitchen_table, l locker, m medical_cabinet, M medical_cart, * plant, s shelf, i sink, o sofa, # stairs, j terminal, < wall_screen, a wardrobe, w wc, W weapon_locker
+  objects: A armchair, v autokitchen, q bench, b bunk_bed, k cabinet, c chair, ( coat_rack, t coffee_table, n counter, K crate, ' fire_extinguisher, f fridge, L gun_rack, d kitchen_table, l locker, m medical_cabinet, M medical_cart, * plant, s shelf, i sink, o sofa, # stairs, j terminal, < wall_screen, a wardrobe, w wc, W weapon_locker
     1  corridor            123 cells
     2  stairwell            54 cells
     3  entry_hall           30 cells
