@@ -960,7 +960,10 @@ class PartitionLayout:
 
     @staticmethod
     def _core_options(
-        free: frozenset[Cell], circulation: frozenset[Cell], size: tuple[int, int]
+        free: frozenset[Cell],
+        circulation: frozenset[Cell],
+        size: tuple[int, int],
+        swapped: bool = False,
     ) -> list[frozenset[Cell]]:
         """Rectangles of the core's size with a long wall on the corridor."""
         found: set[frozenset[Cell]] = set()
@@ -986,8 +989,8 @@ class PartitionLayout:
                         )
                         if cells <= free and len(cells & beside) >= min(length, 2):
                             found.add(cells)
-        if not found and size[0] != size[1]:
-            return PartitionLayout._core_options(free, circulation, (size[1], size[0]))
+        if not found and size[0] != size[1] and not swapped:
+            return PartitionLayout._core_options(free, circulation, (size[1], size[0]), True)
         return sorted(found, key=min)
 
     # --- floors -----------------------------------------------------------------------
@@ -1204,7 +1207,7 @@ def _bevels(
     """The diagonal walls along a diagonal corridor (ADR 0016): the room cells at the
     corners of its staircase edge (corridor on two adjacent sides and the cell between, none
     on the other two) are cut by a 45 degree wall, the corner triangle going to the
-    corridor. Circulation, core and annex cells stay square."""
+    corridor. Circulation, core, annex and open (no wall to the corridor) cells stay square."""
     if not band:
         return frozenset()
     owner = {c: r for r in rooms for c in r.cells}
@@ -1219,7 +1222,7 @@ def _bevels(
         room = owner.get(cell)
         if room is None or room.host is not None or room.sealed or room.type in fixed:
             continue
-        if rules.spec(room.type).circulation or room.hub:
+        if rules.spec(room.type).circulation or room.hub or rules.spec(room.type).open > 0:
             continue
         for a, b, corner in _CORNERS:
             na, nb = cell.neighbour(a), cell.neighbour(b)

@@ -479,6 +479,13 @@ class Assigner:
             pass
         self._fill_regions(blind, pool, rooms, None)
 
+    def _defer(self, blind: list[frozenset[Cell]] | None, region: frozenset[Cell]) -> bool:
+        """Put a region without access to circulation aside (when `blind` is collecting)."""
+        if blind is None or self._has_access(region):
+            return False
+        blind.append(region)
+        return True
+
     def _has_access(self, region: frozenset[Cell]) -> bool:
         return (self._mask(region) & self.border_m).bit_count() >= ACCESS
 
@@ -511,13 +518,14 @@ class Assigner:
 
     def _shared_wall(self, region: frozenset[Cell], kind: str) -> int:
         """Cells of `region` that touch a placed room of type `kind`."""
-        return sum(
-            any(
-                (n := c.neighbour(s)) not in region and self.kinds.get(self.owner.get(n, 0)) == kind
-                for s in Side
-            )
-            for c in region
-        )
+        touching = 0
+        for c in region:
+            for side in Side:
+                n = c.neighbour(side)
+                if n not in region and self.kinds.get(self.owner.get(n, 0)) == kind:
+                    touching += 1
+                    break
+        return touching
 
     def _fill_regions(
         self,
@@ -531,8 +539,7 @@ class Assigner:
         while free:
             free.sort(key=lambda r: (-len(r), min(r)))
             region = free.pop(0)
-            if blind is not None and not self._has_access(region):
-                blind.append(region)
+            if self._defer(blind, region):
                 continue
             options = [e for e in pool if self._open(e)]
             fitting = [e for e in options if self._fits_entry(region, e)]
