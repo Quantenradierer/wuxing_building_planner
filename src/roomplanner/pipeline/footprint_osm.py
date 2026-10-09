@@ -23,12 +23,40 @@ from roomplanner.pipeline.layout.parts import decompose, depth_of, wing_frame
 from roomplanner.pipeline.registry import register, resolve
 
 TOP = 8  # outlines drawn from the best this many (by proportion)
+MISMATCH = 0.6  # score penalty of an outline from another kind of building
+# Outline categories (tools/osm_footprints.py) that suit a building type; others get MISMATCH.
+KINDS: dict[str, tuple[str, ...]] = {
+    "apartment": ("apartments", "house"),
+    "safehouse": ("house", "apartments"),
+    "mage_flat": ("house", "apartments"),
+    "coffin_block": ("apartments", "warehouse"),
+    "hotel": ("hotel", "apartments"),
+    "office": ("office", "commercial", "government"),
+    "corp_office": ("office", "commercial"),
+    "corp_lab": ("office", "university", "industrial"),
+    "data_centre": ("industrial", "office", "warehouse"),
+    "clinic": ("hospital", "commercial", "office"),
+    "cosmetic_clinic": ("commercial", "office"),
+    "street_doc": ("commercial", "house"),
+    "hospital": ("hospital", "university"),
+    "police_station": ("government", "office"),
+    "prison": ("government", "industrial", "hospital"),
+    "church": ("church",),
+    "factory": ("industrial", "warehouse"),
+    "warehouse": ("warehouse", "industrial"),
+    "chop_shop": ("warehouse", "industrial"),
+    "parking_garage": ("parking", "industrial"),
+    "supermarket": ("commercial", "warehouse"),
+    "casino": ("hotel", "commercial"),
+    "nightclub": ("commercial", "warehouse"),
+}
 
 
 @dataclass(frozen=True)
 class Outline:
     ident: str
     rows: tuple[str, ...]
+    category: str = ""
 
     @property
     def width(self) -> int:
@@ -43,7 +71,10 @@ class Outline:
 def outlines() -> tuple[Outline, ...]:
     text = (resources.files("roomplanner") / "data" / "osm_footprints.yaml").read_text("utf-8")
     loader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
-    return tuple(Outline(e["id"], tuple(e["rows"])) for e in yaml.load(text, Loader=loader))
+    return tuple(
+        Outline(e["id"], tuple(e["rows"]), e.get("category", ""))
+        for e in yaml.load(text, Loader=loader)
+    )
 
 
 def _resample(
@@ -94,6 +125,7 @@ class OsmFootprint:
         rng: random.Random = ctx.rng("footprint")
         arm = arm_depth(ctx)
         ratio = ctx.width / ctx.height
+        suited = KINDS.get(str(ctx.rules.program.building))
         options: list[tuple[float, Outline, bool]] = []
         for outline in outlines():
             for transpose in (False, True):
@@ -103,6 +135,8 @@ class OsmFootprint:
                     else (outline.width, outline.height)
                 )
                 off = abs(sw / sh / ratio - 1)
+                if suited and outline.category not in suited:
+                    off += MISMATCH
                 options.append((off + rng.uniform(0, 0.15), outline, transpose))
         options.sort(key=lambda o: o[0])
         picks = options[:TOP]

@@ -46,6 +46,19 @@ REGIONS = [  # name, lat, lon, radius (m)
     ("amsterdam", 52.37, 4.90, 12000),
     ("paris", 48.86, 2.35, 12000),
     ("london", 51.51, -0.12, 12000),
+    ("brussels", 50.85, 4.35, 12000),
+    ("copenhagen", 55.68, 12.57, 12000),
+    ("stockholm", 59.33, 18.07, 12000),
+    ("helsinki", 60.17, 24.94, 12000),
+    ("prague", 50.08, 14.44, 12000),
+    ("warsaw", 52.23, 21.01, 12000),
+    ("barcelona", 41.39, 2.17, 12000),
+    ("milan", 45.46, 9.19, 12000),
+    ("boston", 42.36, -71.06, 12000),
+    ("new-york", 40.73, -73.99, 12000),
+    ("toronto", 43.65, -79.38, 12000),
+    ("tokyo", 35.68, 139.76, 12000),
+    ("sydney", -33.87, 151.21, 12000),
 ]
 # category: Overpass selectors of the buildings the corridors must lie in
 CATEGORIES = {
@@ -56,7 +69,7 @@ CATEGORIES = {
     "commercial": ['way["building"~"^(commercial|retail)$"]'],
     "government": ['way["building"~"^(government|civic|public)$"]'],
 }
-PER_CATEGORY = 24  # shapes kept per category
+PER_CATEGORY = 40  # shapes kept per category
 EXCLUDED = ("tunnel", "railway", "public_transport", "subway", "bridge", "highway", "area:highway")
 CELL = 0.5  # m
 PIXEL = 0.25  # m, raster resolution
@@ -65,7 +78,7 @@ MIN_EXTENT = 12.0  # m, longest side of a network
 MAX_EXTENT = 110.0
 SPUR = 2.5  # m: leaf branches shorter than this are skeleton noise
 TOLERANCE = 0.7  # m, line simplification
-MAX_TEMPLATES = 120
+MAX_TEMPLATES = 240
 MIN_SEGMENT = 4  # cells: shorter pieces are jitter of the skeleton
 MAX_BENDS = 16
 OUT = Path(__file__).resolve().parent.parent / "src/roomplanner/data/osm_corridors.yaml"
@@ -482,7 +495,10 @@ def build(folder: Path) -> None:
         slanted, square = slanted[: PER_CATEGORY - len(square)], square
         kept += slanted + square
         print(f"{category}: {len(mine)} usable, {len(slanted) + len(square)} kept")
-    found = kept
+    # earlier shapes stay (reproducible seeds); new ones are added
+    earlier = yaml.safe_load(OUT.read_text()) if OUT.exists() else []
+    known = {e["id"] for e in earlier}
+    found = earlier + [t for t in kept if t["id"] not in known]
     found.sort(key=lambda t: t["id"])
     header = (
         "# Corridor centrelines of real buildings: cells of 0.5 m, eight directions.\n"
