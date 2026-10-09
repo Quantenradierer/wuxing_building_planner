@@ -14,7 +14,7 @@ corridors.
   cities), joins touching areas of one level into a network, rasterises it, thins it to a
   centreline, prunes spurs, simplifies it and snaps it to the eight directions the model can
   draw (axis-parallel and 45°) in cells of 0.5 m. Result: `data/osm_corridors.yaml`
-  (34 shapes: 24 university, 6 office, 3 school, 1 commercial; only ones with real bends and no skeleton jitter). Corridors come only from buildings tagged office, university, school, hospital, commercial or government; stations, tunnels and anything below ground are left out. Public OSM has few such mapped corridors (hospitals and government buildings gave none in the cities searched), so the set is small; widen `REGIONS` to grow it.
+  (56 shapes from 26 cities, mostly university plus office, school and commercial; ones that left rooms unreachable in the generator were dropped; only ones with real bends and no skeleton jitter). Corridors come only from buildings tagged office, university, school, hospital, commercial or government; stations, tunnels and anything below ground are left out. Public OSM has few such mapped corridors (hospitals and government buildings gave none in the cities searched), so the set is small; widen `REGIONS` to grow it.
   Data (c) OpenStreetMap contributors, ODbL; the YAML header says so.
 - `layout: partition_osm` (`pipeline/layout/osm.py`, opt-in, `--layout partition_osm`)
   subclasses the partition layout and replaces `_bands`/`_diagonal`: it picks a shape
@@ -23,7 +23,7 @@ corridors.
   bands feed the existing bevel step, so the rooms beside them get diagonal walls and doors.
   Branching, lobby, core, regions and typing are unchanged and fill what the shape leaves.
 - `shape: osm` (`pipeline/footprint_osm.py`, `tools/osm_footprints.py`, `data/osm_footprints.yaml`)
-  gives the footprint the outline of a real building: 160 outlines (house, apartments, office,
+  gives the footprint the outline of a real building: 411 outlines (house, apartments, office, hotel, school, university, hospital, industrial, warehouse, church,
   commercial; only L, T, U and bay shapes whose walls are mostly axis-parallel), resampled to
   the requested width and depth.
 - Credit: the CLI prints the OpenStreetMap notice for either, the web form shows it when
