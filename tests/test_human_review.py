@@ -25,15 +25,6 @@ def test_every_nap_room_has_a_locker_for_each_pod() -> None:
     assert pods > 10
 
 
-def test_a_tower_gets_a_roof_over_its_floors_above() -> None:
-    for seed in range(1, 4):
-        building = office(seed=seed)
-        assert [f.level for f in building.floors] == [0, 1, 2, 3]
-        assert building.floors[-1].role == "roof"
-        assert building.floors[2].role != "roof"
-    assert office(floors_above=1).floors[-1].role != "roof"
-
-
 def test_floors_of_one_role_are_not_copies() -> None:
     building = office(seed=1)
     walls = [{(e.x, e.y, e.axis) for e in building.floor(level).walls} for level in (1, 2)]

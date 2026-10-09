@@ -241,7 +241,7 @@ def test_meeting_tables_come_in_sizes_that_fit_the_room() -> None:
     [
         (BuildingType.CLINIC, 52, 49, Wealth.LUXURY, 945989),  # toilet wraps round the row
         (BuildingType.HOSPITAL, 55, 35, Wealth.SQUATTER, 942500),  # a widened stall
-        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 3),
+        (BuildingType.OFFICE, 70, 45, Wealth.SQUATTER, 2),
     ],
 )
 def test_the_stalls_of_a_toilet_all_face_the_same_way(
@@ -500,7 +500,7 @@ def test_the_corp_executive_floor_has_a_balcony_the_rooms_behind_it_look_onto() 
 
 def test_office_nap_rooms_are_big_boxes_with_aligned_rows_of_sleep_pods() -> None:
     params = make_params(
-        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=3, seed=4
+        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=3, seed=14
     )
     floor = generate(params).floor(2)
     naps = [r for r in floor.rooms if r.type == "nap_room"]

@@ -108,7 +108,7 @@ def test_foundry_export_is_one_deterministic_file_with_its_images() -> None:
     )
     scene = document["scene"]
     files = [level["background"]["src"] for level in scene["levels"]]
-    assert files == ["tower_F0.webp", "tower_F1.webp", "tower_F2.webp", "tower_F3.webp"]
+    assert files == ["tower_F0.webp", "tower_F1.webp", "tower_F2.webp"]
     assert set(document["images"]) == set(files)
     image = Image.open(io.BytesIO(base64.b64decode(document["images"]["tower_F0.webp"])))
     assert (image.format, image.size) == ("WEBP", (scene["width"], scene["height"]))

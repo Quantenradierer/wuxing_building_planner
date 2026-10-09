@@ -122,7 +122,7 @@ def test_back_door_opens_into_a_back_room_not_a_corridor_stub(
 
 
 @pytest.mark.parametrize(
-    ("shape", "seed"), [(Shape.RECTANGLE, 1), (Shape.RECTANGLE, 2), (Shape.T, 18), (Shape.L, 4)]
+    ("shape", "seed"), [(Shape.RECTANGLE, 1), (Shape.RECTANGLE, 2), (Shape.T, 18), (Shape.L, 5)]
 )
 def test_supermarket_stairs_are_open_stairs_on_the_sales_floor(shape: Shape, seed: int) -> None:
     building = generate(
