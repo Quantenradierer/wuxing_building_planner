@@ -104,22 +104,30 @@
     <div class="checks" id="entrances"></div>
 
     <h2 data-i18n="h_seed">Seed</h2>
-    <div class="row">
-      <input name="seed" type="number" min="0" placeholder="random" data-i18n-placeholder="random">
-      <button type="button" class="reroll" data-target="seed" data-i18n-title="reroll">🎲</button>
-    </div>
-    <div class="row">
-      <input name="rooms_seed" type="number" min="0" placeholder="Room seed = seed" data-i18n-placeholder="rooms_seed_ph">
-      <button type="button" class="reroll" data-target="rooms_seed" data-i18n-title="reroll">🎲</button>
-    </div>
-    <div class="row">
-      <input name="furniture_seed" type="number" min="0" placeholder="Furniture seed = seed" data-i18n-placeholder="furniture_seed_ph">
-      <button type="button" class="reroll" data-target="furniture_seed" data-i18n-title="reroll">🎲</button>
-    </div>
-    <div class="row">
-      <input name="security_seed" type="number" min="0" placeholder="Security seed = seed" data-i18n-placeholder="security_seed_ph">
-      <button type="button" class="reroll" data-target="security_seed" data-i18n-title="reroll">🎲</button>
-    </div>
+    <label class="field"><span data-i18n="seed_label">Layout</span>
+      <div class="row">
+        <input name="seed" type="number" min="0" placeholder="random" data-i18n-placeholder="random">
+        <button type="button" class="reroll" data-target="seed" data-i18n-title="reroll">🎲</button>
+      </div>
+    </label>
+    <label class="field"><span data-i18n="rooms_seed_label">Room</span>
+      <div class="row">
+        <input name="rooms_seed" type="number" min="0" placeholder="= Layout" data-i18n-placeholder="same_seed">
+        <button type="button" class="reroll" data-target="rooms_seed" data-i18n-title="reroll">🎲</button>
+      </div>
+    </label>
+    <label class="field"><span data-i18n="furniture_seed_label">Furniture</span>
+      <div class="row">
+        <input name="furniture_seed" type="number" min="0" placeholder="= Layout" data-i18n-placeholder="same_seed">
+        <button type="button" class="reroll" data-target="furniture_seed" data-i18n-title="reroll">🎲</button>
+      </div>
+    </label>
+    <label class="field"><span data-i18n="security_seed_label">Security</span>
+      <div class="row">
+        <input name="security_seed" type="number" min="0" placeholder="= Layout" data-i18n-placeholder="same_seed">
+        <button type="button" class="reroll" data-target="security_seed" data-i18n-title="reroll">🎲</button>
+      </div>
+    </label>
 
     <h2 data-i18n="h_image">Image</h2>
     <label class="field"><span data-i18n="theme">Theme</span> <select name="theme"></select></label>
