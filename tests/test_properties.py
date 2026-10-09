@@ -26,7 +26,7 @@ MIN_REASONABLE = {
     BuildingType.POLICE_STATION: 36,
     BuildingType.FACTORY: 40,
     BuildingType.DATA_CENTRE: 36,
-    BuildingType.CASINO: 38,
+    BuildingType.CASINO: 40,
     BuildingType.PRISON: 48,
 }
 

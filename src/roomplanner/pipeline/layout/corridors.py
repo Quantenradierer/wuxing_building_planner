@@ -51,6 +51,33 @@ class _Floor:
         return bool(self.corridor) and bool(self.other)
 
 
+def _core_front(rooms: list[PlannedRoom], core: set[str]) -> frozenset[Cell]:
+    """Corridor cells beside a core room: its door into circulation stays on the same wall
+    on every floor, so no floor may give these cells to a room."""
+    cells = {c for r in rooms if r.type in core for c in r.cells}
+    return frozenset(
+        n
+        for r in rooms
+        if r.type == "corridor" and not r.hallway
+        for n in r.cells
+        if any(n.neighbour(side) in cells for side in Side)
+    )
+
+
+def _corners(rooms: list[PlannedRoom]) -> frozenset[Cell]:
+    """Cells at a convex corner of the footprint: a corner cut (chamfer) would thin a room
+    standing there, so no room moves in."""
+    footprint = {c for r in rooms for c in r.cells}
+    return frozenset(
+        c
+        for c in footprint
+        if any(
+            c.neighbour(a) not in footprint and c.neighbour(b) not in footprint
+            for a, b in ((Side.N, Side.E), (Side.E, Side.S), (Side.S, Side.W), (Side.W, Side.N))
+        )
+    )
+
+
 def fold_corridors(
     rooms: list[PlannedRoom], rules: Rules, keep: frozenset[Cell] = frozenset()
 ) -> list[PlannedRoom]:
@@ -60,6 +87,7 @@ def fold_corridors(
     if not floor.folds:
         return result
     fixed = {e.room for e in rules.program.core}
+    keep |= _core_front(result, fixed)
     hosts = {id(r.host) for r in result if r.host is not None}
     for room in rooms:
         spec = rules.spec(room.type)
@@ -105,6 +133,7 @@ def fill_pockets(
     if not floor.folds:
         return result
     fixed = {e.room for e in rules.program.core}
+    keep |= _core_front(result, fixed) | _corners(result)
     hosts = {id(r.host) for r in result if r.host is not None}
     movers = [
         r
@@ -121,9 +150,16 @@ def fill_pockets(
         and not r.cells & keep
     ]
     moved: int = 0
-    for mover in sorted(movers, key=lambda r: -len(r.cells)):
+    # A swap replaces room objects: later movers are looked up by what became of them.
+    current = {id(r): r for r in result}
+    origin = {id(r): id(r) for r in result}
+    done: set[int] = set()
+    for original in sorted(movers, key=lambda r: -len(r.cells)):
         if moved >= MAX_SWAPS:
             break
+        if id(original) in done:
+            continue
+        mover = current[origin[id(original)]]
         heir = _taker(mover.cells, result, mover, set(floor.circulation), rules)
         if heir is None:
             continue
@@ -132,6 +168,11 @@ def fill_pockets(
             swaps[id(heir)] = replace(heir, cells=heir.cells | mover.cells)
             if _fits(result, swaps, floor, pocket, rules):
                 result = _carve(result, swaps, pocket)
+                for old, new in swaps.items():
+                    root = origin[old]
+                    current[root] = new
+                    origin[id(new)] = root
+                done.add(id(original))
                 floor = _Floor.of(result, rules)
                 moved += 1
                 break
