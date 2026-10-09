@@ -167,7 +167,7 @@ chop_shop, the shops and the flats) are separate types with their own YAML.
 - The building type defines which entrance kinds exist and their widths: `main`, `service`
   (loading dock, ambulance bay, back door), `emergency` (exit from a corridor end or the
   stairwell; a second stairwell has its own) and `roof` (hatch or door from the top floor's
-  stairwell; the roof itself is not modelled). The `entrances` parameter overrides the type's list.
+  stairwell; the roof itself is not modelled; the roof level of office, corp_office and data_centre was removed for now, ideas: per-type roofs, parapet, antennas, helipad, fire escapes). The `entrances` parameter overrides the type's list.
 - The main entrance faces `street_side`; the service entrance faces `service_side`.
 - Vehicle and delivery bays (`facade_door`) have their own wide exterior door; they never
   go into clusters or behind the core. The service door goes into such a bay if it faces

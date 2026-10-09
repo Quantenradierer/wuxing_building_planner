@@ -498,25 +498,6 @@ def test_the_corp_executive_floor_has_a_balcony_the_rooms_behind_it_look_onto() 
     assert all(r.type != "balcony" for f in building.floors if f.level != 2 for r in f.rooms)
 
 
-def test_some_office_towers_end_in_a_flat_roof_the_stairs_open_onto() -> None:
-    params = make_params(
-        building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=5, seed=4
-    )
-    top = generate(params).floors[-1]
-    assert top.role == "roof"
-    assert {r.type for r in top.rooms} == {"roof", "stairwell", "elevator"}
-    roof = next(r for r in top.rooms if r.type == "roof")
-    kinds = [o.kind for o in top.objects if o.room == roof.id]
-    assert "condenser" in kinds or "hvac_unit" in kinds
-    stairs = next(r for r in top.rooms if r.type == "stairwell")
-    assert any(
-        o.kind is OpeningKind.DOOR
-        and any(c in stairs.cells for e in o.edges for c in e.cells())
-        and any(c in roof.cells for e in o.edges for c in e.cells())
-        for o in top.openings
-    )
-
-
 def test_office_nap_rooms_are_big_boxes_with_aligned_rows_of_sleep_pods() -> None:
     params = make_params(
         building_type=BuildingType.CORP_OFFICE, width=60, depth=40, floors_above=3, seed=4

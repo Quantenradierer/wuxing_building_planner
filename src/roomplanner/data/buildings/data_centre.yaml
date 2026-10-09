@@ -59,10 +59,6 @@ floor_roles:
       - {room: cooling_plant, fill: true, limit: 1}
       - {room: meet_me_room, fill: true, limit: 1}
       - {room: suppression_room, fill: true, limit: 1}
-  roof:                     # dry coolers and condensers on the flat roof
-    applies: [roof]
-    when: "floors_above >= 2"
-    roof: roof
   halls:
     applies: [upper, top]
     rooms:

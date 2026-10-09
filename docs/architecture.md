@@ -341,7 +341,8 @@ Works in local frames: `u` along a part's long axis (or away from the junction f
    stays open to the sky and their rows are shallower there.
 10. **Roof** (`roof:` of a floor role, `applies: [roof]`): an extra level over the top floor (not one of `floors_above`; `Rules.levels`); the floor is the core (stair housing, lift shafts) and
    one open-air, circulation room around it (the climate plant), less a balcony's sky below.
-   Corp towers end in one a third of the time; plain offices in 40 %.
+   Currently switched off: no building type has a `roof` floor role (it was an empty plant
+   level); the mechanism stays in the code. See `docs/requirements.md` for the open roof ideas.
 
 Footprints other than rectangle / L / U are planned as cut-outs in a canonical orientation
 (T: bar plus stem; Z: two opposite corners cut; stepped: two steps down from a corner),

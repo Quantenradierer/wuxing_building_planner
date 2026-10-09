@@ -66,13 +66,12 @@ def test_foundry_scene_has_a_level_per_floor_and_stairs_between_them() -> None:
     b = building(security=Security.AAA)
     scene = to_foundry(b, load_theme("neon"), SMALL, "tower").scene
     levels = {level["_id"]: level for level in scene["levels"]}
-    assert len(levels) == 4  # three floors and the roof over them
+    assert len(levels) == 3
     assert scene["initialLevel"] == "defaultLevel0000"
     assert [level["elevation"] for level in scene["levels"]] == [
         {"bottom": 0.0, "top": 3.0},
         {"bottom": 3.0, "top": 6.0},
         {"bottom": 6.0, "top": 9.0},
-        {"bottom": 9.0, "top": 12.0},
     ]
     assert scene["grid"] == {"type": 1, "size": 12, "distance": 1.0, "units": "m"}
     for placeable in scene["walls"] + scene["lights"]:

@@ -56,10 +56,6 @@ floor_roles:
       - {room: copy_room, fill: true, limit: 1}
       - {room: vending_room, fill: true, priority: optional, limit: 1, area: [12, 80]}   # a leftover
       - {room: training_room, fill: true, priority: optional, limit: 1}   # big leftovers
-  roof:                     # the flat roof over the top floor, climate plant around
-    applies: [roof]
-    when: "floors_above >= 2"
-    roof: roof
   executive:                # on top, or under the roof
     applies: [top, below_top]
     when: >-

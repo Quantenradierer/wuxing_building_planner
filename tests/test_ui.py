@@ -32,7 +32,7 @@ def test_response_has_the_building_and_one_image_per_floor() -> None:
     response = generate_response({"params": PARAMS, "cell_px": 6})
     building = from_dict(response["building"])
     assert building.seed == 5
-    assert set(response["images"]) == {"0", "1", "2"}  # 2: the roof
+    assert set(response["images"]) == {"0", "1"}
     assert response["images"]["0"].startswith("data:image/webp;base64,")
 
 
@@ -53,7 +53,7 @@ def test_foundry_export_is_the_schattenakte_file() -> None:
     assert name == "office_5.schattenakte.json"
     document = json.loads(body)
     assert document["name"] == "office_5"
-    assert len(document["scene"]["levels"]) == 3  # two floors and the roof
+    assert len(document["scene"]["levels"]) == 2
 
 
 @pytest.fixture
