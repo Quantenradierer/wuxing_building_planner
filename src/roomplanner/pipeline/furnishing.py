@@ -1367,8 +1367,11 @@ class RoomFurnisher:
         """Every chair (shelf, ...) keeps a 2-cell-wide path to a door."""
         if not (self.targets or new) or not self._wide_enabled:
             return True
+        targets = [*self.targets, *new]
+        if "chair" in self.wide_kinds:  # a chair gets pushed aside: it doesn't block the path
+            free = free | set().union(*targets)
         region = wide_region(free, self._entries)
-        return all(served(t, free, region) for t in [*self.targets, *new])
+        return all(served(t, free, region) for t in targets)
 
     def _accessible(self, free: set[Cell] | frozenset[Cell]) -> bool:
         """Every `accessible` object keeps a free cell at its front or a flank."""

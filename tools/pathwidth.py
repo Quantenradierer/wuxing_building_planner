@@ -32,7 +32,7 @@ def check(b: Building) -> list[tuple[str, str, int, int]]:
     """(room type, id, targets, wide targets) for rooms that have targets."""
     out = []
     for f in b.floors:
-        blocked = {c for o in f.objects if o.blocking for c in _cells(o)}
+        blocked = {c for o in f.objects if o.blocking and o.kind != "chair" for c in _cells(o)}
         for rm in f.rooms:
             kinds = {k for k, rts in TARGET.items() if rm.type in rts}
             if not kinds:
