@@ -51,7 +51,7 @@ rooms:
     door_width: 3
     furniture:
       # Blocks of desks with 1 m aisles round them.
-      - {object: workstation, placement: rows, aisle: 2, block: 12, paired: true}
+      - {object: workstation, placement: rows, aisle: 1, block: 12, paired: true}
       - {object: copier, placement: wall, count: [1, 2]}
       - {object: filing_cabinet, placement: wall, per: 80, count: [1, 6]}
       - {object: plant, placement: corner, count: [1, 4]}
