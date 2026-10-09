@@ -8,8 +8,9 @@ rooms:
     furniture:
       - {object: reception_post, placement: facing_exit}   # facing the entrance
       - {object: security_gate, placement: near_exit, count: [1, 2]}
-      - {object: locker, placement: perimeter, count: [4, 10]}   # visitors' belongings
-      - {object: bench, placement: wall, count: [1, 2]}
+      - {object: guard_post, placement: near_exit, count: [0, 1]}
+      - {object: locker, placement: wall, line: true, count: [4, 10]}   # visitors' belongings
+      - {object: bench, placement: wall, line: true, count: [1, 2]}
       - {object: wall_screen, placement: wall, count: [0, 1]}
       - {object: trash_bin, placement: wall, count: [0, 1]}
   visiting_room:        # booths with a glass partition: visitors from the lobby, inmates from inside
@@ -20,7 +21,7 @@ rooms:
     connect: [prison_lobby]   # the visitors' door; the inmates come from the corridor
     furniture:
       - {object: visitor_booth_set, placement: rows, aisle: 2, margin: 1}
-      - {object: guard_post, placement: wall, count: [0, 1]}
+      - {object: guard_post, placement: near_exit}
   prison_block:         # a housing unit: cells along both sides of the dayroom
     area: [120, 700]
     min_side: 10
@@ -33,11 +34,11 @@ rooms:
     min_side: 4
     windows: forbidden
     furniture:
-      - {object: guard_post, placement: near_exit, count: [0, 1]}
+      - {object: guard_post, placement: near_exit}
       - {object: canteen_set, placement: grid, per: 40, count: [1, 6], aisle: 2, margin: 1}
-      - {object: wall_screen, placement: wall, count: [1, 2]}
-      - {object: terminal, placement: wall, count: [0, 2]}   # the commcall terminals
-      - {object: shower, placement: wall, count: [0, 2]}
+      - {object: wall_screen, placement: end, count: [1, 1]}
+      - {object: terminal, placement: wall, line: true, count: [0, 2]}   # the commcall terminals
+      - {object: shower, placement: wall, line: true, count: [0, 2]}
       - {object: trash_bin, placement: corner, count: [0, 1]}
   prison_cell:          # 2 x 3 m: a bunk bed, a steel toilet with the basin on top
     area: [20, 40]
@@ -61,13 +62,15 @@ rooms:
     furniture:            # other shapes
       - {object: bunk, placement: wall}
       - {object: cell_toilet, placement: corner}
+      - {object: shelf, placement: wall, count: [0, 1]}
   block_sallyport:      # between the corridor and a cell block: one door opens at a time
     area: [12, 120]
     min_side: 4
     windows: forbidden
     transit: true
     furniture:
-      - {object: security_gate, placement: wall, count: [0, 1]}
+      - {object: security_gate, placement: near_exit}
+      - {object: wall_screen, placement: wall}   # camera monitor
       - {object: fire_extinguisher, placement: wall, count: [0, 1]}
   block_control:        # the guards' bubble beside a cell block: consoles and door controls
     area: [32, 60]
@@ -79,6 +82,7 @@ rooms:
       - {object: wall_screen, placement: end}
       - {object: console, placement: rows, aisle: 1, margin: 1, block: 12, toward: wall_screen}
       - {object: weapon_locker, placement: wall, count: [0, 1]}
+      - {object: desk, placement: wall, count: [0, 1]}
       - {object: coffee_machine, placement: corner, count: [0, 1]}
   segregation_unit:     # solitary: single cells along one wall, a narrow walk in front
     area: [40, 160]
