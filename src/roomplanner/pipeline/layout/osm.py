@@ -165,11 +165,9 @@ class OsmMixin:
 
     def _bands(
         self, ctx: Context, footprint: frozenset[Cell], rng: random.Random
-    ) -> tuple[frozenset[Cell], list[frozenset[Cell]]]:
+    ) -> frozenset[Cell]:
         straight, _ = self._network(ctx, footprint)
-        if straight:
-            return straight, []
-        return super()._bands(ctx, footprint, rng)  # type: ignore[misc]
+        return straight or super()._bands(ctx, footprint, rng)  # type: ignore[misc]
 
     def _diagonal(
         self,
